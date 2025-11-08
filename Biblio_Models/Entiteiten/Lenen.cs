@@ -1,4 +1,6 @@
-﻿// Patronen aanwezig in dit bestand:
+﻿// 1) //LINQ - Lenen wordt gebruikt in queries to filter loans by user/book/date
+// 2) //lambda expression - predicates over loans (Where(...=>...))
+// 3) //CRUD - Lenen participates in create/read/update/delete operations via DbContext
 // - Entiteit voor uitlening met relaties naar Book en Member
 // - Velden voor datums (StartDate, DueDate, ReturnedAt) en soft-delete via BaseEntity
 
