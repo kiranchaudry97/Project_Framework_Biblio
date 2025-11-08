@@ -1,4 +1,4 @@
-# Biblio â€” Bibliotheekbeheer in WPF (.NET 9)
+# Biblio” Bibliotheekbeheer in WPF (.NET 9)
 
 **Initiatiefnemer:** Chaud-Ry Kiran Jamil
 
