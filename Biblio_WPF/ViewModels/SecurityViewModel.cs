@@ -1,3 +1,4 @@
+// zie commit bericht //
 using System.ComponentModel;
 
 namespace Biblio_WPF.ViewModels
