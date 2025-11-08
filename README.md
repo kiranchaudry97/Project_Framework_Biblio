@@ -21,7 +21,7 @@ Inhoud (snelkoppelingen)
 
 ## Doel & motivatie
 - Doel: eenvoudig en efficiënt beheer van bibliotheekinventaris en uitleningen.
-- Motivatie: leerrijk project voor MVVM/WPF, EF Core en Identity; uitbreidbaar naar een web-API.
+- Motivatie: leerrijk project voor MVVM/WPF, EF Core en Identity; uitbreidbaar.
 
 ## Technische samenvatting & vereisten
 - .NET 9, WPF UI
@@ -116,11 +116,14 @@ Kort overzicht van belangrijke onderdelen:
 1) Clone & open
 
 ```bash
+<<<<<<< HEAD
 # Klonen van de offici�le repository
+=======
+# Klonen van de officiële repository
+>>>>>>> bbe558e11e740948af7d0f31da3bf3b1d4816497
 git clone https://github.com/kiranchaudry97/Project_Framework_Biblio.git
 cd Project_Framework_Biblio
 ```
-
 2) Restore & build
 
 ```bash
