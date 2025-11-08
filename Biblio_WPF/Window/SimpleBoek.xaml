@@ -1,0 +1,30 @@
+<Window x:Class="Biblio_WPF.Window.SimpleBoek"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:viewmodels="clr-namespace:Biblio_WPF.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:SecurityViewModel}"
+        mc:Ignorable="d"
+        Title="Boek" Height="240" Width="420" WindowStartupLocation="CenterOwner">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Vertical">
+            <TextBlock Text="Titel"/>
+            <TextBox x:Name="TitelBox" Margin="0,4,0,8"/>
+            <TextBlock Text="Auteur"/>
+            <TextBox x:Name="AuteurBox" Margin="0,4,0,8"/>
+            <TextBlock Text="ISBN"/>
+            <TextBox x:Name="IsbnBox" Margin="0,4,0,8"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="3" Margin="0,12,0,0">
+            <Button Content="Annuleren" Click="OnCancel" Margin="0,0,8,0"/>
+            <Button Content="OK" Click="OnOk"/>
+        </StackPanel>
+    </Grid>
+</Window>

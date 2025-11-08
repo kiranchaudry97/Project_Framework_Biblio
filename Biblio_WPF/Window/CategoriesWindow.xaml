@@ -1,0 +1,38 @@
+﻿<Page x:Class="Biblio_WPF.Window.CategoriesWindow"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Biblio_WPF.Window"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="CategoriesWindow">
+
+    <Grid Background="{DynamicResource BackgroundBrush}" Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,0,0,8">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" VerticalAlignment="Center">
+                <Button Content="Terug" Click="OnBack" Margin="0,0,8,0"/>
+                <TextBox x:Name="CategoryNameBox" Width="320" Margin="0,0,8,0"/>
+                <Button Content="Toevoegen" Click="OnAddCategory" Background="#0078D7" Foreground="White" Padding="8,4"/>
+            </StackPanel>
+        </DockPanel>
+
+        <GroupBox Header="Categorieën" Grid.Row="1">
+            <DataGrid x:Name="CategoriesGrid" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" SelectionMode="Single">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Naam" Binding="{Binding Naam}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </GroupBox>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Content="Verwijderen" Click="OnDeleteCategory" Background="#D32F2F" Foreground="White"/>
+        </StackPanel>
+    </Grid>
+</Page>

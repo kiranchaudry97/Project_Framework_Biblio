@@ -1,0 +1,13 @@
+﻿<!--
+Doel: Herbruikbare user control voor gelabeld tekstveld.
+Beschrijving: Toont een label en een tekstvak met TwoWay-binding naar de dependency property 'Text'.
+-->
+<UserControl x:Class="Biblio_WPF.Controls.LabeledTextBox"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel>
+        <TextBlock Text="{Binding Label, RelativeSource={RelativeSource AncestorType=UserControl}}"
+               FontWeight="SemiBold" Margin="0,0,0,4"/>
+        <TextBox Text="{Binding Text, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"/>
+    </StackPanel>
+</UserControl>

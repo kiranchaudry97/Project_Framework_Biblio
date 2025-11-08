@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Biblio_Models/Biblio_Models.csproj" />
+  <Project Path="Biblio_WPF/Biblio_WPF.csproj" />
+</Solution>

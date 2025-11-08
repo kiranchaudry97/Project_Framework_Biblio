@@ -1,0 +1,77 @@
+﻿<!--
+Doel: Beheer UI voor gebruikerslijst, aanmaken van nieuwe gebruiker en toewijzen van rollen (Admin/Medewerker).
+-->
+<Window x:Class="Biblio_WPF.Window.AdminUsersWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ Title="Gebruikers &amp; Rollen" Height="520" Width="860"
+ WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+    <Grid Margin="12" Background="{DynamicResource BackgroundBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Gebruiker verwijderen en aanmaken -->
+        <GroupBox Header="Gebruikers" Margin="0,0,8,0" BorderBrush="{DynamicResource BorderBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <!-- ListView with Email and Blocked status -->
+                <ListView ItemsSource="{Binding Users}" SelectedItem="{Binding SelectedUser}">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="E-mail" Width="250" DisplayMemberBinding="{Binding Email}" />
+                            <GridViewColumn Header="Naam" Width="200" DisplayMemberBinding="{Binding FullName}" />
+                            <GridViewColumn Header="Geblokkeerd" Width="100">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsBlocked}" IsEnabled="False" HorizontalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
+                    <TextBox Width="200" Margin="0,0,8,0" Text="{Binding NewEmail, UpdateSourceTrigger=PropertyChanged}"/>
+                    <PasswordBox x:Name="PwdBox" Width="160" Margin="0,0,8,0"/>
+                    <TextBox Width="160" Margin="0,0,8,0" Text="{Binding NewFullName, UpdateSourceTrigger=PropertyChanged}"/>
+                    <CheckBox Content="Admin" Margin="0,0,8,0" IsChecked="{Binding NewIsAdmin}"/>
+                    <CheckBox Content="Medewerker" IsChecked="{Binding NewIsStaff}"/>
+                    <Button Content="Aanmaken" Margin="8,0,0,0" Click="OnCreateUser" Style="{StaticResource PrimaryButton}"/>
+                    <!-- Verwijder geselecteerde gebruiker -->
+                    <Button Content="Verwijder" Margin="8,0,0,0" Command="{Binding DeleteCommand}" Background="{DynamicResource DangerBrush}" Foreground="White"/>
+                    <!-- Blokkeer/Activeer knop, alleen zichtbaar voor admins -->
+                    <Button Content="Blokkeer / Activeer" Margin="8,0,0,0" Click="OnToggleBlock"
+ Visibility="{Binding Path=SecurityVm.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+
+        <!-- Rollen voor geselecteerde gebruiker -->
+        <GroupBox Header="Rollen" Grid.Column="1" BorderBrush="{DynamicResource BorderBrush}">
+            <StackPanel>
+                <CheckBox Content="Admin" IsChecked="{Binding IsAdmin, Mode=TwoWay}" Margin="0,0,0,8"/>
+                <CheckBox Content="Medewerker" IsChecked="{Binding IsStaff, Mode=TwoWay}"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                    <Button Content="Opslaan" Click="OnSaveRoles" Margin="0,0,8,0" Style="{StaticResource PrimaryButton}"/>
+                    <!-- Knop om rollen te verwijderen; alleen zichtbaar voor admins -->
+                    <Button Content="Verwijder rollen" Click="OnClearRoles" Background="{DynamicResource DangerBrush}" Foreground="White"
+ Visibility="{Binding Path=SecurityVm.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+    </Grid>
+</Window>

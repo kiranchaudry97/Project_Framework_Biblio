@@ -1,0 +1,22 @@
+﻿<!--
+Doel: Licht kleurenthema met penselen en accentkleuren voor de WPF UI.
+Beschrijving: Biedt lichte paletkleuren voor achtergronden, tekst, grenzen en accentstijlen gebruikt door de app.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Palette (Light) -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="ForegroundBrush" Color="#222222"/>
+    <SolidColorBrush x:Key="PanelBrush" Color="#F7F7F7"/>
+    <SolidColorBrush x:Key="HeaderBrush" Color="#F3F3F3"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="#DDDDDD"/>
+
+    <SolidColorBrush x:Key="AccentBrush" Color="#0078D4"/>
+    <SolidColorBrush x:Key="AccentBrushHover" Color="#0E639C"/>
+    <SolidColorBrush x:Key="AccentLightBrush" Color="#E5F1FB"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="#C42B1C"/>
+
+    <!-- DataGrid rows -->
+    <SolidColorBrush x:Key="DataGridRowBrush" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="DataGridAltRowBrush" Color="#E5F1FB"/>
+</ResourceDictionary>

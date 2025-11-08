@@ -1,0 +1,24 @@
+﻿<!--
+
+Doel: Donker kleurenthema met penselen en accentkleuren voor de WPF UI.
+Beschrijving: Definieert donkere paletkleuren en gemeenschappelijke brushes; overschrijft thema-afhankelijke resources.
+
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Palette (Dark) -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#FF1E1E1E"/>
+    <SolidColorBrush x:Key="ForegroundBrush" Color="#FFF5F5F5"/>
+    <SolidColorBrush x:Key="PanelBrush" Color="#FF2B2B2B"/>
+    <SolidColorBrush x:Key="HeaderBrush" Color="#FF333333"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="#FF3D3D3D"/>
+
+    <SolidColorBrush x:Key="AccentBrush" Color="#FF4CC2FF"/>
+    <SolidColorBrush x:Key="AccentBrushHover" Color="#FF79C3FF"/>
+    <SolidColorBrush x:Key="AccentLightBrush" Color="#262F3A"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="#FFEE6352"/>
+
+    <!-- DataGrid rows -->
+    <SolidColorBrush x:Key="DataGridRowBrush" Color="#FF2B2B2B"/>
+    <SolidColorBrush x:Key="DataGridAltRowBrush" Color="#FF1F2A33"/>
+</ResourceDictionary>
