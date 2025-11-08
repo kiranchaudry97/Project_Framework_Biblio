@@ -1,6 +1,9 @@
 ﻿// PATTERNS: // LINQ, // lambda, // CRUD
-// UitleningWindow: uses LINQ (method- and query-syntax), lambda expressions and performs CRUD on loans (Add/Update/SaveChangesAsync).
-// commit bericht 
+// Lambda-expressies (waar en waarom):
+//  - Filter-predicates: veel gebruikt in `Where`-calls, bijv. `u => !u.IsDeleted`, `u => u.LidId == lid.Id`, `u => u.BoekId == boek.Id`.
+//  - Projecties/Selects: gebruikt in error handling en materiaalopsomming (bijv. `Errors.Select(e => e.Description)` in seed/admin code).
+//  - Gebruik in query-composition: lambda's worden gecombineerd met `Include` en `Where` om dynamische queries te bouwen (zie `LoadLoans()`).
+//  - Waar gebruikt in UI: de lambda-predicates bepalen welke items in `LoansGrid`, `LidFilter` en `BoekFilter` verschijnen; ook gebruikt voor berekeningen zoals `CountAsync()` op `overdueQuery`.
 
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -59,7 +62,7 @@ namespace Biblio_WPF.Window
             if (OnlyOpenCheck.IsChecked == true)
                 q = q.Where(u => u.ReturnedAt == null);
 
-            // date range filtering (Van / Tot)
+            // filteren op datumbereik (Van / Tot)
             bool dateValid = true;
             string filterInfo = string.Empty;
 
@@ -72,7 +75,7 @@ namespace Biblio_WPF.Window
 
             if (ToDatePicker?.SelectedDate is DateTime toDate)
             {
-                // include the whole day for the 'to' date
+                // hele dag incluiren voor de 'tot' datum
                 var to = toDate.Date.AddDays(1).AddTicks(-1);
                 q = q.Where(u => u.StartDate <= to);
                 filterInfo = string.IsNullOrEmpty(filterInfo) ? $"Tot {toDate:d}" : filterInfo + $" - tot {toDate:d}";
@@ -83,7 +86,7 @@ namespace Biblio_WPF.Window
                 dateValid = false;
             }
 
-            // Example of LINQ query syntax (requirement): find overdue open loans
+            // Voorbeeld van LINQ query-syntax: zoek open achterstallige uitleningen
             var overdueQuery = from u in db.Leningens
                                where !u.IsDeleted && u.ReturnedAt == null && u.DueDate < DateTime.Now
                                select u;
@@ -113,14 +116,14 @@ namespace Biblio_WPF.Window
 
         private void OnBack(object sender, RoutedEventArgs e)
         {
-            // navigate back (if needed)
+            // ga terug (indien nodig)
             var wnd = System.Windows.Window.GetWindow(this);
             wnd?.Close();
         }
 
         private void OnNewLoan(object sender, RoutedEventArgs e)
         {
-            // Remove modal dialog; create loan from selected Lid and Boek with default dates
+            // Direct nieuwe uitlening aanmaken van geselecteerd Lid en Boek met standaarddatums
             var selectedLid = LidFilter.SelectedItem as Biblio_Models.Entiteiten.Lid;
             var selectedBoek = BoekFilter.SelectedItem as Biblio_Models.Entiteiten.Boek;
 
