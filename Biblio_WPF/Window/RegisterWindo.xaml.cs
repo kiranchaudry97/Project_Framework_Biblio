@@ -16,7 +16,8 @@ using System.Windows.Shapes;
 namespace Biblio_WPF.Window
 {
     /// <summary>
-    /// Interaction logic for RegisterWindo.xaml
+    /// Interaction logic for RegisterWindo.xamlf
+    /// commit bericht
     /// </summary>
     public partial class RegisterWindo : Page
     {
