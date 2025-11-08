@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Biblio_Models.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc 
+    /// zie commit bericht />
     public partial class Migratie_InitialCreate : Migration
     {
         /// <inheritdoc />
