@@ -1,4 +1,4 @@
-# Biblio — Bibliotheekbeheer in WPF (.NET 9)
+# "Biblio” Bibliotheekbeheer in WPF (.NET 9)
 
 **Initiatiefnemer:** Chaud-Ry Kiran Jamil
 
@@ -20,7 +20,7 @@ Inhoud (snelkoppelingen)
 ---
 
 ## Doel & motivatie
-- Doel: eenvoudig en efficiënt beheer van bibliotheekinventaris en uitleningen.
+- Doel: eenvoudig en efficiÃ«nt beheer van bibliotheekinventaris en uitleningen.
 - Motivatie: leerrijk project voor MVVM/WPF, EF Core en Identity; uitbreidbaar.
 
 ## Technische samenvatting & vereisten
@@ -38,7 +38,7 @@ Belangrijke NuGet-pakketten:
 - Microsoft.EntityFrameworkCore.Design
 - Microsoft.AspNetCore.Identity.EntityFrameworkCore
 
-## Datamodel — tabellen & relaties
+## Datamodel â€” tabellen & relaties
 - Boeken
   - Velden: BoekId (PK), Titel, Auteur, ISBN, CategorieID (FK), IsDeleted
   - Relatie: 1 Boek ? N Uitleningen
@@ -50,7 +50,7 @@ Belangrijke NuGet-pakketten:
 - Uitleningen
   - Velden: UitleningId (PK), BoekId (FK), LidId (FK), StartDate, DueDate, ReturnedAt (nullable), IsDeleted, IsClosed
 
-- Categorieën
+- CategorieÃ«n
   - Velden: CategorieId (PK), Naam, Omschrijving
 
 Opmerking: soft-delete via `IsDeleted`; global query filters in `BiblioDbContext`.
@@ -104,6 +104,7 @@ Project_Framework_Biblio/
 ├── README.md
 └── .gitignore
 
+
 ```
 
 Kort overzicht van belangrijke onderdelen:
@@ -117,9 +118,9 @@ Kort overzicht van belangrijke onderdelen:
 
 ```bash
 <<<<<<< HEAD
-# Klonen van de offici�le repository
-=======
 # Klonen van de officiële repository
+=======
+# Klonen van de officiÃ«le repository
 >>>>>>> bbe558e11e740948af7d0f31da3bf3b1d4816497
 git clone https://github.com/kiranchaudry97/Project_Framework_Biblio.git
 cd Project_Framework_Biblio
