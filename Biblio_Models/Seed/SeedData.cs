@@ -1,10 +1,8 @@
-﻿// - LINQ / lambda-expressies (bijv. AnyAsync, FirstAsync, Where)
-// - CRUD-operaties via EF Core (Add, SaveChangesAsync)
-// - Foutafhandeling via exceptions (throw) — geen try/catch in deze routine
-// - Dummy/voorbeeldobjecten gebruikt voor seeding (new Book, new Member, new AppUser)
-// - Soft-delete aandacht wordt in het model gebruikt (global query filter); hier wordt bij het lezen/aanmaken rekening mee gehouden
+﻿// SeedData contains EF Core queries (LINQ) and CRUD operations and uses lambda expressions.
 
-// Doel: Seed-routine voor de database: rollen, admin-gebruiker en basisdata (categorieën, boeken, leden).
+// 1) //LINQ - queries such as AnyAsync, FirstAsync, Where are used in this file
+// 2) //lambda expression - used in Select, FirstAsync predicates and other delegates
+// 3) //CRUD - AddRange, SaveChangesAsync, Database.MigrateAsync
 
 using System;
 using System.Collections.Generic;
@@ -33,7 +31,7 @@ namespace Biblio_Models.Seed
             var opts = scope.ServiceProvider.GetRequiredService<IOptions<SeedOptions>>().Value;
 
             //1️⃣ Database aanmaken (indien niet bestaat)
-            await db.Database.MigrateAsync(); // CRUD: database migration (DDL)
+            await db.Database.MigrateAsync(); // (3) //CRUD: database migration (DDL)
 
             //2️⃣ Rollen aanmaken (enkel Admin en Medewerker)
             string[] rollen = { "Admin", "Medewerker" };
@@ -60,14 +58,14 @@ namespace Biblio_Models.Seed
 
                 var create = await userMgr.CreateAsync(admin, desiredPwd);
                 if (!create.Succeeded)
-                    throw new Exception("Fout bij aanmaken admin: " + string.Join(", ", create.Errors.Select(e => e.Description)));
+                    throw new Exception("Fout bij aanmaken admin: " + string.Join(", ", create.Errors.Select(e => e.Description))); // (2) //lambda expression used in Select
             }
             else if (!string.IsNullOrWhiteSpace(opts.AdminPassword))
             {
                 admin.PasswordHash = hasher.HashPassword(admin, desiredPwd);
                 var upd = await userMgr.UpdateAsync(admin);
                 if (!upd.Succeeded)
-                    throw new Exception("Fout bij resetten admin-wachtwoord: " + string.Join(", ", upd.Errors.Select(e => e.Description)));
+                    throw new Exception("Fout bij resetten admin-wachtwoord: " + string.Join(", ", upd.Errors.Select(e => e.Description))); // (2) //lambda expression
             }
 
             // Admin in Admin-rol zetten
@@ -78,7 +76,7 @@ namespace Biblio_Models.Seed
             }
 
             //4️⃣ Basisdata seeden
-            if (!await db.Categorien.AnyAsync())
+            if (!await db.Categorien.AnyAsync()) // (1) //LINQ AnyAsync
             {
                 db.Categorien.AddRange(
                     new Categorie { Naam = "Roman" },
@@ -86,13 +84,13 @@ namespace Biblio_Models.Seed
                     new Categorie { Naam = "Thriller" },
                     new Categorie { Naam = "Wetenschap" }
                 );
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(); // (3) //CRUD
             }
 
-            if (!await db.Boeken.AnyAsync())
+            if (!await db.Boeken.AnyAsync()) // (1) //LINQ
             {
-                var roman = await db.Categorien.FirstAsync(c => c.Naam == "Roman");
-                var jeugd = await db.Categorien.FirstAsync(c => c.Naam == "Jeugd");
+                var roman = await db.Categorien.FirstAsync(c => c.Naam == "Roman"); // (1) //LINQ + (2) //lambda predicate
+                var jeugd = await db.Categorien.FirstAsync(c => c.Naam == "Jeugd"); // (1) //LINQ + (2) //lambda
                 var thriller = await db.Categorien.FirstAsync(c => c.Naam == "Thriller");
                 var wetenschap = await db.Categorien.FirstAsync(c => c.Naam == "Wetenschap");
 
@@ -112,16 +110,16 @@ namespace Biblio_Models.Seed
                     new Boek { Titel = "A Brief History of Time", Auteur = "Stephen Hawking", Isbn = "9780553380163", CategorieID = wetenschap.Id },
                     new Boek { Titel = "The Selfish Gene", Auteur = "Richard Dawkins", Isbn = "9780192860927", CategorieID = wetenschap.Id }
                 );
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(); // (3) //CRUD
             }
 
-            if (!await db.Leden.AnyAsync())
+            if (!await db.Leden.AnyAsync()) // (1) //LINQ
             {
                 db.Leden.AddRange(
                     new Lid { Voornaam = "Jan", AchterNaam = "Peeters", Email = "jan.peeters@example.com" },
                     new Lid { Voornaam = "Sara", AchterNaam = "De Smet", Email = "sara.desmet@example.com" }
                 );
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(); // (3) //CRUD
             }
 
             //5️⃣ Optioneel: seeding van een geblokkeerd test-account
