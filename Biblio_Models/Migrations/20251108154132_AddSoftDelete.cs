@@ -4,7 +4,8 @@
 
 namespace Biblio_Models.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc
+    /// zie commit bericht/>
     public partial class AddSoftDelete : Migration
     {
         /// <inheritdoc />
