@@ -7,7 +7,7 @@ using Biblio_Models.Entiteiten;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-
+// zie commict bericht voor meer informatie over AppUser
 
 namespace Biblio_Models.Data
 {
