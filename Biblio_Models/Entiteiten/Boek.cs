@@ -1,4 +1,8 @@
-﻿using System;
+﻿// 1) //LINQ - Boek gebruikt in queries (Where, FirstOrDefault, AnyAsync)
+// 2) //lambda expression - used in LINQ predicates when querying boeken
+// 3) //CRUD - Boek participates in create/read/update/delete via DbContext
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
