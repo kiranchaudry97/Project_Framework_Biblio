@@ -1,4 +1,14 @@
-﻿using System;
+﻿// 1) //LINQ - gebruikt voor filteren, sorteren en eager-loading (Where, OrderBy, Include, ToListAsync)
+//    Waar: `LoadFilters()` (categorieën ophalen), `LoadBooks()` (boekenquery met filters/zoek)
+//    Doel: resultaten filteren en sorteren voor UI-lijsten en dropdowns.
+// 2) //lambda expressie - predicaten/selectors in LINQ-expressies
+//    Waar: predicaten zoals `c => !c.IsDeleted`, `b => b.Titel.Contains(search)`
+//    Doel: compacte definitie van filtercriteria en sortering.
+// 3) //CRUD - Aanmaken/Bijwerken/Verwijderen (soft delete) en `SaveChangesAsync`
+//    Waar: `OnSaveBook` (Add/Update + SaveChangesAsync), `OnDeleteBook` (soft delete + Update + SaveChangesAsync)
+//    Doel: beheren van boeken in de database.
+
+using System;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -22,8 +32,8 @@ namespace Biblio_WPF.Window
 
         private async void BoekWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            await LoadFilters();
-            await LoadBooks();
+            await LoadFilters(); // (1) //LINQ wordt hier gebruikt om categorieën op te halen
+            await LoadBooks();   // (1) //LINQ + (2) //lambda worden hier gebruikt voor boekenquery
         }
 
         private async System.Threading.Tasks.Task LoadFilters()
@@ -33,7 +43,7 @@ namespace Biblio_WPF.Window
             var db = svc.GetService<Biblio_Models.Data.BiblioDbContext>();
             if (db == null) return;
 
-            var cats = await db.Categorien.Where(c => !c.IsDeleted).OrderBy(c => c.Naam).ToListAsync();
+            var cats = await db.Categorien.Where(c => !c.IsDeleted).OrderBy(c => c.Naam).ToListAsync(); // (1) //LINQ + (2) //lambda
             CategoryFilter.ItemsSource = cats;
             CategoryFilter.DisplayMemberPath = "Naam";
             CategoryBox.ItemsSource = cats;
@@ -47,20 +57,20 @@ namespace Biblio_WPF.Window
             var db = svc.GetService<Biblio_Models.Data.BiblioDbContext>();
             if (db == null) return;
 
-            var q = db.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).AsQueryable();
+            var q = db.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).AsQueryable(); // (1) //LINQ + (2) //lambda + Include voor eager-loading
 
             var search = SearchBox.Text?.Trim();
             if (!string.IsNullOrWhiteSpace(search))
             {
-                q = q.Where(b => b.Titel.Contains(search) || b.Auteur.Contains(search) || b.Isbn.Contains(search));
+                q = q.Where(b => b.Titel.Contains(search) || b.Auteur.Contains(search) || b.Isbn.Contains(search)); // (2) //lambda predicate
             }
 
             if (CategoryFilter.SelectedItem is Biblio_Models.Entiteiten.Categorie cat)
             {
-                q = q.Where(b => b.CategorieID == cat.Id);
+                q = q.Where(b => b.CategorieID == cat.Id); // (2) //lambda predicate gebruiken voor filter
             }
 
-            var list = await q.OrderBy(b => b.Titel).ToListAsync();
+            var list = await q.OrderBy(b => b.Titel).ToListAsync(); // (1) //LINQ + (2) //lambda + (3) //CRUD read
             BooksGrid.ItemsSource = list;
             CountLabel.Text = $"{list.Count} boeken";
         }
@@ -85,7 +95,7 @@ namespace Biblio_WPF.Window
             TitelBox.Text = _selected.Titel ?? string.Empty;
             AuteurBox.Text = _selected.Auteur ?? string.Empty;
             IsbnBox.Text = _selected.Isbn ?? string.Empty;
-            CategoryBox.SelectedItem = CategoryBox.Items.Cast<Biblio_Models.Entiteiten.Categorie?>().FirstOrDefault(c => c != null && c.Id == _selected.CategorieID);
+            CategoryBox.SelectedItem = CategoryBox.Items.Cast<Biblio_Models.Entiteiten.Categorie?>().FirstOrDefault(c => c != null && c.Id == _selected.CategorieID); // (2) //lambda used in FirstOrDefault
         }
 
         private void OnNewBook(object sender, RoutedEventArgs e)
@@ -113,11 +123,11 @@ namespace Biblio_WPF.Window
                 _selected.CategorieID = cat.Id;
 
             if (_selected.Id == 0)
-                db.Boeken.Add(_selected);
+                db.Boeken.Add(_selected); // (3) //CRUD create
             else
-                db.Boeken.Update(_selected);
+                db.Boeken.Update(_selected); // (3) //CRUD update
 
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(); // (3) //CRUD save
             await LoadBooks();
         }
 
@@ -130,8 +140,8 @@ namespace Biblio_WPF.Window
                 var db = svc?.GetService<Biblio_Models.Data.BiblioDbContext>();
                 if (db == null) return;
                 _selected.IsDeleted = true;
-                db.Boeken.Update(_selected);
-                await db.SaveChangesAsync();
+                db.Boeken.Update(_selected); // (3) //CRUD soft-delete update
+                await db.SaveChangesAsync(); // (3) //CRUD save
                 await LoadBooks();
             }
         }
