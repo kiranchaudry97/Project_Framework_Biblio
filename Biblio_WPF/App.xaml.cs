@@ -1,6 +1,5 @@
-﻿// Doel: Bootstrap van WPF-app met generieke host, DI, EF Core, Identity en seeding.
-// Beschrijving: Start de Host, configureert services (DbContext, Identity, ViewModels/Windows),
-// voert database seeding uit en toont het hoofdvenster. Bevat globale exception handlers.
+﻿// App bootstrap: host start, seeding, theme persistence. Contains LINQ for resource checks, try/catch for startup, and calls into SeedData (CRUD).
+
 using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
 using Biblio_Models.Seed;
