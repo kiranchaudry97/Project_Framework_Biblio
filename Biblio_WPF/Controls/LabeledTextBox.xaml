@@ -1,4 +1,5 @@
 ﻿<!--
+    commit
 Doel: Herbruikbare user control voor gelabeld tekstveld.
 Beschrijving: Toont een label en een tekstvak met TwoWay-binding naar de dependency property 'Text'.
 -->
