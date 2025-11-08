@@ -1,4 +1,5 @@
 ﻿<!--
+    commit
 Doel: Globale WPF stijlen (knoppen, tekstvakken, DataGrid) en primaire knopstijl, thema-onafhankelijk.
 Beschrijving: Centrale plek voor basisstijlen die door de app worden gebruikt, los van het gekozen thema. zie commit bericht.
 -->
