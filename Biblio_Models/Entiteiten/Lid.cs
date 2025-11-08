@@ -1,4 +1,7 @@
-﻿// Patronen aanwezig in dit bestand:
+﻿// 1) //LINQ - used when querying Leden collection (Where, AnyAsync)
+// 2) //lambda expression - used in LINQ predicates
+// 3) //CRUD - this entity participates in create/read/update/delete operations via DbContext
+
 // - Entiteit voor leden met validatieattributen
 // - Wordt gebruikt in queries (LINQ) en soft-delete filtering
 
