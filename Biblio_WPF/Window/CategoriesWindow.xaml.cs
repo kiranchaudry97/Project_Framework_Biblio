@@ -11,6 +11,7 @@ namespace Biblio_WPF.Window
 {
     /// <summary>
     /// Interaction logic for CategoriesWindow.xaml
+    /// zie commit bericht 
     /// </summary>
     public partial class CategoriesWindow : Page
     {
