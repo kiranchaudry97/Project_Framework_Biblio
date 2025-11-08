@@ -1,9 +1,9 @@
 ﻿// PATTERNS: // LINQ, // lambda, // CRUD
-// Lambda-expressies (waar en waarom):
-//  - Filter-predicates: veel gebruikt in `Where`-calls, bijv. `u => !u.IsDeleted`, `u => u.LidId == lid.Id`, `u => u.BoekId == boek.Id`.
-//  - Projecties/Selects: gebruikt in error handling en materiaalopsomming (bijv. `Errors.Select(e => e.Description)` in seed/admin code).
-//  - Gebruik in query-composition: lambda's worden gecombineerd met `Include` en `Where` om dynamische queries te bouwen (zie `LoadLoans()`).
-//  - Waar gebruikt in UI: de lambda-predicates bepalen welke items in `LoansGrid`, `LidFilter` en `BoekFilter` verschijnen; ook gebruikt voor berekeningen zoals `CountAsync()` op `overdueQuery`.
+// Foutafhandeling (try/catch) — waar en waarom in dit venster:
+//  - CreateLoanAsync: vang fouten bij toevoegen uitlening en SaveChangesAsync.
+//  - OnReturnLoan: vang fouten bij updaten (inleveren) en SaveChangesAsync.
+//  - OnDeleteLoan: vang fouten bij soft-delete update en SaveChangesAsync.
+//  - LoadLoans: query-operations zijn grotendeels leesoperaties; indien gewenst kan hier ook foutafhandeling toegevoegd worden.
 
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
@@ -156,9 +156,17 @@ namespace Biblio_WPF.Window
             var svc = Biblio_WPF.App.AppHost?.Services;
             var db = svc?.GetService<Biblio_Models.Data.BiblioDbContext>();
             if (db == null) return;
-            db.Leningens.Add(loan);
-            await db.SaveChangesAsync();
-            await LoadLoans();
+
+            try
+            {
+                db.Leningens.Add(loan);
+                await db.SaveChangesAsync();
+                await LoadLoans();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout bij aanmaken uitlening: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private async void OnReturnLoan(object sender, RoutedEventArgs e)
@@ -172,9 +180,16 @@ namespace Biblio_WPF.Window
                 if (db == null) return;
                 sel.ReturnedAt = DateTime.Now;
                 sel.IsClosed = true;
-                db.Leningens.Update(sel);
-                await db.SaveChangesAsync();
-                await LoadLoans();
+                try
+                {
+                    db.Leningens.Update(sel);
+                    await db.SaveChangesAsync();
+                    await LoadLoans();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Fout bij inleveren uitlening: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -188,9 +203,16 @@ namespace Biblio_WPF.Window
                 var db = svc?.GetService<Biblio_Models.Data.BiblioDbContext>();
                 if (db == null) return;
                 sel.IsDeleted = true;
-                db.Leningens.Update(sel);
-                await db.SaveChangesAsync();
-                await LoadLoans();
+                try
+                {
+                    db.Leningens.Update(sel);
+                    await db.SaveChangesAsync();
+                    await LoadLoans();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Fout bij verwijderen uitlening: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
     }
