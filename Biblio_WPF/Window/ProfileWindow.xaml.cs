@@ -17,6 +17,7 @@ namespace Biblio_WPF.Window
 {
     /// <summary>
     /// Interaction logic for ProfileWindow.xaml
+    /// zie commit bericht
     /// </summary>
     public partial class ProfileWindow : Page
     {
