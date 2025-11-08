@@ -7,9 +7,10 @@
 // 3) //CRUD - Aanmaken/Bijwerken/Verwijderen (soft delete) en `SaveChangesAsync`
 //    Waar: `OnSaveBook` (Add/Update + SaveChangesAsync), `OnDeleteBook` (soft delete + Update + SaveChangesAsync)
 //    Doel: beheren van boeken in de database.
-// LINQ-gebruik — waar deze queries in de applicatie worden gebruikt:
-//  - De `BoekWindow` toont de resultaten van `LoadBooks()` in `BooksGrid`.
-//  - `UitleningWindow` en andere pagina's gebruiken de seeded boeken (SeedData) voor voorbeelden.
+// 4) //try/catch - foutafhandeling rond persistente acties
+//    Waar: rondom `SaveChangesAsync()` bij `OnSaveBook` en `OnDeleteBook` (aanbevolen).
+//    Doel: fouten loggen/tonen en voorkomen dat onhandige uitzonderingen de UI laten crashen.
+//    Opmerking: momenteel worden SaveChangesAsync-calls direct aangeroepen; overweeg try/catch met gebruikersvriendelijke meldingen en logging.
 
 using System;
 using System.Linq;
@@ -130,8 +131,15 @@ namespace Biblio_WPF.Window
             else
                 db.Boeken.Update(_selected); // (3) //CRUD update
 
-            await db.SaveChangesAsync(); // (3) //CRUD save
-            await LoadBooks();
+            try
+            {
+                await db.SaveChangesAsync(); // (3) //CRUD save
+                await LoadBooks();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Fout bij opslaan boek: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private async void OnDeleteBook(object sender, RoutedEventArgs e)
@@ -144,8 +152,15 @@ namespace Biblio_WPF.Window
                 if (db == null) return;
                 _selected.IsDeleted = true;
                 db.Boeken.Update(_selected); // (3) //CRUD soft-delete update
-                await db.SaveChangesAsync(); // (3) //CRUD save
-                await LoadBooks();
+                try
+                {
+                    await db.SaveChangesAsync(); // (3) //CRUD save
+                    await LoadBooks();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Fout bij verwijderen boek: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
