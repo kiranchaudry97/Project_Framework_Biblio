@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿// MainWindow contains resource LINQ checks, theme try/catch blocks and opens pages that perform CRUD operations.
+
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
