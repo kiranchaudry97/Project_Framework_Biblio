@@ -1,8 +1,10 @@
 ﻿// SeedData contains EF Core queries (LINQ) and CRUD operations and uses lambda expressions.
-
-// 1) //LINQ - queries such as AnyAsync, FirstAsync, Where are used in this file
-// 2) //lambda expression - used in Select, FirstAsync predicates and other delegates
-// 3) //CRUD - AddRange, SaveChangesAsync, Database.MigrateAsync
+// This file seeds several "dummy" / test objects used by the app and UI for development/testing.
+// Key seed objects and where they are used:
+//  - Admin account: email `admin@biblio.local` (default) — used by LoginWindow, AdminUsersWindow and security checks (see App.xaml.cs, AdminUsersWindow.xaml.cs, LoginWindow.xaml.cs)
+//  - Blocked test account: email `blocked@biblio.local` — useful for testing blocked-login flows (used by LoginWindow and AdminUsersWindow)
+//  - Medewerker account: email `medewerker@biblio.local` — staff role for testing (AdminUsersWindow, SecurityViewModel)
+//  - Sample members and books: used by UitleningWindow, BoekWindow, LidWindow (see UitleningWindow.xaml.cs, BoekWindow.xaml.cs, LidWindow.xaml.cs)
 
 using System;
 using System.Collections.Generic;
@@ -42,6 +44,8 @@ namespace Biblio_Models.Seed
             }
 
             //3️⃣ Admin-gebruiker aanmaken of wachtwoord forceren (zonder tokenproviders)
+            // De standaardwaarden hieronder zijn development/test defaults ("dummy" credentials).
+            // Production: overschrijf via configuratie (SeedOptions in appsettings.json/user secrets) of verwijder deze seed.
             var adminEmail = string.IsNullOrWhiteSpace(opts.AdminEmail) ? "admin@biblio.local" : opts.AdminEmail;
             var desiredPwd = string.IsNullOrWhiteSpace(opts.AdminPassword) ? "Admin1234?" : opts.AdminPassword;
             var admin = await userMgr.FindByEmailAsync(adminEmail);
@@ -62,6 +66,7 @@ namespace Biblio_Models.Seed
             }
             else if (!string.IsNullOrWhiteSpace(opts.AdminPassword))
             {
+                // Forceer wachtwoord indien admin bestaat en een admin-wachtwoord is opgegeven via config
                 admin.PasswordHash = hasher.HashPassword(admin, desiredPwd);
                 var upd = await userMgr.UpdateAsync(admin);
                 if (!upd.Succeeded)
@@ -69,6 +74,7 @@ namespace Biblio_Models.Seed
             }
 
             // Admin in Admin-rol zetten
+            // (De Admin-rol wordt gebruikt door AdminUsersWindow, SecurityViewModel en autorisatie checks.)
             admin = await userMgr.FindByEmailAsync(adminEmail);
             if (admin != null && !await userMgr.IsInRoleAsync(admin, "Admin"))
             {
@@ -94,6 +100,7 @@ namespace Biblio_Models.Seed
                 var thriller = await db.Categorien.FirstAsync(c => c.Naam == "Thriller");
                 var wetenschap = await db.Categorien.FirstAsync(c => c.Naam == "Wetenschap");
 
+                // Sample books (development/test data). Deze items worden gebruikt door BoekWindow en UitleningWindow.
                 db.Boeken.AddRange(
                     new Boek { Titel = "1984", Auteur = "George Orwell", Isbn = "9780451524935", CategorieID = roman.Id },
                     new Boek { Titel = "De Hobbit", Auteur = "J.R.R. Tolkien", Isbn = "9780547928227", CategorieID = roman.Id },
@@ -115,6 +122,7 @@ namespace Biblio_Models.Seed
 
             if (!await db.Leden.AnyAsync()) // (1) //LINQ
             {
+                // Sample members (development/test data). Used in UitleningWindow and LidWindow.
                 db.Leden.AddRange(
                     new Lid { Voornaam = "Jan", AchterNaam = "Peeters", Email = "jan.peeters@example.com" },
                     new Lid { Voornaam = "Sara", AchterNaam = "De Smet", Email = "sara.desmet@example.com" }
@@ -123,6 +131,8 @@ namespace Biblio_Models.Seed
             }
 
             //5️⃣ Optioneel: seeding van een geblokkeerd test-account
+            // Dummy account: `blocked@biblio.local` met wachtwoord `Test!23456`.
+            // Gebruik: testen van geblokkeerde login-flow (LoginWindow) en rolbeheer (AdminUsersWindow).
             var blockedEmail = "blocked@biblio.local";
             var blocked = await userMgr.FindByEmailAsync(blockedEmail);
             if (blocked == null)
@@ -144,6 +154,8 @@ namespace Biblio_Models.Seed
             }
 
             //6️⃣ Optioneel: seeding van een standaard medewerker account
+            // Dummy staff account: `medewerker@biblio.local` met wachtwoord `test1234?`.
+            // Gebruik: testen van medewerker-rollen en UI (AdminUsersWindow, SecurityViewModel).
             var staffEmail = "medewerker@biblio.local";
             var staff = await userMgr.FindByEmailAsync(staffEmail);
             if (staff == null)
