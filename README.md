@@ -1,4 +1,4 @@
-# Biblio � Bibliotheekbeheer in WPF (.NET 9)
+# Biblio — Bibliotheekbeheer in WPF (.NET 9)
 
 **Initiatiefnemer:** Chaud-Ry Kiran Jamil
 
@@ -20,7 +20,7 @@ Inhoud (snelkoppelingen)
 ---
 
 ## Doel & motivatie
-- Doel: eenvoudig en effici�nt beheer van bibliotheekinventaris en uitleningen.
+- Doel: eenvoudig en efficiënt beheer van bibliotheekinventaris en uitleningen.
 - Motivatie: leerrijk project voor MVVM/WPF, EF Core en Identity; uitbreidbaar naar een web-API.
 
 ## Technische samenvatting & vereisten
@@ -38,7 +38,7 @@ Belangrijke NuGet-pakketten:
 - Microsoft.EntityFrameworkCore.Design
 - Microsoft.AspNetCore.Identity.EntityFrameworkCore
 
-## Datamodel � tabellen & relaties
+## Datamodel — tabellen & relaties
 - Boeken
   - Velden: BoekId (PK), Titel, Auteur, ISBN, CategorieID (FK), IsDeleted
   - Relatie: 1 Boek ? N Uitleningen
@@ -50,7 +50,7 @@ Belangrijke NuGet-pakketten:
 - Uitleningen
   - Velden: UitleningId (PK), BoekId (FK), LidId (FK), StartDate, DueDate, ReturnedAt (nullable), IsDeleted, IsClosed
 
-- Categorie�n
+- Categorieën
   - Velden: CategorieId (PK), Naam, Omschrijving
 
 Opmerking: soft-delete via `IsDeleted`; global query filters in `BiblioDbContext`.
@@ -60,41 +60,50 @@ Hieronder een gedetailleerd voorbeeld van de mappenstructuur in de repository. P
 
 ```
 Project_Framework_Biblio/
-?? Biblio_Models/
-?  ?? Entiteiten/
-?  ?  ?? Boek.cs
-?  ?  ?? Lid.cs
-?  ?  ?? Lenen.cs
-?  ?  ?? Categorie.cs
-?  ?  ?? AppUser.cs
-?  ?  ?? BaseEntiteit.cs
-?  ?? Data/
-?  ?  ?? BiblioDbContext.cs
-?  ?  ?? Migrations/
-?  ?? Seed/
-?  ?  ?? SeedData.cs
-?  ?  ?? SeedOptions.cs
-?  ?? Biblio_Models.csproj
-?? Biblio_WPF/
-?  ?? Window/
-?  ?  ?? BoekWindow.xaml(+.cs)
-?  ?  ?? LidWindow.xaml(+.cs)
-?  ?  ?? UitleningWindow.xaml(+.cs)
-?  ?  ?? AdminUserWindow.xaml(+.cs)
-?  ?  ?? ...
-?  ?? Controls/
-?  ?  ?? LabeledTextBox.xaml(+.cs)
-?  ?? ViewModels/
-?  ?  ?? SecurityViewModel.cs
-?  ?? Styles/
-?  ?  ?? Theme.Dark.xaml
-?  ?  ?? Theme.Light.xaml
-?  ?? App.xaml(+.cs)
-?  ?? Biblio_WPF.csproj
-?? docs/
-?  ?? screenshots/
-?? README.md
-?? .gitignore
+├── Biblio_Models/
+│   ├── Entiteiten/
+│   │   ├── Boek.cs
+│   │   ├── Lid.cs
+│   │   ├── Lenen.cs
+│   │   ├── Categorie.cs
+│   │   ├── AppUser.cs
+│   │   └── BaseEntiteit.cs
+│   ├── Data/
+│   │   ├── BiblioDbContext.cs
+│   │   └── Migrations/
+│   ├── Seed/
+│   │   ├── SeedData.cs
+│   │   └── SeedOptions.cs
+│   └── Biblio_Models.csproj
+│
+├── Biblio_WPF/
+│   ├── Window/
+│   │   ├── BoekWindow.xaml
+│   │   ├── BoekWindow.xaml.cs
+│   │   ├── LidWindow.xaml
+│   │   ├── LidWindow.xaml.cs
+│   │   ├── UitleningWindow.xaml
+│   │   ├── UitleningWindow.xaml.cs
+│   │   ├── AdminUserWindow.xaml
+│   │   └── AdminUserWindow.xaml.cs
+│   ├── Controls/
+│   │   ├── LabeledTextBox.xaml
+│   │   └── LabeledTextBox.xaml.cs
+│   ├── ViewModels/
+│   │   └── SecurityViewModel.cs
+│   ├── Styles/
+│   │   ├── Theme.Dark.xaml
+│   │   └── Theme.Light.xaml
+│   ├── App.xaml
+│   ├── App.xaml.cs
+│   └── Biblio_WPF.csproj
+│
+├── docs/
+│   └── screenshots/
+│
+├── README.md
+└── .gitignore
+
 ```
 
 Kort overzicht van belangrijke onderdelen:
