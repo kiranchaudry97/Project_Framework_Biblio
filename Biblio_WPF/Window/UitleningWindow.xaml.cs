@@ -1,5 +1,6 @@
 ﻿// PATTERNS: // LINQ, // lambda, // CRUD
 // UitleningWindow: uses LINQ (method- and query-syntax), lambda expressions and performs CRUD on loans (Add/Update/SaveChangesAsync).
+// commit bericht 
 
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
