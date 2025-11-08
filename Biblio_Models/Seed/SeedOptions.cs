@@ -1,5 +1,6 @@
 
 // Doel: Configuratieopties voor seeding van admin gebruiker (e-mail, naam, wachtwoord).
+// zie commit bericht
 
 namespace Biblio_Models.Seed
 {
