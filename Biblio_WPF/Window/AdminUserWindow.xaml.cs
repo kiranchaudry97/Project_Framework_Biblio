@@ -16,6 +16,7 @@ using System.Windows.Controls;
 namespace Biblio_WPF.Window
 {
     /// <summary>
+    /// zie commit bericht
     /// Interactielogica voor AdminUsersWindow.xaml
     /// </summary>
     public partial class AdminUsersWindow : System.Windows.Window, INotifyPropertyChanged
