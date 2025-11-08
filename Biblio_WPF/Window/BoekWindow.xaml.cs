@@ -1,13 +1,15 @@
 ﻿// 1) //LINQ - gebruikt voor filteren, sorteren en eager-loading (Where, OrderBy, Include, ToListAsync)
 //    Waar: `LoadFilters()` (categorieën ophalen), `LoadBooks()` (boekenquery met filters/zoek)
 //    Doel: resultaten filteren en sorteren voor UI-lijsten en dropdowns.
-// 2) //lambda expressie - predicaten/selectors in LINQ-expressies
+// 2) //lambda-expressies - predicaten/selectors in LINQ-expressies
 //    Waar: predicaten zoals `c => !c.IsDeleted`, `b => b.Titel.Contains(search)`
 //    Doel: compacte definitie van filtercriteria en sortering.
 // 3) //CRUD - Aanmaken/Bijwerken/Verwijderen (soft delete) en `SaveChangesAsync`
 //    Waar: `OnSaveBook` (Add/Update + SaveChangesAsync), `OnDeleteBook` (soft delete + Update + SaveChangesAsync)
 //    Doel: beheren van boeken in de database.
-// zie commit bericht 
+// LINQ-gebruik — waar deze queries in de applicatie worden gebruikt:
+//  - De `BoekWindow` toont de resultaten van `LoadBooks()` in `BooksGrid`.
+//  - `UitleningWindow` en andere pagina's gebruiken de seeded boeken (SeedData) voor voorbeelden.
 
 using System;
 using System.Linq;
