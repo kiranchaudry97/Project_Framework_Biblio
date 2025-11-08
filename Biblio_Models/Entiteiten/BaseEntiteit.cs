@@ -1,4 +1,7 @@
-﻿// Doel: Basisklasse voor entiteiten met soft-delete ondersteuning (IsDeleted, DeletedAt).
+﻿// 1) //LINQ - BaseEntiteit-derived types are queried via LINQ
+// 2) //lambda expression - used in LINQ predicates across entities
+// 3) //CRUD - BaseEntiteit provides Id/IsDeleted used in CRUD operations
+// Doel: Basisklasse voor entiteiten met soft-delete ondersteuning (IsDeleted, DeletedAt).
 // Beschrijving: Biedt Id, IsDeleted en DeletedAt voor logische verwijderingen op alle afgeleide entiteiten.
 
 using System;
