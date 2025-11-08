@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
 
 #nullable disable
+// zie commit bericht 
 
 namespace Biblio_Models.Migrations
 {
