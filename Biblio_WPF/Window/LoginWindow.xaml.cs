@@ -7,6 +7,7 @@ namespace Biblio_WPF.Window
 {
     /// <summary>
     /// Interaction logic for LoginWindow.xaml
+    /// zie commit bericht
     /// </summary>
     public partial class LoginWindow : Page
     {
