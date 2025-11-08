@@ -21,6 +21,13 @@ namespace Biblio_WPF.Window
     /// </summary>
     public partial class AdminUsersWindow : System.Windows.Window, INotifyPropertyChanged
     {
+        // Foutafhandeling (try/catch) — waar en waarom in dit venster:
+        //  - Rollen opslaan (OnSaveRoles): vang fouten bij rol- en role-toewijzingen, toon melding.
+        //  - Gebruiker aanmaken (OnCreateUser): controleer CreateAsync resultaat en toon fouten.
+        //  - Rollen verwijderen (OnClearRoles): fouten bij RemoveFromRoleAsync worden gelogd en getoond.
+        //  - Gebruiker verwijderen (DeleteSelectedUserAsync): vang fout bij DeleteAsync en log.
+        //  - Blokkering togglen (OnToggleBlock): update kan falen; toon foutmelding.
+
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<AdminUsersWindow> _logger;
@@ -129,6 +136,7 @@ namespace Biblio_WPF.Window
             if (SelectedUser is null) return;
             try
             {
+                // TRY: opslaan van rollen voor geselecteerde gebruiker. Fouten worden getoond in catch.
                 if (!await _roleManager.RoleExistsAsync("Admin"))
                     await _roleManager.CreateAsync(new IdentityRole("Admin"));
                 if (!await _roleManager.RoleExistsAsync("Medewerker"))
@@ -158,6 +166,7 @@ namespace Biblio_WPF.Window
             }
             catch (Exception ex)
             {
+                // CATCH: toon foutmelding aan gebruiker
                 MessageBox.Show($"Opslaan mislukt: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -175,6 +184,7 @@ namespace Biblio_WPF.Window
 
             try
             {
+                // TRY: aanmaken gebruiker; fouten uit Identity worden getoond
                 var user = new AppUser { UserName = NewEmail.Trim(), Email = NewEmail.Trim(), FullName = NewFullName };
                 var result = await _userManager.CreateAsync(user, NewPassword);
                 if (!result.Succeeded)
@@ -195,6 +205,7 @@ namespace Biblio_WPF.Window
             }
             catch (Exception ex)
             {
+                // CATCH: toon foutmelding
                 MessageBox.Show($"Aanmaken mislukt: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -205,6 +216,7 @@ namespace Biblio_WPF.Window
             if (MessageBox.Show($"Verwijder alle rollen van {SelectedUser.Email}?", "Bevestig", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
             try
             {
+                // TRY: verwijder alle rollen van geselecteerde gebruiker
                 if (await _userManager.IsInRoleAsync(SelectedUser, "Admin"))
                 {
                     var res = await _userManager.RemoveFromRoleAsync(SelectedUser, "Admin");
@@ -228,6 +240,7 @@ namespace Biblio_WPF.Window
             }
             catch (Exception ex)
             {
+                // CATCH: log en toon fout
                 _logger.LogError(ex, "Fout bij verwijderen rollen voor {Email}", SelectedUser.Email);
                 MessageBox.Show($"Verwijderen mislukt: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -239,6 +252,7 @@ namespace Biblio_WPF.Window
             if (MessageBox.Show($"Verwijder gebruiker {SelectedUser.Email}?", "Bevestig", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
             try
             {
+                // TRY: verwijderen gebruiker via UserManager
                 var email = SelectedUser.Email;
                 var res = await _userManager.DeleteAsync(SelectedUser);
                 if (!res.Succeeded) throw new Exception(string.Join(';', res.Errors.Select(x => x.Description)));
@@ -256,6 +270,7 @@ namespace Biblio_WPF.Window
             }
             catch (Exception ex)
             {
+                // CATCH: log en toon fout
                 _logger.LogError(ex, "Fout bij verwijderen gebruiker voor {Email}", SelectedUser?.Email);
                 MessageBox.Show($"Verwijderen mislukt: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -267,6 +282,7 @@ namespace Biblio_WPF.Window
 
             try
             {
+                // TRY: toggle blokkering en update via UserManager
                 SelectedUser.IsBlocked = !SelectedUser.IsBlocked;
                 var res = await _userManager.UpdateAsync(SelectedUser);
                 if (!res.Succeeded) throw new Exception(string.Join(';', res.Errors.Select(x => x.Description)));
@@ -276,6 +292,7 @@ namespace Biblio_WPF.Window
             }
             catch (Exception ex)
             {
+                // CATCH: toon foutmelding
                 MessageBox.Show($"Fout bij wijzigen blokkering: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
