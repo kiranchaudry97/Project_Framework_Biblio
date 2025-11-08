@@ -116,10 +116,10 @@ Kort overzicht van belangrijke onderdelen:
 1) Clone & open
 
 ```bash
-git clone <repo-url>
+# Klonen van de officiële repository
+git clone https://github.com/kiranchaudry97/Project_Framework_Biblio.git
 cd Project_Framework_Biblio
 ```
-
 2) Restore & build
 
 ```bash
