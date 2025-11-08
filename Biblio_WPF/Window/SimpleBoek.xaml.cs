@@ -1,5 +1,7 @@
 using System.Windows;
 
+//commit bericht //
+
 namespace Biblio_WPF.Window
 {
     public partial class SimpleBoek : System.Windows.Window
