@@ -27,10 +27,20 @@
 
                 <CheckBox x:Name="OnlyOpenCheck" Content="Alleen open" Margin="12,0,8,0" VerticalAlignment="Center" Checked="OnFilterChanged" Unchecked="OnFilterChanged"/>
 
+                <!-- Date range filters -->
+                <TextBlock Text="Van:" VerticalAlignment="Center" Margin="8,0,4,0"/>
+                <DatePicker x:Name="FromDatePicker" Width="120" SelectedDateChanged="OnFilterChanged"/>
+                <TextBlock Text="Tot:" VerticalAlignment="Center" Margin="8,0,4,0"/>
+                <DatePicker x:Name="ToDatePicker" Width="120" SelectedDateChanged="OnFilterChanged"/>
+
                 <Button Content="Uitlenen" Click="OnNewLoan" Background="#0078D7" Foreground="White" Margin="8,0,0,0" Padding="8,4"/>
             </StackPanel>
 
-            <TextBlock x:Name="CountLabel" DockPanel.Dock="Right" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,8,0"/>
+            <!-- Right side shows count and a small filter/info message -->
+            <StackPanel DockPanel.Dock="Right" Orientation="Vertical" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0">
+                <TextBlock x:Name="CountLabel" HorizontalAlignment="Right" />
+                <TextBlock x:Name="FilterInfoLabel" HorizontalAlignment="Right" FontSize="12" Foreground="Gray" />
+            </StackPanel>
         </DockPanel>
 
         <DataGrid x:Name="LoansGrid" Grid.Row="1" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" SelectionMode="Single">
