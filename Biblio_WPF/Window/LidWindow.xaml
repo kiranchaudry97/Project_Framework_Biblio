@@ -36,32 +36,39 @@
         </DataGrid>
 
         <Border Grid.Row="2" BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,8,0,0">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <StackPanel Width="220" Margin="0,0,12,0">
-                    <TextBlock Text="Voornaam"/>
-                    <TextBox x:Name="VoornaamBox" Margin="0,4,0,8"/>
-                </StackPanel>
+            <!-- Responsive grid: star-sized input columns, Auto column for buttons so they stay visible -->
+            <Grid VerticalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-                <StackPanel Width="220" Margin="0,0,12,0">
-                    <TextBlock Text="Achternaam"/>
-                    <TextBox x:Name="AchternaamBox" Margin="0,4,0,8"/>
-                </StackPanel>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.2*" />
+                    <ColumnDefinition Width="1.2*" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                <StackPanel Width="260" Margin="0,0,12,0">
-                    <TextBlock Text="E-mail"/>
-                    <TextBox x:Name="EmailBox" Margin="0,4,0,8"/>
-                </StackPanel>
+                <!-- Labels -->
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Voornaam" Margin="0,0,12,6" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="Achternaam" Margin="0,0,12,6" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="E-mail" Margin="0,0,12,6" FontWeight="SemiBold" />
+                <TextBlock Grid.Row="0" Grid.Column="3" Text="Telefoon" Margin="0,0,12,6" FontWeight="SemiBold" />
 
-                <StackPanel Width="160" Margin="0,0,12,0">
-                    <TextBlock Text="Telefoon"/>
-                    <TextBox x:Name="TelefoonBox" Margin="0,4,0,8"/>
-                </StackPanel>
+                <!-- Inputs -->
+                <TextBox Grid.Row="1" Grid.Column="0" x:Name="VoornaamBox" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" MinWidth="80" />
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="AchternaamBox" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" MinWidth="80" />
+                <TextBox Grid.Row="1" Grid.Column="2" x:Name="EmailBox" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" MinWidth="120" />
+                <TextBox Grid.Row="1" Grid.Column="3" x:Name="TelefoonBox" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" MinWidth="60" />
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Opslaan" Click="OnSaveMember" Background="#0078D7" Foreground="White" Padding="8,4" Margin="0,0,8,0"/>
-                    <Button Content="Verwijderen" Click="OnDeleteMember" Background="#D32F2F" Foreground="White" Padding="8,4"/>
+                <!-- Buttons in Auto column so they remain visible; they will wrap if window too narrow -->
+                <StackPanel Grid.Row="1" Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="Opslaan" Click="OnSaveMember" Background="#0078D7" Foreground="White" Padding="8,4" Margin="0,0,8,0" MinWidth="80"/>
+                    <Button Content="Verwijderen" Click="OnDeleteMember" Background="#D32F2F" Foreground="White" Padding="8,4" MinWidth="80"/>
                 </StackPanel>
-            </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </Page>
