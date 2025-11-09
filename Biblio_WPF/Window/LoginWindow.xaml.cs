@@ -116,5 +116,27 @@ namespace Biblio_WPF.Window
                 w.ShowDialog();
             }
         }
+
+        private void OnRegister(object sender, RoutedEventArgs e)
+        {
+            var services = Biblio_WPF.App.AppHost?.Services;
+            RegisterWindow? page = null;
+            try
+            {
+                page = services?.GetService<RegisterWindow>();
+            }
+            catch { /* ignore */ }
+
+            if (page == null)
+            {
+                page = new RegisterWindow();
+            }
+
+            if (page != null)
+            {
+                var w = new System.Windows.Window { Title = "Registreer gebruiker", Content = page, Owner = System.Windows.Window.GetWindow(this), Width = 540, Height = 360 };
+                w.ShowDialog();
+            }
+        }
     }
 }

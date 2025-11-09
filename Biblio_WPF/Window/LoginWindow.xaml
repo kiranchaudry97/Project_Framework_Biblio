@@ -30,6 +30,11 @@
                     <TextBlock Margin="12,0,0,0" VerticalAlignment="Center">
                         <Hyperlink Click="OnForgotPassword" Foreground="{DynamicResource AccentBrush}">Wachtwoord vergeten</Hyperlink>
                     </TextBlock>
+
+                    <!-- Registratie link voor aanmaken nieuwe gebruiker -->
+                    <TextBlock Margin="12,0,0,0" VerticalAlignment="Center">
+                        <Hyperlink Click="OnRegister" Foreground="{DynamicResource AccentBrush}">Registreer</Hyperlink>
+                    </TextBlock>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
