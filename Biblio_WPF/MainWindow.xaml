@@ -12,10 +12,10 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_Bestand">
                 <MenuItem Header="_Inloggen" Click="OnOpenLogin"/>
-                <MenuItem Header="_Profiel" Click="OnOpenProfile"/>
-                <MenuItem Header="_Wachtwoord wijzigen" Click="OnChangePassword"/>
+                <MenuItem Header="_Profiel" Click="OnOpenProfile" IsEnabled="{Binding Path=SecurityVm.IsAuthenticated, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                <MenuItem Header="_Wachtwoord wijzigen" Click="OnChangePassword" IsEnabled="{Binding Path=SecurityVm.IsAuthenticated, RelativeSource={RelativeSource AncestorType=Window}}"/>
                 <Separator/>
-                <MenuItem Header="_Afmelden" Click="OnLogout"/>
+                <MenuItem Header="_Afmelden" Click="OnLogout" IsEnabled="{Binding Path=SecurityVm.IsAuthenticated, RelativeSource={RelativeSource AncestorType=Window}}"/>
                 <Separator/>
                 <MenuItem Header="_Afsluiten" Click="OnExit"/>
             </MenuItem>
@@ -24,7 +24,7 @@
                 <MenuItem Header="Gebruikers &amp; Rollen" Click="OnManageUsers"/>
             </MenuItem>
 
-            <MenuItem Header="_Openen">
+            <MenuItem Header="_Openen" IsEnabled="{Binding Path=SecurityVm.IsAuthenticated, RelativeSource={RelativeSource AncestorType=Window}}">
                 <MenuItem Header="Boeken" Click="OnOpenBooks"/>
                 <MenuItem Header="Leden" Click="OnOpenMembers"/>
                 <MenuItem Header="Uitleningen" Click="OnOpenLoans"/>
@@ -68,7 +68,7 @@
             <!-- Left navigation pane -->
             <Border Grid.Column="0" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="12" Width="196">
+                    <StackPanel Margin="12" Width="196" IsEnabled="{Binding Path=SecurityVm.IsAuthenticated, RelativeSource={RelativeSource AncestorType=Window}}">
                         <TextBlock Text="Navigatie" FontWeight="SemiBold" Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
                         <Button Style="{StaticResource PrimaryButton}" Margin="0,6" HorizontalContentAlignment="Left" Click="OnOpenBooks">
                             <StackPanel Orientation="Horizontal">

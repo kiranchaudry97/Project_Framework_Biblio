@@ -18,6 +18,9 @@ namespace Biblio_WPF
             InitializeComponent();
         }
 
+        // Expose SecurityViewModel for XAML bindings
+        public SecurityViewModel SecurityVm => App.AppHost?.Services?.GetService<SecurityViewModel>() ?? new SecurityViewModel();
+
         protected override void OnContentRendered(System.EventArgs e)
         {
             base.OnContentRendered(e);

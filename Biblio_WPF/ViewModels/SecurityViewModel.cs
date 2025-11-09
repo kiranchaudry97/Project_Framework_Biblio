@@ -7,7 +7,7 @@ namespace Biblio_WPF.ViewModels
     {
         public event PropertyChangedEventHandler? PropertyChanged;
         private string? _currentEmail;
-        public string? CurrentEmail { get => _currentEmail; private set { _currentEmail = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentEmail))); } }
+        public string? CurrentEmail { get => _currentEmail; private set { _currentEmail = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentEmail))); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated))); } }
 
         private bool _isAdmin;
         public bool IsAdmin { get => _isAdmin; private set { _isAdmin = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAdmin))); } }
@@ -18,12 +18,17 @@ namespace Biblio_WPF.ViewModels
         private string? _fullName;
         public string? FullName { get => _fullName; private set { _fullName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FullName))); } }
 
+        // New: computed property to indicate an authenticated user
+        public bool IsAuthenticated => !string.IsNullOrWhiteSpace(CurrentEmail);
+
         public void SetUser(string? email, bool isAdmin, bool isStaff, string? fullName = null)
         {
             CurrentEmail = email;
             IsAdmin = isAdmin;
             IsStaff = isStaff;
             FullName = fullName;
+            // notify other dependent properties
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
         }
 
         public void Reset()
@@ -32,6 +37,7 @@ namespace Biblio_WPF.ViewModels
             IsAdmin = false;
             IsStaff = false;
             FullName = null;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
         }
     }
 }
