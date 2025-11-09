@@ -1,4 +1,4 @@
-# Biblio â€” Bibliotheekbeheer in WPF (.NET 9)
+# "Biblio" Bibliotheekbeheer in WPF (.NET 9)
 
 **Initiatiefnemer:** Chaud-Ry Kiran Jamil
 
@@ -60,49 +60,50 @@ Hieronder een gedetailleerd voorbeeld van de mappenstructuur in de repository. P
 
 ```
 Project_Framework_Biblio/
-â”œâ”€â”€ Biblio_Models/
-â”‚   â”œâ”€â”€ Entiteiten/
-â”‚   â”‚   â”œâ”€â”€ Boek.cs
-â”‚   â”‚   â”œâ”€â”€ Lid.cs
-â”‚   â”‚   â”œâ”€â”€ Lenen.cs
-â”‚   â”‚   â”œâ”€â”€ Categorie.cs
-â”‚   â”‚   â”œâ”€â”€ AppUser.cs
-â”‚   â”‚   â””â”€â”€ BaseEntiteit.cs
-â”‚   â”œâ”€â”€ Data/
-â”‚   â”‚   â”œâ”€â”€ BiblioDbContext.cs
-â”‚   â”‚   â””â”€â”€ Migrations/
-â”‚   â”œâ”€â”€ Seed/
-â”‚   â”‚   â”œâ”€â”€ SeedData.cs
-â”‚   â”‚   â””â”€â”€ SeedOptions.cs
-â”‚   â””â”€â”€ Biblio_Models.csproj
-â”‚
-â”œâ”€â”€ Biblio_WPF/
-â”‚   â”œâ”€â”€ Window/
-â”‚   â”‚   â”œâ”€â”€ BoekWindow.xaml
-â”‚   â”‚   â”œâ”€â”€ BoekWindow.xaml.cs
-â”‚   â”‚   â”œâ”€â”€ LidWindow.xaml
-â”‚   â”‚   â”œâ”€â”€ LidWindow.xaml.cs
-â”‚   â”‚   â”œâ”€â”€ UitleningWindow.xaml
-â”‚   â”‚   â”œâ”€â”€ UitleningWindow.xaml.cs
-â”‚   â”‚   â”œâ”€â”€ AdminUserWindow.xaml
-â”‚   â”‚   â””â”€â”€ AdminUserWindow.xaml.cs
-â”‚   â”œâ”€â”€ Controls/
-â”‚   â”‚   â”œâ”€â”€ LabeledTextBox.xaml
-â”‚   â”‚   â””â”€â”€ LabeledTextBox.xaml.cs
-â”‚   â”œâ”€â”€ ViewModels/
-â”‚   â”‚   â””â”€â”€ SecurityViewModel.cs
-â”‚   â”œâ”€â”€ Styles/
-â”‚   â”‚   â”œâ”€â”€ Theme.Dark.xaml
-â”‚   â”‚   â””â”€â”€ Theme.Light.xaml
-â”‚   â”œâ”€â”€ App.xaml
-â”‚   â”œâ”€â”€ App.xaml.cs
-â”‚   â””â”€â”€ Biblio_WPF.csproj
-â”‚
-â”œâ”€â”€ docs/
-â”‚   â””â”€â”€ screenshots/
-â”‚
-â”œâ”€â”€ README.md
-â””â”€â”€ .gitignore
+├── Biblio_Models/
+│   ├── Entiteiten/
+│   │   ├── Boek.cs
+│   │   ├── Lid.cs
+│   │   ├── Lenen.cs
+│   │   ├── Categorie.cs
+│   │   ├── AppUser.cs
+│   │   └── BaseEntiteit.cs
+│   ├── Data/
+│   │   ├── BiblioDbContext.cs
+│   │   └── Migrations/
+│   ├── Seed/
+│   │   ├── SeedData.cs
+│   │   └── SeedOptions.cs
+│   └── Biblio_Models.csproj
+│
+├── Biblio_WPF/
+│   ├── Window/
+│   │   ├── BoekWindow.xaml
+│   │   ├── BoekWindow.xaml.cs
+│   │   ├── LidWindow.xaml
+│   │   ├── LidWindow.xaml.cs
+│   │   ├── UitleningWindow.xaml
+│   │   ├── UitleningWindow.xaml.cs
+│   │   ├── AdminUserWindow.xaml
+│   │   └── AdminUserWindow.xaml.cs
+│   ├── Controls/
+│   │   ├── LabeledTextBox.xaml
+│   │   └── LabeledTextBox.xaml.cs
+│   ├── ViewModels/
+│   │   └── SecurityViewModel.cs
+│   ├── Styles/
+│   │   ├── Theme.Dark.xaml
+│   │   └── Theme.Light.xaml
+│   ├── App.xaml
+│   ├── App.xaml.cs
+│   └── Biblio_WPF.csproj
+│
+├── docs/
+│   └── screenshots/
+│
+├── README.md
+└── .gitignore
+
 
 ```
 
