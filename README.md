@@ -205,7 +205,7 @@ MessageBox.Show($"Fout: {ex.Message}");
 
 
 ### Loginvenster:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/mainwindow.png)
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/fbc1233417fbe3605ae37647a7b794708aa4c7ae/Screenshot/login.png)
 [*Login: Kunnen aanmelden , wachtwoord tonen en indien vergeten*]
 
 
@@ -214,7 +214,7 @@ MessageBox.Show($"Fout: {ex.Message}");
 ![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/b8b038f87a4285dc7b44623e7d0e5afe6f048d0b/Screenshot/darkmode.png)
 [*darkmode]
 
-
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/mainwindow.png)
 
 
 ### Openen:
