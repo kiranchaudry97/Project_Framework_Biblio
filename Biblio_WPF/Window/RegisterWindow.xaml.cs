@@ -10,7 +10,7 @@ namespace Biblio_WPF.Window
 {
     /// <summary>
     /// Interaction logic for RegisterWindow.xaml
-    /// zie commit bericht
+    /// zie commit berichten
     /// </summary>
     public partial class RegisterWindow : Page
     {
