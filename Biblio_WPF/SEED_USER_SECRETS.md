@@ -1,5 +1,4 @@
-Voorbeeld: SeedOptions via User Secrets (Nederlands)
-
+Voorbeeld: SeedOptions via User Secrets 
 Doel
 -----
 Voor ontwikkelomgevingen mogen testaccounts en dev-wachtwoorden niet in de repository staan. Gebruik User Secrets of appsettings (niet in Git) om de waarden voor `SeedOptions` te zetten.
