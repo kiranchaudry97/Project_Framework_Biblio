@@ -22,7 +22,7 @@ Inhoud (snelkoppelingen)
 
 ## Doel & motivatie
 - Doel: eenvoudig en efficiënt beheer van bibliotheekinventaris en uitleningen.
-- Motivatie: leerrijk project voor MVVM/WPF, EF Core en Identity; uitbreidbaar naar een web-API.
+- Motivatie: leerrijk project voor MVVM/WPF, EF Core en Identity;.
 
 ## Technische samenvatting & vereisten
 - .NET 9, WPF UI
