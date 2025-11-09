@@ -1,10 +1,10 @@
-﻿// SeedData contains EF Core queries (LINQ) and CRUD operations and uses lambda expressions.
-// This file seeds several "dummy" / test objects used by the app and UI for development/testing.
-// Key seed objects and where they are used:
-//  - Admin account: email `admin@biblio.local` (default) — used by LoginWindow, AdminUsersWindow and security checks (see App.xaml.cs, AdminUsersWindow.xaml.cs, LoginWindow.xaml.cs)
-//  - Blocked test account: email `blocked@biblio.local` — useful for testing blocked-login flows (used by LoginWindow and AdminUsersWindow)
-//  - Medewerker account: email `medewerker@biblio.local` — staff role for testing (AdminUsersWindow, SecurityViewModel)
-//  - Sample members and books: used by UitleningWindow, BoekWindow, LidWindow (see UitleningWindow.xaml.cs, BoekWindow.xaml.cs, LidWindow.xaml.cs)
+﻿// SeedData bevat EF Core queries (LINQ) en CRUD-operaties en gebruikt lambda-expressies.
+// Dit bestand seedt meerdere "dummy"/test-objecten die door de app en UI worden gebruikt voor ontwikkeling/testing.
+// Belangrijke seed-objecten en waar ze gebruikt worden:
+//  - Admin-account: e-mail `admin@biblio.local` (standaard) — gebruikt door LoginWindow, AdminUsersWindow en security checks (zie App.xaml.cs, AdminUsersWindow.xaml.cs, LoginWindow.xaml.cs)
+//  - Geblokkeerd testaccount (optioneel) — handig om geblokkeerde login‑flows te testen (gebruikt in LoginWindow en AdminUsersWindow)
+//  - Medewerker‑account (optioneel) — staff‑rol voor testen (AdminUsersWindow, SecurityViewModel)
+//  - Voorbeeldleden en -boeken: gebruikt door UitleningWindow, BoekWindow, LidWindow (zie UitleningWindow.xaml.cs, BoekWindow.xaml.cs, LidWindow.xaml.cs)
 
 using System;
 using System.Collections.Generic;
@@ -130,49 +130,51 @@ namespace Biblio_Models.Seed
                 await db.SaveChangesAsync(); // (3) //CRUD
             }
 
-            //5️⃣ Optioneel: seeding van een geblokkeerd test-account
-            // Dummy account: `blocked@biblio.local` met wachtwoord `Test!23456`.
-            // Gebruik: testen van geblokkeerde login-flow (LoginWindow) en rolbeheer (AdminUsersWindow).
-            var blockedEmail = "blocked@biblio.local";
-            var blocked = await userMgr.FindByEmailAsync(blockedEmail);
-            if (blocked == null)
+            //5️⃣ Optioneel: seeding van test accounts wanneer dit expliciet is ingeschakeld via SeedOptions
+            if (opts.CreateTestAccounts)
             {
-                blocked = new AppUser
+                // Blocked account
+                var blockedEmail = string.IsNullOrWhiteSpace(opts.BlockedEmail) ? "blocked@biblio.local" : opts.BlockedEmail;
+                var blockedPwd = string.IsNullOrWhiteSpace(opts.BlockedPassword) ? "Test!23456" : opts.BlockedPassword;
+                var blocked = await userMgr.FindByEmailAsync(blockedEmail);
+                if (blocked == null)
                 {
-                    UserName = blockedEmail,
-                    Email = blockedEmail,
-                    FullName = "Geblokkeerde Gebruiker",
-                    EmailConfirmed = true,
-                    IsBlocked = true
-                };
-                var createBlocked = await userMgr.CreateAsync(blocked, "Test!23456");
-                if (createBlocked.Succeeded)
-                {
-                    if (await roleMgr.RoleExistsAsync("Medewerker"))
-                        await userMgr.AddToRoleAsync(blocked, "Medewerker");
+                    blocked = new AppUser
+                    {
+                        UserName = blockedEmail,
+                        Email = blockedEmail,
+                        FullName = "Geblokkeerde Gebruiker",
+                        EmailConfirmed = true,
+                        IsBlocked = true
+                    };
+                    var createBlocked = await userMgr.CreateAsync(blocked, blockedPwd);
+                    if (createBlocked.Succeeded)
+                    {
+                        if (await roleMgr.RoleExistsAsync("Medewerker"))
+                            await userMgr.AddToRoleAsync(blocked, "Medewerker");
+                    }
                 }
-            }
 
-            //6️⃣ Optioneel: seeding van een standaard medewerker account
-            // Dummy staff account: `medewerker@biblio.local` met wachtwoord `test1234?`.
-            // Gebruik: testen van medewerker-rollen en UI (AdminUsersWindow, SecurityViewModel).
-            var staffEmail = "medewerker@biblio.local";
-            var staff = await userMgr.FindByEmailAsync(staffEmail);
-            if (staff == null)
-            {
-                staff = new AppUser
+                // Staff account
+                var staffEmail = string.IsNullOrWhiteSpace(opts.StaffEmail) ? "medewerker@biblio.local" : opts.StaffEmail;
+                var staffPwd = string.IsNullOrWhiteSpace(opts.StaffPassword) ? "test1234?" : opts.StaffPassword;
+                var staff = await userMgr.FindByEmailAsync(staffEmail);
+                if (staff == null)
                 {
-                    UserName = staffEmail,
-                    Email = staffEmail,
-                    FullName = "Standaard Medewerker",
-                    EmailConfirmed = true
-                };
+                    staff = new AppUser
+                    {
+                        UserName = staffEmail,
+                        Email = staffEmail,
+                        FullName = "Standaard Medewerker",
+                        EmailConfirmed = true
+                    };
 
-                var createStaff = await userMgr.CreateAsync(staff, "test1234?");
-                if (createStaff.Succeeded)
-                {
-                    if (await roleMgr.RoleExistsAsync("Medewerker"))
-                        await userMgr.AddToRoleAsync(staff, "Medewerker");
+                    var createStaff = await userMgr.CreateAsync(staff, staffPwd);
+                    if (createStaff.Succeeded)
+                    {
+                        if (await roleMgr.RoleExistsAsync("Medewerker"))
+                            await userMgr.AddToRoleAsync(staff, "Medewerker");
+                    }
                 }
             }
         }
