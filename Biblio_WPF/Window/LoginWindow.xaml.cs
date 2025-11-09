@@ -61,7 +61,12 @@ namespace Biblio_WPF.Window
 
             // Set security context
             var security = services.GetService<Biblio_WPF.ViewModels.SecurityViewModel>();
-            security?.SetUser(user.Email, await userManagerApp.IsInRoleAsync(user, "Admin"), await userManagerApp.IsInRoleAsync(user, "Medewerker"));
+            if (security != null)
+            {
+                var isAdmin = await userManagerApp.IsInRoleAsync(user, "Admin");
+                var isStaff = await userManagerApp.IsInRoleAsync(user, "Medewerker");
+                security.SetUser(user.Email, isAdmin, isStaff, user.FullName);
+            }
 
             MessageBox.Show("Inloggen gelukt.", "Inloggen", MessageBoxButton.OK, MessageBoxImage.Information);
             // Close the login page window if hosted in a Window
