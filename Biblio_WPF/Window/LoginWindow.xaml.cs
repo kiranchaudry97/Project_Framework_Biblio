@@ -19,7 +19,13 @@ namespace Biblio_WPF.Window
         private async void OnLogin(object sender, RoutedEventArgs e)
         {
             var email = EmailBox.Text?.Trim();
-            var pwd = PwdBox.Visibility == Visibility.Visible ? PwdBox.Password : PwdTextBox.Text;
+            var pwdBox = FindName("PwdBox") as PasswordBox;
+            var pwdTextBox = FindName("PwdTextBox") as TextBox;
+            string pwd = null;
+            if (pwdTextBox != null && !string.IsNullOrWhiteSpace(pwdTextBox.Text))
+                pwd = pwdTextBox.Text;
+            else if (pwdBox != null && !string.IsNullOrWhiteSpace(pwdBox.Password))
+                pwd = pwdBox.Password;
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(pwd))
             {
                 MessageBox.Show("E-mail en wachtwoord zijn verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
