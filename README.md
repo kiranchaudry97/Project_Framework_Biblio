@@ -207,8 +207,8 @@ MessageBox.Show($"Fout: {ex.Message}");
 
 
 ### Loginvenster:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/fbc1233417fbe3605ae37647a7b794708aa4c7ae/Screenshot/login.png)
-[*Login: Kunnen aanmelden , wachtwoord tonen en indien vergeten*]
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/771b4a63f08b055434323d72d7372fd853fbe2df/Screenshot/loginwindow.png)
+[*Login: Kunnen aanmelden ,registeren , wachtwoord tonen en indien vergeten*]
 
 
 
