@@ -38,7 +38,7 @@ Belangrijke NuGet-pakketten:
 - Microsoft.EntityFrameworkCore.Design
 - Microsoft.AspNetCore.Identity.EntityFrameworkCore
 
-## Datamodel â€” tabellen & relaties
+## Datamodel tabellen & relaties
 - Boeken
   - Velden: BoekId (PK), Titel, Auteur, ISBN, CategorieID (FK), IsDeleted
   - Relatie: 1 Boek ? N Uitleningen
@@ -201,11 +201,69 @@ _logger.LogError(ex, "Fout bij opslaan gebruiker {Email}", email);
 MessageBox.Show($"Fout: {ex.Message}");
 ```
 
-## Screenshots (placeholder)
-Plaats afbeeldingen in `docs/screenshots/` en update de paden hieronder:
-- `docs/screenshots/mainwindow.png`
-- `docs/screenshots/boeken.png`
-- `docs/screenshots/leden.png`
+### Screenshots
+
+**Loginvenster:**
+
+![image]()
+
+**Mainwindow:**
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/mainwindow.png)
+[*Login: Kunnen aanmelden , wachtwoord tonen en indien vergeten*]
+
+**Darkmode:**
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/b8b038f87a4285dc7b44623e7d0e5afe6f048d0b/Screenshot/darkmode.png)
+[*darkmode]
+
+**Openen:**
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/openen.png)
+[*Openen: boeken, leden, uitleningen, categorieën*]
+
+
+**Beheer:**
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/beheer.png)
+[*Beheer :Gebruikers | rollen kunnen zien aan rechten kunnen geven als admin of medewerker *]
+
+**Gebruiken & Rollen:**
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7f28cf8cb386e7a73314e2c78969d4a5051b6a10/Screenshot/gebruiker_rollen.png)
+[* Gebruikers rollen kunnen zien aan rechten kunnen geven als admin of medewerker *]
+
+
+
+**Bestanden:**
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/bestand.png)
+[*bestand : soort nav voor inloggen, profiel, wachtwoord kunnen wijzigen, afmelden en afsluiten *]
+
+
+**Profiel:**
+![image]()
+
+**wachtwoord wijzigen:**
+![image]()
+
+
+
+**categorie:**
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/categorie.png)
+[*categorie : categorie kunnen toevoegen en verwijderen *]
+
+**Uitleningen:**
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/uitleningen.png)
+[*uitleningen : Boeken kunnen uitlenen , datum selecteren , vermelden wanneer de boeken teruggebracht zijn *]
+
+
+**Leden:**
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/leden.png)
+[*leden : kunnen toevoegen van hun persoonlijke gegevens , opslaan en verwijderen en opzoeken*]
+
+**Bestand:**
+![image]()
+
+
+**Bestand:**
+![image]()
+
+
 
 ---
 
