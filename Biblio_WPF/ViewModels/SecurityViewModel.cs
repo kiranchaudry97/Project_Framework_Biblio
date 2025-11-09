@@ -15,11 +15,15 @@ namespace Biblio_WPF.ViewModels
         private bool _isStaff;
         public bool IsStaff { get => _isStaff; private set { _isStaff = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsStaff))); } }
 
-        public void SetUser(string? email, bool isAdmin, bool isStaff)
+        private string? _fullName;
+        public string? FullName { get => _fullName; private set { _fullName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FullName))); } }
+
+        public void SetUser(string? email, bool isAdmin, bool isStaff, string? fullName = null)
         {
             CurrentEmail = email;
             IsAdmin = isAdmin;
             IsStaff = isStaff;
+            FullName = fullName;
         }
 
         public void Reset()
@@ -27,6 +31,7 @@ namespace Biblio_WPF.ViewModels
             CurrentEmail = null;
             IsAdmin = false;
             IsStaff = false;
+            FullName = null;
         }
     }
 }
