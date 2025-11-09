@@ -54,7 +54,7 @@ namespace Biblio_WPF
                     // Windows (use types defined in Biblio_WPF.Window)
                     services.AddSingleton<MainWindow>();
                     services.AddTransient<LoginWindow>();
-                    services.AddTransient<RegisterWindo>();
+                    services.AddTransient<RegisterWindow>();
                     services.AddTransient<WachtwoordVeranderenWindw>();
                     services.AddTransient<ProfileWindow>();
                     services.AddTransient<AdminUsersWindow>();
