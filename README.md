@@ -16,6 +16,7 @@ Inhoud (snelkoppelingen)
 - [Identity, seeding & security](#identity-seeding--security)
 - [Foutafhandeling & logging](#foutafhandeling--logging)
 - [Screenshots (placeholder)](#screenshots-placeholder)
+- [Licenties](#licenties)
 
 ---
 
@@ -280,6 +281,15 @@ MessageBox.Show($"Fout: {ex.Message}");
 
 
 
+## Licenties
+
+De belangrijkste components/pakketten:
+
+- .NET / ASP.NET Core / Entity Framework Core (Microsoft) 
+- `Microsoft.EntityFrameworkCore` (EF Core) — MIT
+- `Microsoft.EntityFrameworkCore.SqlServer` — MIT
+- `Microsoft.EntityFrameworkCore.Design` — MIT
+- `Microsoft.AspNetCore.Identity.EntityFrameworkCore` — MIT
 
 
 
