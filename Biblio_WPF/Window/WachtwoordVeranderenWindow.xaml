@@ -1,17 +1,107 @@
-﻿<!--
-    commit bericht
-+-->
-    <Page x:Class="Biblio_WPF.Window.WachtwoordVeranderenWindw"
+﻿<Page x:Class="Biblio_WPF.Window.WachtwoordVeranderenWindw"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:Biblio_WPF.Window"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
+      d:DesignHeight="300" d:DesignWidth="520"
       Title="WachtwoordVeranderenWindw">
 
-    <Grid>
-        
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Heading centered -->
+        <TextBlock Grid.Row="0" Text="Wachtwoord wijzigen" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+
+        <!-- Profile summary centered -->
+        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0,12,0,0" Width="420" HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Margin="0,6">
+                <TextBlock Width="140" VerticalAlignment="Center">E-mail:</TextBlock>
+                <TextBox x:Name="EmailDisplayBox" IsReadOnly="True" Width="260" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,6">
+                <TextBlock Width="140" VerticalAlignment="Center">Volledige naam:</TextBlock>
+                <TextBox x:Name="FullNameDisplayBox" IsReadOnly="True" Width="260" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,6">
+                <TextBlock Width="140" VerticalAlignment="Center">Rol:</TextBlock>
+                <TextBox x:Name="RoleDisplayBox" IsReadOnly="True" Width="260" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Password fields (left aligned) -->
+        <StackPanel Grid.Row="2" Margin="0,12,0,0" Width="420" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal" Margin="0,6" VerticalAlignment="Center">
+                <TextBlock Width="140" VerticalAlignment="Center">Huidig wachtwoord:</TextBlock>
+                <!-- Grid with two columns: password and button so button is always visible -->
+                <Grid Width="260">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <PasswordBox x:Name="CurrentPwdBox" Grid.Column="0" HorizontalAlignment="Stretch" />
+                    <TextBox x:Name="CurrentPwdText" Grid.Column="0" Visibility="Collapsed" HorizontalAlignment="Stretch" />
+                    <ToggleButton x:Name="CurrentShowBtn" Grid.Column="1" Width="48" Height="28" Margin="6,0,0,0" VerticalAlignment="Center"
+                                  Background="{DynamicResource AccentLightBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                  Padding="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FocusVisualStyle="{x:Null}"
+                                  Cursor="Hand" ToolTip="Toon wachtwoord">
+                        <TextBlock Text="Toon" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AccentBrush}"/>
+                    </ToggleButton>
+                </Grid>
+            </StackPanel>
+            <TextBlock x:Name="CurrentPwdError" Foreground="Red" FontSize="12" Margin="140,0,0,0" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,6" VerticalAlignment="Center">
+                <TextBlock Width="140" VerticalAlignment="Center">Nieuw wachtwoord:</TextBlock>
+                <Grid Width="260">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <PasswordBox x:Name="NewPwdBox" Grid.Column="0" HorizontalAlignment="Stretch" />
+                    <TextBox x:Name="NewPwdText" Grid.Column="0" Visibility="Collapsed" HorizontalAlignment="Stretch" />
+                    <ToggleButton x:Name="NewShowBtn" Grid.Column="1" Width="48" Height="28" Margin="6,0,0,0" VerticalAlignment="Center"
+                                  Background="{DynamicResource AccentLightBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                  Padding="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FocusVisualStyle="{x:Null}"
+                                  Cursor="Hand" ToolTip="Toon wachtwoord">
+                        <TextBlock Text="Toon" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AccentBrush}"/>
+                    </ToggleButton>
+                </Grid>
+            </StackPanel>
+            <TextBlock x:Name="NewPwdError" Foreground="Red" FontSize="12" Margin="140,0,0,0" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,6" VerticalAlignment="Center">
+                <TextBlock Width="140" VerticalAlignment="Center">Bevestig wachtwoord:</TextBlock>
+                <Grid Width="260">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <PasswordBox x:Name="ConfirmPwdBox" Grid.Column="0" HorizontalAlignment="Stretch" />
+                    <TextBox x:Name="ConfirmPwdText" Grid.Column="0" Visibility="Collapsed" HorizontalAlignment="Stretch" />
+                    <ToggleButton x:Name="ConfirmShowBtn" Grid.Column="1" Width="48" Height="28" Margin="6,0,0,0" VerticalAlignment="Center"
+                                  Background="{DynamicResource AccentLightBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                  Padding="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FocusVisualStyle="{x:Null}"
+                                  Cursor="Hand" ToolTip="Toon wachtwoord">
+                        <TextBlock Text="Toon" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource AccentBrush}"/>
+                    </ToggleButton>
+                </Grid>
+            </StackPanel>
+            <TextBlock x:Name="ConfirmPwdError" Foreground="Red" FontSize="12" Margin="140,0,0,0" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,12,0,0" HorizontalAlignment="Left">
+                <Button x:Name="SavePwdBtn" Content="Opslaan" Width="120" Height="36" Style="{StaticResource PrimaryButton}" />
+                <Button x:Name="CancelBtn" Content="Annuleren" Width="120" Height="36" Margin="8,0,0,0" Style="{StaticResource DangerButton}" />
+            </StackPanel>
+        </StackPanel>
+
+        <TextBlock Grid.Row="4" x:Name="StatusText" Foreground="Gray" Margin="0,12,0,0" HorizontalAlignment="Left" />
     </Grid>
 </Page>
