@@ -70,7 +70,7 @@ Project_Framework_Biblio/
 │   │   └── BaseEntiteit.cs
 │   ├── Data/
 │   │   ├── BiblioDbContext.cs
-│   │   └── Migrations/
+│   │   └── Migrations/           (EF Core migratiebestanden)
 │   ├── Seed/
 │   │   ├── SeedData.cs
 │   │   └── SeedOptions.cs
@@ -78,29 +78,33 @@ Project_Framework_Biblio/
 │
 ├── Biblio_WPF/
 │   ├── Window/
-│   │   ├── BoekWindow.xaml
-│   │   ├── BoekWindow.xaml.cs
-│   │   ├── LidWindow.xaml
-│   │   ├── LidWindow.xaml.cs
-│   │   ├── UitleningWindow.xaml
-│   │   ├── UitleningWindow.xaml.cs
-│   │   ├── AdminUserWindow.xaml
-│   │   └── AdminUserWindow.xaml.cs
+│   │   ├── BoekWindow.xaml / BoekWindow.xaml.cs
+│   │   ├── LidWindow.xaml / LidWindow.xaml.cs
+│   │   ├── UitleningWindow.xaml / UitleningWindow.xaml.cs
+│   │   ├── AdminUserWindow.xaml / AdminUserWindow.xaml.cs
+│   │   ├── LoginWindow.xaml / LoginWindow.xaml.cs
+│   │   ├── RegisterWindow.xaml / RegisterWindow.xaml.cs
+│   │   ├── ProfileWindow.xaml / ProfileWindow.xaml.cs
+│   │   ├── CategoriesWindow.xaml / CategoriesWindow.xaml.cs
+│   │   └── Overige dialogen/Windows/
+│   │       ├── SimpleBoekWindow.xaml / SimpleBoekWindow.xaml.cs
+│   │       ├── SimpleLidWindow.xaml / SimpleLidWindow.xaml.cs
+│   │       └── ResetWindow.xaml / ResetWindow.xaml.cs
 │   ├── Controls/
-│   │   ├── LabeledTextBox.xaml
-│   │   └── LabeledTextBox.xaml.cs
+│   │   └── LabeledTextBox.xaml / LabeledTextBox.xaml.cs
 │   ├── ViewModels/
 │   │   └── SecurityViewModel.cs
 │   ├── Styles/
+│   │   ├── Theme.Light.xaml
 │   │   ├── Theme.Dark.xaml
-│   │   └── Theme.Light.xaml
-│   ├── App.xaml
-│   ├── App.xaml.cs
+│   │   └── Themes.xaml (+ code-behind)
+│   ├── App.xaml / App.xaml.cs
+│   ├── MainWindow.xaml / MainWindow.xaml.cs
 │   └── Biblio_WPF.csproj
 │
+├── SEED_USER_SECRETS.md
 ├── docs/
 │   └── screenshots/
-│
 ├── README.md
 └── .gitignore
 
