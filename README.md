@@ -184,7 +184,7 @@ dotnet user-secrets init
 ```
 dotnet user-secrets set "Seed:CreateTestAccounts" "true"
 dotnet user-secrets set "Seed:AdminEmail" "admin@biblio.local"
-dotnet user-secrets set "Seed:AdminPassword" "Admin1234?"
+dotnet user-secrets set "Seed:AdminPassword" "Vb1234?"
 # zet ook StaffEmail/StaffPassword en BlockedEmail/BlockedPassword indien gewenst
 ```
 
