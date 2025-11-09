@@ -22,7 +22,22 @@ vergeten" FontSize="16" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicR
                     <Button Content="Annuleren" Click="OnCancel" Margin="0,0,8,0"/>
                     <Button Content="Verstuur" Click="OnSendReset" Style="{StaticResource PrimaryButton}"/>
                 </StackPanel>
+
                 <TextBlock x:Name="ResultText" Text="" Margin="0,8,0,0" Foreground="{DynamicResource ForegroundBrush}"/>
+
+                <!-- Dev: one-click reset panel, hidden until token is generated -->
+                <StackPanel x:Name="ResetActionPanel" Visibility="Collapsed" Margin="0,8,0,0">
+                    <TextBlock Text="Reset token (dev):" Foreground="{DynamicResource ForegroundBrush}"/>
+                    <TextBox x:Name="TokenBox" IsReadOnly="True" Margin="0,4,0,8" />
+                    <TextBlock Text="Nieuw wachtwoord:" Foreground="{DynamicResource ForegroundBrush}"/>
+                    <PasswordBox x:Name="NewPwdBox" Margin="0,4,0,8" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="Annuleren" Click="OnCancel" Margin="0,0,8,0"/>
+                        <Button Content="Herstel wachtwoord" Click="OnApplyReset" Style="{StaticResource PrimaryButton}"/>
+                    </StackPanel>
+                    <TextBlock x:Name="ResetStatusText" Text="" Margin="0,8,0,0" Foreground="{DynamicResource ForegroundBrush}"/>
+                </StackPanel>
+
             </StackPanel>
         </Border>
     </Grid>
