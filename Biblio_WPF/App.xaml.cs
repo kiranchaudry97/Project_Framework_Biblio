@@ -47,13 +47,14 @@ namespace Biblio_WPF
                         .AddRoles<IdentityRole>()
                         .AddEntityFrameworkStores<BiblioDbContext>();
 
-                    // Seed options
+                    // Seed opties
                     services.AddOptions<Biblio_Models.Seed.SeedOptions>()
                         .Bind(context.Configuration.GetSection("Seed"));
 
-                    // Windows (use types defined in Biblio_WPF.Window)
+                    // Windows (typen gedefinieerd in Biblio_WPF.Window)
                     services.AddSingleton<MainWindow>();
                     services.AddTransient<LoginWindow>();
+                    services.AddTransient<ResetWindow>();
                     services.AddTransient<RegisterWindow>();
                     services.AddTransient<WachtwoordVeranderenWindw>();
                     services.AddTransient<ProfileWindow>();
@@ -84,37 +85,37 @@ namespace Biblio_WPF
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            // Schrijf voortgang naar console zodat 'dotnet run' startup-stappen toont in de terminal
+            // Schrijf voortgang naar de console zodat 'dotnet run' startup-stappen toont in de terminal
             try
             {
-                // TRY: Host starten (kritische initialisatie). Fouten hier stoppen de app.
+                // PROBEER: Host starten (kritische initialisatie). Fouten hier stoppen de app.
                 Console.WriteLine("[App] Starting host...");
                 await AppHost.StartAsync();
                 Console.WriteLine("[App] Host started.");
             }
             catch (Exception ex)
             {
-                // CATCH: toon fout en stop verdere initialisatie
+                // FOUTAFHANDELING: toon fout en stop verdere initialisatie
                 Console.Error.WriteLine($"[App] Failed to start host: {ex}");
                 MessageBox.Show($"Fout tijdens starten Host:\n{ex.Message}", "Initialisatie", MessageBoxButton.OK, MessageBoxImage.Error);
-                // If host failed to start we should not continue
+                // Als de host niet kon starten mogen we niet doorgaan
                 return;
             }
 
-            // register SecurityViewModel instance into application resources for XAML binding
+            // Registreer SecurityViewModel-instantie in application resources voor XAML-binding
             var securityVm = AppHost.Services.GetRequiredService<SecurityViewModel>();
             Application.Current.Resources["SecurityViewModel"] = securityVm;
 
             try
             {
-                // TRY: Seed en migraties uitvoeren. Fouten hier tonen melding maar app kan blijven draaien afhankelijk van de fout.
+                // PROBEER: Seed en migraties uitvoeren. Fouten hier tonen melding maar app kan blijven draaien afhankelijk van de fout.
                 Console.WriteLine("[App] Running database seed/migrations...");
                 await SeedData.InitializeAsync(AppHost.Services);
                 Console.WriteLine("[App] Database seed/migrations completed.");
             }
             catch (Exception ex)
             {
-                // CATCH: log en toon foutmelding
+                // FOUTAFHANDELING: log en toon foutmelding
                 Console.Error.WriteLine($"[App] Fout tijdens database-initialisatie: {ex}");
                 MessageBox.Show($"Fout tijdens database-initialisatie:\n{ex.Message}",
                     "Initialisatie", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -123,16 +124,16 @@ namespace Biblio_WPF
             // Laad opgeslagen thema (indien aanwezig)
             try
             {
-                // TRY: thema laden (niet-kritisch). Fouten worden genegeerd.
+                // PROBEER: thema laden (niet-kritisch). Fouten worden genegeerd.
                 var theme = LoadPersistedTheme();
                 if (theme == "Dark") UseDarkTheme();
                 else UseLightTheme();
             }
-            catch { /* swallow theme load errors */ }
+            catch { /* negeer fouten bij thema laden */ }
 
             try
             {
-                // TRY: hoofdvenster openen. Fouten tonen melding.
+                // PROBEER: hoofdvenster openen. Fouten tonen melding.
                 var main = AppHost.Services.GetRequiredService<MainWindow>();
                 Console.WriteLine("[App] Showing main window.");
                 main.Show();
@@ -179,7 +180,7 @@ namespace Biblio_WPF
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir!);
                 File.WriteAllText(ThemeFilePath, name);
             }
-            catch { /* ignore persistence errors */ }
+            catch { /* negeer fouten bij persistentie */ }
         }
 
         private static string? LoadPersistedTheme()
