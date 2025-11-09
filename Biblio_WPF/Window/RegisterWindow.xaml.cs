@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -69,6 +70,24 @@ namespace Biblio_WPF.Window
             {
                 MessageBox.Show("E-mail en wachtwoord zijn verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
+            }
+
+            // Ensure the email uses the biblio.local domain.
+            // If user entered only the local part (no '@'), append '@biblio.local'.
+            // If user provided a domain different from biblio.local, show validation error.
+            email = email!.ToLowerInvariant();
+            if (!email.Contains("@"))
+            {
+                email = $"{email}@biblio.local";
+            }
+            else
+            {
+                var parts = email.Split('@');
+                if (parts.Length != 2 || !string.Equals(parts[1], "biblio.local", StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show("E-mailadres moet eindigen op '@biblio.local'.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
             }
 
             var services = Biblio_WPF.App.AppHost?.Services;
