@@ -1,4 +1,4 @@
-﻿// App bootstrap: host start, seeding, theme persistence. Contains LINQ for resource checks, try/catch for startup, and calls into SeedData (CRUD).
+﻿// App-bootstrap: host starten, seeding en thema‑persistentie. Bevat LINQ voor resource‑checks, try/catch bij startup en roept SeedData aan (CRUD).
 
 using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
@@ -68,7 +68,7 @@ namespace Biblio_WPF
                 })
                 .Build();
 
-            // Global exception handling
+            // Globale foutafhandeling
             this.DispatcherUnhandledException += (s, args) =>
             {
                 MessageBox.Show(args.Exception.Message, "Onverwachte fout", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -84,15 +84,17 @@ namespace Biblio_WPF
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            // Write progress to console so 'dotnet run' shows startup steps in terminal
+            // Schrijf voortgang naar console zodat 'dotnet run' startup-stappen toont in de terminal
             try
             {
+                // TRY: Host starten (kritische initialisatie). Fouten hier stoppen de app.
                 Console.WriteLine("[App] Starting host...");
                 await AppHost.StartAsync();
                 Console.WriteLine("[App] Host started.");
             }
             catch (Exception ex)
             {
+                // CATCH: toon fout en stop verdere initialisatie
                 Console.Error.WriteLine($"[App] Failed to start host: {ex}");
                 MessageBox.Show($"Fout tijdens starten Host:\n{ex.Message}", "Initialisatie", MessageBoxButton.OK, MessageBoxImage.Error);
                 // If host failed to start we should not continue
@@ -105,20 +107,23 @@ namespace Biblio_WPF
 
             try
             {
+                // TRY: Seed en migraties uitvoeren. Fouten hier tonen melding maar app kan blijven draaien afhankelijk van de fout.
                 Console.WriteLine("[App] Running database seed/migrations...");
                 await SeedData.InitializeAsync(AppHost.Services);
                 Console.WriteLine("[App] Database seed/migrations completed.");
             }
             catch (Exception ex)
             {
+                // CATCH: log en toon foutmelding
                 Console.Error.WriteLine($"[App] Fout tijdens database-initialisatie: {ex}");
                 MessageBox.Show($"Fout tijdens database-initialisatie:\n{ex.Message}",
                     "Initialisatie", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            // Load persisted theme (if any)
+            // Laad opgeslagen thema (indien aanwezig)
             try
             {
+                // TRY: thema laden (niet-kritisch). Fouten worden genegeerd.
                 var theme = LoadPersistedTheme();
                 if (theme == "Dark") UseDarkTheme();
                 else UseLightTheme();
@@ -127,6 +132,7 @@ namespace Biblio_WPF
 
             try
             {
+                // TRY: hoofdvenster openen. Fouten tonen melding.
                 var main = AppHost.Services.GetRequiredService<MainWindow>();
                 Console.WriteLine("[App] Showing main window.");
                 main.Show();
