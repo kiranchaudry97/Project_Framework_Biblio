@@ -1,4 +1,4 @@
-# "Biblio” Bibliotheekbeheer in WPF (.NET 9)
+# Biblio â€” Bibliotheekbeheer in WPF (.NET 9)
 
 **Initiatiefnemer:** Chaud-Ry Kiran Jamil
 
@@ -20,8 +20,8 @@ Inhoud (snelkoppelingen)
 ---
 
 ## Doel & motivatie
-- Doel: eenvoudig en efficiÃ«nt beheer van bibliotheekinventaris en uitleningen.
-- Motivatie: leerrijk project voor MVVM/WPF, EF Core en Identity; uitbreidbaar.
+- Doel: eenvoudig en efficiënt beheer van bibliotheekinventaris en uitleningen.
+- Motivatie: leerrijk project voor MVVM/WPF, EF Core en Identity; uitbreidbaar naar een web-API.
 
 ## Technische samenvatting & vereisten
 - .NET 9, WPF UI
@@ -60,50 +60,49 @@ Hieronder een gedetailleerd voorbeeld van de mappenstructuur in de repository. P
 
 ```
 Project_Framework_Biblio/
-├── Biblio_Models/
-│   ├── Entiteiten/
-│   │   ├── Boek.cs
-│   │   ├── Lid.cs
-│   │   ├── Lenen.cs
-│   │   ├── Categorie.cs
-│   │   ├── AppUser.cs
-│   │   └── BaseEntiteit.cs
-│   ├── Data/
-│   │   ├── BiblioDbContext.cs
-│   │   └── Migrations/
-│   ├── Seed/
-│   │   ├── SeedData.cs
-│   │   └── SeedOptions.cs
-│   └── Biblio_Models.csproj
-│
-├── Biblio_WPF/
-│   ├── Window/
-│   │   ├── BoekWindow.xaml
-│   │   ├── BoekWindow.xaml.cs
-│   │   ├── LidWindow.xaml
-│   │   ├── LidWindow.xaml.cs
-│   │   ├── UitleningWindow.xaml
-│   │   ├── UitleningWindow.xaml.cs
-│   │   ├── AdminUserWindow.xaml
-│   │   └── AdminUserWindow.xaml.cs
-│   ├── Controls/
-│   │   ├── LabeledTextBox.xaml
-│   │   └── LabeledTextBox.xaml.cs
-│   ├── ViewModels/
-│   │   └── SecurityViewModel.cs
-│   ├── Styles/
-│   │   ├── Theme.Dark.xaml
-│   │   └── Theme.Light.xaml
-│   ├── App.xaml
-│   ├── App.xaml.cs
-│   └── Biblio_WPF.csproj
-│
-├── docs/
-│   └── screenshots/
-│
-├── README.md
-└── .gitignore
-
+â”œâ”€â”€ Biblio_Models/
+â”‚   â”œâ”€â”€ Entiteiten/
+â”‚   â”‚   â”œâ”€â”€ Boek.cs
+â”‚   â”‚   â”œâ”€â”€ Lid.cs
+â”‚   â”‚   â”œâ”€â”€ Lenen.cs
+â”‚   â”‚   â”œâ”€â”€ Categorie.cs
+â”‚   â”‚   â”œâ”€â”€ AppUser.cs
+â”‚   â”‚   â””â”€â”€ BaseEntiteit.cs
+â”‚   â”œâ”€â”€ Data/
+â”‚   â”‚   â”œâ”€â”€ BiblioDbContext.cs
+â”‚   â”‚   â””â”€â”€ Migrations/
+â”‚   â”œâ”€â”€ Seed/
+â”‚   â”‚   â”œâ”€â”€ SeedData.cs
+â”‚   â”‚   â””â”€â”€ SeedOptions.cs
+â”‚   â””â”€â”€ Biblio_Models.csproj
+â”‚
+â”œâ”€â”€ Biblio_WPF/
+â”‚   â”œâ”€â”€ Window/
+â”‚   â”‚   â”œâ”€â”€ BoekWindow.xaml
+â”‚   â”‚   â”œâ”€â”€ BoekWindow.xaml.cs
+â”‚   â”‚   â”œâ”€â”€ LidWindow.xaml
+â”‚   â”‚   â”œâ”€â”€ LidWindow.xaml.cs
+â”‚   â”‚   â”œâ”€â”€ UitleningWindow.xaml
+â”‚   â”‚   â”œâ”€â”€ UitleningWindow.xaml.cs
+â”‚   â”‚   â”œâ”€â”€ AdminUserWindow.xaml
+â”‚   â”‚   â””â”€â”€ AdminUserWindow.xaml.cs
+â”‚   â”œâ”€â”€ Controls/
+â”‚   â”‚   â”œâ”€â”€ LabeledTextBox.xaml
+â”‚   â”‚   â””â”€â”€ LabeledTextBox.xaml.cs
+â”‚   â”œâ”€â”€ ViewModels/
+â”‚   â”‚   â””â”€â”€ SecurityViewModel.cs
+â”‚   â”œâ”€â”€ Styles/
+â”‚   â”‚   â”œâ”€â”€ Theme.Dark.xaml
+â”‚   â”‚   â””â”€â”€ Theme.Light.xaml
+â”‚   â”œâ”€â”€ App.xaml
+â”‚   â”œâ”€â”€ App.xaml.cs
+â”‚   â””â”€â”€ Biblio_WPF.csproj
+â”‚
+â”œâ”€â”€ docs/
+â”‚   â””â”€â”€ screenshots/
+â”‚
+â”œâ”€â”€ README.md
+â””â”€â”€ .gitignore
 
 ```
 
@@ -117,11 +116,7 @@ Kort overzicht van belangrijke onderdelen:
 1) Clone & open
 
 ```bash
-<<<<<<< HEAD
 # Klonen van de officiële repository
-=======
-# Klonen van de officiÃ«le repository
->>>>>>> bbe558e11e740948af7d0f31da3bf3b1d4816497
 git clone https://github.com/kiranchaudry97/Project_Framework_Biblio.git
 cd Project_Framework_Biblio
 ```
@@ -166,6 +161,30 @@ await userMgr.CreateAsync(admin, desiredPwd);
 await userMgr.AddToRoleAsync(admin, "Admin");
 ```
 
+## Seed: User Secrets (aanbevolen)
+
+Gebruik User Secrets om dev/test-credentials voor `SeedOptions` veilig lokaal te bewaren en niet in de repository op te nemen. Er is een voorbeeldbestand `Biblio_WPF/SEED_USER_SECRETS.md` met JSON en stappen.
+
+Korte stappen (voer uit in `Biblio_WPF` map):
+
+1. Initialiseer user-secrets éénmalig voor het project:
+
+```
+cd Biblio_WPF
+dotnet user-secrets init
+```
+
+2. Stel de seedwaarden in (voorbeeld):
+
+```
+dotnet user-secrets set "Seed:CreateTestAccounts" "true"
+dotnet user-secrets set "Seed:AdminEmail" "admin@biblio.local"
+dotnet user-secrets set "Seed:AdminPassword" "Admin1234?"
+# zet ook StaffEmail/StaffPassword en BlockedEmail/BlockedPassword indien gewenst
+```
+
+Opmerking: zet `Seed:CreateTestAccounts` op `false` voor productie en bewaar geen echte wachtwoorden in de repository. Zie `Biblio_WPF/SEED_USER_SECRETS.md` voor uitgebreidere instructies.
+
 ## Foutafhandeling & logging
 - Gebruik `try/catch` rond persistente acties en log fouten met `ILogger`.
 - UI: toon gebruikersvriendelijke meldingen via `MessageBox`.
@@ -184,6 +203,8 @@ Plaats afbeeldingen in `docs/screenshots/` en update de paden hieronder:
 - `docs/screenshots/leden.png`
 
 ---
+
+
 
 
 
