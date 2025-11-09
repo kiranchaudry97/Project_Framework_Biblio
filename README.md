@@ -236,10 +236,13 @@ MessageBox.Show($"Fout: {ex.Message}");
 
 
 **Profiel:**
-![image]()
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0089393fa95562fff3b577f0e167e28b00f9e6e6/Screenshot/profile.png)
+[*profiel : profiel kunnenn bekijken en opslaan of wijzigen van wachtwoord *]
+
 
 **wachtwoord wijzigen:**
-![image]()
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0089393fa95562fff3b577f0e167e28b00f9e6e6/Screenshot/wachtwoord.png)
+[*Wachtwoord wijzigen *]
 
 
 
