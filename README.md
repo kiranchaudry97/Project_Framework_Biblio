@@ -17,6 +17,7 @@ Inhoud (snelkoppelingen)
 - [Foutafhandeling & logging](#foutafhandeling--logging)
 - [Screenshots (placeholder)](#screenshots-placeholder)
 - [Licenties](#licenties)
+-  [AI-hulpmiddelen & ontwikkelworkflow](#ai-hulpmiddelen--ontwikkelworkflow)
 
 ---
 
@@ -293,7 +294,40 @@ De belangrijkste components/pakketten:
 
 
 
+## NuGet-installatieproblemen & AI-assistentie
+Tijdens ontwikkeling bij manueel werkte de installatie niet en werd vermeld dat dit niet geinstalleerd terwijl ik dit toch heb gedaan en geselecteerd,
+moest ik AI -assistentie inschakelen om de problemen op te lossen.
 
+AI‑assistentie is gebruikt om:
+- foutmeldingen te analyseren en mogelijke oorzaken te identificeren,
+- concrete `dotnet` commando's en `csproj`-aanpassingen voor te stellen,
+- te adviseren over het wissen van caches en het verifiëren van TFM/versiecompatibiliteit.
+
+
+
+## AI-hulpmiddelen & ontwikkelworkflow
+Deze repository gebruikt AI‑geassisteerde workflows (bijv. GitHub Copilot of vergelijkbare tools) ter ondersteuning van ontwikkeltaken. Typische AI‑taken die in dit project zijn toegepast of kunnen helpen:
+
+- Debuggen en verbeteren van foutmeldingen (error list): analyseren van compile/runtime errors en suggesties voor fixes.
+- Aanmaken van EF Core migraties: genereren of voorbereiden van migratiebestanden en SQL-scripts.
+- Automatisch aanmaken of verbeteren van documentatie, zoals README-bestanden.
+- Refactorings en kleine codewijzigingen (XAML/C#) om UX of toegankelijkheid te verbeteren.
+
+
+
+
+## Problemen die ik voorkwam
+
+Kort overzicht van concrete problemen die tijdens ontwikkeling zijn opgespoord en verholpen:
+
+- Bestanden die wel op schijf stonden maar niet in Visual Studio Solution Explorer verschenen (ontbrekende project-includes).
+- Dubbele of gedupliceerde bestanden in het project / op schijf die verwarring en build‑issues veroorzaakten.
+- Tijdelijke of IDE-specifieke bestanden die per ongeluk in de repository konden verschijnen (bv. `.vs/`, temp READMEs).
+- Problemen met NuGet-installatie (package restore, cache- of netwerkfouten) waardoor builds faalden.
+- TargetFramework / package‑versie mismatch die tot compile- of runtime‑fouten leidde.
+- Onzichtbare UI-elementen door thema- of resource-issues (bv. foreground/background brushes niet geladen).
+- Migratieproblemen of onvolledige EF Core migratiebestanden die database-updates blokkeerden.
+- Foutmeldingen in de error list die voortkwamen uit niet-gesynchroniseerde bronnen of ontbrekende referenties.
 
 
 
