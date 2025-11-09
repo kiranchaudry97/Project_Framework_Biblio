@@ -279,6 +279,11 @@ MessageBox.Show($"Fout: {ex.Message}");
 [*leden : kunnen toevoegen van hun persoonlijke gegevens , opslaan en verwijderen en opzoeken*]
 
 
+### Leden:
+![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/55695f5e70c8e93bda9cda7a91a95144a5d3cf84/Screenshot/database_biblio.png)
+[*database; categorien, leden, uitleningen , boeken *]
+
+
 
 
 
