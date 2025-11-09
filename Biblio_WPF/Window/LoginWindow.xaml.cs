@@ -97,7 +97,19 @@ namespace Biblio_WPF.Window
         private void OnForgotPassword(object sender, RoutedEventArgs e)
         {
             var services = Biblio_WPF.App.AppHost?.Services;
-            var page = services?.GetService<ResetWindow>();
+            ResetWindow? page = null;
+            try
+            {
+                page = services?.GetService<ResetWindow>();
+            }
+            catch { /* ignore */ }
+
+            // Fallback: if DI did not provide the page, create a new instance so feature still works
+            if (page == null)
+            {
+                page = new ResetWindow();
+            }
+
             if (page != null)
             {
                 var w = new System.Windows.Window { Title = "Wachtwoord vergeten", Content = page, Owner = System.Windows.Window.GetWindow(this), Width = 520, Height = 260 };
