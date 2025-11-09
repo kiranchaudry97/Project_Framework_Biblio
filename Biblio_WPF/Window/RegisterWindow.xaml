@@ -11,7 +11,31 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="RegisterWindow">
 
-    <Grid>
-        
+    <Grid Background="{DynamicResource BackgroundBrush}">
+        <Border Width="440" Padding="16" CornerRadius="6" Background="{DynamicResource BackgroundBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel>
+                <TextBlock Text="Nieuwe gebruiker registreren" FontSize="16" FontWeight="Bold" Margin="0,0,0,8" Foreground="{DynamicResource ForegroundBrush}"/>
+                <TextBlock Text="E-mail:" Foreground="{DynamicResource ForegroundBrush}"/>
+                <TextBox x:Name="EmailBox" Margin="0,4,0,8" />
+                <TextBlock Text="Volledige naam:" Foreground="{DynamicResource ForegroundBrush}"/>
+                <TextBox x:Name="FullNameBox" Margin="0,4,0,8" />
+                <TextBlock Text="Wachtwoord:" Foreground="{DynamicResource ForegroundBrush}"/>
+                <PasswordBox x:Name="PwdBox" Margin="0,4,0,8" />
+                <TextBox x:Name="PwdTextBox" Margin="0,4,0,8" Visibility="Collapsed" />
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <CheckBox x:Name="ShowPwdCheck" Content="Toon wachtwoord" Checked="OnShowPasswordChecked" Unchecked="OnShowPasswordUnchecked" Foreground="{DynamicResource ForegroundBrush}" />
+                    <CheckBox x:Name="IsStaffCheck" Content="Medewerker" IsChecked="True" Margin="12,0,0,0" Foreground="{DynamicResource ForegroundBrush}" />
+                    <CheckBox x:Name="IsAdminCheck" Content="Admin" Margin="12,0,0,0" Foreground="{DynamicResource ForegroundBrush}" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                    <Button Content="Annuleren" Click="OnCancel" Margin="0,0,8,0"/>
+                    <Button Content="Registreer" Click="OnRegister" Style="{StaticResource PrimaryButton}"/>
+                </StackPanel>
+
+                <TextBlock x:Name="ResultText" Text="" Margin="0,8,0,0" Foreground="{DynamicResource ForegroundBrush}"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </Page>
