@@ -1,4 +1,6 @@
-﻿<!-- zie commit bericht-->
+﻿
+    
+    <!-- zie commit bericht-->
     
     <Window x:Class="Biblio_WPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -106,7 +108,7 @@
 
             <!-- Right content area -->
             <Grid Grid.Column="1">
-                <Border Width="760" MaxWidth="980" Padding="36" CornerRadius="8" Background="{DynamicResource BackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Border Width="760" MaxWidth="980" Padding="36" CornerRadius="8" Background="{DynamicResource BackgroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Visibility="{Binding Path=SecurityVm.IsAuthenticated, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}">
                     <StackPanel>
                         <TextBlock Text="Welkom bij Biblio – Bibliotheekbeheer"
                                    FontSize="28"
