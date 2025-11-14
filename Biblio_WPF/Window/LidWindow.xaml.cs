@@ -3,7 +3,7 @@
 // voert database seeding uit en toont het hoofdvenster. Bevat globale exception handlers.
 
 // 1) //LINQ - queries gebruikt Where/OrderBy/AnyAsync/FirstOrDefault
-// 2) //lambda expression - gebruikt in predicate expressions and LINQ selectors
+// 2) //lambda expression - gebruikt in predicate expressions en LINQ selectors
 // 3) //CRUD - Add, Update, SaveChangesAsync
 // 4) //trycatch - present around save operations
 
@@ -94,38 +94,38 @@ namespace Biblio_WPF.Window
 
             if (_selected == null) _selected = new Biblio_Models.Entiteiten.Lid();
 
-            // Read values from UI
+            // leest validatie vanuit UI
             var voornaam = VoornaamBox.Text?.Trim() ?? string.Empty;
             var achternaam = AchternaamBox.Text?.Trim() ?? string.Empty;
             var email = EmailBox.Text?.Trim() ?? string.Empty;
             var telefoon = TelefoonBox.Text?.Trim() ?? string.Empty;
 
-            // Validation: required names
+            // Validatie: vereiste namen
             if (string.IsNullOrWhiteSpace(voornaam) || string.IsNullOrWhiteSpace(achternaam))
             {
-                MessageBox.Show("Voornaam en achternaam zijn verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Voornaam en achternaam zijn verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning); // pop window voor lege namen
                 return;
             }
 
-            // Validation: email required and format
+            // Validatie: email vereiste en formaat
             if (string.IsNullOrWhiteSpace(email))
-            {
-                MessageBox.Show("E-mail is verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+            { 
+                MessageBox.Show("E-mail is verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning); // pop window voor lege email
                 return;
             }
 
             var emailAttr = new EmailAddressAttribute();
             if (!emailAttr.IsValid(email))
             {
-                MessageBox.Show("Ongeldig e-mailadres.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Ongeldig e-mailadres.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning); // pop window voor ongeldig email
                 return;
             }
 
-            // Duplicate email check (exclude current record when editing)
+            // Duplicatie email controle (huidige record uitsluiten bij het bewerken)
             var exists = await db.Leden.AnyAsync(l => !l.IsDeleted && l.Email == email && ( _selected.Id == 0 || l.Id != _selected.Id )); // (1) //LINQ + (2) //lambda
             if (exists)
             {
-                MessageBox.Show("E-mail is al in gebruik door een ander lid.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("E-mail is al in gebruik door een ander lid.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning); // pop window voor duplicate email
                 return;
             }
 
@@ -144,10 +144,10 @@ namespace Biblio_WPF.Window
 
                 await db.SaveChangesAsync(); // (3) //CRUD save
 
-                // reload list and select the saved member
+                // herlaad ledenlijst
                 await LoadMembers();
 
-                // select saved member in grid
+                // geselecteerd item in grid zetten
                 var saved = MembersGrid.Items.Cast<Biblio_Models.Entiteiten.Lid?>().FirstOrDefault(x => x != null && x.Id == _selected.Id); // (2) //lambda + (1) //LINQ
                 if (saved != null)
                 {
@@ -159,14 +159,14 @@ namespace Biblio_WPF.Window
             }
             catch (System.Exception ex) // (4) //trycatch handling
             {
-                MessageBox.Show($"Fout bij opslaan: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Fout bij opslaan: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error); // pop window voor fout bij opslaan 
             }
         }
 
         private async void OnDeleteMember(object sender, RoutedEventArgs e)
         {
             if (_selected == null) { MessageBox.Show("Selecteer een lid."); return; }
-            if (MessageBox.Show($"Verwijder '{_selected.Voornaam} {_selected.AchterNaam}'? (soft delete)", "Bevestigen", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            if (MessageBox.Show($"Verwijder '{_selected.Voornaam} {_selected.AchterNaam}'? (soft delete)", "Bevestigen", MessageBoxButton.YesNo) == MessageBoxResult.Yes) // pop up window en soft delete bevestiging
             {
                 var svc = Biblio_WPF.App.AppHost?.Services;
                 var db = svc?.GetService<Biblio_Models.Data.BiblioDbContext>();

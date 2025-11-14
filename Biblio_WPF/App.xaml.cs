@@ -85,7 +85,6 @@ namespace Biblio_WPF
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            // Schrijf voortgang naar de console zodat 'dotnet run' startup-stappen toont in de terminal
             try
             {
                 // PROBEER: Host starten (kritische initialisatie). Fouten hier stoppen de app.

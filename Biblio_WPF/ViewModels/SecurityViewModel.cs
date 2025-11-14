@@ -18,7 +18,7 @@ namespace Biblio_WPF.ViewModels
         private string? _fullName;
         public string? FullName { get => _fullName; private set { _fullName = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FullName))); } }
 
-        // New: computed property to indicate an authenticated user
+        // New: berkende eigenschappen om een geauthenticeerde gebruiker te controleren en aan te duiden
         public bool IsAuthenticated => !string.IsNullOrWhiteSpace(CurrentEmail);
 
         public void SetUser(string? email, bool isAdmin, bool isStaff, string? fullName = null)
@@ -27,7 +27,7 @@ namespace Biblio_WPF.ViewModels
             IsAdmin = isAdmin;
             IsStaff = isStaff;
             FullName = fullName;
-            // notify other dependent properties
+            // andere afhankelijke eigenschappen op de hoogte stellen
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsAuthenticated)));
         }
 

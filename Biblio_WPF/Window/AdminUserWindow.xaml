@@ -44,19 +44,19 @@ Doel: Beheer UI voor gebruikerslijst, aanmaken van nieuwe gebruiker en toewijzen
                     </ListView.View>
                 </ListView>
 
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">
-                    <TextBox Width="200" Margin="0,0,8,0" Text="{Binding NewEmail, UpdateSourceTrigger=PropertyChanged}"/>
-                    <PasswordBox x:Name="PwdBox" Width="160" Margin="0,0,8,0"/>
+                <!--<StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,8,0,0">-->
+                    <!--<TextBox Width="200" Margin="0,0,8,0" Text="{Binding NewEmail, UpdateSourceTrigger=PropertyChanged}"/>-->
+                    <!--<PasswordBox x:Name="PwdBox" Width="160" Margin="0,0,8,0"/>
                     <TextBox Width="160" Margin="0,0,8,0" Text="{Binding NewFullName, UpdateSourceTrigger=PropertyChanged}"/>
                     <CheckBox Content="Admin" Margin="0,0,8,0" IsChecked="{Binding NewIsAdmin}"/>
                     <CheckBox Content="Medewerker" IsChecked="{Binding NewIsStaff}"/>
                     <Button Content="Aanmaken" Margin="8,0,0,0" Click="OnCreateUser" Style="{StaticResource PrimaryButton}"/>
-                    <!-- Verwijder geselecteerde gebruiker -->
+                    --><!-- Verwijder geselecteerde gebruiker --><!--
                     <Button Content="Verwijder" Margin="8,0,0,0" Command="{Binding DeleteCommand}" Background="{DynamicResource DangerBrush}" Foreground="White"/>
-                    <!-- Blokkeer/Activeer knop, alleen zichtbaar voor admins -->
-                    <Button Content="Blokkeer / Activeer" Margin="8,0,0,0" Click="OnToggleBlock"
- Visibility="{Binding Path=SecurityVm.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}"/>
-                </StackPanel>
+                    --><!-- Blokkeer/Activeer knop, alleen zichtbaar voor admins --><!--
+                    <Button Content="Blokkeer / Activeer" Margin="8,0,0,0" Click="OnToggleBlock"-->
+ <!--Visibility="{Binding Path=SecurityVm.IsAdmin, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVis}}"/>-->
+                <!--</StackPanel>-->
             </Grid>
         </GroupBox>
 

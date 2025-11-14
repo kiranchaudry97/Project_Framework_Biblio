@@ -28,7 +28,7 @@ namespace Biblio_WPF.Window
                 pwd = pwdBox.Password;
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(pwd))
             {
-                MessageBox.Show("E-mail en wachtwoord zijn verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("E-mail en wachtwoord zijn verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning); // pop up window voor validatie
                 return;
             }
 
@@ -41,27 +41,27 @@ namespace Biblio_WPF.Window
             var userManagerApp = um;
             if (userManagerApp == null)
             {
-                MessageBox.Show("User manager niet beschikbaar.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("User manager niet beschikbaar.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error); // pop up window voor validatie en foutafhandeling
                 return;
             }
 
             var user = await userManagerApp.FindByEmailAsync(email);
             if (user == null)
             {
-                MessageBox.Show("Onbekende gebruiker.", "Inloggen", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Onbekende gebruiker.", "Inloggen", MessageBoxButton.OK, MessageBoxImage.Error); // pop up window voor validatie en onbekende gebruikerr en foutafhandeling
                 return;
             }
 
             if (user.IsBlocked)
             {
-                MessageBox.Show("Deze gebruiker is geblokkeerd.", "Inloggen", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Deze gebruiker is geblokkeerd.", "Inloggen", MessageBoxButton.OK, MessageBoxImage.Warning); // pop up window voor validatie en voor geblokkeerde gebruiker en foutafhandeling
                 return;
             }
 
             var pwdValid = await userManagerApp.CheckPasswordAsync(user, pwd);
             if (!pwdValid)
             {
-                MessageBox.Show("Ongeldig wachtwoord.", "Inloggen", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Ongeldig wachtwoord.", "Inloggen", MessageBoxButton.OK, MessageBoxImage.Error); // pop up window voor validatie voor ongeldig wachtwoord en foutafhandeling
                 return;
             }
 
@@ -100,7 +100,7 @@ namespace Biblio_WPF.Window
             PwdBox.Visibility = Visibility.Visible;
         }
 
-        private void OnForgotPassword(object sender, RoutedEventArgs e)
+        private void OnForgotPassword(object sender, RoutedEventArgs e) // try catch voor fouthandeling 
         {
             var services = Biblio_WPF.App.AppHost?.Services;
             ResetWindow? page = null;
@@ -123,7 +123,7 @@ namespace Biblio_WPF.Window
             }
         }
 
-        private void OnRegister(object sender, RoutedEventArgs e)
+        private void OnRegister(object sender, RoutedEventArgs e) // try catch voor dependency injection
         {
             var services = Biblio_WPF.App.AppHost?.Services;
             RegisterWindow? page = null;

@@ -15,7 +15,7 @@ namespace Biblio_Models.Data
     {
         public BiblioDbContext(DbContextOptions<BiblioDbContext> options) : base(options) { }
 
-        public DbSet<Boek> Boeken { get; set; } = null!;
+        public DbSet<Boek> Boeken { get; set; } = null!; 
         public DbSet<Lid> Leden { get; set; } = null!;
         public DbSet<Lenen> Leningens { get; set; } = null!;
         public DbSet<Categorie> Categorien { get; set; } = null!;

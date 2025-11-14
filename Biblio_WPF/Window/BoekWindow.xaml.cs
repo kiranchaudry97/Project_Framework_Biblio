@@ -12,12 +12,11 @@
 //    Doel: fouten loggen/tonen en voorkomen dat onhandige uitzonderingen de UI laten crashen.
 //    Opmerking: momenteel worden SaveChangesAsync-calls direct aangeroepen; overweeg try/catch met gebruikersvriendelijke meldingen en logging.
 
-using System;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Biblio_WPF.Window
 {
@@ -26,12 +25,15 @@ namespace Biblio_WPF.Window
     /// </summary>
     public partial class BoekWindow : Page
     {
+        
+
         private Biblio_Models.Entiteiten.Boek? _selected;
 
         public BoekWindow()
         {
+            DataContext = this; // voor databinding
             InitializeComponent();
-            Loaded += BoekWindow_Loaded;
+            Loaded += BoekWindow_Loaded; 
         }
 
         private async void BoekWindow_Loaded(object sender, RoutedEventArgs e)
@@ -48,10 +50,16 @@ namespace Biblio_WPF.Window
             if (db == null) return;
 
             var cats = await db.Categorien.Where(c => !c.IsDeleted).OrderBy(c => c.Naam).ToListAsync(); // (1) //LINQ + (2) //lambda
+                                                                                                        // dbset neem de caterogieën uit de database, filtert de verwijderde eruit, sorteert ze op naam en zet ze om in een lijst
+                                                                                                        // where isdeleted = false zorgt ervoor dat alleen niet-verwijderde categorieën worden opgehaald met linq filter met lambda expressie
+                                                                                                        //orderby sorteert de categorieën op naam alfabetisch
+                                                                                                        // tolistasync voert de query uit op de databease en geeft een lijst categorie terug
             CategoryFilter.ItemsSource = cats;
             CategoryFilter.DisplayMemberPath = "Naam";
             CategoryBox.ItemsSource = cats;
             CategoryBox.DisplayMemberPath = "Naam";
+       
+
         }
 
         private async System.Threading.Tasks.Task LoadBooks()
@@ -62,6 +70,11 @@ namespace Biblio_WPF.Window
             if (db == null) return;
 
             var q = db.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).AsQueryable(); // (1) //LINQ + (2) //lambda + Include voor eager-loading
+                                                                                                // dbset neemt de boeken uit de database,
+                                                                                                // include zorgt ervoor dat de gerelateerde categorie gegevens ook worden opgehaald
+                                                                                                // where filtert de verwijderde boeken eruit
+                                                                                                // conditie isdeleted = false zorgt ervoor dat alleen niet-verwijderde boeken worden opgehaald met linq filter met lambda expressie
+                                                                                                // orderby sorteert de boeken op titel alfabetisch
 
             var search = SearchBox.Text?.Trim();
             if (!string.IsNullOrWhiteSpace(search))
@@ -134,15 +147,15 @@ namespace Biblio_WPF.Window
             try
             {
                 await db.SaveChangesAsync(); // (3) //CRUD save
-                await LoadBooks();
+                await LoadBooks(); 
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Fout bij opslaan boek: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Fout bij opslaan boek: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error); // met try catch en fouthandeling en melding 
             }
         }
 
-        private async void OnDeleteBook(object sender, RoutedEventArgs e)
+        private async void OnDeleteBook(object sender, RoutedEventArgs e) 
         {
             if (_selected == null) { MessageBox.Show("Selecteer een boek."); return; }
             if (MessageBox.Show($"Verwijder '{_selected.Titel}'? (soft delete)", "Bevestigen", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -150,16 +163,16 @@ namespace Biblio_WPF.Window
                 var svc = Biblio_WPF.App.AppHost?.Services;
                 var db = svc?.GetService<Biblio_Models.Data.BiblioDbContext>();
                 if (db == null) return;
-                _selected.IsDeleted = true;
+                _selected.IsDeleted = true; // soft-delete en try/catch voor foutafhandeling
                 db.Boeken.Update(_selected); // (3) //CRUD soft-delete update
-                try
-                {
+                try // try catch voor foutafhandeling
+                {   
                     await db.SaveChangesAsync(); // (3) //CRUD save
-                    await LoadBooks();
+                    await LoadBooks(); // refresh 
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Fout bij verwijderen boek: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Fout bij verwijderen boek: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error); // met try catch en fouthandeling en melding
                 }
             }
         }
@@ -167,7 +180,7 @@ namespace Biblio_WPF.Window
         private void OnBack(object sender, RoutedEventArgs e)
         {
             var wnd = System.Windows.Window.GetWindow(this);
-            wnd?.Close();
+            wnd?.Close(); //
         }
     }
 }

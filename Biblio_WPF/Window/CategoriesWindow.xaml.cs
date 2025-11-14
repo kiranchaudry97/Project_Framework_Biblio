@@ -59,10 +59,10 @@ namespace Biblio_WPF.Window
             }
 
             var cat = new Biblio_Models.Entiteiten.Categorie { Naam = name };
-            db.Categorien.Add(cat);
-            await db.SaveChangesAsync();
-            CategoryNameBox.Text = string.Empty;
-            await LoadCategories();
+            db.Categorien.Add(cat); // CRUD toevoegen
+            await db.SaveChangesAsync(); // CRUD opslaan
+            CategoryNameBox.Text = string.Empty; // leegmaken
+            await LoadCategories(); // herladen
         }
 
         private async void OnDeleteCategory(object sender, RoutedEventArgs e)
@@ -74,10 +74,12 @@ namespace Biblio_WPF.Window
                 var svc = Biblio_WPF.App.AppHost?.Services;
                 var db = svc?.GetService<Biblio_Models.Data.BiblioDbContext>();
                 if (db == null) return;
-                sel.IsDeleted = true;
-                db.Categorien.Update(sel);
-                await db.SaveChangesAsync();
-                await LoadCategories();
+                sel.IsDeleted = true; // 
+                db.Categorien.Update(sel); // CRUD soft delete
+                {
+                    await db.SaveChangesAsync(); // CRUD opslaan
+                    await LoadCategories(); // herladen
+                }
             }
         }
     }

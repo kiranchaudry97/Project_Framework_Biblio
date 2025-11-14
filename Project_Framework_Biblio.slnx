@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="Biblio_App/Biblio_App.csproj" Id="eafab969-51ae-451c-9bd5-f6c2a31ce8de" />
   <Project Path="Biblio_Models/Biblio_Models.csproj" />
+  <Project Path="Biblio_Web/Biblio_Web.csproj" Id="e8db7990-a955-4825-bef1-defb360e53e4" />
   <Project Path="Biblio_WPF/Biblio_WPF.csproj" />
 </Solution>

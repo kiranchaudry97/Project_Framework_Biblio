@@ -95,6 +95,7 @@ namespace Biblio_Models.Seed
 
             if (!await db.Boeken.AnyAsync()) // (1) //LINQ
             {
+                //dummy objecten ophalen 
                 var roman = await db.Categorien.FirstAsync(c => c.Naam == "Roman"); // (1) //LINQ + (2) //lambda predicate
                 var jeugd = await db.Categorien.FirstAsync(c => c.Naam == "Jeugd"); // (1) //LINQ + (2) //lambda
                 var thriller = await db.Categorien.FirstAsync(c => c.Naam == "Thriller");
@@ -124,6 +125,7 @@ namespace Biblio_Models.Seed
             {
                 // Sample members (development/test data). Used in UitleningWindow and LidWindow.
                 db.Leden.AddRange(
+
                     new Lid { Voornaam = "Jan", AchterNaam = "Peeters", Email = "jan.peeters@example.com" },
                     new Lid { Voornaam = "Sara", AchterNaam = "De Smet", Email = "sara.desmet@example.com" }
                 );
@@ -141,6 +143,7 @@ namespace Biblio_Models.Seed
                 {
                     blocked = new AppUser
                     {
+
                         UserName = blockedEmail,
                         Email = blockedEmail,
                         FullName = "Geblokkeerde Gebruiker",
