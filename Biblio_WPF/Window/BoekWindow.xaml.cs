@@ -17,11 +17,14 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Linq;
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.Windows.Media;
 
 namespace Biblio_WPF.Window
 {
     /// <summary>
-    /// Interaction logic for BoekWindow.xaml
+    /// Interactie logica voor BoekWindow.xaml
     /// </summary>
     public partial class BoekWindow : Page
     {
@@ -100,6 +103,7 @@ namespace Biblio_WPF.Window
         private void BooksGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _selected = BooksGrid.SelectedItem as Biblio_Models.Entiteiten.Boek;
+            Biblio_WPF.Helpers.ValidationHelper.ResetValidationVisuals(TitelBox, AuteurBox, IsbnBox, CategoryBox);
             if (_selected == null)
             {
                 TitelBox.Text = string.Empty;
@@ -122,6 +126,11 @@ namespace Biblio_WPF.Window
             AuteurBox.Text = string.Empty;
             IsbnBox.Text = string.Empty;
             CategoryBox.SelectedItem = null;
+
+            Biblio_WPF.Helpers.ValidationHelper.ResetValidationVisuals(TitelBox, AuteurBox, IsbnBox, CategoryBox);
+
+            // focus op eerste invoerveld
+            TitelBox.Focus();
         }
 
         private async void OnSaveBook(object sender, RoutedEventArgs e)
@@ -130,7 +139,7 @@ namespace Biblio_WPF.Window
             var db = svc?.GetService<Biblio_Models.Data.BiblioDbContext>();
             if (db == null) return;
 
-            // ensure we have an instance
+            // zorg dat we een instantie hebben
             if (_selected == null) _selected = new Biblio_Models.Entiteiten.Boek();
 
             _selected.Titel = TitelBox.Text?.Trim() ?? string.Empty;
@@ -138,6 +147,41 @@ namespace Biblio_WPF.Window
             _selected.Isbn = IsbnBox.Text?.Trim() ?? string.Empty;
             if (CategoryBox.SelectedItem is Biblio_Models.Entiteiten.Categorie cat)
                 _selected.CategorieID = cat.Id;
+
+            // validatie + reset visuele status
+            Biblio_WPF.Helpers.ValidationHelper.ResetValidationVisuals(TitelBox, AuteurBox, IsbnBox, CategoryBox);
+
+            if (string.IsNullOrWhiteSpace(_selected.Titel))
+            {
+                MessageBox.Show("Titel is verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Biblio_WPF.Helpers.ValidationHelper.MarkInvalid(TitelBox);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_selected.Auteur))
+            {
+                MessageBox.Show("Auteur is verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Biblio_WPF.Helpers.ValidationHelper.MarkInvalid(AuteurBox);
+                return;
+            }
+
+            // optioneel: ISBN formaat controleren
+            var isbnAttr = new RegularExpressionAttribute("^(?:97[89])?\\d{9}(\\d|X)$");
+            if (!string.IsNullOrWhiteSpace(_selected.Isbn) && !isbnAttr.IsValid(_selected.Isbn))
+            {
+                MessageBox.Show("Ongeldig ISBN.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Biblio_WPF.Helpers.ValidationHelper.MarkInvalid(IsbnBox);
+                return;
+            }
+
+            // controleer op unieke ISBN (huidige record uitsluiten)
+            var existsIsbn = await db.Boeken.AnyAsync(b => !b.IsDeleted && b.Isbn == _selected.Isbn && (_selected.Id == 0 || b.Id != _selected.Id));
+            if (!string.IsNullOrWhiteSpace(_selected.Isbn) && existsIsbn)
+            {
+                MessageBox.Show("ISBN bestaat al in de database.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Biblio_WPF.Helpers.ValidationHelper.MarkInvalid(IsbnBox);
+                return;
+            }
 
             if (_selected.Id == 0)
                 db.Boeken.Add(_selected); // (3) //CRUD create
@@ -148,6 +192,8 @@ namespace Biblio_WPF.Window
             {
                 await db.SaveChangesAsync(); // (3) //CRUD save
                 await LoadBooks(); 
+
+                Biblio_WPF.Helpers.ValidationHelper.ResetValidationVisuals(TitelBox, AuteurBox, IsbnBox, CategoryBox);
             }
             catch (Exception ex)
             {
@@ -168,7 +214,7 @@ namespace Biblio_WPF.Window
                 try // try catch voor foutafhandeling
                 {   
                     await db.SaveChangesAsync(); // (3) //CRUD save
-                    await LoadBooks(); // refresh 
+                    await LoadBooks(); // ververs lijst
                 }
                 catch (Exception ex)
                 {
@@ -180,7 +226,7 @@ namespace Biblio_WPF.Window
         private void OnBack(object sender, RoutedEventArgs e)
         {
             var wnd = System.Windows.Window.GetWindow(this);
-            wnd?.Close(); //
+            wnd?.Close(); // sluit het venster
         }
     }
 }
