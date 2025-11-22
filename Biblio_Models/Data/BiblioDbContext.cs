@@ -53,7 +53,6 @@ namespace Biblio_Models.Data
                 e.Property(x => x.Voornaam).HasColumnName("Voornaam");
                 e.Property(x => x.AchterNaam).HasColumnName("Naam");
                 e.Property(x => x.Telefoon).HasColumnName("Tel");
-                e.Property(x => x.Adres).HasColumnName("Adres");
             });
 
             b.Entity<Lenen>(e =>
