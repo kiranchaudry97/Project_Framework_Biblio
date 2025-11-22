@@ -13,11 +13,12 @@ using System.Windows.Controls;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.ComponentModel.DataAnnotations;
+using System.Windows.Media;
 
 namespace Biblio_WPF.Window
 {
     /// <summary>
-    /// Interaction logic for LidWindow.xaml
+    /// Interactie logica voor LidWindow.xaml
     /// </summary>
     public partial class LidWindow : Page
     {
@@ -44,7 +45,7 @@ namespace Biblio_WPF.Window
             var q = db.Leden.Where(l => !l.IsDeleted).AsQueryable(); // (1) //LINQ
             var search = MemberSearchBox.Text?.Trim();
             if (!string.IsNullOrWhiteSpace(search))
-                q = q.Where(l => l.Voornaam.Contains(search) || l.AchterNaam.Contains(search) || l.Email.Contains(search)); // (2) //lambda expression
+                q = q.Where(l => l.Voornaam.Contains(search) || l.AchterNaam.Contains(search) || l.Email.Contains(search)); // (2) //lambda expressie
 
             var list = await q.OrderBy(l => l.Voornaam).ToListAsync(); // (1) //LINQ + (2) //lambda + (3) //CRUD read
             MembersGrid.ItemsSource = list;
@@ -54,6 +55,7 @@ namespace Biblio_WPF.Window
         private void MembersGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _selected = MembersGrid.SelectedItem as Biblio_Models.Entiteiten.Lid;
+            Biblio_WPF.Helpers.ValidationHelper.ResetValidationVisuals(VoornaamBox, AchternaamBox, EmailBox, TelefoonBox);
             if (_selected == null)
             {
                 VoornaamBox.Text = string.Empty;
@@ -82,7 +84,9 @@ namespace Biblio_WPF.Window
             EmailBox.Text = string.Empty;
             TelefoonBox.Text = string.Empty;
 
-            // focus first input
+            Biblio_WPF.Helpers.ValidationHelper.ResetValidationVisuals(VoornaamBox, AchternaamBox, EmailBox, TelefoonBox);
+
+            // focus op eerste invoerveld
             VoornaamBox.Focus();
         }
 
@@ -100,36 +104,44 @@ namespace Biblio_WPF.Window
             var email = EmailBox.Text?.Trim() ?? string.Empty;
             var telefoon = TelefoonBox.Text?.Trim() ?? string.Empty;
 
+            // reset visuals
+            Biblio_WPF.Helpers.ValidationHelper.ResetValidationVisuals(VoornaamBox, AchternaamBox, EmailBox, TelefoonBox);
+
             // Validatie: vereiste namen
             if (string.IsNullOrWhiteSpace(voornaam) || string.IsNullOrWhiteSpace(achternaam))
             {
-                MessageBox.Show("Voornaam en achternaam zijn verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning); // pop window voor lege namen
+                MessageBox.Show("Voornaam en achternaam zijn verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (string.IsNullOrWhiteSpace(voornaam)) Biblio_WPF.Helpers.ValidationHelper.MarkInvalid(VoornaamBox);
+                else Biblio_WPF.Helpers.ValidationHelper.MarkInvalid(AchternaamBox);
                 return;
             }
 
             // Validatie: email vereiste en formaat
             if (string.IsNullOrWhiteSpace(email))
-            { 
-                MessageBox.Show("E-mail is verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning); // pop window voor lege email
+            {
+                MessageBox.Show("E-mail is verplicht.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Biblio_WPF.Helpers.ValidationHelper.MarkInvalid(EmailBox);
                 return;
             }
 
             var emailAttr = new EmailAddressAttribute();
             if (!emailAttr.IsValid(email))
             {
-                MessageBox.Show("Ongeldig e-mailadres.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning); // pop window voor ongeldig email
+                MessageBox.Show("Ongeldig e-mailadres.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Biblio_WPF.Helpers.ValidationHelper.MarkInvalid(EmailBox);
                 return;
             }
 
-            // Duplicatie email controle (huidige record uitsluiten bij het bewerken)
-            var exists = await db.Leden.AnyAsync(l => !l.IsDeleted && l.Email == email && ( _selected.Id == 0 || l.Id != _selected.Id )); // (1) //LINQ + (2) //lambda
+            // Duplicatie e-mailcontrole (huidig record uitsluiten bij bewerken)
+            var exists = await db.Leden.AnyAsync(l => !l.IsDeleted && l.Email == email && (_selected.Id == 0 || l.Id != _selected.Id)); // (1) //LINQ + (2) //lambda
             if (exists)
             {
-                MessageBox.Show("E-mail is al in gebruik door een ander lid.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning); // pop window voor duplicate email
+                MessageBox.Show("E-mail is al in gebruik door een ander lid.", "Validatie", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Biblio_WPF.Helpers.ValidationHelper.MarkInvalid(EmailBox);
                 return;
             }
 
-            // Assign validated values
+            // wijs gevalideerde waarden toe
             _selected.Voornaam = voornaam;
             _selected.AchterNaam = achternaam;
             _selected.Email = email;
@@ -155,18 +167,20 @@ namespace Biblio_WPF.Window
                     MembersGrid.ScrollIntoView(saved);
                 }
 
+                Biblio_WPF.Helpers.ValidationHelper.ResetValidationVisuals(VoornaamBox, AchternaamBox, EmailBox, TelefoonBox);
+
                 MessageBox.Show("Lid opgeslagen.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (System.Exception ex) // (4) //trycatch handling
             {
-                MessageBox.Show($"Fout bij opslaan: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error); // pop window voor fout bij opslaan 
+                MessageBox.Show($"Fout bij opslaan: {ex.Message}", "Fout", MessageBoxButton.OK, MessageBoxImage.Error); // foutmelding bij opslaan
             }
         }
 
         private async void OnDeleteMember(object sender, RoutedEventArgs e)
         {
             if (_selected == null) { MessageBox.Show("Selecteer een lid."); return; }
-            if (MessageBox.Show($"Verwijder '{_selected.Voornaam} {_selected.AchterNaam}'? (soft delete)", "Bevestigen", MessageBoxButton.YesNo) == MessageBoxResult.Yes) // pop up window en soft delete bevestiging
+            if (MessageBox.Show($"Verwijder '{_selected.Voornaam} {_selected.AchterNaam}'? (soft delete)", "Bevestigen", MessageBoxButton.YesNo) == MessageBoxResult.Yes) // bevestiging voor soft delete
             {
                 var svc = Biblio_WPF.App.AppHost?.Services;
                 var db = svc?.GetService<Biblio_Models.Data.BiblioDbContext>();
@@ -176,7 +190,7 @@ namespace Biblio_WPF.Window
                 await db.SaveChangesAsync(); // (3) //CRUD save
                 _selected = null;
 
-                // clear form after delete
+                // formulier leegmaken na verwijderen
                 VoornaamBox.Text = string.Empty;
                 AchternaamBox.Text = string.Empty;
                 EmailBox.Text = string.Empty;
