@@ -15,24 +15,25 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Biblio_Models.Resources;
 
 namespace Biblio_Models.Entiteiten
 {
     public class Lid : BaseEntiteit
     {
-        [Required, StringLength(100)]
+        [Required(ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "Required"), StringLength(100, ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "StringLength")]
         public string Voornaam { get; set; } = string.Empty;
 
-        [Required, StringLength(100)]
+        [Required(ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "Required"), StringLength(100, ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "StringLength")]
         public string AchterNaam { get; set; } = string.Empty;
 
-        [Required, EmailAddress, StringLength(256)]
-        public string Email { get; set; } = string.Empty;
-       
-        [Phone]
+        [EmailAddress(ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "EmailAddress")]
+        public string? Email { get; set; }
+
+        [Phone(ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "Phone")]
         public string? Telefoon { get; set; }
 
-        [StringLength(300)]
+        [StringLength(300, ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "StringLength")]
         public string? Adres { get; set; }
 
         public ICollection<Lenen> Leningens { get; set; } = new List<Lenen>();
