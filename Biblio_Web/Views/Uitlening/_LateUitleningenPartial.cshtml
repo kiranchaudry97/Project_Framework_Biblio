@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Biblio_Web.ApiModels.UitleningDto>
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+
+<div id="late-uitleningen-container">
+    <table class="table table-sm table-striped">
+        <thead>
+            <tr>
+                <th>@Localizer["ColumnTitle"]</th>
+                <th>@Localizer["Member"]</th>
+                <th>@Localizer["StartDate"]</th>
+                <th>@Localizer["DueDate"]</th>
+                <th>@Localizer["DaysLate"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr><td colspan="5" class="text-muted">@Localizer["NoLateLoans"]</td></tr>
+            }
+            else
+            {
+                foreach (var l in Model)
+                {
+                    var daysLate = (System.DateTime.Today - l.DueDate.Date).Days;
+                    <tr>
+                        <td>@(l.BoekTitel ?? "")</td>
+                        <td>@(l.LidNaam ?? "")</td>
+                        <td>@l.StartDate.ToString("d")</td>
+                        <td>@l.DueDate.ToString("d")</td>
+                        <td class="text-danger">@Math.Max(0, daysLate)</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

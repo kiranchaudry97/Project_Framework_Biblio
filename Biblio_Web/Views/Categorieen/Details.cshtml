@@ -1,0 +1,15 @@
+@model Biblio_Models.Entiteiten.Categorie
+@{
+    ViewData["Title"] = "Categorie details";
+}
+
+<h1>Categorie details</h1>
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Naam</dt>
+            <dd class="col-sm-9">@Model.Naam</dd>
+        </dl>
+        <a asp-action="Index" class="btn btn-secondary">Terug</a>
+    </div>
+</div>

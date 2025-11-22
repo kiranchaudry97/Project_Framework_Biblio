@@ -1,14 +1,17 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Shell
     x:Class="Biblio_App.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:Biblio_App.Pages"
     xmlns:local="clr-namespace:Biblio_App"
     Title="Biblio_App">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
-
+    <TabBar>
+        <ShellContent Title="Home" ContentTemplate="{DataTemplate local:MainPage}" />
+        <ShellContent Title="Boeken" ContentTemplate="{DataTemplate pages:BoekenPagina}" />
+        <ShellContent Title="Leden" ContentTemplate="{DataTemplate pages:LedenPagina}" />
+        <ShellContent Title="Uitleningen" ContentTemplate="{DataTemplate pages:UitleningenPagina}" />
+        <ShellContent Title="Categorieën" ContentTemplate="{DataTemplate pages:CategorieenPagina}" />
+    </TabBar>
 </Shell>

@@ -1,0 +1,33 @@
+@model Biblio_Models.Entiteiten.RegisterViewModel
+@{
+    ViewData["Title"] = "Registreren";
+}
+
+<h1>Registreren</h1>
+<form asp-action="Register" method="post">
+    <div class="mb-3">
+        <label class="form-label">E-mail</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Volledige naam</label>
+        <input asp-for="FullName" class="form-control" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Wachtwoord</label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Bevestig wachtwoord</label>
+        <input asp-for="ConfirmPassword" type="password" class="form-control" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+    <button class="btn btn-primary">Registreren</button>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

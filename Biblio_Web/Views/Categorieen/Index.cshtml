@@ -1,0 +1,30 @@
+@model IEnumerable<Biblio_Models.Entiteiten.Categorie>
+@{
+    ViewData["Title"] = "Categorieën";
+}
+
+<h1>Categorieën</h1>
+@if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
+{
+    <a class="btn btn-success mb-2" asp-action="Create">Nieuwe categorie</a>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr><th>Naam</th><th></th></tr>
+    </thead>
+    <tbody>
+@foreach(var c in Model)
+{
+    <tr>
+        <td>@c.Naam</td>
+        <td>
+            @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
+            {
+                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@c.Id">Verwijderen</a>
+            }
+        </td>
+    </tr>
+}
+    </tbody>
+</table>

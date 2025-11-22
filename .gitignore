@@ -362,3 +362,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /README.md
+
+# Ignore generated Razor temp files
+*.tmp.cshtml
+*.tmp.cs

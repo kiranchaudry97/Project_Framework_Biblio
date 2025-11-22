@@ -6,3 +6,20 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<div class="text-center mt-4">
+    <h1>Welkom bij Biblio</h1>
+
+    @if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <p class="mb-2">Hello, @User.Identity.Name!</p>
+        <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline-block">
+            <button type="submit" class="btn btn-link p-0">Logout</button>
+        </form>
+    }
+    else
+    {
+        <p>U bent niet ingelogd.</p>
+        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">Login</a>
+    }
+</div>

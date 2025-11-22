@@ -1,0 +1,51 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:Biblio_App.ViewModels"
+             xmlns:models="clr-namespace:Biblio_Models.Entiteiten;assembly=Biblio_Models"
+             x:Class="Biblio_App.Pages.BoekenPagina"
+             x:DataType="viewmodel:BoekenViewModel"
+             Title="Boeken">
+
+    <VerticalStackLayout Padding="12">
+        <Label Text="Boeken" FontSize="20" FontAttributes="Bold" />
+        
+        <SearchBar Placeholder="Zoek boeken..." Text="{Binding SearchText}" />
+
+        <CollectionView ItemsSource="{Binding Boeken}" SelectionMode="Single" SelectedItem="{Binding SelectedBoek, Mode=TwoWay}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Boek">
+                    <Frame Padding="8" Margin="4">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding Titel}" FontAttributes="Bold" />
+                            <Label Text="{Binding Auteur}" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Frame Padding="8" Margin="8" HasShadow="False" BorderColor="#E0E0E0">
+            <VerticalStackLayout>
+                <!-- Bind to VM properties that the ViewModel exposes -->
+                <Entry x:Name="TitelEntry"
+                       Placeholder="Titel"
+                       Text="{Binding Titel, Mode=TwoWay}" />
+
+                <Entry x:Name="AuteurEntry"
+                       Placeholder="Auteur"
+                       Text="{Binding Auteur, Mode=TwoWay}" />
+
+                <Entry x:Name="IsbnEntry"
+                       Placeholder="ISBN"
+                       Text="{Binding Isbn, Mode=TwoWay}" />
+
+                <HorizontalStackLayout Spacing="8" HorizontalOptions="End">
+                    <!-- Use the actual command names from the VM -->
+                    <Button Text="Opslaan" Command="{Binding OpslaanCommand}" />
+                    <Button Text="Verwijderen" Command="{Binding VerwijderCommand}" BackgroundColor="Crimson" TextColor="White" />
+                    <Button Text="Nieuw" Command="{Binding NieuwCommand}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Frame>
+    </VerticalStackLayout>
+</ContentPage>

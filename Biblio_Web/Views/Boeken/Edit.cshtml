@@ -1,0 +1,38 @@
+@model Biblio_Models.Entiteiten.Boek
+@{
+    ViewData["Title"] = "Bewerk boek";
+}
+
+<h1>Bewerk boek</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label class="form-label">Titel</label>
+        <input asp-for="Titel" class="form-control" />
+        <span asp-validation-for="Titel" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Auteur</label>
+        <input asp-for="Auteur" class="form-control" />
+        <span asp-validation-for="Auteur" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">ISBN</label>
+        <input asp-for="Isbn" class="form-control" />
+        <span asp-validation-for="Isbn" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Categorie</label>
+        <select asp-for="CategorieID" class="form-select" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Naam"))">
+            <option value="">-- Kies categorie --</option>
+        </select>
+    </div>
+
+    <button class="btn btn-primary">Opslaan</button>
+    <a asp-action="Index" class="btn btn-secondary">Annuleer</a>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

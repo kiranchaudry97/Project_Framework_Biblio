@@ -1,0 +1,22 @@
+@model Biblio_Models.Entiteiten.Categorie
+@{
+    ViewData["Title"] = "Bewerk categorie";
+}
+
+<h1>Bewerk categorie</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label class="form-label">Naam</label>
+        <input asp-for="Naam" class="form-control" />
+        <span asp-validation-for="Naam" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary">Opslaan</button>
+    <a asp-action="Index" class="btn btn-secondary">Annuleer</a>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,27 @@
+﻿@model Biblio_Models.Entiteiten.Lenen
+@{
+    ViewData["Title"] = "Uitlening details";
+}
+
+<h1>Uitlening details</h1>
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Boek</dt>
+            <dd class="col-sm-9">@Model.Boek?.Titel</dd>
+
+            <dt class="col-sm-3">Lid</dt>
+            <dd class="col-sm-9">@Model.Lid?.Voornaam @Model.Lid?.AchterNaam</dd>
+
+            <dt class="col-sm-3">Startdatum</dt>
+            <dd class="col-sm-9">@Model.StartDate:d</dd>
+
+            <dt class="col-sm-3">Einddatum</dt>
+            <dd class="col-sm-9">@Model.DueDate:d</dd>
+
+            <dt class="col-sm-3">Ingeleverd op</dt>
+            <dd class="col-sm-9">@(Model.ReturnedAt?.ToString("g") ?? "Nog niet")</dd>
+        </dl>
+        <a asp-action="Index" class="btn btn-secondary">Terug</a>
+    </div>
+</div>

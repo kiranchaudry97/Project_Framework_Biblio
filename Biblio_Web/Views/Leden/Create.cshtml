@@ -1,0 +1,32 @@
+@model Biblio_Models.Entiteiten.Lid
+@{
+    ViewData["Title"] = "Nieuw lid";
+}
+
+<h1>Nieuw lid</h1>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label class="form-label">Voornaam</label>
+        <input asp-for="Voornaam" class="form-control" />
+        <span asp-validation-for="Voornaam" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Achternaam</label>
+        <input asp-for="AchterNaam" class="form-control" />
+        <span asp-validation-for="AchterNaam" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary">Opslaan</button>
+    <a asp-action="Index" class="btn btn-secondary">Annuleer</a>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

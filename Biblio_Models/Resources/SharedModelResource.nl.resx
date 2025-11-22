@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Required" xml:space="preserve"><value>Het veld {0} is verplicht.</value></data>
+  <data name="StringLength" xml:space="preserve"><value>{0} moet tussen {2} en {1} tekens bevatten.</value></data>
+  <data name="IsbnInvalid" xml:space="preserve"><value>Ongeldige ISBN.</value></data>
+</root>

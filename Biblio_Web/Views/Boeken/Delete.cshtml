@@ -1,0 +1,18 @@
+@model Biblio_Models.Entiteiten.Boek
+@{
+    ViewData["Title"] = "Verwijder boek";
+}
+
+<h1>Verwijder boek</h1>
+
+<div class="alert alert-warning">Weet je zeker dat je dit boek wilt verwijderen?</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label class="form-label">Titel</label>
+        <div>@Model.Titel</div>
+    </div>
+    <button class="btn btn-danger">Verwijder</button>
+    <a asp-action="Index" class="btn btn-secondary">Annuleer</a>
+</form>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Required" xml:space="preserve"><value>The {0} field is required.</value></data>
+  <data name="StringLength" xml:space="preserve"><value>{0} must be between {2} and {1} characters long.</value></data>
+  <data name="IsbnInvalid" xml:space="preserve"><value>Invalid ISBN.</value></data>
+</root>

@@ -1,0 +1,85 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:Biblio_App.ViewModels"
+             xmlns:models="clr-namespace:Biblio_Models.Entiteiten;assembly=Biblio_Models"
+             x:Class="Biblio_App.Pages.LedenPagina"
+             x:DataType="viewmodel:LedenViewModel"
+             Title="Leden">
+
+    <Grid RowDefinitions="Auto,*,Auto,Auto" ColumnDefinitions="*,*" Padding="12">
+        <Label Grid.ColumnSpan="2" Text="Leden" FontSize="20" FontAttributes="Bold" />
+
+        <CollectionView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Leden}" SelectionMode="Single" SelectedItem="{Binding SelectedLid, Mode=TwoWay}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Lid">
+                    <Frame Padding="8" Margin="4">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding Voornaam}" FontAttributes="Bold" />
+                            <Label Text="{Binding Email}" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="8">
+            <Frame HasShadow="False" Padding="2" BorderColor="Transparent" CornerRadius="6">
+                <Frame.Triggers>
+                    <DataTrigger TargetType="Frame" Binding="{Binding VoornaamError, Converter={StaticResource StringNotEmptyToBoolConverter}}" Value="True">
+                        <Setter Property="BorderColor" Value="Red" />
+                    </DataTrigger>
+                </Frame.Triggers>
+                <Entry x:Name="VoornaamEntry" Text="{Binding Voornaam, Mode=TwoWay}" Placeholder="Voornaam" />
+            </Frame>
+            <Label TextColor="Red" FontSize="12" Text="{Binding VoornaamError}" IsVisible="{Binding VoornaamError, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
+
+            <Frame HasShadow="False" Padding="2" BorderColor="Transparent" CornerRadius="6">
+                <Frame.Triggers>
+                    <DataTrigger TargetType="Frame" Binding="{Binding AchternaamError, Converter={StaticResource StringNotEmptyToBoolConverter}}" Value="True">
+                        <Setter Property="BorderColor" Value="Red" />
+                    </DataTrigger>
+                </Frame.Triggers>
+                <Entry x:Name="AchternaamEntry" Text="{Binding Achternaam, Mode=TwoWay}" Placeholder="Achternaam" />
+            </Frame>
+            <Label TextColor="Red" FontSize="12" Text="{Binding AchternaamError}" IsVisible="{Binding AchternaamError, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
+
+            <Frame HasShadow="False" Padding="2" BorderColor="Transparent" CornerRadius="6">
+                <Frame.Triggers>
+                    <DataTrigger TargetType="Frame" Binding="{Binding EmailError, Converter={StaticResource StringNotEmptyToBoolConverter}}" Value="True">
+                        <Setter Property="BorderColor" Value="Red" />
+                    </DataTrigger>
+                </Frame.Triggers>
+                <Entry x:Name="EmailEntry" Text="{Binding Email, Mode=TwoWay}" Placeholder="Email" Keyboard="Email" />
+            </Frame>
+            <Label TextColor="Red" FontSize="12" Text="{Binding EmailError}" IsVisible="{Binding EmailError, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
+
+            <Frame HasShadow="False" Padding="2" BorderColor="Transparent" CornerRadius="6">
+                <Frame.Triggers>
+                    <DataTrigger TargetType="Frame" Binding="{Binding TelefoonError, Converter={StaticResource StringNotEmptyToBoolConverter}}" Value="True">
+                        <Setter Property="BorderColor" Value="Red" />
+                    </DataTrigger>
+                </Frame.Triggers>
+                <Entry x:Name="TelefoonEntry" Text="{Binding Telefoon, Mode=TwoWay}" Placeholder="Telefoon" Keyboard="Telephone" />
+            </Frame>
+            <Label TextColor="Red" FontSize="12" Text="{Binding TelefoonError}" IsVisible="{Binding TelefoonError, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
+
+            <Frame HasShadow="False" Padding="2" BorderColor="Transparent" CornerRadius="6">
+                <Frame.Triggers>
+                    <DataTrigger TargetType="Frame" Binding="{Binding AdresError, Converter={StaticResource StringNotEmptyToBoolConverter}}" Value="True">
+                        <Setter Property="BorderColor" Value="Red" />
+                    </DataTrigger>
+                </Frame.Triggers>
+                <Entry x:Name="AdresEntry" Text="{Binding Adres, Mode=TwoWay}" Placeholder="Adres" />
+            </Frame>
+            <Label TextColor="Red" FontSize="12" Text="{Binding AdresError}" IsVisible="{Binding AdresError, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
+        </VerticalStackLayout>
+
+        <Label Grid.Row="2" Grid.ColumnSpan="2" TextColor="Red" IsVisible="{Binding HasValidationErrors}" Text="{Binding ValidationMessage}" />
+
+        <HorizontalStackLayout Grid.Row="3" Grid.ColumnSpan="2" Spacing="12" HorizontalOptions="Center">
+            <Button Text="Nieuw" Command="{Binding NieuwCommand}" />
+            <Button Text="Opslaan" Command="{Binding OpslaanCommand}" />
+            <Button Text="Verwijder" Command="{Binding VerwijderCommand}" />
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>

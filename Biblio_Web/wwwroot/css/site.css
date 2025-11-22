@@ -29,3 +29,107 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* small visual improvements for Biblio layout */
+body {
+    background-color: #fafafa;
+    color: #222;
+}
+
+.navbar-brand {
+    letter-spacing: -0.5px;
+}
+
+.footer {
+    background-color: #fff;
+}
+
+.footer a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.navbar .nav-link {
+    color: #333;
+}
+
+.navbar .nav-link:hover {
+    color: #0d6efd;
+}
+
+.badge {
+    font-weight: 600;
+}
+
+/* login form styling helper (used on Login.cshtml) */
+.form-centered {
+    max-width: 520px;
+    margin: 2.5rem auto;
+    background: #fff;
+    padding: 1.6rem;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(18, 38, 63, 0.06);
+}
+
+/* Custom navbar tweaks */
+
+/* Light blue hover for navbar links */
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-item:hover {
+  background-color: #e6f7ff; /* light blue */
+  border-radius: 6px;
+}
+
+/* Ensure spacing for hovered items */
+.navbar-nav .nav-link {
+  padding: .35rem 0.75rem;
+}
+
+/* Center navbar items when collapsed (mobile) */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    text-align: center;
+  }
+  .navbar-nav {
+    width: 100%;
+  }
+  .navbar-nav .nav-item {
+    width: 100%;
+  }
+  .navbar-nav .nav-link {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* Sidebar */
+.sidebar {
+  min-height: 100vh;
+  border-right: 1px solid #eaeaea;
+}
+.sidebar .btn {
+  border-radius: 0.25rem;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background-color: #121212;
+  color: #e6e6e6;
+}
+body.dark-mode .navbar,
+body.dark-mode .footer,
+body.dark-mode .sidebar {
+  background-color: #1e1e1e !important;
+  color: #e6e6e6;
+}
+body.dark-mode .nav-link,
+body.dark-mode .navbar-brand {
+  color: #e6e6e6 !important;
+}
+body.dark-mode .btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
