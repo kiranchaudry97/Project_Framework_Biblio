@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System;
+using System.Windows.Media;
 
 namespace Biblio_WPF.Window
 {
@@ -123,6 +124,8 @@ namespace Biblio_WPF.Window
 
         private void OnNewLoan(object sender, RoutedEventArgs e)
         {
+            Biblio_WPF.Helpers.ValidationHelper.ResetValidationVisuals(LidFilter, BoekFilter, FromDatePicker, ToDatePicker);
+
             // Direct nieuwe uitlening aanmaken van geselecteerd Lid en Boek met standaarddatums
             var selectedLid = LidFilter.SelectedItem as Biblio_Models.Entiteiten.Lid;
             var selectedBoek = BoekFilter.SelectedItem as Biblio_Models.Entiteiten.Boek;
@@ -130,7 +133,17 @@ namespace Biblio_WPF.Window
             if (selectedLid == null || selectedBoek == null)
             {
                 MessageBox.Show("Selecteer een lid en een boek voordat u uitleent.", "Informatie", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
+               
+                if (selectedLid == null)
+                {
+                    Biblio_WPF.Helpers.ValidationHelper.MarkInvalid(LidFilter);
+                    return;
+                }
+                if (selectedBoek == null)
+                {
+                    Biblio_WPF.Helpers.ValidationHelper.MarkInvalid(BoekFilter);
+                    return;
+                }
             }
 
             var start = DateTime.Now.Date;
