@@ -157,45 +157,51 @@ locOptions.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localizati
 
 app.UseRequestLocalization(locOptions);
 
-// Ensure database is created/migrated and seed roles/users in development
-using (var scope = app.Services.CreateScope())
+// Ensure database is created/migrated and seed roles/users in development (async)
+try
 {
+    using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
-    try
+
+    var db = services.GetRequiredService<BiblioDbContext>();
+    await db.Database.MigrateAsync();
+
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<AppUser>>();
+
+    string[] roles = new[] { "Admin", "Medewerker", "Lid" };
+    foreach (var r in roles)
     {
-        var db = services.GetRequiredService<BiblioDbContext>();
-        db.Database.Migrate();
-
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = services.GetRequiredService<UserManager<AppUser>>();
-
-        string[] roles = new[] { "Admin", "Medewerker", "Lid" };
-        foreach (var r in roles)
+        if (!await roleManager.RoleExistsAsync(r))
         {
-            var exists = roleManager.RoleExistsAsync(r).GetAwaiter().GetResult();
-            if (!exists)
-            {
-                roleManager.CreateAsync(new IdentityRole(r)).GetAwaiter().GetResult();
-            }
-        }
-
-        var adminEmail = builder.Configuration["Seed:AdminEmail"] ?? "admin@biblio.local";
-        var adminPwd = builder.Configuration["Seed:AdminPassword"] ?? "Admin123!";
-        var admin = userManager.FindByEmailAsync(adminEmail).GetAwaiter().GetResult();
-        if (admin == null)
-        {
-            admin = new AppUser { UserName = adminEmail, Email = adminEmail, FullName = "Hoofdbeheerder" };
-            var res = userManager.CreateAsync(admin, adminPwd).GetAwaiter().GetResult();
-            if (res.Succeeded)
-            {
-                userManager.AddToRoleAsync(admin, "Admin").GetAwaiter().GetResult();
-            }
+            await roleManager.CreateAsync(new IdentityRole(r));
         }
     }
-    catch (Exception ex)
+
+    var adminEmail = builder.Configuration["Seed:AdminEmail"] ?? "admin@biblio.local";
+    var adminPwd = builder.Configuration["Seed:AdminPassword"] ?? "Admin123!";
+    var admin = await userManager.FindByEmailAsync(adminEmail);
+    if (admin == null)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
+        admin = new AppUser { UserName = adminEmail, Email = adminEmail, FullName = "Hoofdbeheerder" };
+        var res = await userManager.CreateAsync(admin, adminPwd);
+        if (res.Succeeded)
+        {
+            await userManager.AddToRoleAsync(admin, "Admin");
+        }
+    }
+}
+catch (Exception ex)
+{
+    // Try to log using built-in logger; fall back silently if not available
+    try
+    {
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred seeding the DB.");
+    }
+    catch
+    {
+        // swallow - logging not critical here
     }
 }
 

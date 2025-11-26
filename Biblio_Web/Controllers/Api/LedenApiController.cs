@@ -16,11 +16,26 @@ namespace Biblio_Web.Controllers.Api
         private readonly BiblioDbContext _db;
         public LedenApiController(BiblioDbContext db) => _db = db;
 
+        // GET: api/leden?page=1&pageSize=50
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Lid>>> Get()
+        public async Task<ActionResult<IEnumerable<Lid>>> Get(int page = 1, int pageSize = 50)
         {
-            var list = await _db.Leden.Where(l => !l.IsDeleted).ToListAsync();
-            return Ok(list);
+            var q = _db.Leden.Where(l => !l.IsDeleted).AsQueryable();
+            var total = await q.CountAsync();
+            var totalPages = (int)System.Math.Ceiling(total / (double)pageSize);
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            var items = await q.OrderBy(l => l.Voornaam)
+                               .Skip((page - 1) * pageSize)
+                               .Take(pageSize)
+                               .ToListAsync();
+
+            Response.Headers["X-Total-Count"] = total.ToString();
+            Response.Headers["X-Total-Pages"] = totalPages.ToString();
+            Response.Headers["X-Current-Page"] = page.ToString();
+
+            return Ok(items);
         }
 
         [HttpGet("{id}")]
