@@ -20,13 +20,14 @@ namespace Biblio_Web.Controllers
 
         // GET: Boeken
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string search, int? categoryId)
+        public async Task<IActionResult> Index(string search, int? categoryId, int page = 1, int pageSize = 10)
         {
             // provide categories for the filter dropdown
             ViewBag.Categories = await _db.Categorien.OrderBy(c => c.Naam).ToListAsync();
             ViewBag.SelectedCategory = categoryId;
+            ViewBag.PageSize = pageSize;
 
-            var q = _db.Boeken.Include(b => b.categorie).AsQueryable();
+            var q = _db.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).AsQueryable();
             if (!string.IsNullOrWhiteSpace(search))
             {
                 q = q.Where(b => b.Titel.Contains(search) || b.Auteur.Contains(search) || b.Isbn.Contains(search));
@@ -36,7 +37,21 @@ namespace Biblio_Web.Controllers
                 q = q.Where(b => b.CategorieID == categoryId.Value);
             }
 
-            var list = await q.OrderBy(b => b.Titel).ToListAsync();
+            var totalCount = await q.CountAsync();
+            var totalPages = (int)System.Math.Ceiling(totalCount / (double)pageSize);
+            if (page < 1) page = 1;
+            if (page > totalPages && totalPages > 0) page = totalPages;
+
+            var list = await q.OrderBy(b => b.Titel)
+                              .Skip((page - 1) * pageSize)
+                              .Take(pageSize)
+                              .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+            ViewBag.Search = search;
+
             return View(list);
         }
 

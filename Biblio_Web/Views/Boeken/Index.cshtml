@@ -6,13 +6,17 @@
 @{
     ViewData["Title"] = L["Books"];
     var canCreate = AuthorizationService.AuthorizeAsync(User, null, "RequireStaff").GetAwaiter().GetResult().Succeeded;
+
+    var currentPage = (int)(ViewBag.CurrentPage ?? 1);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var pageSize = (int)(ViewBag.PageSize ?? 10);
 }
 
 <h1>@L["Books"]</h1>
 
 <form method="get" class="row g-2">
     <div class="col-auto">
-        <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="@L["SearchPlaceholder"]" />
+        <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="@L["SearchPlaceholder"]" />
     </div>
     <div class="col-auto">
         <select name="categoryId" class="form-select">
@@ -21,14 +25,8 @@
             {
                 foreach (var c in (IEnumerable<Biblio_Models.Entiteiten.Categorie>)ViewBag.Categories)
                 {
-                    if (ViewContext.HttpContext.Request.Query["categoryId"] == c.Id.ToString())
-                    {
-                        <option value="@c.Id" selected>@c.Naam</option>
-                    }
-                    else
-                    {
-                        <option value="@c.Id">@c.Naam</option>
-                    }
+                    var selected = ViewBag.SelectedCategory != null && ((int)ViewBag.SelectedCategory) == c.Id ? "selected" : "";
+                    <option value="@c.Id" @Html.Raw(selected)>@c.Naam</option>
                 }
             }
         </select>
@@ -75,3 +73,18 @@
 }
     </tbody>
 </table>
+
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+            <a class="page-link" href="?search=@ViewBag.Search&categoryId=@ViewBag.SelectedCategory&page=@(currentPage-1)&pageSize=@pageSize">@L["Back"]</a>
+        </li>
+        @for (int p = 1; p <= totalPages; p++)
+        {
+            <li class="page-item @(p == currentPage ? "active" : "")"><a class="page-link" href="?search=@ViewBag.Search&categoryId=@ViewBag.SelectedCategory&page=@p&pageSize=@pageSize">@p</a></li>
+        }
+        <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+            <a class="page-link" href="?search=@ViewBag.Search&categoryId=@ViewBag.SelectedCategory&page=@(currentPage+1)&pageSize=@pageSize">@L["Back"]</a>
+        </li>
+    </ul>
+</nav>
