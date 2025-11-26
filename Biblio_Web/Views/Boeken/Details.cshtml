@@ -1,25 +1,24 @@
 @model Biblio_Models.Entiteiten.Boek
-@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
 @{
-    ViewData["Title"] = L["Title"];
+    ViewData["Title"] = "Boek details";
 }
 
-<h1>@L["Title"]</h1>
+<h1>Boek details</h1>
 <div class="card">
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">@L["Titel"]</dt>
+            <dt class="col-sm-3">Titel</dt>
             <dd class="col-sm-9">@Model.Titel</dd>
 
-            <dt class="col-sm-3">@L["Auteur"]</dt>
+            <dt class="col-sm-3">Auteur</dt>
             <dd class="col-sm-9">@Model.Auteur</dd>
 
-            <dt class="col-sm-3">@L["ISBN"]</dt>
+            <dt class="col-sm-3">ISBN</dt>
             <dd class="col-sm-9">@Model.Isbn</dd>
 
-            <dt class="col-sm-3">@L["Categorie"]</dt>
+            <dt class="col-sm-3">Categorie</dt>
             <dd class="col-sm-9">@Model.categorie?.Naam</dd>
         </dl>
-        <a asp-action="Index" class="btn btn-secondary">@L["Back"]</a>
+        <a asp-action="Index" class="btn btn-secondary">Terug</a>
     </div>
-</div></div>
+</div>

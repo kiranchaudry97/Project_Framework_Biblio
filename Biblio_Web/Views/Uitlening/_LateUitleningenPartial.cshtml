@@ -1,21 +1,21 @@
-﻿@model IEnumerable<Biblio_Models.Entiteiten.Lenen>
-@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
+﻿@model IEnumerable<Biblio_Web.ApiModels.UitleningDto>
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 
 <div id="late-uitleningen-container">
     <table class="table table-sm table-striped">
         <thead>
             <tr>
-                <th>@L["ColumnTitle"]</th>
-                <th>@L["Member"]</th>
-                <th>@L["StartDate"]</th>
-                <th>@L["DueDate"]</th>
-                <th>@L["DaysLate"]</th>
+                <th>@Localizer["ColumnTitle"]</th>
+                <th>@Localizer["Member"]</th>
+                <th>@Localizer["StartDate"]</th>
+                <th>@Localizer["DueDate"]</th>
+                <th>@Localizer["DaysLate"]</th>
             </tr>
         </thead>
         <tbody>
             @if (!Model.Any())
             {
-                <tr><td colspan="5" class="text-muted">@L["NoLateLoans"]</td></tr>
+                <tr><td colspan="5" class="text-muted">@Localizer["NoLateLoans"]</td></tr>
             }
             else
             {
@@ -23,8 +23,8 @@
                 {
                     var daysLate = (System.DateTime.Today - l.DueDate.Date).Days;
                     <tr>
-                        <td>@(l.Boek?.Titel ?? "")</td>
-                        <td>@(l.Lid != null ? l.Lid.Voornaam + " " + l.Lid.AchterNaam : "")</td>
+                        <td>@(l.BoekTitel ?? "")</td>
+                        <td>@(l.LidNaam ?? "")</td>
                         <td>@l.StartDate.ToString("d")</td>
                         <td>@l.DueDate.ToString("d")</td>
                         <td class="text-danger">@Math.Max(0, daysLate)</td>

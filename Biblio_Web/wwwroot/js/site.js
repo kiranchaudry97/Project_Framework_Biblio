@@ -1,7 +1,7 @@
-﻿// Zie documentatie op https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// voor details over het configureren van bundling en minification van static web assets.
+﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+// for details on configuring this project to bundle and minify static web assets.
 
-// Schrijf je JavaScript-code.
+// Write your JavaScript code.
 
 // AJAX helper (Nederlands) om late uitleningen gedeeltelijk te verversen
 (function ($) {
@@ -54,31 +54,5 @@
             // optioneel: periodiek verversen
             // setInterval(function(){ Biblio.refreshLateUitleningen(); }, 60000);
         }
-
-        // Zorg dat sidebar/offcanvas navigatie betrouwbaar werkt:
-        // - Als offcanvas open is op kleine schermen, sluit deze eerst en navigeer daarna (betere UX).
-        // - Als href niet is ingesteld of '#', laat standaardgedrag verder doorgaan.
-        $(document).on('click', '#sidebar a.btn, .offcanvas-body a.btn', function (e) {
-            try {
-                var href = $(this).attr('href');
-                if (!href || href === '#') return; // niets te doen
-
-                var offcanvasEl = document.getElementById('offcanvasSidebar');
-                if (offcanvasEl && offcanvasEl.classList.contains('show')) {
-                    // Gebruik Bootstrap Offcanvas API om te verbergen, navigeer daarna na korte vertraging
-                    var bsOff = bootstrap.Offcanvas.getInstance(offcanvasEl) || new bootstrap.Offcanvas(offcanvasEl);
-                    bsOff.hide();
-                    e.preventDefault();
-                    // vertraging om de sluit-animatie af te ronden
-                    setTimeout(function () {
-                        window.location.href = href;
-                    }, 220);
-                }
-                // Op desktop zorgt de anchor zelf voor navigatie
-            } catch (ex) {
-                // Als bootstrap niet beschikbaar is of bij andere fouten, val terug op standaardnavigatie
-                console.warn('Fout in navigatiehelper', ex);
-            }
-        });
     });
 })(jQuery);

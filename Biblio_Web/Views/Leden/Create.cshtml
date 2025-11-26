@@ -1,43 +1,30 @@
 @model Biblio_Models.Entiteiten.Lid
-@using Microsoft.AspNetCore.Mvc.Localization
-@inject IViewLocalizer Localizer
-@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
 @{
-    ViewData["Title"] = L["NewMember"];
+    ViewData["Title"] = "Nieuw lid";
 }
 
-<h1>@L["NewMember"]</h1>
+<h1>Nieuw lid</h1>
 
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
     <div class="mb-3">
-        <label class="form-label">@Localizer["Voornaam"]</label>
+        <label class="form-label">Voornaam</label>
         <input asp-for="Voornaam" class="form-control" />
         <span asp-validation-for="Voornaam" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">@Localizer["Achternaam"]</label>
+        <label class="form-label">Achternaam</label>
         <input asp-for="AchterNaam" class="form-control" />
         <span asp-validation-for="AchterNaam" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">@Localizer["Email"]</label>
+        <label class="form-label">Email</label>
         <input asp-for="Email" class="form-control" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
-    <div class="mb-3">
-        <label class="form-label">@Localizer["Telefoon"]</label>
-        <input asp-for="Telefoon" class="form-control" />
-        <span asp-validation-for="Telefoon" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">@Localizer["Adres"]</label>
-        <input asp-for="Adres" class="form-control" />
-        <span asp-validation-for="Adres" class="text-danger"></span>
-    </div>
 
-    <button class="btn btn-primary">@L["Save"]</button>
-    <a asp-action="Index" class="btn btn-secondary ms-2">@L["Cancel"]</a>
+    <button class="btn btn-primary">Opslaan</button>
+    <a asp-action="Index" class="btn btn-secondary">Annuleer</a>
 </form>
 
 @section Scripts{

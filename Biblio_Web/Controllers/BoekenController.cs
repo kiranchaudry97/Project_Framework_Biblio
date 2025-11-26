@@ -28,6 +28,7 @@ namespace Biblio_Web.Controllers
             ViewBag.PageSize = pageSize;
 
             var q = _db.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).AsQueryable();
+
             if (!string.IsNullOrWhiteSpace(search))
             {
                 q = q.Where(b => b.Titel.Contains(search) || b.Auteur.Contains(search) || b.Isbn.Contains(search));
@@ -90,6 +91,7 @@ namespace Biblio_Web.Controllers
         }
 
         // GET: Boeken/Edit/5
+        [Authorize(Policy = "RequireStaff")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();

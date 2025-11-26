@@ -2,16 +2,15 @@
 @using Microsoft.AspNetCore.Localization
 @using Microsoft.AspNetCore.Identity
 @using Biblio_Models.Entiteiten
-@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - @L["SiteName"]</title>
+    <title>@ViewData["Title"] - Biblio_Web</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Biblio_Web.styles.css" asp-append-version="true" />
 </head>
@@ -19,63 +18,78 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">@L["SiteName"]</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Biblio_Web</a>
 
                 <!-- Sidebar toggler for small screens -->
                 <button class="btn btn-outline-primary d-lg-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="#navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <div class="navbar-nav me-auto mb-2 mb-lg-0 list-unstyled d-flex">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">@L["Home"]</a>
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">@L["Privacy"]</a>
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">@Localizer["Home"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">@Localizer["Privacy"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Boeken" asp-action="Index">@Localizer["Books"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Leden" asp-action="Index">@Localizer["Members"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Uitlening" asp-action="Index">@Localizer["Loans"]</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Categorieen" asp-action="Index">Categorieën</a>
+                        </li>
                         @if (User.IsInRole("Admin"))
                         {
-                            <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">Admin</a>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Users">Admin</a>
+                            </li>
                         }
-                    </div>
+                    </ul>
 
-                    <div class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center list-unstyled d-flex">
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <div class="nav-item d-flex align-items-center me-2">
-                                @await Html.PartialAsync("_AdminDropdown")
-                            </div>
-                        }
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                        <li class="nav-item me-2">
+                            <button id="themeToggle" class="btn btn-outline-secondary btn-sm">Toggle theme</button>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToUpper()</a>
+                            <ul class="dropdown-menu" aria-labelledby="langDropdown">
+                                <li>
+                                    <a class="dropdown-item"
+                                       asp-controller="Culture"
+                                       asp-action="SetLanguage"
+                                       asp-route-culture="nl"
+                                       asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)">
+                                        NL
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item"
+                                       asp-controller="Culture"
+                                       asp-action="SetLanguage"
+                                       asp-route-culture="en"
+                                       asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)">
+                                        EN
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
 
-                        <div class="nav-item me-2">
-                            <button id="themeToggle" class="btn btn-outline-secondary btn-sm" aria-label="Toggle theme"><i id="themeIcon" class="bi bi-sun me-1"></i>@L["ToggleTheme"]</button>
-                        </div>
-
-                        <div class="nav-item dropdown me-2">
-                            <a class="nav-link dropdown-toggle" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToUpper() <i class="bi bi-caret-down-fill lang-caret"></i></a>
-                            <div class="dropdown-menu" aria-labelledby="langDropdown">
-                                <a class="dropdown-item"
-                                   asp-controller="Culture"
-                                   asp-action="SetLanguage"
-                                   asp-route-culture="nl"
-                                   asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)">NL</a>
-                                <a class="dropdown-item"
-                                   asp-controller="Culture"
-                                   asp-action="SetLanguage"
-                                   asp-route-culture="en"
-                                   asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)">EN</a>
-                            </div>
-                        </div>
-
-                        <!-- Profile link for authenticated users -->
-                        @if (User?.Identity?.IsAuthenticated == true)
-                        {
-                            <div class="nav-item me-2">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Profile">@L["Profile"]</a>
-                            </div>
-                        }
-
-                        <div class="nav-item d-flex align-items-center">
+                        <li class="nav-item">
                             @await Component.InvokeAsync("LoginStatus")
-                        </div>
-                    </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>
@@ -86,22 +100,20 @@
             <!-- Desktop sidebar (md+) -->
             <nav id="sidebar" class="col-md-2 d-none d-md-block bg-light sidebar">
                 <div class="position-sticky pt-3 px-2">
-                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-2 mb-2 text-muted">@L["Menu"]</h6>
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-2 mb-2 text-muted">Menu</h6>
                     <ul class="nav flex-column">
-                        <li class="nav-item mb-1"><a class="btn btn-primary w-100 text-start d-flex align-items-center" asp-controller="Boeken" asp-action="Index"><i class="bi bi-book me-2"></i>@L["Books"]</a></li>
-                        <li class="nav-item mb-1"><a class="btn btn-primary w-100 text-start d-flex align-items-center" asp-controller="Leden" asp-action="Index"><i class="bi bi-people me-2"></i>@L["Members"]</a></li>
-                        <li class="nav-item mb-1"><a class="btn btn-primary w-100 text-start d-flex align-items-center" asp-controller="Uitlening" asp-action="Index"><i class="bi bi-journal-check me-2"></i>@L["Loans"]</a></li>
-                        <li class="nav-item mb-1"><a class="btn btn-primary w-100 text-start d-flex align-items-center" asp-controller="Categorieen" asp-action="Index"><i class="bi bi-tags me-2"></i>@L["Categories"]</a></li>
-                        <li class="nav-item mb-1"><a class="btn btn-primary w-100 text-start d-flex align-items-center" asp-controller="Talen" asp-action="Index"><i class="bi bi-translate me-2"></i>@L["Languages"]</a></li>
-                        <li class="nav-item mb-3"><a class="btn btn-primary w-100 text-start d-flex align-items-center" asp-controller="Categorieen" asp-action="Index"><i class="bi bi-tags me-2"></i>@L["Categories"]</a></li>
+                        <li class="nav-item mb-1"><a class="btn btn-primary w-100 text-start" asp-controller="Boeken" asp-action="Index">Boeken</a></li>
+                        <li class="nav-item mb-1"><a class="btn btn-primary w-100 text-start" asp-controller="Leden" asp-action="Index">Leden</a></li>
+                        <li class="nav-item mb-1"><a class="btn btn-primary w-100 text-start" asp-controller="Uitlening" asp-action="Index">Uitleningen</a></li>
+                        <li class="nav-item mb-3"><a class="btn btn-primary w-100 text-start" asp-controller="Categorieen" asp-action="Index">Categorieën</a></li>
                     </ul>
 
-                    <h6 class="sidebar-heading px-2 mb-2 text-muted">@L["QuickActions"]</h6>
+                    <h6 class="sidebar-heading px-2 mb-2 text-muted">Snelle acties</h6>
                     <div class="px-2">
                         @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
                         {
-                            <a id="quickNewBook" class="btn btn-outline-secondary w-100 mb-2" asp-controller="Boeken" asp-action="Create">@L["NewBook"]</a>
-                            <a id="quickNewMember" class="btn btn-outline-secondary w-100 mb-2" asp-controller="Leden" asp-action="Create">@L["NewMember"]</a>
+                            <a id="quickNewBook" class="btn btn-outline-secondary w-100 mb-2" asp-controller="Boeken" asp-action="Create">Nieuw boek</a>
+                            <a id="quickNewMember" class="btn btn-outline-secondary w-100 mb-2" asp-controller="Leden" asp-action="Create">Nieuw lid</a>
                         }
                     </div>
                 </div>
@@ -110,24 +122,22 @@
             <!-- Offcanvas sidebar for small screens -->
             <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
                 <div class="offcanvas-header">
-                    <h5 class="offcanvas-title" id="offcanvasSidebarLabel">@L["Menu"]</h5>
+                    <h5 class="offcanvas-title" id="offcanvasSidebarLabel">Menu</h5>
                     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body">
                     <div class="mb-3">
-                        <a class="btn btn-primary w-100 mb-2 text-start d-flex align-items-center" asp-controller="Boeken" asp-action="Index"><i class="bi bi-book me-2"></i>@L["Books"]</a>
-                        <a class="btn btn-primary w-100 mb-2 text-start d-flex align-items-center" asp-controller="Leden" asp-action="Index"><i class="bi bi-people me-2"></i>@L["Members"]</a>
-                        <a class="btn btn-primary w-100 mb-2 text-start d-flex align-items-center" asp-controller="Uitlening" asp-action="Index"><i class="bi bi-journal-check me-2"></i>@L["Loans"]</a>
-                        <a class="btn btn-primary w-100 mb-2 text-start d-flex align-items-center" asp-controller="Categorieen" asp-action="Index"><i class="bi bi-tags me-2"></i>@L["Categories"]</a>
-                        <a class="btn btn-primary w-100 mb-2 text-start d-flex align-items-center" asp-controller="Talen" asp-action="Index"><i class="bi bi-translate me-2"></i>@L["Languages"]</a>
-                        <a class="btn btn-primary w-100 mb-2 text-start d-flex align-items-center" asp-controller="Categorieen" asp-action="Index"><i class="bi bi-tags me-2"></i>@L["Categories"]</a>
+                        <a class="btn btn-primary w-100 mb-2 text-start" asp-controller="Boeken" asp-action="Index">Boeken</a>
+                        <a class="btn btn-primary w-100 mb-2 text-start" asp-controller="Leden" asp-action="Index">Leden</a>
+                        <a class="btn btn-primary w-100 mb-2 text-start" asp-controller="Uitlening" asp-action="Index">Uitleningen</a>
+                        <a class="btn btn-primary w-100 mb-2 text-start" asp-controller="Categorieen" asp-action="Index">Categorieën</a>
                     </div>
-                    <h6 class="sidebar-heading px-2 mb-2 text-muted">@L["QuickActions"]</h6>
+                    <h6 class="sidebar-heading px-2 mb-2 text-muted">Snelle acties</h6>
                     <div>
                         @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
                         {
-                            <a id="offcanvasQuickNewBook" class="btn btn-outline-secondary w-100 mb-2" asp-controller="Boeken" asp-action="Create">@L["NewBook"]</a>
-                            <a id="offcanvasQuickNewMember" class="btn btn-outline-secondary w-100 mb-2" asp-controller="Leden" asp-action="Create">@L["NewMember"]</a>
+                            <a id="offcanvasQuickNewBook" class="btn btn-outline-secondary w-100 mb-2" asp-controller="Boeken" asp-action="Create">Nieuw boek</a>
+                            <a id="offcanvasQuickNewMember" class="btn btn-outline-secondary w-100 mb-2" asp-controller="Leden" asp-action="Create">Nieuw lid</a>
                         }
                     </div>
                 </div>
@@ -144,10 +154,9 @@
 
     <footer class="border-top footer text-muted mt-4">
         <div class="container">
-            <div class="text-center py-3">
-                <span>&copy; @DateTime.Now.Year - @L["SiteName"]</span>
-                <span class="mx-2">-</span>
-                <a asp-area="" asp-controller="Home" asp-action="Privacy">@L["Privacy"]</a>
+            <div class="d-flex justify-content-center align-items-center py-3">
+                <span>&copy; 2025 - Biblio_Web</span>
+                <a asp-area="" asp-controller="Home" asp-action="Privacy" class="ms-2">@Localizer["Privacy"]</a>
             </div>
         </div>
     </footer>
@@ -165,21 +174,11 @@
             }
             var saved = localStorage.getItem('biblio-theme') || 'light';
             applyTheme(saved);
-            // update theme icon and footer status
-            function updateThemeUi() {
-                var isDark = document.body.classList.contains('dark-mode');
-                var icon = document.getElementById('themeIcon');
-                var status = document.getElementById('themeStatus');
-                if (icon) icon.className = isDark ? 'bi bi-moon-fill me-1' : 'bi bi-sun-fill me-1';
-                if (status) status.innerHTML = (isDark ? '<i class="bi bi-moon-fill"></i> Dark' : '<i class="bi bi-sun-fill"></i> Light');
-            }
-            updateThemeUi();
             if (toggle) toggle.addEventListener('click', function () {
                 var current = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
                 var next = current === 'dark' ? 'light' : 'dark';
                 localStorage.setItem('biblio-theme', next);
                 applyTheme(next);
-                updateThemeUi();
             });
 
             // No-op: anchors now navigate without JS. Keep for compatibility.

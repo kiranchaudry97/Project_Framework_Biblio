@@ -1,43 +1,42 @@
-﻿@model IEnumerable<Biblio_Models.Entiteiten.Lenen>
-@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model IEnumerable<Biblio_Models.Entiteiten.Lenen>
 @{
-    ViewData["Title"] = L["Title"];
-    var selectedLid = ViewBag.SelectedLidId as int?;
-    var selectedBoek = ViewBag.SelectedBoekId as int?;
+    ViewData["Title"] = Localizer["Title"];
 }
 
-<h1>@L["Title"]</h1>
+<h1>@Localizer["Title"]</h1>
 
 <form method="get" class="row g-2 mb-2">
     <div class="col-auto">
         <select name="lidId" class="form-select">
-            <option value="">@L["AllMembers"]</option>
+            <option value="">@Localizer["AllMembers"]</option>
             @foreach(var l in ViewBag.Leden as List<Biblio_Models.Entiteiten.Lid> ?? new List<Biblio_Models.Entiteiten.Lid>())
             {
-                <option value="@l.Id" selected="@(selectedLid.HasValue && selectedLid.Value == l.Id ? "selected" : null)">@l.Voornaam @l.AchterNaam</option>
+                <option value="@l.Id">@l.Voornaam @l.AchterNaam</option>
             }
         </select>
     </div>
     <div class="col-auto">
         <select name="boekId" class="form-select">
-            <option value="">@L["AllBooks"]</option>
+            <option value="">@Localizer["AllBooks"]</option>
             @foreach(var b in ViewBag.Boeken as List<Biblio_Models.Entiteiten.Boek> ?? new List<Biblio_Models.Entiteiten.Boek>())
             {
-                <option value="@b.Id" selected="@(selectedBoek.HasValue && selectedBoek.Value == b.Id ? "selected" : null)">@b.Titel</option>
+                <option value="@b.Id">@b.Titel</option>
             }
         </select>
     </div>
     <div class="col-auto form-check">
         <input type="checkbox" name="onlyOpen" class="form-check-input" />
-        <label class="form-check-label">@L["OnlyOpen"]</label>
+        <label class="form-check-label">@Localizer["OnlyOpen"]</label>
     </div>
     <div class="col-auto">
-        <button class="btn btn-primary">@L["Filter"]</button>
+        <button class="btn btn-primary">@Localizer["Filter"]</button>
     </div>
     <div class="col-auto">
         @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
         {
-            <a class="btn btn-success" asp-action="Create">@L["New"]</a>
+            <a class="btn btn-success" asp-action="Create">@Localizer["New"]</a>
         }
     </div>
 </form>
@@ -45,11 +44,11 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>@L["Member"]</th>
-            <th>@L["Book"]</th>
-            <th>@L["StartDate"]</th>
-            <th>@L["DueDate"]</th>
-            <th>@L["IngeleverdOp"]</th>
+            <th>@Localizer["Member"]</th>
+            <th>@Localizer["Book"]</th>
+            <th>@Localizer["Start"]</th>
+            <th>@Localizer["Due"]</th>
+            <th>@Localizer["Returned"]</th>
             <th></th>
         </tr>
     </thead>
@@ -63,14 +62,14 @@
         <td>@u.DueDate:d</td>
         <td>@(u.ReturnedAt?.ToString("d") ?? "-")</td>
         <td>
-            <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@u.Id">@L["Details"]</a>
+            <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@u.Id">@Localizer["Details"]</a>
             @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
             {
                 @if (u.ReturnedAt == null)
                 {
-                    <a class="btn btn-sm btn-success" asp-action="Return" asp-route-id="@u.Id">@L["Return"]</a>
+                    <a class="btn btn-sm btn-success" asp-action="Return" asp-route-id="@u.Id">@Localizer["Return"]</a>
                 }
-                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@u.Id">@L["Delete"]</a>
+                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@u.Id">@Localizer["Delete"]</a>
             }
         </td>
     </tr>

@@ -1,34 +1,25 @@
-﻿@using Microsoft.Extensions.Localization
-@inject IStringLocalizer<Biblio_Web.SharedResource> L
-@{
-    ViewData["Title"] = L["Home"];
+﻿@{
+    ViewData["Title"] = "Home Page";
 }
 
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
 <div class="text-center mt-4">
+    <h1>Welkom bij Biblio</h1>
+
     @if (User.Identity?.IsAuthenticated ?? false)
     {
-        <p class="mb-2">@L["HelloUser", User.Identity.Name]</p>
+        <p class="mb-2">Hello, @User.Identity.Name!</p>
         <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline-block">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-primary btn-sm text-white">@L["Logout"]</button>
+            <button type="submit" class="btn btn-link p-0">Logout</button>
         </form>
     }
     else
     {
-        <p>@L["NotLoggedIn"]</p>
-        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">@L["Login"]</a>
+        <p>U bent niet ingelogd.</p>
+        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">Login</a>
     }
-</div>
-
-<div class="container mt-4">
-    <div class="card rounded-3 shadow-sm border-0">
-        <div class="card-body text-center py-5">
-            <h1 class="h3 fw-bold mb-3">@L["DashboardTitle"]</h1>
-            <p class="card-text text-muted mb-4">@L["DashboardDescription"]</p>
-            <div class="d-flex justify-content-center gap-2">
-                <a class="btn btn-primary" asp-controller="Boeken" asp-action="Index">@L["ManageBooks"]</a>
-                <a class="btn btn-primary" asp-controller="Leden" asp-action="Index">@L["ManageMembers"]</a>
-            </div>
-        </div>
-    </div>
 </div>

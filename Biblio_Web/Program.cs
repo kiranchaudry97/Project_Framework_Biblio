@@ -157,51 +157,46 @@ locOptions.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localizati
 
 app.UseRequestLocalization(locOptions);
 
-// Ensure database is created/migrated and seed roles/users in development (async)
-try
+// Ensure database is created/migrated and seed roles/users in development
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
-
-    var db = services.GetRequiredService<BiblioDbContext>();
-    await db.Database.MigrateAsync();
-
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<AppUser>>();
-
-    string[] roles = new[] { "Admin", "Medewerker", "Lid" };
-    foreach (var r in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(r))
-        {
-            await roleManager.CreateAsync(new IdentityRole(r));
-        }
-    }
-
-    var adminEmail = builder.Configuration["Seed:AdminEmail"] ?? "admin@biblio.local";
-    var adminPwd = builder.Configuration["Seed:AdminPassword"] ?? "Admin123!";
-    var admin = await userManager.FindByEmailAsync(adminEmail);
-    if (admin == null)
-    {
-        admin = new AppUser { UserName = adminEmail, Email = adminEmail, FullName = "Hoofdbeheerder" };
-        var res = await userManager.CreateAsync(admin, adminPwd);
-        if (res.Succeeded)
-        {
-            await userManager.AddToRoleAsync(admin, "Admin");
-        }
-    }
-}
-catch (Exception ex)
-{
-    // Try to log using built-in logger; fall back silently if not available
     try
     {
-        var logger = app.Services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred seeding the DB.");
+        var db = services.GetRequiredService<BiblioDbContext>();
+        // use async migration
+        await db.Database.MigrateAsync();
+
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<AppUser>>();
+
+        string[] roles = new[] { "Admin", "Medewerker", "Lid" };
+        foreach (var r in roles)
+        {
+            var exists = await roleManager.RoleExistsAsync(r);
+            if (!exists)
+            {
+                await roleManager.CreateAsync(new IdentityRole(r));
+            }
+        }
+
+        var adminEmail = builder.Configuration["Seed:AdminEmail"] ?? "admin@biblio.local";
+        var adminPwd = builder.Configuration["Seed:AdminPassword"] ?? "Admin123!";
+        var admin = await userManager.FindByEmailAsync(adminEmail);
+        if (admin == null)
+        {
+            admin = new AppUser { UserName = adminEmail, Email = adminEmail, FullName = "Hoofdbeheerder" };
+            var res = await userManager.CreateAsync(admin, adminPwd);
+            if (res.Succeeded)
+            {
+                await userManager.AddToRoleAsync(admin, "Admin");
+            }
+        }
     }
-    catch
+    catch (Exception ex)
     {
-        // swallow - logging not critical here
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred seeding the DB.");
     }
 }
 

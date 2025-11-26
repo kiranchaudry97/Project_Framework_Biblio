@@ -1,20 +1,18 @@
-@using Microsoft.AspNetCore.Mvc.Localization
-@inject IViewLocalizer Localizer
 @model Biblio_Models.Entiteiten.Categorie
 @{
-    ViewData["Title"] = Localizer["DeleteCategory"];
+    ViewData["Title"] = "Verwijder categorie";
 }
 
-<h1>@Localizer["DeleteCategory"]</h1>
+<h1>Verwijder categorie</h1>
 
-<div class="alert alert-warning">@Localizer["DeleteConfirm"]</div>
+<div class="alert alert-warning">Weet je zeker dat je deze categorie wilt verwijderen?</div>
 
 <form asp-action="Delete">
     <input type="hidden" asp-for="Id" />
     <div class="mb-3">
-        <label class="form-label">@Localizer["ColumnName"]</label>
+        <label class="form-label">Naam</label>
         <div>@Model.Naam</div>
     </div>
-    <button class="btn btn-danger">@Localizer["Delete"]</button>
-    <a asp-action="Index" class="btn btn-secondary">@Localizer["Cancel"]</a>
+    <button class="btn btn-danger">Verwijder</button>
+    <a asp-action="Index" class="btn btn-secondary">Annuleer</a>
 </form>

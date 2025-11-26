@@ -1,17 +1,31 @@
 ﻿@model string?
-@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
 
 @if (!string.IsNullOrEmpty(Model))
 {
-    <span class="nav-link text-dark">@L["HelloUser", Model]</span>
-
-    <form class="d-inline" asp-controller="Account" asp-action="LogoutPost" method="post" id="logoutForm">
-        @Html.AntiForgeryToken()
-        <button type="submit" class="btn btn-link nav-link p-0">@L["Logout"]</button>
-    </form>
+    <ul class="nav navbar-nav navbar-right">
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Hello @Model</a>
+        </li>
+        <li class="nav-item">
+            <form class="form-inline" asp-controller="Account" asp-action="LogoutPost" method="post" id="logoutForm">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="nav-link btn btn-link text-dark">Uitloggen</button>
+            </form>
+        </li>
+        <li class="nav-item">
+            <!-- GET fallback if POST is not available -->
+            <a class="nav-link text-muted small" asp-controller="Account" asp-action="Logout">(Logout fallback)</a>
+        </li>
+    </ul>
 }
 else
 {
-    <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">@L["Login"]</a>
-    <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">@L["Register"]</a>
+    <ul class="nav navbar-nav navbar-right">
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Inloggen</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Registreren</a>
+        </li>
+    </ul>
 }

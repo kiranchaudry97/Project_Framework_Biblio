@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
+using AutoMapper;
+using Biblio_Web.ApiModels;
 
 namespace Biblio_Web.Controllers.Api
 {
@@ -14,32 +16,34 @@ namespace Biblio_Web.Controllers.Api
     public class CategorieenApiController : ControllerBase
     {
         private readonly BiblioDbContext _db;
-        public CategorieenApiController(BiblioDbContext db) => _db = db;
+        private readonly IMapper _mapper;
+        public CategorieenApiController(BiblioDbContext db, IMapper mapper) => (_db, _mapper) = (db, mapper);
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Categorie>>> Get()
+        public async Task<ActionResult<IEnumerable<CategorieDto>>> Get()
         {
             var list = await _db.Categorien.Where(c => !c.IsDeleted).ToListAsync();
-            return Ok(list);
+            return Ok(_mapper.Map<IEnumerable<CategorieDto>>(list));
         }
 
         [HttpPost]
-        public async Task<ActionResult<Categorie>> Post(Categorie model)
+        public async Task<ActionResult<CategorieDto>> Post(CategorieDto model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var entity = new Categorie { Naam = model.Naam };
+            var entity = _mapper.Map<Categorie>(model);
             _db.Categorien.Add(entity);
             await _db.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
+            var dto = _mapper.Map<CategorieDto>(entity);
+            return CreatedAtAction(nameof(Get), new { id = dto.Id }, dto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Categorie model)
+        public async Task<IActionResult> Put(int id, CategorieDto model)
         {
             if (id != model.Id) return BadRequest();
             var existing = await _db.Categorien.FindAsync(id);
             if (existing == null || existing.IsDeleted) return NotFound();
-            existing.Naam = model.Naam;
+            _mapper.Map(model, existing);
             _db.Categorien.Update(existing);
             await _db.SaveChangesAsync();
             return NoContent();

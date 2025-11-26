@@ -1,29 +1,27 @@
 ﻿@model Biblio_Models.Entiteiten.Lenen
-@using Microsoft.AspNetCore.Mvc.Localization
-@inject IViewLocalizer Localizer
 @{
-    ViewData["Title"] = Localizer["Title"];
+    ViewData["Title"] = "Uitlening details";
 }
 
-<h1>@Localizer["Title"]</h1>
+<h1>Uitlening details</h1>
 <div class="card">
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">@Localizer["Boek"]</dt>
+            <dt class="col-sm-3">Boek</dt>
             <dd class="col-sm-9">@Model.Boek?.Titel</dd>
 
-            <dt class="col-sm-3">@Localizer["Lid"]</dt>
+            <dt class="col-sm-3">Lid</dt>
             <dd class="col-sm-9">@Model.Lid?.Voornaam @Model.Lid?.AchterNaam</dd>
 
-            <dt class="col-sm-3">@Localizer["Startdatum"]</dt>
+            <dt class="col-sm-3">Startdatum</dt>
             <dd class="col-sm-9">@Model.StartDate:d</dd>
 
-            <dt class="col-sm-3">@Localizer["Einddatum"]</dt>
+            <dt class="col-sm-3">Einddatum</dt>
             <dd class="col-sm-9">@Model.DueDate:d</dd>
 
-            <dt class="col-sm-3">@Localizer["IngeleverdOp"]</dt>
-            <dd class="col-sm-9">@(Model.ReturnedAt?.ToString("g") ?? Localizer["NotReturned"].Value)</dd>
+            <dt class="col-sm-3">Ingeleverd op</dt>
+            <dd class="col-sm-9">@(Model.ReturnedAt?.ToString("g") ?? "Nog niet")</dd>
         </dl>
-        <a asp-action="Index" class="btn btn-secondary">@Localizer["Back"]</a>
+        <a asp-action="Index" class="btn btn-secondary">Terug</a>
     </div>
 </div>

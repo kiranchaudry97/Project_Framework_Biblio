@@ -17,26 +17,28 @@ namespace Biblio_Web.Controllers.Api
         private readonly BiblioDbContext _db;
         public BoekenApiController(BiblioDbContext db) => _db = db;
 
-        // GET: api/Boeken?page=1&pageSize=20
+        // GET: api/Boeken?page=1&pageSize=10
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Boek>>> Get(int page = 1, int pageSize = 50)
+        public async Task<IActionResult> Get(int page = 1, int pageSize = 20)
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 20;
+
             var q = _db.Boeken.Where(b => !b.IsDeleted).Include(b => b.categorie).AsQueryable();
             var total = await q.CountAsync();
             var totalPages = (int)System.Math.Ceiling(total / (double)pageSize);
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
+            var items = await q.OrderBy(b => b.Titel).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
-            var items = await q.OrderBy(b => b.Titel)
-                               .Skip((page - 1) * pageSize)
-                               .Take(pageSize)
-                               .ToListAsync();
+            var result = new
+            {
+                page,
+                pageSize,
+                total,
+                totalPages,
+                items
+            };
 
-            Response.Headers["X-Total-Count"] = total.ToString();
-            Response.Headers["X-Total-Pages"] = totalPages.ToString();
-            Response.Headers["X-Current-Page"] = page.ToString();
-
-            return Ok(items);
+            return Ok(result);
         }
 
         // GET: api/Boeken/5
@@ -44,16 +46,16 @@ namespace Biblio_Web.Controllers.Api
         public async Task<ActionResult<Boek>> Get(int id)
         {
             var boek = await _db.Boeken.Include(b => b.categorie).FirstOrDefaultAsync(b => b.Id == id && !b.IsDeleted);
-            if (boek == null) return NotFound();
+            if (boek == null) return NotFound(new ProblemDetails { Title = "Not Found", Detail = "Book not found" });
             return Ok(boek);
         }
 
         // POST: api/Boeken
         [HttpPost]
         [Authorize(Policy = "RequireStaff")]
-        public async Task<ActionResult<Boek>> Post(Boek model)
+        public async Task<IActionResult> Post(Boek model)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(new ValidationProblemDetails(ModelState));
             var entity = new Boek
             {
                 Titel = model.Titel,
@@ -73,9 +75,9 @@ namespace Biblio_Web.Controllers.Api
         [Authorize(Policy = "RequireStaff")]
         public async Task<IActionResult> Put(int id, Boek model)
         {
-            if (id != model.Id) return BadRequest();
+            if (id != model.Id) return BadRequest(new ProblemDetails { Title = "Bad Request", Detail = "Id mismatch" });
             var existing = await _db.Boeken.FindAsync(id);
-            if (existing == null || existing.IsDeleted) return NotFound();
+            if (existing == null || existing.IsDeleted) return NotFound(new ProblemDetails { Title = "Not Found", Detail = "Book not found" });
 
             existing.Titel = model.Titel;
             existing.Auteur = model.Auteur;
@@ -93,7 +95,7 @@ namespace Biblio_Web.Controllers.Api
         public async Task<IActionResult> Delete(int id)
         {
             var existing = await _db.Boeken.FindAsync(id);
-            if (existing == null || existing.IsDeleted) return NotFound();
+            if (existing == null || existing.IsDeleted) return NotFound(new ProblemDetails { Title = "Not Found", Detail = "Book not found" });
             existing.IsDeleted = true;
             _db.Boeken.Update(existing);
             await _db.SaveChangesAsync();

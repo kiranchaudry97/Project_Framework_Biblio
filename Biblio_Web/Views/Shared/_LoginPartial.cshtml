@@ -3,18 +3,17 @@
 @using Biblio_Models.Entiteiten
 @inject SignInManager<AppUser> SignInManager
 @inject UserManager<AppUser> UserManager
-@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
 
 @if (SignInManager.IsSignedIn(User))
 {
     var userName = User?.Identity?.Name ?? "";
     <ul class="nav navbar-nav navbar-right">
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index">@L["HelloUser", userName]</a>
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index">Hello @userName!</a>
         </li>
         <li class="nav-item">
             <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" method="post" id="logoutForm">
-                <button type="submit" class="nav-link btn btn-link text-dark">@L["Logout"]</button>
+                <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
             </form>
         </li>
     </ul>
@@ -23,10 +22,10 @@ else
 {
     <ul class="nav navbar-nav navbar-right">
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">@L["Login"]</a>
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">@L["Register"]</a>
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
         </li>
     </ul>
 }

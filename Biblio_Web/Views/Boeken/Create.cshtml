@@ -1,46 +1,38 @@
-@using System.Linq
-@using Microsoft.AspNetCore.Mvc.Rendering
-@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 @model Biblio_Models.Entiteiten.Boek
 @{
-    // Ensure a model instance exists so tag-helpers (asp-for) don't fail when Model is null
-    if (ViewData.Model == null)
-    {
-        ViewData.Model = new Biblio_Models.Entiteiten.Boek();
-    }
-
-    ViewData["Title"] = L["NewBook"];
+    ViewData["Title"] = Localizer["Title"];
 }
 
-<h1>@L["NewBook"]</h1>
+<h1>@Localizer["Title"]</h1>
 
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
     <div class="mb-3">
-        <label class="form-label">@L["Titel"]</label>
+        <label class="form-label">@Localizer["ColumnTitle"]</label>
         <input asp-for="Titel" class="form-control" />
         <span asp-validation-for="Titel" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">@L["Auteur"]</label>
+        <label class="form-label">@Localizer["ColumnAuthor"]</label>
         <input asp-for="Auteur" class="form-control" />
         <span asp-validation-for="Auteur" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">@L["ISBN"]</label>
+        <label class="form-label">@Localizer["ColumnIsbn"]</label>
         <input asp-for="Isbn" class="form-control" />
         <span asp-validation-for="Isbn" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">@L["Categorie"]</label>
-        @{ var categories = ViewBag.Categories as IEnumerable<Biblio_Models.Entiteiten.Categorie> ?? Enumerable.Empty<Biblio_Models.Entiteiten.Categorie>(); }
-        <select asp-for="CategorieID" class="form-select" asp-items="@(new SelectList(categories, "Id", "Naam", Model?.CategorieID))">
-            <option value="">@L["ChooseCategory"]</option>
+        <label class="form-label">Categorie</label>
+        <select asp-for="CategorieID" class="form-select" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Naam"))">
+            <option value="">-- Kies categorie --</option>
         </select>
     </div>
 
-    <button class="btn btn-primary">@L["Save"]</button>
-    <a asp-action="Index" class="btn btn-secondary">@L["Cancel"]</a>
+    <button class="btn btn-primary">@Localizer["Save"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["Cancel"]</a>
 </form>
 
 @section Scripts{

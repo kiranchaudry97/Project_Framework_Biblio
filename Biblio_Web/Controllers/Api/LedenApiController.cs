@@ -16,40 +16,42 @@ namespace Biblio_Web.Controllers.Api
         private readonly BiblioDbContext _db;
         public LedenApiController(BiblioDbContext db) => _db = db;
 
-        // GET: api/leden?page=1&pageSize=50
+        // GET: api/leden?page=1&pageSize=20
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Lid>>> Get(int page = 1, int pageSize = 50)
+        public async Task<IActionResult> Get(int page = 1, int pageSize = 20)
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 20;
+
             var q = _db.Leden.Where(l => !l.IsDeleted).AsQueryable();
             var total = await q.CountAsync();
             var totalPages = (int)System.Math.Ceiling(total / (double)pageSize);
-            if (page < 1) page = 1;
-            if (page > totalPages && totalPages > 0) page = totalPages;
+            var items = await q.OrderBy(l => l.Voornaam).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
-            var items = await q.OrderBy(l => l.Voornaam)
-                               .Skip((page - 1) * pageSize)
-                               .Take(pageSize)
-                               .ToListAsync();
+            var result = new
+            {
+                page,
+                pageSize,
+                total,
+                totalPages,
+                items
+            };
 
-            Response.Headers["X-Total-Count"] = total.ToString();
-            Response.Headers["X-Total-Pages"] = totalPages.ToString();
-            Response.Headers["X-Current-Page"] = page.ToString();
-
-            return Ok(items);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Lid>> Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             var item = await _db.Leden.FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted);
-            if (item == null) return NotFound();
+            if (item == null) return NotFound(new ProblemDetails { Title = "Not Found", Detail = "Member not found" });
             return Ok(item);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Lid>> Post(Lid model)
+        public async Task<IActionResult> Post(Lid model)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(new ValidationProblemDetails(ModelState));
             var entity = new Lid
             {
                 Voornaam = model.Voornaam,
@@ -66,9 +68,9 @@ namespace Biblio_Web.Controllers.Api
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Lid model)
         {
-            if (id != model.Id) return BadRequest();
+            if (id != model.Id) return BadRequest(new ProblemDetails { Title = "Bad Request", Detail = "Id mismatch" });
             var existing = await _db.Leden.FindAsync(id);
-            if (existing == null || existing.IsDeleted) return NotFound();
+            if (existing == null || existing.IsDeleted) return NotFound(new ProblemDetails { Title = "Not Found", Detail = "Member not found" });
 
             existing.Voornaam = model.Voornaam;
             existing.AchterNaam = model.AchterNaam;
@@ -85,7 +87,7 @@ namespace Biblio_Web.Controllers.Api
         public async Task<IActionResult> Delete(int id)
         {
             var existing = await _db.Leden.FindAsync(id);
-            if (existing == null || existing.IsDeleted) return NotFound();
+            if (existing == null || existing.IsDeleted) return NotFound(new ProblemDetails { Title = "Not Found", Detail = "Member not found" });
             existing.IsDeleted = true;
             _db.Leden.Update(existing);
             await _db.SaveChangesAsync();

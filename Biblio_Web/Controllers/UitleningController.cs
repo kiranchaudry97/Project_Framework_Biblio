@@ -22,14 +22,6 @@ namespace Biblio_Web.Controllers
             if (boekId.HasValue) q = q.Where(l => l.BoekId == boekId.Value);
             if (onlyOpen) q = q.Where(l => l.ReturnedAt == null);
 
-            // populate filter lists for the view
-            ViewBag.Leden = await _db.Leden.Where(l => !l.IsDeleted).OrderBy(l => l.Voornaam).ToListAsync();
-            ViewBag.Boeken = await _db.Boeken.Where(b => !b.IsDeleted).OrderBy(b => b.Titel).ToListAsync();
-
-            // pass selected ids back to view so the selected option can be marked
-            ViewBag.SelectedLidId = lidId;
-            ViewBag.SelectedBoekId = boekId;
-
             var list = await q.OrderByDescending(l => l.StartDate).ToListAsync();
             return View(list);
         }
@@ -102,19 +94,6 @@ namespace Biblio_Web.Controllers
                 await _db.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
-        }
-
-        // Details action: show one loan with related Boek and Lid
-        [AllowAnonymous]
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null) return NotFound();
-            var loan = await _db.Leningens
-                .Include(l => l.Boek)
-                .Include(l => l.Lid)
-                .FirstOrDefaultAsync(l => l.Id == id.Value && !l.IsDeleted);
-            if (loan == null) return NotFound();
-            return View(loan);
         }
     }
 }

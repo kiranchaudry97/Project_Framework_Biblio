@@ -1,0 +1,24 @@
+@using Biblio_Models.Entiteiten
+@model AdminEditRoles   
+
+@{
+    ViewData["Title"] = "Rollen bewerken";
+}
+
+<h1>Rollen bewerken voor @Model.Email</h1>
+
+<form method="post">
+    <input type="hidden" asp-for="UserId" />
+    <div class="mb-3">
+@for (int i = 0; i < Model.Roles.Count; i++)
+{
+    <div class="form-check mb-2">
+        <input asp-for="Roles[@i].IsSelected" class="form-check-input" />
+        <label asp-for="Roles[@i].IsSelected" class="form-check-label">@Model.Roles[i].RoleName</label>
+        <input type="hidden" asp-for="Roles[@i].RoleName" />
+    </div>
+}
+    </div>
+    <button class="btn btn-primary">Opslaan</button>
+    <a asp-action="Users" class="btn btn-secondary">Annuleer</a>
+</form>     
