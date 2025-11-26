@@ -5,8 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
-using AutoMapper;
-using Biblio_Web.ApiModels;
 
 namespace Biblio_Web.Controllers.Api
 {
@@ -16,43 +14,52 @@ namespace Biblio_Web.Controllers.Api
     public class LedenApiController : ControllerBase
     {
         private readonly BiblioDbContext _db;
-        private readonly IMapper _mapper;
-        public LedenApiController(BiblioDbContext db, IMapper mapper) => (_db, _mapper) = (db, mapper);
+        public LedenApiController(BiblioDbContext db) => _db = db;
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<LidDto>>> Get()
+        public async Task<ActionResult<IEnumerable<Lid>>> Get()
         {
             var list = await _db.Leden.Where(l => !l.IsDeleted).ToListAsync();
-            return Ok(_mapper.Map<IEnumerable<LidDto>>(list));
+            return Ok(list);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<LidDto>> Get(int id)
+        public async Task<ActionResult<Lid>> Get(int id)
         {
             var item = await _db.Leden.FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted);
             if (item == null) return NotFound();
-            return Ok(_mapper.Map<LidDto>(item));
+            return Ok(item);
         }
 
         [HttpPost]
-        public async Task<ActionResult<LidDto>> Post(LidDto model)
+        public async Task<ActionResult<Lid>> Post(Lid model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var entity = _mapper.Map<Lid>(model);
+            var entity = new Lid
+            {
+                Voornaam = model.Voornaam,
+                AchterNaam = model.AchterNaam,
+                Email = model.Email,
+                Telefoon = model.Telefoon,
+                Adres = model.Adres
+            };
             _db.Leden.Add(entity);
             await _db.SaveChangesAsync();
-            var dto = _mapper.Map<LidDto>(entity);
-            return CreatedAtAction(nameof(Get), new { id = dto.Id }, dto);
+            return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, LidDto model)
+        public async Task<IActionResult> Put(int id, Lid model)
         {
             if (id != model.Id) return BadRequest();
             var existing = await _db.Leden.FindAsync(id);
             if (existing == null || existing.IsDeleted) return NotFound();
 
-            _mapper.Map(model, existing);
+            existing.Voornaam = model.Voornaam;
+            existing.AchterNaam = model.AchterNaam;
+            existing.Email = model.Email;
+            existing.Telefoon = model.Telefoon;
+            existing.Adres = model.Adres;
 
             _db.Leden.Update(existing);
             await _db.SaveChangesAsync();

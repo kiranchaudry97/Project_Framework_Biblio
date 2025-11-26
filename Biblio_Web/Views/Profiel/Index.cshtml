@@ -1,0 +1,21 @@
+@model Biblio_Web.Models.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Profiel";
+}
+
+<h1>Profiel</h1>
+
+<div class="card mb-3" style="max-width:540px;">
+    <div class="card-body">
+        <h5 class="card-title">@Model.FullName (@Model.UserName)</h5>
+        <p class="card-text"><strong>E-mail:</strong> @Model.Email</p>
+        <p class="card-text"><strong>Rollen:</strong> @string.Join(", ", Model.Roles)</p>
+
+        <div class="d-grid gap-2 d-sm-flex">
+            <a asp-controller="Account" asp-action="Edit" class="btn btn-primary">Wijzig profiel</a>
+            <a asp-controller="Account" asp-action="ChangePassword" class="btn btn-purple ms-sm-2">Wijzig wachtwoord</a>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary ms-sm-2">Terug</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,171 @@
+{
+  "info": {
+    "name": "Biblio API - Postman",
+    "_postman_id": "biblio-api-collection",
+    "description": "Collection with example requests for Biblio Web API (JWT auth).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:7264",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Get JWT token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@biblio.local\",\n  \"password\": \"Admin123!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/token", "host": ["{{baseUrl}}"], "path": ["api","auth","token"] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "item": [
+        {
+          "name": "List books",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/boeken", "host": ["{{baseUrl}}"], "path": ["api","boeken"] }
+          }
+        },
+        {
+          "name": "Get book by id",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/boeken/1", "host": ["{{baseUrl}}"], "path": ["api","boeken","1"] }
+          }
+        },
+        {
+          "name": "Create book (Requires Staff)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titel\": \"Nieuwe titel\",\n  \"auteur\": \"Auteur Naam\",\n  \"isbn\": \"9781234567897\",\n  \"categorieID\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/boeken", "host": ["{{baseUrl}}"], "path": ["api","boeken"] }
+          }
+        },
+        {
+          "name": "Update book (Requires Staff)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"titel\": \"Bijgewerkte titel\",\n  \"auteur\": \"Auteur Naam\",\n  \"isbn\": \"9781234567897\",\n  \"categorieID\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/boeken/1", "host": ["{{baseUrl}}"], "path": ["api","boeken","1"] }
+          }
+        },
+        {
+          "name": "Delete book (Requires Staff)",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/boeken/1", "host": ["{{baseUrl}}"], "path": ["api","boeken","1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "List categories",
+          "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/api/categorieen", "host": ["{{baseUrl}}"], "path": ["api","categorieen"] } }
+        },
+        {
+          "name": "Create category (Requires Staff)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"naam\": \"Roman\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/api/categorieen", "host": ["{{baseUrl}}"], "path": ["api","categorieen"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Members",
+      "item": [
+        {
+          "name": "List members",
+          "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/api/leden", "host": ["{{baseUrl}}"], "path": ["api","leden"] } }
+        },
+        {
+          "name": "Create member (Requires Staff)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"voornaam\": \"Jan\",\n  \"achterNaam\": \"Jansen\",\n  \"email\": \"jan@example.com\",\n  \"telefoon\": \"0123456789\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/api/leden", "host": ["{{baseUrl}}"], "path": ["api","leden"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loans",
+      "item": [
+        {
+          "name": "List loans",
+          "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/api/uitleningen", "host": ["{{baseUrl}}"], "path": ["api","uitleningen"] } }
+        },
+        {
+          "name": "List overdue loans",
+          "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/api/uitleningen/late", "host": ["{{baseUrl}}"], "path": ["api","uitleningen","late"] } }
+        },
+        {
+          "name": "Create loan (Requires Staff)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+            "body": { "mode": "raw", "raw": "{\n  \"boekId\": 1,\n  \"lidId\": 1,\n  \"startDate\": \"2025-01-01T00:00:00\",\n  \"dueDate\": \"2025-01-15T00:00:00\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/api/uitleningen", "host": ["{{baseUrl}}"], "path": ["api","uitleningen"] }
+          }
+        },
+        {
+          "name": "Return loan (Requires Staff)",
+          "request": { "method": "PUT", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/api/uitleningen/1/return", "host": ["{{baseUrl}}"], "path": ["api","uitleningen","1","return"] } }
+        }
+      ]
+    }
+  ]
+}

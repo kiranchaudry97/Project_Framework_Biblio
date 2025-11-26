@@ -132,6 +132,16 @@ namespace Biblio_Models.Seed
                 await db.SaveChangesAsync(); // (3) //CRUD
             }
 
+            // Seed languages (Talen)
+            if (!await db.Talen.AnyAsync())
+            {
+                db.Talen.AddRange(
+                    new Taal { Code = "nl", Naam = "Nederlands", IsSystemTaal = true, IsActive = true },
+                    new Taal { Code = "en", Naam = "English", IsSystemTaal = false, IsActive = true }
+                );
+                await db.SaveChangesAsync();
+            }
+
             //5️⃣ Optioneel: seeding van test accounts wanneer dit expliciet is ingeschakeld via SeedOptions
             if (opts.CreateTestAccounts)
             {

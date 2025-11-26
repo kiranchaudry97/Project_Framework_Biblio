@@ -1,0 +1,130 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Biblio_Web.Models
+@inject IViewLocalizer Localizer
+@model PagedResult<Biblio_Web.Models.UserViewModel>
+@{
+    ViewData["Title"] = "Gebruikers (Medewerker)";
+    var search = ViewData["Search"] as string ?? string.Empty;
+    var isAdmin = User.IsInRole("Admin");
+    var currentUrl = Context.Request.Path + Context.Request.QueryString;
+    var roles = ViewBag.Roles as System.Collections.Generic.List<string> ?? new System.Collections.Generic.List<string>();
+    var selectedRole = ViewBag.SelectedRole as string ?? string.Empty;
+}
+
+<h1>Gebruikers</h1>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">@TempData["Message"]</div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <form method="get" class="row g-2">
+        <div class="col-auto">
+            <input type="text" name="search" value="@search" class="form-control" placeholder="Zoek gebruikers..." />
+        </div>
+
+        <div class="col-auto">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" type="button" id="roleDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                    @if (string.IsNullOrEmpty(selectedRole))
+                    {
+                        <span>Alle rollen</span>
+                    }
+                    else
+                    {
+                        <span>@selectedRole</span>
+                    }
+                    <i class="bi bi-chevron-down ms-2"></i>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="roleDropdownBtn">
+                    <li><a class="dropdown-item" href="?role=&amp;search=@System.Net.WebUtility.UrlEncode(search)">Alle rollen</a></li>
+                    @foreach (var r in roles)
+                    {
+                        <li><a class="dropdown-item" href="?role=@System.Net.WebUtility.UrlEncode(r)&amp;search=@System.Net.WebUtility.UrlEncode(search)">@r</a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-auto">
+            <button class="btn btn-primary">Zoek</button>
+        </div>
+    </form>
+
+    @* New user button for admins/staff aligned to the right *@
+    @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
+    {
+        <div>
+            <a class="btn btn-primary" asp-controller="Admin" asp-action="CreateUser">Nieuwe gebruiker</a>
+        </div>
+    }
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>@Localizer["User"]</th>
+            <th>@Localizer["Email"]</th>
+            <th>Rollen</th>
+            <th>Geblokkeerd</th>
+            <th>Acties</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach(var u in Model.Items)
+{
+    <tr>
+        <td>@u.UserName</td>
+        <td>@u.Email</td>
+        <td>@(string.Join(", ", u.Roles ?? new List<string>()))</td>
+        <td>@(u.Blocked ? "Ja" : "Nee")</td>
+        <td>
+            <div class="d-flex flex-wrap align-items-center gap-1">
+                @* Toggle block form: only admins may perform toggle; show disabled button to others *@
+                @if (isAdmin)
+                {
+                    <form asp-controller="Account" asp-action="ToggleBlock" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@u.Id" />
+                        <input type="hidden" name="returnUrl" value="@currentUrl" />
+                        <button type="submit" class="btn btn-sm btn-warning">@(u.Blocked ? "Deblokkeer" : "Blokkeer")</button>
+                    </form>
+                }
+                else
+                {
+                    <button class="btn btn-sm btn-warning" disabled title="Alleen admins kunnen blokkeren/deblokkeren">@(u.Blocked ? "Deblokkeer" : "Blokkeer")</button>
+                }
+
+                @* View roles link *@
+                <a class="btn btn-sm btn-secondary" asp-controller="Admin" asp-action="UserRoles" asp-route-id="@u.Id">Bekijk rollen</a>
+
+                @* Delete only for admins *@
+                @if (isAdmin)
+                {
+                    <form asp-controller="Admin" asp-action="DeleteUser" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@u.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?');">Verwijder</button>
+                    </form>
+                }
+            </div>
+        </td>
+    </tr>
+}
+    </tbody>
+</table>
+
+<nav aria-label="Pagina navigatie">
+    <ul class="pagination">
+        @{ var totalPages = (int)System.Math.Ceiling((double)Model.Total / Model.PageSize); }
+        @for (int p = 1; p <= totalPages; p++)
+        {
+            <li class="page-item @(p==Model.Page ? "active" : "")"><a class="page-link" href="?page=@p&pageSize=@Model.PageSize&search=@search&role=@selectedRole">@p</a></li>
+        }
+    </ul>
+</nav>

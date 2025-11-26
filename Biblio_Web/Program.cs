@@ -9,6 +9,7 @@ using System.Globalization;
 using Microsoft.OpenApi.Models;
 using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
+using Biblio_Web.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,13 +21,14 @@ var connectionString = builder.Configuration.GetConnectionString(ConnKey)
     ?? "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
 
 // Localization
-builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources/Vertalingen");
 
 // Configure DbContext and suppress pending-model-changes warning temporarily (create migrations instead)
 builder.Services.AddDbContext<BiblioDbContext>(options =>
     options.UseSqlServer(connectionString)
            .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))
 );
+
 
 // Identity + packaged UI
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -46,7 +48,8 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
-});
+})
+.AddViewLocalization();
 
 // JWT Authentication (register JwtBearer without overriding cookie defaults)
 var jwtSection = builder.Configuration.GetSection("Jwt");
@@ -106,13 +109,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
+    // Define a Swagger document
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Biblio API", Version = "v1" });
+
+    // JWT Bearer authentication configuration for Swagger UI
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -120,11 +128,17 @@ builder.Services.AddSwaggerGen(c =>
         {
             new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" },
+                Scheme = "bearer",
+                Name = "Bearer",
+                In = ParameterLocation.Header
             },
-            new string[] {}
+            new string[] { }
         }
     });
+
+    // Show example payload for the login endpoint in Swagger UI
+    c.OperationFilter<AddLoginRequestExampleOperationFilter>();
 });
 
 // Supported cultures
@@ -194,8 +208,13 @@ if (!app.Environment.IsDevelopment())
 else
 {
     app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Biblio API V1"));
+    // Serve the generated Swagger as JSON endpoint and enable Swagger UI
+    app.UseSwagger(c => { c.RouteTemplate = "swagger/{documentName}/swagger.json"; });
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Biblio API V1");
+        c.RoutePrefix = "swagger"; // serve UI at /swagger
+    });
 }
 
 app.UseHttpsRedirection();

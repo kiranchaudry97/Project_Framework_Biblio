@@ -1,0 +1,22 @@
+@model Biblio_Web.ViewModels.UserViewModel
+
+@{
+    ViewData["Title"] = "Bevestig verwijderen";
+}
+
+<h1>Bevestig verwijderen</h1>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@Model.UserName (@Model.Email)</h5>
+        <p>Rollen: @string.Join(", ", Model.Roles ?? new List<string>())</p>
+        <p>Geblokkeerd: @(Model.Blocked ? "Ja" : "Nee")</p>
+
+        <form asp-controller="Admin" asp-action="DeleteUser" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">Bevestig verwijderen</button>
+            <a asp-action="Users" class="btn btn-secondary">Annuleer</a>
+        </form>
+    </div>
+</div>

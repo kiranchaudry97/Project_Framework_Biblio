@@ -1,0 +1,35 @@
+@model Biblio_Models.Entiteiten.Lid
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["Lid Bewerken"];
+}
+
+<h1>@Localizer["Edit"]</h1>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label class="form-label">@Localizer["Voornaam"]</label>
+        <input asp-for="Voornaam" class="form-control" />
+        <span asp-validation-for="Voornaam" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">@Localizer["Achternaam"]</label>
+        <input asp-for="AchterNaam" class="form-control" />
+        <span asp-validation-for="AchterNaam" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">@Localizer["Email"]</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary">@Localizer["Opslaan"]</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">@Localizer["Annuleren"]</a>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

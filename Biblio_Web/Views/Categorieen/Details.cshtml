@@ -1,15 +1,17 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 @model Biblio_Models.Entiteiten.Categorie
 @{
-    ViewData["Title"] = "Categorie details";
+    ViewData["Title"] = Localizer["CategoryDetails"];
 }
 
-<h1>Categorie details</h1>
+<h1>@Localizer["CategoryDetails"]</h1>
 <div class="card">
     <div class="card-body">
         <dl class="row">
-            <dt class="col-sm-3">Naam</dt>
+            <dt class="col-sm-3">@Localizer["ColumnName"]</dt>
             <dd class="col-sm-9">@Model.Naam</dd>
         </dl>
-        <a asp-action="Index" class="btn btn-secondary">Terug</a>
+        <a asp-action="Index" class="btn btn-secondary">@Localizer["Back"]</a>
     </div>
 </div>

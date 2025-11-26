@@ -2,21 +2,28 @@
 @model Biblio_Web.Areas.Identity.Pages.Account.LoginModel
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 @{
-    ViewData["Title"] = Localizer["Welkom bij biblio!"];
+    ViewData["Title"] = Localizer["Log In"];
 }
 
 <div class="form-centered">
-    <div class="text-center mb-3">
+    <div class="text-center mb-3 d-flex justify-content-center align-items-center gap-3">
         <a class="navbar-brand fw-bold fs-4" asp-area="" asp-controller="Home" asp-action="Index">Biblio</a>
+
+        <!-- language selector placed next to logo -->
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="langDropdownLogin" data-bs-toggle="dropdown" aria-expanded="false">@System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToUpper()</button>
+            <ul class="dropdown-menu" aria-labelledby="langDropdownLogin">
+                <li><a class="dropdown-item" asp-controller="Culture" asp-action="SetLanguage" asp-route-culture="nl" asp-route-returnUrl="@(Request.Path + Request.QueryString)">NL</a></li>
+                <li><a class="dropdown-item" asp-controller="Culture" asp-action="SetLanguage" asp-route-culture="en" asp-route-returnUrl="@(Request.Path + Request.QueryString)">EN</a></li>
+            </ul>
+        </div>
     </div>
 
-    @if (User?.Identity?.IsAuthenticated == true)
+    <h1 class="text-center mb-3">@ViewData["Title"]</h1>
+
+    @if (TempData["Message"] != null)
     {
-        <h1 class="h3 mb-3 fw-semibold text-center">@($"{Localizer["Welcome"]} {User.Identity.Name}")</h1>
-    }
-    else
-    {
-        <h1 class="h3 mb-3 fw-semibold text-center">@ViewData["Title"]</h1>
+        <div class="alert alert-success">@TempData["Message"]</div>
     }
 
     <form method="post" class="needs-validation" novalidate>
@@ -25,35 +32,33 @@
         <div asp-validation-summary="All" class="text-danger mb-2"></div>
 
         <div class="mx-auto" style="max-width:420px;">
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Email" id="Input_Email" type="email" class="form-control form-control-sm"
-                    maxlength="254" />
-                <label asp-for="Input.Email">@Localizer["Email"]</label>
+            <div class="mb-3">
+                <label class="form-label">@Localizer["Email"]</label>
+                <input asp-for="Input.Email" id="Input_Email" type="email" class="form-control form-control-sm" placeholder="@Localizer["Email"]" maxlength="254" />
                 <span asp-validation-for="Input.Email" class="text-danger small"></span>
             </div>
 
-            <div class="form-floating mb-3">
-                <input asp-for="Input.Password" id="Input_Password" type="password" class="form-control form-control-sm"
-                    maxlength="100" />
-                <label asp-for="Input.Password">@Localizer["Password"]</label>
+            <div class="mb-3">
+                <label class="form-label">@Localizer["Password"]</label>
+                <input asp-for="Input.Password" id="passwordInput" type="password" class="form-control form-control-sm" placeholder="@Localizer["Password"]" />
                 <span asp-validation-for="Input.Password" class="text-danger small"></span>
+
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" value="" id="showPasswordCheck" />
+                    <label class="form-check-label small" for="showPasswordCheck">@Localizer["Show Password"]</label>
+                </div>
             </div>
 
             <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="showPassword" />
-                <label class="form-check-label" for="showPassword">@Localizer["Show Password"]</label>
-            </div>
-
-            <div class="form-check mb-3">
-                <input asp-for="Input.RememberMe" class="form-check-input" />
+                <input asp-for="Input.RememberMe" class="form-check-input" id="Input_RememberMe" />
                 <label asp-for="Input.RememberMe" class="form-check-label">@Localizer["Remember Me"]</label>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-sm mx-auto d-block mb-2" style="min-width:140px;">@Localizer["Login"]</button>
+            <button type="submit" class="btn btn-primary btn-sm w-100 mb-2">@Localizer["Login"]</button>
 
-            <div class="text-center small mt-2">
-                <a asp-page="./Register" class="mx-2">@Localizer["Register Link"]</a>
-                <a asp-page="./ForgotPassword" class="mx-2">@Localizer["Forgot Password Link"]</a>
+            <div class="d-flex justify-content-between small mt-2">
+                <a asp-page="./ForgotPassword" class="text-decoration-none">@Localizer["Forgot Password Link"]</a>
+                <a asp-page="./Register" class="text-decoration-none">@Localizer["Register Link"]</a>
             </div>
         </div>
 
@@ -61,13 +66,15 @@
 </div>
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script>
-        (function() {
-            var cb = document.getElementById('showPassword');
-            var pw = document.getElementById('Input_Password');
-            if (!cb || !pw) return;
-            cb.addEventListener('change', function() {
-                pw.type = this.checked ? 'text' : 'password';
+        (function(){
+            const pwd = document.getElementById('passwordInput');
+            const chk = document.getElementById('showPasswordCheck');
+            if (!pwd || !chk) return;
+
+            chk.addEventListener('change', function(){
+                pwd.type = this.checked ? 'text' : 'password';
             });
         })();
     </script>

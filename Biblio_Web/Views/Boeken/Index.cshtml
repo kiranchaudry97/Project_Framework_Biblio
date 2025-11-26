@@ -1,31 +1,60 @@
-@using Microsoft.AspNetCore.Mvc.Localization
-@inject IViewLocalizer Localizer
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Mvc.Rendering
 @model IEnumerable<Biblio_Models.Entiteiten.Boek>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
+@inject Microsoft.AspNetCore.Authorization.IAuthorizationService AuthorizationService
 @{
-    ViewData["Title"] = Localizer["Title"];
+    ViewData["Title"] = L["Books"];
+    var canCreate = AuthorizationService.AuthorizeAsync(User, null, "RequireStaff").GetAwaiter().GetResult().Succeeded;
 }
 
-<h1>@Localizer["Title"]</h1>
+<h1>@L["Books"]</h1>
 
 <form method="get" class="row g-2">
     <div class="col-auto">
-        <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" />
+        <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="@L["SearchPlaceholder"]" />
     </div>
     <div class="col-auto">
-        <button class="btn btn-primary">@Localizer["Filter"]</button>
+        <select name="categoryId" class="form-select">
+            <option value="">@L["ChooseCategory"]</option>
+            @if (ViewBag.Categories != null)
+            {
+                foreach (var c in (IEnumerable<Biblio_Models.Entiteiten.Categorie>)ViewBag.Categories)
+                {
+                    if (ViewContext.HttpContext.Request.Query["categoryId"] == c.Id.ToString())
+                    {
+                        <option value="@c.Id" selected>@c.Naam</option>
+                    }
+                    else
+                    {
+                        <option value="@c.Id">@c.Naam</option>
+                    }
+                }
+            }
+        </select>
     </div>
     <div class="col-auto">
-        <a class="btn btn-success" asp-action="Create">@Localizer["New"]</a>
+        <button class="btn btn-primary">@L["Filter"]</button>
+    </div>
+    <div class="col-auto">
+        @if (canCreate)
+        {
+            <a class="btn btn-success" href="@Url.Action("Create", "Boeken")">@L["New"]</a>
+        }
+        else if (User?.Identity?.IsAuthenticated != true)
+        {
+            <a class="btn btn-outline-primary" asp-area="Identity" asp-page="/Account/Login">@L["SignIn"]</a>
+        }
     </div>
 </form>
 
 <table class="table table-striped mt-3">
     <thead>
         <tr>
-            <th>@Localizer["ColumnTitle"]</th>
-            <th>@Localizer["ColumnAuthor"]</th>
-            <th>@Localizer["ColumnIsbn"]</th>
-            <th>@Localizer["ColumnCategory"]</th>
+            <th>@L["ColumnTitle"]</th>
+            <th>@L["ColumnAuthor"]</th>
+            <th>@L["ColumnIsbn"]</th>
+            <th>@L["ColumnCategory"]</th>
             <th></th>
         </tr>
     </thead>
@@ -38,9 +67,9 @@
         <td>@b.Isbn</td>
         <td>@b.categorie?.Naam</td>
         <td>
-            <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@b.Id">@Localizer["Edit"]</a>
-            <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@b.Id">@Localizer["Details"]</a>
-            <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@b.Id">@Localizer["Delete"]</a>
+            <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@b.Id">@L["Edit"]</a>
+            <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@b.Id">@L["Details"]</a>
+            <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@b.Id">@L["Delete"]</a>
         </td>
     </tr>
 }

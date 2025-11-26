@@ -1,0 +1,14 @@
+@using System.Collections.Generic
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
+@{
+    var roles = ViewBag.Roles as List<string> ?? new List<string>();
+}
+
+<div class="dropdown ms-3">
+    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="beheerDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+        <span>@L["Admin"]</span>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="beheerDropdownBtn">
+        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">@L["Admin"]</a></li>
+    </ul>
+</div>

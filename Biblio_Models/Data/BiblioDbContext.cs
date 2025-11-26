@@ -19,6 +19,7 @@ namespace Biblio_Models.Data
         public DbSet<Lid> Leden { get; set; } = null!;
         public DbSet<Lenen> Leningens { get; set; } = null!;
         public DbSet<Categorie> Categorien { get; set; } = null!;
+        public DbSet<Taal> Talen { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -36,6 +37,8 @@ namespace Biblio_Models.Data
         protected override void OnModelCreating(ModelBuilder b)
         {
             base.OnModelCreating(b);
+
+            // removed mapping for CategorieVertalingen
 
             b.Entity<Boek>(e =>
             {
@@ -71,6 +74,23 @@ namespace Biblio_Models.Data
                 .HasDatabaseName("IX_Uitleningen_BoekId_Actief")
                 .IsUnique();
             });
+
+            // Taal mapping
+            b.Entity<Taal>(e =>
+            {
+                e.ToTable("Talen");
+                e.Property(x => x.Id).HasColumnName("Id");
+                e.Property(x => x.Code).HasColumnName("Code").HasMaxLength(5).IsRequired();
+                e.Property(x => x.Naam).HasColumnName("Naam").HasMaxLength(120).IsRequired();
+                e.Property(x => x.IsSystemTaal).HasColumnName("IsSystemTaal");
+                e.Property(x => x.IsActive).HasColumnName("IsActive");
+                e.Property(x => x.CreatedAt).HasColumnName("CreatedAt");
+
+                e.HasIndex(x => x.Code).IsUnique().HasDatabaseName("IX_Talen_Code");
+            });
+
+            // make it easy to only query active languages
+            b.Entity<Taal>().HasQueryFilter(t => t.IsActive);
 
             // Relaties
             b.Entity<Boek>()

@@ -6,8 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
-using AutoMapper;
-using Biblio_Web.ApiModels;
 
 namespace Biblio_Web.Controllers.Api
 {
@@ -17,53 +15,58 @@ namespace Biblio_Web.Controllers.Api
     public class BoekenApiController : ControllerBase
     {
         private readonly BiblioDbContext _db;
-        private readonly IMapper _mapper;
-        public BoekenApiController(BiblioDbContext db, IMapper mapper) => (_db, _mapper) = (db, mapper);
+        public BoekenApiController(BiblioDbContext db) => _db = db;
 
         // GET: api/Boeken
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BoekDto>>> Get()
+        public async Task<ActionResult<IEnumerable<Boek>>> Get()
         {
             var list = await _db.Boeken.Where(b => !b.IsDeleted).Include(b => b.categorie).ToListAsync();
-            var dto = _mapper.Map<IEnumerable<BoekDto>>(list);
-            return Ok(dto);
+            return Ok(list);
         }
 
         // GET: api/Boeken/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BoekDto>> Get(int id)
+        public async Task<ActionResult<Boek>> Get(int id)
         {
             var boek = await _db.Boeken.Include(b => b.categorie).FirstOrDefaultAsync(b => b.Id == id && !b.IsDeleted);
             if (boek == null) return NotFound();
-            return Ok(_mapper.Map<BoekDto>(boek));
+            return Ok(boek);
         }
 
         // POST: api/Boeken
         [HttpPost]
         [Authorize(Policy = "RequireStaff")]
-        public async Task<ActionResult<BoekDto>> Post(BoekDto model)
+        public async Task<ActionResult<Boek>> Post(Boek model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var entity = _mapper.Map<Boek>(model);
+            var entity = new Boek
+            {
+                Titel = model.Titel,
+                Auteur = model.Auteur,
+                Isbn = model.Isbn,
+                CategorieID = model.CategorieID
+            };
             _db.Boeken.Add(entity);
             await _db.SaveChangesAsync();
 
             var saved = await _db.Boeken.Include(b => b.categorie).FirstOrDefaultAsync(b => b.Id == entity.Id);
-            var dto = _mapper.Map<BoekDto>(saved!);
-            return CreatedAtAction(nameof(Get), new { id = dto.Id }, dto);
+            return CreatedAtAction(nameof(Get), new { id = entity.Id }, saved);
         }
 
         // PUT: api/Boeken/5
         [HttpPut("{id}")]
         [Authorize(Policy = "RequireStaff")]
-        public async Task<IActionResult> Put(int id, BoekDto model)
+        public async Task<IActionResult> Put(int id, Boek model)
         {
             if (id != model.Id) return BadRequest();
             var existing = await _db.Boeken.FindAsync(id);
             if (existing == null || existing.IsDeleted) return NotFound();
 
-            // map incoming DTO onto existing entity (Categorie navigation is ignored by mapping)
-            _mapper.Map(model, existing);
+            existing.Titel = model.Titel;
+            existing.Auteur = model.Auteur;
+            existing.Isbn = model.Isbn;
+            existing.CategorieID = model.CategorieID;
 
             _db.Boeken.Update(existing);
             await _db.SaveChangesAsync();

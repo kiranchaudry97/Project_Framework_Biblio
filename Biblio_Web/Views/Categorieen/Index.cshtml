@@ -1,17 +1,18 @@
 @model IEnumerable<Biblio_Models.Entiteiten.Categorie>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
 @{
-    ViewData["Title"] = "Categorieën";
+    ViewData["Title"] = L["Categories"];
 }
 
-<h1>Categorieën</h1>
+<h1>@L["Categories"]</h1>
 @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
 {
-    <a class="btn btn-success mb-2" asp-action="Create">Nieuwe categorie</a>
+    <a class="btn btn-success mb-2" asp-action="Create">@L["NewCategory"]</a>
 }
 
 <table class="table table-striped">
     <thead>
-        <tr><th>Naam</th><th></th></tr>
+        <tr><th>@L["ColumnName"]</th><th></th></tr>
     </thead>
     <tbody>
 @foreach(var c in Model)
@@ -21,10 +22,10 @@
         <td>
             @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
             {
-                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@c.Id">Verwijderen</a>
+                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@c.Id">@L["Delete"]</a>
             }
         </td>
     </tr>
 }
     </tbody>
-</table>
+</table></table>

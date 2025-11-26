@@ -71,13 +71,81 @@ body {
     box-shadow: 0 8px 20px rgba(18, 38, 63, 0.06);
 }
 
-/* Custom navbar tweaks */
+/* refine width on small screens */
+@media (max-width: 576px) {
+  .form-centered { margin: 1rem 0.75rem; padding: 1rem; }
+}
 
-/* Light blue hover for navbar links */
-.navbar-nav .nav-link:hover,
-.navbar-nav .nav-item:hover {
-  background-color: #e6f7ff; /* light blue */
-  border-radius: 6px;
+/* eye button style (updated to remove hover background/border and browser default appearance) */
+.btn-eye {
+  border-top-left-radius: 0; border-bottom-left-radius: 0;
+  padding: .35rem .5rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  color: inherit !important;
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.input-group .form-control.form-control-sm + .btn-eye,
+.input-group .btn-eye {
+  margin-left: -1px; /* visually attach button to input */
+}
+
+/* ensure no hover/focus background for the eye button */
+.btn-eye:hover,
+.btn-eye:active,
+.btn-eye:focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* remove any default focus ring from browsers for the eye button but keep accessibility via aria-label */
+.btn-eye:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* center footer content */
+.footer .container .d-flex {
+  justify-content: center;
+}
+
+/* Dark mode styles */
+body.dark-mode {
+  background-color: #121212;
+  color: #e6e6e6;
+}
+body.dark-mode .navbar,
+body.dark-mode .footer,
+body.dark-mode .sidebar {
+  background-color: #1e1e1e !important;
+  color: #e6e6e6;
+}
+body.dark-mode .nav-link,
+body.dark-mode .navbar-brand {
+  color: #e6e6e6 !important;
+}
+body.dark-mode .btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+/* small transition on theme changes */
+body { transition: background-color .18s ease, color .18s ease; }
+
+/* Ensure nav-item hover doesn't add a second background behind buttons */
+.navbar-nav .nav-item:hover > .btn {
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Ensure spacing for hovered items */
@@ -114,6 +182,36 @@ body {
   border-radius: 0.25rem;
 }
 
+/* Icon styling for sidebar buttons: show a small white rounded box with the bootstrap icon in brand color */
+.sidebar .btn .bi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 6px;
+  background-color: #fff !important; /* force white background */
+  color: var(--bs-primary) !important;
+  font-size: 1.05rem;
+  margin-right: 0.75rem;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* Keep the icon background white even in dark mode for contrast */
+body.dark-mode .sidebar .btn .bi {
+  background-color: #fff !important;
+  color: var(--bs-primary) !important;
+  border-color: rgba(0,0,0,0.12);
+}
+
+/* Ensure button text is vertically centered and has consistent padding */
+.sidebar .btn.d-flex.align-items-center {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
 /* Dark mode styles */
 body.dark-mode {
   background-color: #121212;
@@ -132,4 +230,151 @@ body.dark-mode .navbar-brand {
 body.dark-mode .btn-primary {
   background-color: #0d6efd;
   border-color: #0d6efd;
+}
+
+/* Only show dropdown caret for the admin 'Beheer' button in the navbar. Hide caret for other dropdowns in the navbar (e.g. language). */
+.navbar .dropdown-toggle::after {
+  display: none !important;
+}
+#beheerDropdownBtn::after {
+  display: inline-block !important;
+}
+
+/* Make theme toggle visually neutral: remove dark/active background and focus shadow */
+#themeToggle {
+  background-color: transparent !important;
+  color: inherit !important;
+  border-color: rgba(0,0,0,0.15) !important;
+  box-shadow: none !important;
+}
+#themeToggle:hover {
+  background-color: rgba(0,0,0,0.03) !important;
+}
+#themeToggle:focus,
+#themeToggle:active,
+#themeToggle.active {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Remove focus/active indicators for navbar inline items like Hallo Beheerder and small nav buttons */
+.navbar .nav-link:focus,
+.navbar .nav-link:active,
+.navbar .nav-link:focus-visible {
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Ensure non-button nav elements don't get default focus styles */
+.navbar .nav-item .form-inline .nav-link,
+.navbar .nav-item span.nav-link {
+  padding: .35rem 0.5rem;
+}
+
+/* Remove list bullets from Bootstrap navbars used in our layout */
+.navbar-nav {
+  list-style: none;
+  padding-left: 0; /* ensure no left padding */
+  margin: 0;
+}
+
+/* Ensure dropdown menus keep their default styles but no bullets */
+.navbar-nav .dropdown-menu {
+  list-style: none;
+}
+
+/* Make language caret smaller */
+.lang-caret {
+  font-size: 0.65em; /* smaller caret */
+  vertical-align: -1px;
+}
+
+/* Remove bullets for vertical sidebar nav lists */
+ul.nav.flex-column {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+/* Admin 'Beheer' button hover: match navbar nav-link hover visual */
+#beheerDropdownBtn {
+  /* keep default primary appearance but allow override on hover */
+  border-radius: 6px;
+  padding: .35rem .75rem;
+  transition: background-color .12s ease-in-out, color .12s ease-in-out;
+  line-height: 1;
+}
+#beheerDropdownBtn:hover,
+#beheerDropdownBtn:focus {
+  background-color: #e6f7ff !important; /* same light blue as nav link hover */
+  color: var(--bs-primary) !important; /* blue text on light background */
+  border-color: rgba(0,0,0,0.06) !important;
+  box-shadow: none !important;
+}
+
+/* Prevent parent nav-item hover from painting behind the button */
+.navbar-nav .nav-item:hover > #beheerDropdownBtn {
+  background-color: transparent !important;
+}
+
+/* Override default .btn-primary hover inside navbar to avoid a second layer */
+.navbar .btn-primary:hover,
+.navbar .btn-primary:focus {
+  background-color: #e6f7ff !important;
+  color: var(--bs-primary) !important;
+  border-color: rgba(0,0,0,0.06) !important;
+  box-shadow: none !important;
+}
+
+/* In dark mode keep the hover visible and readable */
+body.dark-mode #beheerDropdownBtn:hover,
+body.dark-mode #beheerDropdownBtn:focus {
+  background-color: rgba(230,247,255,0.08) !important;
+  color: var(--bs-primary) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+/* Center placeholders and buttons inside form-centered cards */
+.form-centered .form-control {
+  /* keep typed text left aligned for readability */
+  text-align: left;
+}
+
+/* keep placeholder text centered until the input is focused */
+.form-centered .form-control::placeholder {
+  text-align: center;
+}
+
+/* When user focuses the input, align typed text to the left for readability */
+.form-centered .form-control:focus {
+  text-align: left;
+}
+
+/* Ensure button text is centered */
+.form-centered .btn {
+  text-align: center;
+}
+
+/* Purple action button for profile change password */
+.btn-purple {
+  background-color: #6f42c1;
+  border-color: #6f42c1;
+  color: #fff !important;
+}
+.btn-purple:hover,
+.btn-purple:focus {
+  background-color: #5a34a6;
+  border-color: #523192;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.btn-purple:active {
+  background-color: #4b2a8a;
+  border-color: #412575;
+}
+.btn-purple:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 0.2rem rgba(111,66,193,0.25) !important;
 }

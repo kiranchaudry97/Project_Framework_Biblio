@@ -55,7 +55,7 @@ namespace Biblio_Web.Controllers
             return View(lid);
         }
 
-        [Authorize(Policy = "RequireStaff")]
+        // GET: Leden/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();

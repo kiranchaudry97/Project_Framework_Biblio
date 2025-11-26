@@ -1,20 +1,22 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
 @model Biblio_Models.Entiteiten.Categorie
 @{
-    ViewData["Title"] = "Bewerk categorie";
+    ViewData["Title"] = Localizer["EditCategory"];
 }
 
-<h1>Bewerk categorie</h1>
+<h1>@Localizer["EditCategory"]</h1>
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
     <div class="mb-3">
-        <label class="form-label">Naam</label>
+        <label class="form-label">@Localizer["ColumnName"]</label>
         <input asp-for="Naam" class="form-control" />
         <span asp-validation-for="Naam" class="text-danger"></span>
     </div>
 
-    <button class="btn btn-primary">Opslaan</button>
-    <a asp-action="Index" class="btn btn-secondary">Annuleer</a>
+    <button class="btn btn-primary">@Localizer["Save"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["Cancel"]</a>
 </form>
 
 @section Scripts{

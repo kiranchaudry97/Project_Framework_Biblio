@@ -1,22 +1,21 @@
-@using Microsoft.AspNetCore.Mvc.Localization
-@inject IViewLocalizer Localizer
 @model IEnumerable<Biblio_Models.Entiteiten.Lid>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
 @{
-    ViewData["Title"] = Localizer["Title"];
+    ViewData["Title"] = L["Members"];
 }
 
-<h1>@Localizer["Title"]</h1>
+<h1>@L["Members"]</h1>
 <form method="get" class="row g-2">
     <div class="col-auto">
-        <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" />
+        <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="@L["SearchPlaceholder"]" />
     </div>
     <div class="col-auto">
-        <button class="btn btn-primary">@Localizer["Filter"]</button>
+        <button class="btn btn-primary">@L["Filter"]</button>
     </div>
     <div class="col-auto">
         @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
         {
-            <a class="btn btn-success" asp-action="Create">@Localizer["New"]</a>
+            <a class="btn btn-success" asp-action="Create">@L["New"]</a>
         }
     </div>
 </form>
@@ -24,9 +23,9 @@
 <table class="table table-striped mt-3">
     <thead>
         <tr>
-            <th>@Localizer["ColumnFirstName"]</th>
-            <th>@Localizer["ColumnLastName"]</th>
-            <th>@Localizer["ColumnEmail"]</th>
+            <th>@L["ColumnFirstName"]</th>
+            <th>@L["ColumnLastName"]</th>
+            <th>@L["ColumnEmail"]</th>
             <th></th>
         </tr>
     </thead>
@@ -38,14 +37,21 @@
         <td>@l.AchterNaam</td>
         <td>@l.Email</td>
         <td>
-            <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@l.Id">@Localizer["Details"]</a>
+            <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@l.Id">@L["Details"]</a>
+
+            @* Allow authenticated users to open the Edit form; actual saving still requires staff *@
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a class="btn btn-sm btn-primary ms-1" asp-action="Edit" asp-route-id="@l.Id">@L["Edit"]</a>
+            }
+
+            @* Delete only for staff *@
             @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
             {
-                <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@l.Id">@Localizer["Edit"]</a>
-                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@l.Id">@Localizer["Delete"]</a>
+                <a class="btn btn-sm btn-danger ms-1" asp-action="Delete" asp-route-id="@l.Id">@L["Delete"]</a>
             }
         </td>
     </tr>
 }
     </tbody>
-</table>
+</table></table>

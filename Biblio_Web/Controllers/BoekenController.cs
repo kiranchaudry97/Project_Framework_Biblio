@@ -22,6 +22,10 @@ namespace Biblio_Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index(string search, int? categoryId)
         {
+            // provide categories for the filter dropdown
+            ViewBag.Categories = await _db.Categorien.OrderBy(c => c.Naam).ToListAsync();
+            ViewBag.SelectedCategory = categoryId;
+
             var q = _db.Boeken.Include(b => b.categorie).AsQueryable();
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -71,7 +75,6 @@ namespace Biblio_Web.Controllers
         }
 
         // GET: Boeken/Edit/5
-        [Authorize(Policy = "RequireStaff")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();

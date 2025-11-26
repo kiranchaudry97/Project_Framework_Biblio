@@ -1,0 +1,55 @@
+@using Biblio_Web.Models
+@model CreateUserViewModel
+
+@{
+    ViewData["Title"] = "Nieuw gebruiker";
+}
+
+<h1>Nieuw gebruiker</h1>
+
+<form method="post" asp-controller="Admin" asp-action="CreateUser">
+    @Html.AntiForgeryToken()
+    <div class="mb-3">
+        <label class="form-label">E-mail</label>
+        <input type="email" asp-for="Email" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Wachtwoord</label>
+        <input type="password" asp-for="Password" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Volledige naam</label>
+        <input type="text" asp-for="FullName" class="form-control" />
+    </div>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="form-check mb-3">
+            <input type="checkbox" asp-for="IsAdmin" class="form-check-input" id="isAdmin" />
+            <label class="form-check-label" for="isAdmin">Admin</label>
+        </div>
+        <div class="form-check mb-3">
+            <input type="checkbox" asp-for="IsStaff" class="form-check-input" id="isStaff" checked />
+            <label class="form-check-label" for="isStaff">Medewerker</label>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            Alleen gebruikers met de rol <strong>Admin</strong> kunnen rollen toewijzen.
+        </div>
+        <div class="form-check mb-3">
+            <input class="form-check-input" id="isAdmin" type="checkbox" checked="false" disabled />
+            <label class="form-check-label" for="isAdmin">Admin</label>
+            <input type="hidden" name="IsAdmin" value="false" />
+        </div>
+        <div class="form-check mb-3">
+            <input class="form-check-input" id="isStaff" type="checkbox" checked="checked" disabled />
+            <label class="form-check-label" for="isStaff">Medewerker</label>
+            <input type="hidden" name="IsStaff" value="true" />
+        </div>
+    }
+
+    <button class="btn btn-primary">Aanmaken</button>
+    <a asp-action="Users" class="btn btn-secondary">Annuleer</a>
+</form>

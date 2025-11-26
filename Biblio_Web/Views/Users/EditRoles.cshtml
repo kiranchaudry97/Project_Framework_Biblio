@@ -1,0 +1,49 @@
+@using Biblio_Web.Models
+@model AdminEditRolesViewModel
+
+@{
+    ViewData["Title"] = "Rollen bewerken";
+    var canAssignAdmin = User.IsInRole("Admin");
+}
+
+<h1>Rollen bewerken voor @Model.Email</h1>
+
+@if (canAssignAdmin)
+{
+    <div class="alert alert-info">
+        <strong>Opmerking:</strong> Gebruikers met de rol <em>Admin</em> kunnen rollen toewijzen en verwijderen, inclusief de <em>Admin</em>- en <em>Medewerker</em>-rollen.
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <strong>Opmerking:</strong> Alleen gebruikers met de rol <em>Admin</em> kunnen de rollen <em>Admin</em> en <em>Medewerker</em> toewijzen of verwijderen.
+    </div>
+}
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="UserId" />
+    <div class="mb-3">
+@for (int i = 0; i < Model.Roles.Count; i++)
+{
+    var roleName = Model.Roles[i].RoleName;
+    var isAdminRole = string.Equals(roleName, "Admin", System.StringComparison.OrdinalIgnoreCase);
+    var isStaffRole = string.Equals(roleName, "Medewerker", System.StringComparison.OrdinalIgnoreCase);
+    <div class="form-check mb-2">
+        @if ((isAdminRole || isStaffRole) && !canAssignAdmin)
+        {
+            <input asp-for="Roles[@i].IsSelected" class="form-check-input" disabled="disabled" title="Alleen admins kunnen deze rol toewijzen" />
+        }
+        else
+        {
+            <input asp-for="Roles[@i].IsSelected" class="form-check-input" />
+        }
+        <label class="form-check-label" for="@("Roles_" + i + "__IsSelected")">@roleName</label>
+        <input type="hidden" asp-for="Roles[@i].RoleName" />
+    </div>
+}
+    </div>
+    <button class="btn btn-primary">Opslaan</button>
+    <a asp-action="Users" class="btn btn-secondary">Annuleer</a>
+</form>
