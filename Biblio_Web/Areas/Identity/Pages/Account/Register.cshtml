@@ -1,0 +1,78 @@
+@*
+Register.cshtml
+Doel: pagina waarmee nieuwe gebruikers zich kunnen registreren (e-mail + wachtwoord).
+Gebruik: toont een formulier voor het invoeren van e-mailadres, wachtwoord en bevestiging; het PageModel verwerkt de POST en maakt een nieuw account aan.
+Doelstellingen:
+- Bied een eenvoudige en toegankelijke UI om nieuwe accounts te registreren.
+- Gebruik gelokaliseerde teksten via `IStringLocalizer` voor meertalige ondersteuning.
+- Valideer wachtwoord en bevestiging client-side en server-side.
+- Respecteer de app-layout en geef gebruikers de mogelijkheid om direct in te loggen na registratie.
+*@
+
+@page
+@model Biblio_Web.Areas.Identity.Pages.Account.RegisterModel
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> Localizer
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Localizer["Register"];
+}
+
+<div class="form-centered">
+    <div class="text-center mb-3">
+        <a class="navbar-brand fw-bold fs-4" asp-area="" asp-controller="Home" asp-action="Index">Biblio</a>
+        <div class="mt-2" style="display:inline-block;">
+            <select id="cultureSelect" class="form-select form-select-sm" data-returnurl="@(HttpContext.Request.Path + HttpContext.Request.QueryString)">
+                <option value="nl">NL</option>
+                <option value="en">EN</option>
+            </select>
+        </div>
+    </div>
+
+    <h1 class="h3 mb-3 fw-semibold text-center">@ViewData["Title"]</h1>
+
+    <form method="post" class="needs-validation" novalidate>
+        <partial name="_ValidationScriptsPartial" />
+        <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
+        <div class="mx-auto" style="max-width:420px;">
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Email" class="form-control form-control-sm" />
+                <label asp-for="Input.Email">@Localizer["Email"]</label>
+                <span asp-validation-for="Input.Email" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Password" type="password" class="form-control form-control-sm" />
+                <label asp-for="Input.Password">@Localizer["Password"]</label>
+                <span asp-validation-for="Input.Password" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Input.ConfirmPassword" type="password" class="form-control form-control-sm" />
+                <label asp-for="Input.ConfirmPassword">@Localizer["ConfirmPassword"]</label>
+                <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-sm mx-auto d-block mb-2" style="min-width:140px;">@Localizer["Register"]</button>
+            <div class="text-center small mt-2">
+                <a asp-page="./Login" class="mx-2">@Localizer["Login"]</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        (function() {
+            var sel = document.getElementById('cultureSelect');
+            if (sel) {
+                sel.addEventListener('change', function() {
+                    var returnUrl = this.getAttribute('data-returnurl') || '/';
+                    var culture = this.value || 'nl';
+                    var target = '@Url.Action("SetLanguage", "Culture")';
+                    window.location.href = target + '?culture=' + encodeURIComponent(culture) + '&returnUrl=' + encodeURIComponent(returnUrl);
+                });
+            }
+        })();
+    </script>
+}
