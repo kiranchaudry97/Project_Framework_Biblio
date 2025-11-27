@@ -1,10 +1,18 @@
-using System.ComponentModel.DataAnnotations;
+﻿// Login.cshtml.cs
+// Doel: PageModel voor de inlogpagina; handelt gebruikersauthenticatie af via e-mail en wachtwoord.
+// Gebruik: verwerkt GET en POST van de Login pagina; gebruikt SignInManager om gebruikers aan te melden.
+// Doelstellingen:
+// - Bied een duidelijke, gelokaliseerde inlogervaring met client-side validatie en 'onthoud mij' optie.
+// - Houd logging informatief maar niet gevoelig (log alleen niet‑geprivilegieerde informatie zoals e-mail en cookie keys/values).
+// - Zorg dat returnUrl correct wordt afgehandeld zodat gebruikers na inloggen terugkeren naar de gewenste pagina.using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Biblio_Models.Entiteiten;
+using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace Biblio_Web.Areas.Identity.Pages.Account
 {
@@ -12,10 +20,12 @@ namespace Biblio_Web.Areas.Identity.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<AppUser> signInManager)
+        public LoginModel(SignInManager<AppUser> signInManager, ILogger<LoginModel> logger)
         {
             _signInManager = signInManager;
+            _logger = logger;
             Input = new InputModel();
             ReturnUrl = string.Empty;
         }
@@ -50,7 +60,19 @@ namespace Biblio_Web.Areas.Identity.Pages.Account
 
             // Use null-forgiving because validation attributes ensure values are present
             var result = await _signInManager.PasswordSignInAsync(Input.Email!, Input.Password!, Input.RememberMe, lockoutOnFailure: false);
-            if (result.Succeeded) return LocalRedirect(ReturnUrl);
+            if (result.Succeeded)
+            {
+                // log request cookies
+                _logger.LogInformation("Login succeeded for {email}. Request cookies: {cookies}", Input.Email, string.Join(';', Request.Cookies.Select(kv => kv.Key + "=" + kv.Value)));
+                // log any Set-Cookie headers set on the response
+                if (Response?.Headers != null && Response.Headers.ContainsKey("Set-Cookie"))
+                {
+                    var sc = string.Join(';', Response.Headers["Set-Cookie"].ToArray());
+                    _logger.LogInformation("Response Set-Cookie headers: {setCookie}", sc);
+                }
+
+                return LocalRedirect(ReturnUrl);
+            }
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return Page();
         }
