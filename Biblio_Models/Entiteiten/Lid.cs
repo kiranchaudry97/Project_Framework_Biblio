@@ -21,19 +21,21 @@ namespace Biblio_Models.Entiteiten
 {
     public class Lid : BaseEntiteit
     {
-        [Required(ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "Required"), StringLength(100, ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "StringLength")]
+        [Required]
+        [StringLength(100, MinimumLength = 1)]
         public string Voornaam { get; set; } = string.Empty;
 
-        [Required(ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "Required"), StringLength(100, ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "StringLength")]
+        [Required]
+        [StringLength(100, MinimumLength = 1)]
         public string AchterNaam { get; set; } = string.Empty;
 
-        [EmailAddress(ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "EmailAddress")]
+        [EmailAddress]
         public string? Email { get; set; }
 
-        [Phone(ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "Phone")]
+        [Phone]
         public string? Telefoon { get; set; }
 
-        [StringLength(300, ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "StringLength")]
+        [StringLength(300)]
         public string? Adres { get; set; }
 
         public ICollection<Lenen> Leningens { get; set; } = new List<Lenen>();
