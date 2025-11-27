@@ -1,3 +1,14 @@
+﻿// Program.cs
+// Doel: bootstrap en configuratie van de webapplicatie (services, middleware en routing).
+// Gebruik: registreert services (DB, Identity, localization, AutoMapper, controllers, Swagger),
+//         voert database migratie en seeding uit bij startup en bouwt RequestLocalizationOptions
+//         op basis van talen in de database (met fallback).
+// Doelstellingen:
+// - Centraliseer startup-configuratie en maak cultuur/taal dynamisch instelbaar via de Taal-entiteit in de DB.
+// - Zorg voor veilige defaults voor Identity en JWT, en configureer autorisatiepolicies.
+// - Voer database migrations/seeding automatisch uit in development zodat de app direct getest kan worden.
+// - Houd cookie-gedrag en lokaliseringsproviders consistent zodat gebruikerskeuzes persistent zijn.
+
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -9,7 +20,7 @@ using System.Globalization;
 using Microsoft.OpenApi.Models;
 using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
-using Biblio_Web.Swagger;
+using Biblio_Models.Seed;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,17 +31,17 @@ var connectionString = builder.Configuration.GetConnectionString(ConnKey)
     ?? builder.Configuration["ConnectionStrings:DefaultConnection"]
     ?? "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
 
-// Localization
+// Localisatie - gebruik de map Vertalingen (bevat de volledige SharedResource.*.resx bestanden)
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources/Vertalingen");
 
-// Configure DbContext and suppress pending-model-changes warning temporarily (create migrations instead)
+// DbContext configureren en tijdelijk waarschuwing over pending model changes onderdrukken (maak migrations aan)
 builder.Services.AddDbContext<BiblioDbContext>(options =>
     options.UseSqlServer(connectionString)
            .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning))
 );
 
 
-// Identity + packaged UI
+// Identity + standaard UI
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = true;
@@ -44,14 +55,18 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     .AddDefaultTokenProviders()
     .AddDefaultUI();
 
-// Register Razor Pages and require authorization for Manage folder
+// Register Razor Pages en eis autorisatie voor de Manage-folder van Identity
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
 })
-.AddViewLocalization();
+.AddViewLocalization()
+.AddDataAnnotationsLocalization(options =>
+{
+    options.DataAnnotationLocalizerProvider = (type, factory) => factory.Create(typeof(Biblio_Web.SharedResource));
+});
 
-// JWT Authentication (register JwtBearer without overriding cookie defaults)
+// JWT Authenticatie (registreer JwtBearer zonder cookie-standaarden te overschrijven)
 var jwtSection = builder.Configuration.GetSection("Jwt");
 var jwtKey = jwtSection["Key"] ?? "SuperSecretDevelopmentKey";
 var jwtIssuer = jwtSection["Issuer"] ?? "BiblioApp";
@@ -71,13 +86,13 @@ builder.Services.AddAuthentication()
         };
     });
 
-// Ensure the application cookie redirects unauthenticated browser requests to the Identity login page
+// Zorg dat de application cookie niet-geauthenticeerde browserverzoeken doorstuurt naar de Identity loginpagina
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Identity/Account/Login";
 });
 
-// Authorization policies
+// Autorisatiepolicies
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireAdmin", policy => policy.RequireRole("Admin"));
@@ -85,10 +100,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireMember", policy => policy.RequireRole("Admin", "Medewerker", "Lid"));
 });
 
-// AutoMapper
+// AutoMapper configuratie
 builder.Services.AddAutoMapper(typeof(Biblio_Web.Mapping.MappingProfile));
 
-// MVC with global authorization fallback
+// MVC met globale autorisatiefallback
 builder.Services.AddControllersWithViews(options =>
 {
     var policy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
@@ -99,20 +114,21 @@ builder.Services.AddControllersWithViews(options =>
 .AddViewLocalization()
 .AddDataAnnotationsLocalization(options =>
 {
+    // gebruik de SharedResource class voor gevalideerde/localized data annotations
     options.DataAnnotationLocalizerProvider = (type, factory) => factory.Create(typeof(Biblio_Web.SharedResource));
 });
 
-// Add controllers support
+// Controllers ondersteuning
 builder.Services.AddControllers();
 
-// Swagger + JWT support
+// Swagger + JWT ondersteuning
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    // Define a Swagger document
+    // Definieer een Swagger document
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Biblio API", Version = "v1" });
 
-    // JWT Bearer authentication configuration for Swagger UI
+    // JWT Bearer authentication configuratie voor Swagger UI
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
@@ -136,35 +152,23 @@ builder.Services.AddSwaggerGen(c =>
             new string[] { }
         }
     });
-
-    // Show example payload for the login endpoint in Swagger UI
-    c.OperationFilter<AddLoginRequestExampleOperationFilter>();
 });
 
-// Supported cultures
-var supportedCultures = new[] { new CultureInfo("nl"), new CultureInfo("en") };
+// Fallback voor ondersteunde culturen (wordt runtime vervangen door DB‑waarden indien beschikbaar)
+var fallbackSupportedCultures = new[] { new CultureInfo("nl"), new CultureInfo("en") };
 
 var app = builder.Build();
 
-// Request localization
-var locOptions = new RequestLocalizationOptions
-{
-    DefaultRequestCulture = new RequestCulture("nl"),
-    SupportedCultures = supportedCultures.ToList(),
-    SupportedUICultures = supportedCultures.ToList()
-};
-locOptions.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localization.QueryStringRequestCultureProvider());
+// We bouwen RequestLocalizationOptions nadat DB is gemigreerd/geseed zodat ondersteunde culturen uit DB geladen kunnen worden.
 
-app.UseRequestLocalization(locOptions);
-
-// Ensure database is created/migrated and seed roles/users in development
+// Zorg dat de database wordt aangemaakt/gemigreerd en seed rollen/gebruikers in development
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var db = services.GetRequiredService<BiblioDbContext>();
-        // use async migration
+        // gebruik async migratie
         await db.Database.MigrateAsync();
 
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
@@ -192,15 +196,69 @@ using (var scope = app.Services.CreateScope())
                 await userManager.AddToRoleAsync(admin, "Admin");
             }
         }
+
+        // Voer centrale seed uit (categorieën, boeken, leden, talen, testaccounts)
+        await SeedData.InitializeAsync(services);
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred seeding the DB.");
+        logger.LogError(ex, "Er trad een fout op tijdens het seeden van de DB.");
     }
 }
 
-// Configure the HTTP request pipeline.
+// Bouw nu localization options op basis van in DB opgeslagen talen wanneer beschikbaar
+RequestLocalizationOptions locOptions;
+try
+{
+    using var scope2 = app.Services.CreateScope();
+    var db = scope2.ServiceProvider.GetRequiredService<BiblioDbContext>();
+
+    // laad niet‑verwijderde talen gesorteerd op IsDefault desc zodat default eerst komt als aanwezig
+    var taalEntities = await db.Talen
+        .Where(t => !t.IsDeleted)
+        .OrderByDescending(t => t.IsDefault)
+        .ToListAsync();
+
+    var codes = taalEntities.Select(t => t.Code).Where(c => !string.IsNullOrWhiteSpace(c)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+    var cultures = (codes != null && codes.Count > 0)
+        ? codes.Select(c => {
+            try { return new CultureInfo(c); }
+            catch { return null; }
+        }).Where(ci => ci != null).Select(ci => ci!).ToList()
+        : fallbackSupportedCultures.ToList();
+
+    // kies default culture: eerst IsDefault uit DB, anders eerste culture in lijst
+    var defaultCulture = taalEntities.FirstOrDefault(t => t.IsDefault && !t.IsDeleted)?.Code
+                         ?? cultures.FirstOrDefault()?.Name
+                         ?? fallbackSupportedCultures.First().Name;
+
+    locOptions = new RequestLocalizationOptions
+    {
+        DefaultRequestCulture = new RequestCulture(defaultCulture),
+        SupportedCultures = cultures,
+        SupportedUICultures = cultures
+    };
+}
+catch
+{
+    // fallback wanneer DB niet bereikbaar is
+    locOptions = new RequestLocalizationOptions
+    {
+        DefaultRequestCulture = new RequestCulture(fallbackSupportedCultures.First().Name),
+        SupportedCultures = fallbackSupportedCultures.ToList(),
+        SupportedUICultures = fallbackSupportedCultures.ToList()
+    };
+}
+
+// Zorg dat de cookie provider de hoogste prioriteit heeft zodat gebruikerskeuze via cookie persistent is; querystring als secundair
+locOptions.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localization.CookieRequestCultureProvider());
+locOptions.RequestCultureProviders.Insert(1, new Microsoft.AspNetCore.Localization.QueryStringRequestCultureProvider());
+
+app.UseRequestLocalization(locOptions);
+
+// Configureer de HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -209,12 +267,12 @@ if (!app.Environment.IsDevelopment())
 else
 {
     app.UseDeveloperExceptionPage();
-    // Serve the generated Swagger as JSON endpoint and enable Swagger UI
+    // Serveer het gegenereerde Swagger als JSON endpoint en enable Swagger UI
     app.UseSwagger(c => { c.RouteTemplate = "swagger/{documentName}/swagger.json"; });
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Biblio API V1");
-        c.RoutePrefix = "swagger"; // serve UI at /swagger
+        c.RoutePrefix = "swagger"; // toon UI op /swagger
     });
 }
 
@@ -226,7 +284,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map controllers and Razor Pages so Identity UI is reachable
+// Map controllers en Razor Pages zodat de Identity UI bereikbaar is
 app.MapControllers();
 app.MapRazorPages();
 
