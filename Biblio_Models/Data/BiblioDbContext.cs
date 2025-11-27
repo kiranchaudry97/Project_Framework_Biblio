@@ -19,6 +19,7 @@ namespace Biblio_Models.Data
         public DbSet<Lid> Leden { get; set; } = null!;
         public DbSet<Lenen> Leningens { get; set; } = null!;
         public DbSet<Categorie> Categorien { get; set; } = null!;
+        public DbSet<Taal> Talen { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -98,6 +99,19 @@ namespace Biblio_Models.Data
             b.Entity<Categorie>().HasQueryFilter(e => !e.IsDeleted);
             b.Entity<Lenen>().HasQueryFilter(e => !e.IsDeleted);
 
+            // Taal entity mapping
+            b.Entity<Taal>(e =>
+            {
+                e.ToTable("Talen");
+                e.Property(t => t.Id).HasColumnName("Id");
+                e.Property(t => t.Naam).HasColumnName("Naam").HasMaxLength(120).IsRequired();
+                e.Property(t => t.Code).HasColumnName("Code").HasMaxLength(10).IsRequired();
+                e.Property(t => t.IsDefault).HasColumnName("IsDefault");
+                e.Property(t => t.IsDeleted).HasColumnName("IsDeleted");
+            });
+
+            b.Entity<Taal>().HasQueryFilter(t => !t.IsDeleted);
+
             // Unieke indexes voor data-integriteit
             b.Entity<Lid>()
             .HasIndex(m => m.Email)
@@ -109,19 +123,19 @@ namespace Biblio_Models.Data
             .IsUnique()
             .HasFilter("([Isbn] IS NOT NULL AND [Isbn] <> '')");
         }
-    }
-
-    internal class BiblioDbContextDesignTimeFactory : IDesignTimeDbContextFactory<BiblioDbContext>
-    {
-        public BiblioDbContext CreateDbContext(string[] args)
+    
+        internal class BiblioDbContextDesignTimeFactory : IDesignTimeDbContextFactory<BiblioDbContext>
         {
-            var optionsBuilder = new DbContextOptionsBuilder<BiblioDbContext>();
-            var connectionString = Environment.GetEnvironmentVariable("BIBLIO_CONNECTION")
-                ?? "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+            public BiblioDbContext CreateDbContext(string[] args)
+            {
+                var optionsBuilder = new DbContextOptionsBuilder<BiblioDbContext>();
+                var connectionString = Environment.GetEnvironmentVariable("BIBLIO_CONNECTION")
+                    ?? "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
 
-            optionsBuilder.UseSqlServer(connectionString);
+                optionsBuilder.UseSqlServer(connectionString);
 
-            return new BiblioDbContext(optionsBuilder.Options);
+                return new BiblioDbContext(optionsBuilder.Options);
+            }
         }
     }
 }
