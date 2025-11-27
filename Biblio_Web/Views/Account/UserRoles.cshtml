@@ -1,0 +1,36 @@
+@using Biblio_Web.Models
+@using Microsoft.AspNetCore.Mvc.Localization
+@model UserRolesViewModel
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["UserRoles"];
+}
+
+<h1>@Localizer["UserRolesFor", Model.UserName]</h1>
+
+<div class="mb-3">
+    <label class="form-label">@Localizer["User"]</label>
+    <div class="fw-bold">@Model.UserName</div>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">@Localizer["Roles"]</label>
+    @if (Model.Roles != null && Model.Roles.Count > 0)
+    {
+        <ul>
+            @foreach(var r in Model.Roles)
+            {
+                <li>@r</li>
+            }
+        </ul>
+    }
+    else
+    {
+        <div class="text-muted">@Localizer["NoRoles"]</div>
+    }
+</div>
+
+<div class="mb-3">
+    <a class="btn btn-primary" asp-controller="Account" asp-action="UsersList">@Localizer["Back"]</a>
+    <a class="btn btn-secondary ms-2" asp-controller="Account" asp-action="UserRoles" asp-route-id="@Model.UserName">@Localizer["ChangePassword"]</a>
+</div>
