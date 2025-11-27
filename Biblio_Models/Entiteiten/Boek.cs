@@ -15,19 +15,19 @@ namespace Biblio_Models.Entiteiten
 {
     public class Boek : BaseEntiteit
     {
-        [Required(ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "Required"), StringLength(200, ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "StringLength")] 
+        [Required(ErrorMessage = "Titel is verplicht."), StringLength(200, ErrorMessage = "{0} moet tussen {2} en {1} tekens bevatten.")] 
         public string Titel { get; set; } = string.Empty;
 
-        [Required(ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "Required"), StringLength(200, ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "StringLength")] 
+        [Required(ErrorMessage = "Auteur is verplicht."), StringLength(200, ErrorMessage = "{0} moet tussen {2} en {1} tekens bevatten.")] 
         public string Auteur { get; set; } = string.Empty;
 
-        [StringLength(17, ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "StringLength")]
-        [RegularExpression(@"^(?:97[89])?\d{9}(\d|X)$", ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "IsbnInvalid")]
+        [StringLength(17, ErrorMessage = "{0} moet maximaal {1} tekens bevatten.")]
+        [RegularExpression(@"^(?:97[89])?\d{9}(\d|X)$", ErrorMessage = "Ongeldig ISBN.")]
         public string Isbn { get; set; } = string.Empty;
 
 
         // FK → Category
-        [Required(ErrorMessageResourceType = typeof(SharedModelResource), ErrorMessageResourceName = "Required")]
+        [Required(ErrorMessage = "Categorie is verplicht.")]
         public int CategorieID { get; set; }
         public Categorie? categorie { get; set; }
 
