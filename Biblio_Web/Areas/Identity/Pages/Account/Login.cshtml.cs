@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Biblio_Models.Entiteiten;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using System.ComponentModel.DataAnnotations;
 
 namespace Biblio_Web.Areas.Identity.Pages.Account
 {

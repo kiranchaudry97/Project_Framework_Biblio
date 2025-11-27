@@ -69,6 +69,19 @@ namespace Biblio_Web.Controllers
             return View(loan);
         }
 
+        [AllowAnonymous]
+        public async Task<IActionResult> LatePartial()
+        {
+            var today = System.DateTime.Today;
+            var list = await _db.Leningens
+                .Include(l => l.Boek)
+                .Include(l => l.Lid)
+                .Where(l => l.DueDate < today && l.ReturnedAt == null && !l.IsDeleted)
+                .ToListAsync();
+
+            return PartialView("_LateUitleningenPartial", list);
+        }
+
         [Authorize(Policy = "RequireStaff")]
         public async Task<IActionResult> Create()
         {

@@ -1,6 +1,4 @@
-﻿
-
-// Taal.cs
+﻿// Taal.cs
 // Doel: entiteit die een ondersteunde taal/cultuur van de applicatie vertegenwoordigt.
 // Gebruik: opgeslagen in de database en gebruikt tijdens runtime om supported cultures en default-culture te bepalen.
 // Doelstellingen:
@@ -14,10 +12,18 @@
 /// </summary>
 /// <remarks>
 /// Wordt gebruikt door de localization startup-logica om SupportedCultures en DefaultRequestCulture op te bouwen.
-/// </remarks>using System.ComponentModel.DataAnnotations;
+/// </remarks>
+
+using System.ComponentModel.DataAnnotations;
 
 namespace Biblio_Models.Entiteiten
 {
+    /// <summary>
+    /// Representatie van een taal/cultuur die door de applicatie wordt ondersteund.
+    /// </summary>
+    /// <remarks>
+    /// Wordt gebruikt door de localization startup-logica om SupportedCultures en DefaultRequestCulture op te bouwen.
+    /// </remarks>
     public class Taal
     {
         public int Id { get; set; }
