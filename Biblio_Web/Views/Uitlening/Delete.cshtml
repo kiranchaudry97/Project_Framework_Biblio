@@ -1,5 +1,33 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
+@model Biblio_Models.Entiteiten.Lenen
 @{
+    ViewData["Title"] = Localizer["Delete"];
 }
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">@Localizer["Book"]</dt>
+            <dd class="col-sm-9">@Model.Boek?.Titel</dd>
+
+            <dt class="col-sm-3">@Localizer["Member"]</dt>
+            <dd class="col-sm-9">@Model.Lid?.Voornaam @Model.Lid?.AchterNaam</dd>
+
+            <dt class="col-sm-3">@Localizer["StartDate"]</dt>
+            <dd class="col-sm-9">@Model.StartDate.ToString("d")</dd>
+
+            <dt class="col-sm-3">@Localizer["DueDate"]</dt>
+            <dd class="col-sm-9">@Model.DueDate.ToString("d")</dd>
+        </dl>
+
+        <form asp-action="Delete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">@Localizer["Delete"]</button>
+            <a asp-action="Index" class="btn btn-secondary">@Localizer["Cancel"]</a>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,33 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
+@model Biblio_Models.Entiteiten.Lid
+@{
+    ViewData["Title"] = Localizer["Delete"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">@Localizer["ColumnFirstName"]</dt>
+            <dd class="col-sm-9">@Model.Voornaam</dd>
+
+            <dt class="col-sm-3">@Localizer["ColumnLastName"]</dt>
+            <dd class="col-sm-9">@Model.AchterNaam</dd>
+
+            <dt class="col-sm-3">@Localizer["ColumnEmail"]</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">@Localizer["LoanCount"]</dt>
+            <dd class="col-sm-9">@Model.Leningens?.Count()</dd>
+        </dl>
+
+        <form asp-action="Delete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">@Localizer["Delete"]</button>
+            <a asp-action="Index" class="btn btn-secondary">@Localizer["Cancel"]</a>
+        </form>
+    </div>
+</div>
