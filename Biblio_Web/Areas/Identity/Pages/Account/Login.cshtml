@@ -1,4 +1,13 @@
-@page
+@*
+Login.cshtml
+Doel: pagina waarmee gebruikers kunnen inloggen met e-mailadres en wachtwoord.
+Gebruik: toont een formulier voor het invoeren van e-mail, wachtwoord en 'onthoud mij', met links naar registreren en wachtwoord vergeten.
+Doelstellingen:
+- Bied een eenvoudige, toegankelijke en gelokaliseerde UI voor gebruikersauthenticatie.
+- Gebruik `IStringLocalizer` voor vertalingen zodat labels en knoppen meertalig zijn.
+- Verbeter de gebruikerservaring met client-side validatie en een 'toon wachtwoord' toggle.
+- Respecteer de algemene site-layout zodat de pagina visueel consistent is met de rest van de applicatie.
+*@@page
 @model Biblio_Web.Areas.Identity.Pages.Account.LoginModel
 @inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @{
