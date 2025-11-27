@@ -114,6 +114,40 @@ body {
   border-radius: 0.25rem;
 }
 
+/* Sidebar list-group look */
+.list-group-item {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  margin-bottom: 8px;
+}
+.list-group-item:hover {
+  background-color: #0069d9;
+  color: #fff;
+}
+
+.list-group-item .icon {
+  margin-right: 8px;
+}
+
+/* Quick action buttons */
+.btn-light.border {
+  background: #f0f0f0;
+  color: #333;
+  border-color: #ccc;
+  text-align: left;
+}
+
+/* Card */
+.card {
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.card .card-title {
+  font-weight: 700;
+}
+
 /* Dark mode styles */
 body.dark-mode {
   background-color: #121212;
@@ -132,4 +166,23 @@ body.dark-mode .navbar-brand {
 body.dark-mode .btn-primary {
   background-color: #0d6efd;
   border-color: #0d6efd;
+}
+
+/* arrow under dropdown button */
+.dropdown-arrow {
+  position: absolute;
+  top: 100%;
+  left: 6px; /* align under button */
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(0,123,255,0.15);
+  margin-top: 6px;
+  pointer-events: none;
+}
+
+/* small adjustment so arrow sits under the button and above the menu */
+.nav-item.dropdown .dropdown-menu {
+  margin-top: 6px;
 }
