@@ -1,5 +1,50 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using Microsoft.Extensions.Localization
+@using System.Linq
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
+@model Biblio_Models.Entiteiten.Lenen
 @{
+    ViewData["Title"] = Localizer["New"];
+    var leden = ViewBag.Leden as IEnumerable<Biblio_Models.Entiteiten.Lid> ?? new List<Biblio_Models.Entiteiten.Lid>();
+    var boeken = ViewBag.Boeken as IEnumerable<Biblio_Models.Entiteiten.Boek> ?? new List<Biblio_Models.Entiteiten.Boek>();
+}
+
+<h1>@Localizer["New"]</h1>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">@Localizer["Member"]</label>
+        <select asp-for="LidId" class="form-select" asp-items="@(new SelectList(leden.Select(l => new { Id = l.Id, Name = (l.Voornaam + " " + l.AchterNaam).Trim() }), "Id", "Name"))">
+            <option value="">@Localizer["AllMembers"]</option>
+        </select>
+        <span asp-validation-for="LidId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">@Localizer["Book"]</label>
+        <select asp-for="BoekId" class="form-select" asp-items="@(new SelectList(boeken.Select(b => new { Id = b.Id, Name = (string.IsNullOrWhiteSpace(b.Titel) ? "" : b.Titel) + (string.IsNullOrWhiteSpace(b.Auteur) ? "" : " — " + b.Auteur) }), "Id", "Name"))">
+            <option value="">@Localizer["AllBooks"]</option>
+        </select>
+        <span asp-validation-for="BoekId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">@Localizer["StartDate"]</label>
+        <input asp-for="StartDate" class="form-control" type="date" />
+        <span asp-validation-for="StartDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">@Localizer["DueDate"]</label>
+        <input asp-for="DueDate" class="form-control" type="date" />
+        <span asp-validation-for="DueDate" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary">@Localizer["Create"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["Cancel"]</a>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
 }

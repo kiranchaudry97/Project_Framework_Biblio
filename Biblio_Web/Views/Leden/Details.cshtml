@@ -1,0 +1,23 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model Biblio_Models.Entiteiten.Lid
+@{
+    ViewData["Title"] = Localizer["Member"];
+}
+
+<h1>@Localizer["Member"]</h1>
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">@Localizer["Naam"]</dt>
+            <dd class="col-sm-9">@Model.Voornaam @Model.AchterNaam</dd>
+
+            <dt class="col-sm-3">@Localizer["Email"]</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">@Localizer["LoanCount"]</dt>
+            <dd class="col-sm-9">@Model.Leningens?.Count()</dd>
+        </dl>
+        <a asp-action="Index" class="btn btn-secondary">@Localizer["Back"]</a>
+    </div>
+</div>

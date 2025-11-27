@@ -1,11 +1,11 @@
-@using Microsoft.AspNetCore.Mvc.Localization
-@inject IViewLocalizer Localizer
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @model Biblio_Models.Entiteiten.Boek
 @{
-    ViewData["Title"] = Localizer["Title"];
+    ViewData["Title"] = Localizer["Books_Create_Title"];
 }
 
-<h1>@Localizer["Title"]</h1>
+<h1>@ViewData["Title"]</h1>
 
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
@@ -25,9 +25,9 @@
         <span asp-validation-for="Isbn" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">Categorie</label>
+        <label class="form-label">@Localizer["ColumnCategory"]</label>
         <select asp-for="CategorieID" class="form-select" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Naam"))">
-            <option value="">-- Kies categorie --</option>
+            <option value="">@Localizer["ChooseCategory"]</option>
         </select>
     </div>
 

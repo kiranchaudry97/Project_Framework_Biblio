@@ -1,11 +1,13 @@
 @using Biblio_Models.Entiteiten
-@model AdminEditRoles   
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model Biblio_Web.Models.AdminEditRolesViewModel
 
 @{
-    ViewData["Title"] = "Rollen bewerken";
+    ViewData["Title"] = Localizer["EditRoles"];
 }
 
-<h1>Rollen bewerken voor @Model.Email</h1>
+<h1>@Localizer["EditRolesFor", Model.Email]</h1>
 
 <form method="post">
     <input type="hidden" asp-for="UserId" />
@@ -14,11 +16,12 @@
 {
     <div class="form-check mb-2">
         <input asp-for="Roles[@i].IsSelected" class="form-check-input" />
-        <label asp-for="Roles[@i].IsSelected" class="form-check-label">@Model.Roles[i].RoleName</label>
+        @* display localized role name when available *@
+        <label class="form-check-label">@Localizer[Model.Roles[i].RoleName]</label>
         <input type="hidden" asp-for="Roles[@i].RoleName" />
     </div>
 }
     </div>
-    <button class="btn btn-primary">Opslaan</button>
-    <a asp-action="Users" class="btn btn-secondary">Annuleer</a>
-</form>     
+    <button class="btn btn-primary">@Localizer["Save"]</button>
+    <a asp-action="Users" class="btn btn-secondary">@Localizer["Cancel"]</a>
+</form>

@@ -3,17 +3,19 @@
 @using Biblio_Models.Entiteiten
 @inject SignInManager<AppUser> SignInManager
 @inject UserManager<AppUser> UserManager
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 
 @if (SignInManager.IsSignedIn(User))
 {
     var userName = User?.Identity?.Name ?? "";
     <ul class="nav navbar-nav navbar-right">
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index">Hello @userName!</a>
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index">@Localizer["HelloUser", userName]</a>
         </li>
         <li class="nav-item">
             <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" method="post" id="logoutForm">
-                <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+                @Html.AntiForgeryToken()
+                <button type="submit" class="nav-link btn btn-link text-dark">@Localizer["Logout"]</button>
             </form>
         </li>
     </ul>
@@ -22,10 +24,10 @@ else
 {
     <ul class="nav navbar-nav navbar-right">
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">@Localizer["Login"]</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">@Localizer["Register"]</a>
         </li>
     </ul>
 }

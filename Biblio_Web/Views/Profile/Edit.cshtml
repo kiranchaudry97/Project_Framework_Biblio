@@ -1,0 +1,25 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
+@model Biblio_Web.Models.ProfileViewModel
+@{
+    ViewData["Title"] = Localizer["EditProfile"];
+}
+
+<h1>@Localizer["EditProfile"]</h1>
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label class="form-label">@Localizer["Email"]</label>
+        <input asp-for="Email" class="form-control" readonly />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">@Localizer["FullName"]</label>
+        <input asp-for="FullName" class="form-control" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary">@Localizer["Save"]</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">@Localizer["Cancel"]</a>
+    <a asp-controller="Account" asp-action="ChangePassword" asp-route-id="@Model.Id" class="btn btn-secondary ms-2">@Localizer["ChangePassword"]</a>
+</form>

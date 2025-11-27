@@ -1,15 +1,63 @@
 @using System.Collections.Generic
+@using Biblio_Models.Entiteiten
+@using Microsoft.AspNetCore.Identity
 @inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> L
+@inject UserManager<AppUser> UserManager
 @{
-    var roles = ViewBag.Roles as List<string> ?? new List<string>();
+    var roles = new List<string>();
+    AppUser? currentUser = null;
 }
 
-<div class="dropdown ms-3">
-    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="beheerDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-        <span>@L["Admin"]</span>
+@{ 
+    currentUser = await UserManager.GetUserAsync(User);
+    if (currentUser != null)
+    {
+        var rlist = await UserManager.GetRolesAsync(currentUser);
+        roles = rlist?.ToList() ?? new List<string>();
+    }
+}
+
+<li class="nav-item dropdown ms-3" style="position:relative;">
+    <button class="btn btn-sm btn-primary dropdown-toggle" id="beheerDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+        <span>
+            @if (currentUser != null)
+            {
+                @($"{currentUser.UserName} — ")@L["Admin"]
+            }
+            else
+            {
+                @L["Admin"]
+            }
+        </span>
     </button>
+    <span class="dropdown-arrow" aria-hidden="true"></span>
     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="beheerDropdownBtn">
-        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">@L["AdminUsers"]</a></li>
+        @* Current user info *@
+        @if (currentUser != null)
+        {
+            <li class="px-3 py-2">
+                <div class="small text-muted">@L["User"]</div>
+                <div class="fw-bold">@currentUser.UserName</div>
+                @if (!string.IsNullOrWhiteSpace(currentUser.Email))
+                {
+                    <div class="small text-muted">@currentUser.Email</div>
+                }
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li><a class="dropdown-item" asp-controller="Admin" asp-action="Users">@L["UserAndRoles"]</a></li>
+            <li><a class="dropdown-item" asp-controller="Profile" asp-action="Index">@L["Profile"]</a></li>
+            <li><hr class="dropdown-divider" /></li>
+        }
+
+        @if (roles.Count > 0)
+        {
+            <li><h6 class="dropdown-header">@L["Roles"]</h6></li>
+            @foreach (var r in roles)
+            {
+                <li><span class="dropdown-item-text">@r</span></li>
+            }
+            <li><hr class="dropdown-divider" /></li>
+        }
         <li><a class="dropdown-item" asp-controller="Talen" asp-action="Index">@L["Languages"]</a></li>
     </ul>
-</div>
+</li>

@@ -1,34 +1,108 @@
-﻿@using Microsoft.AspNetCore.Mvc.Localization
-@inject IViewLocalizer Localizer
+﻿@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @model IEnumerable<Biblio_Models.Entiteiten.Lenen>
 @{
-    ViewData["Title"] = Localizer["Title"];
+    ViewData["Title"] = Localizer["Loans"];
+    var selLidStr = Context.Request.Query["lidId"].FirstOrDefault();
+    int? selLid = int.TryParse(selLidStr, out var tmpLid) ? tmpLid : (int?)null;
+    var selBoekStr = Context.Request.Query["boekId"].FirstOrDefault();
+    int? selBoek = int.TryParse(selBoekStr, out var tmpBoek) ? tmpBoek : (int?)null;
+
+    var currentSearch = ViewBag.Search as string ?? string.Empty;
+    var selectedCategory = ViewBag.SelectedCategory as int?;
+    var selectedLid = ViewBag.SelectedLid as int? ?? selLid;
+    var selectedBoek = ViewBag.SelectedBoek as int? ?? selBoek;
 }
 
-<h1>@Localizer["Title"]</h1>
+<h1>@ViewData["Title"]</h1>
 
-<form method="get" class="row g-2 mb-2">
-    <div class="col-auto">
-        <select name="lidId" class="form-select">
-            <option value="">@Localizer["AllMembers"]</option>
-            @foreach(var l in ViewBag.Leden as List<Biblio_Models.Entiteiten.Lid> ?? new List<Biblio_Models.Entiteiten.Lid>())
+<form method="get" class="row g-2 mb-2 align-items-end">
+    <div class="col-12 col-md-5">
+        <label class="form-label visually-hidden">@Localizer["Search"]</label>
+        <input type="search" name="search" value="@currentSearch" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" />
+    </div>
+
+    <div class="col-12 col-md-3">
+        <label class="form-label visually-hidden">@Localizer["ChooseCategory"]</label>
+        <select name="categoryId" class="form-select">
+            <option value="">-- @Localizer["ChooseCategory"] --</option>
+            @if (ViewBag.Categories is IEnumerable<Biblio_Models.Entiteiten.Categorie> cats)
             {
-                <option value="@l.Id">@l.Voornaam @l.AchterNaam</option>
+                foreach (var c in cats)
+                {
+                    if (selectedCategory.HasValue && selectedCategory.Value == c.Id)
+                    {
+                        <option value="@c.Id" selected>@c.Naam</option>
+                    }
+                    else
+                    {
+                        <option value="@c.Id">@c.Naam</option>
+                    }
+                }
             }
         </select>
     </div>
-    <div class="col-auto">
-        <select name="boekId" class="form-select">
-            <option value="">@Localizer["AllBooks"]</option>
-            @foreach(var b in ViewBag.Boeken as List<Biblio_Models.Entiteiten.Boek> ?? new List<Biblio_Models.Entiteiten.Boek>())
-            {
-                <option value="@b.Id">@b.Titel</option>
-            }
-        </select>
+
+    <div class="col-12 col-md-4">
+        <div class="row g-2">
+            <div class="col-6">
+                <label class="form-label">@Localizer["Member"]</label>
+                @if (ViewBag.Leden is IEnumerable<Biblio_Models.Entiteiten.Lid> leden)
+                {
+                    <select name="lidId" class="form-select">
+                        <option value="">@Localizer["AllMembers"]</option>
+                        @foreach(var l in leden)
+                        {
+                            var full = (l.Voornaam + " " + l.AchterNaam).Trim();
+                            if (selectedLid.HasValue && selectedLid.Value == l.Id)
+                            {
+                                <option value="@l.Id" selected>@full</option>
+                            }
+                            else
+                            {
+                                <option value="@l.Id">@full</option>
+                            }
+                        }
+                    </select>
+                }
+                else
+                {
+                    <select class="form-select"><option disabled>@Localizer["NoMembersLoaded"]</option></select>
+                }
+            </div>
+            <div class="col-6">
+                <label class="form-label">@Localizer["Book"]</label>
+                @if (ViewBag.Boeken is IEnumerable<Biblio_Models.Entiteiten.Boek> boeken)
+                {
+                    <select name="boekId" class="form-select">
+                        <option value="">@Localizer["AllBooks"]</option>
+                        @foreach(var b in boeken)
+                        {
+                            var name = (string.IsNullOrWhiteSpace(b.Titel) ? "" : b.Titel) + (string.IsNullOrWhiteSpace(b.Auteur) ? "" : " — " + b.Auteur);
+                            if (selectedBoek.HasValue && selectedBoek.Value == b.Id)
+                            {
+                                <option value="@b.Id" selected>@name</option>
+                            }
+                            else
+                            {
+                                <option value="@b.Id">@name</option>
+                            }
+                        }
+                    </select>
+                }
+                else
+                {
+                    <select class="form-select"><option disabled>@Localizer["NoBooksLoaded"]</option></select>
+                }
+            </div>
+        </div>
     </div>
-    <div class="col-auto form-check">
-        <input type="checkbox" name="onlyOpen" class="form-check-input" />
-        <label class="form-check-label">@Localizer["OnlyOpen"]</label>
+
+    <div class="col-auto">
+        <div class="form-check me-2">
+            <input type="checkbox" name="onlyOpen" class="form-check-input" id="onlyOpen" />
+            <label class="form-check-label" for="onlyOpen">@Localizer["OnlyOpen"]</label>
+        </div>
     </div>
     <div class="col-auto">
         <button class="btn btn-primary">@Localizer["Filter"]</button>
@@ -46,9 +120,9 @@
         <tr>
             <th>@Localizer["Member"]</th>
             <th>@Localizer["Book"]</th>
-            <th>@Localizer["Start"]</th>
-            <th>@Localizer["Due"]</th>
-            <th>@Localizer["Returned"]</th>
+            <th>@Localizer["StartDate"]</th>
+            <th>@Localizer["DueDate"]</th>
+            <th>@Localizer["IngeleverdOp"]</th>
             <th></th>
         </tr>
     </thead>
@@ -58,9 +132,9 @@
     <tr>
         <td>@u.Lid?.Voornaam @u.Lid?.AchterNaam</td>
         <td>@u.Boek?.Titel</td>
-        <td>@u.StartDate:d</td>
-        <td>@u.DueDate:d</td>
-        <td>@(u.ReturnedAt?.ToString("d") ?? "-")</td>
+        <td>@(u.StartDate.ToString("d"))</td>
+        <td>@(u.DueDate.ToString("d"))</td>
+        <td>@(u.ReturnedAt.HasValue ? u.ReturnedAt.Value.ToString("d") : "-")</td>
         <td>
             <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@u.Id">@Localizer["Details"]</a>
             @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))

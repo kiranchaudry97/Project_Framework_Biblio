@@ -1,5 +1,6 @@
-﻿@model IEnumerable<Biblio_Web.ApiModels.UitleningDto>
-@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+﻿@model IEnumerable<Biblio_Models.Entiteiten.Lenen>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 
 <div id="late-uitleningen-container">
     <table class="table table-sm table-striped">
@@ -21,10 +22,10 @@
             {
                 foreach (var l in Model)
                 {
-                    var daysLate = (System.DateTime.Today - l.DueDate.Date).Days;
+                    var daysLate = (System.DateTime.Today - (l.DueDate.Date)).Days;
                     <tr>
-                        <td>@(l.BoekTitel ?? "")</td>
-                        <td>@(l.LidNaam ?? "")</td>
+                        <td>@(l.Boek?.Titel ?? "")</td>
+                        <td>@(l.Lid != null ? (l.Lid.Voornaam + " " + l.Lid.AchterNaam) : "")</td>
                         <td>@l.StartDate.ToString("d")</td>
                         <td>@l.DueDate.ToString("d")</td>
                         <td class="text-danger">@Math.Max(0, daysLate)</td>

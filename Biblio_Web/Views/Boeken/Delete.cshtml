@@ -1,18 +1,21 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @model Biblio_Models.Entiteiten.Boek
 @{
-    ViewData["Title"] = "Verwijder boek";
+    ViewData["Title"] = Localizer["Delete"];
 }
 
-<h1>Verwijder boek</h1>
+<h1>@ViewData["Title"]</h1>
 
-<div class="alert alert-warning">Weet je zeker dat je dit boek wilt verwijderen?</div>
+<div>
+    <h4>@Model.Titel</h4>
+    <p>@Localizer["ColumnAuthor"]: @Model.Auteur</p>
+    <p>@Localizer["ColumnIsbn"]: @Model.Isbn</p>
+    <p>@Localizer["ColumnCategory"]: @Model.categorie?.Naam</p>
+</div>
 
-<form asp-action="Delete">
+<form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
-    <div class="mb-3">
-        <label class="form-label">Titel</label>
-        <div>@Model.Titel</div>
-    </div>
-    <button class="btn btn-danger">Verwijder</button>
-    <a asp-action="Index" class="btn btn-secondary">Annuleer</a>
+    <button type="submit" class="btn btn-danger">@Localizer["Delete"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["Cancel"]</a>
 </form>

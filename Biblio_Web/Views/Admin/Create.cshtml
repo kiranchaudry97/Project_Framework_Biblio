@@ -1,0 +1,46 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@model Biblio_Web.Models.AdminCreateUserViewModel
+@inject IViewLocalizer Localizer
+@{
+    ViewData["Title"] = Localizer["NewUser"];
+}
+
+<h1>@Localizer["NewUser"]</h1>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">@Localizer["Email"]</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">@Localizer["FullName"]</label>
+        <input asp-for="FullName" class="form-control" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">@Localizer["Password"]</label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-check mb-2">
+        <input asp-for="IsAdmin" class="form-check-input" />
+        <label asp-for="IsAdmin" class="form-check-label">@Localizer["Admin"]</label>
+    </div>
+    <div class="form-check mb-2">
+        <input asp-for="IsStaff" class="form-check-input" />
+        <label asp-for="IsStaff" class="form-check-label">@Localizer["Medewerker"]</label>
+    </div>
+
+    <button class="btn btn-primary">@Localizer["Create"]</button>
+    <a asp-action="Users" class="btn btn-secondary ms-2">@Localizer["Cancel"]</a>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

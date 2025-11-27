@@ -1,24 +1,18 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @model Biblio_Models.Entiteiten.Boek
 @{
-    ViewData["Title"] = "Boek details";
+    ViewData["Title"] = Localizer["Details"];
 }
 
-<h1>Boek details</h1>
-<div class="card">
-    <div class="card-body">
-        <dl class="row">
-            <dt class="col-sm-3">Titel</dt>
-            <dd class="col-sm-9">@Model.Titel</dd>
+<h1>@ViewData["Title"]</h1>
 
-            <dt class="col-sm-3">Auteur</dt>
-            <dd class="col-sm-9">@Model.Auteur</dd>
-
-            <dt class="col-sm-3">ISBN</dt>
-            <dd class="col-sm-9">@Model.Isbn</dd>
-
-            <dt class="col-sm-3">Categorie</dt>
-            <dd class="col-sm-9">@Model.categorie?.Naam</dd>
-        </dl>
-        <a asp-action="Index" class="btn btn-secondary">Terug</a>
-    </div>
+<div>
+    <h4>@Model.Titel</h4>
+    <p>@Localizer["ColumnAuthor"]: @Model.Auteur</p>
+    <p>@Localizer["ColumnIsbn"]: @Model.Isbn</p>
+    <p>@Localizer["ColumnCategory"]: @Model.categorie?.Naam</p>
 </div>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">@Localizer["Edit"]</a>
+<a asp-action="Index" class="btn btn-secondary">@Localizer["Back"]</a>

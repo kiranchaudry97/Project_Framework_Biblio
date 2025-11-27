@@ -1,36 +1,39 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @model Biblio_Models.Entiteiten.Boek
 @{
-    ViewData["Title"] = "Bewerk boek";
+    ViewData["Title"] = Localizer["Edit"];
 }
 
-<h1>Bewerk boek</h1>
+<h1>@ViewData["Title"]</h1>
 
 <form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
     <div class="mb-3">
-        <label class="form-label">Titel</label>
+        <label class="form-label">@Localizer["ColumnTitle"]</label>
         <input asp-for="Titel" class="form-control" />
         <span asp-validation-for="Titel" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">Auteur</label>
+        <label class="form-label">@Localizer["ColumnAuthor"]</label>
         <input asp-for="Auteur" class="form-control" />
         <span asp-validation-for="Auteur" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">ISBN</label>
+        <label class="form-label">@Localizer["ColumnIsbn"]</label>
         <input asp-for="Isbn" class="form-control" />
         <span asp-validation-for="Isbn" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label class="form-label">Categorie</label>
+        <label class="form-label">@Localizer["ColumnCategory"]</label>
         <select asp-for="CategorieID" class="form-select" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Naam"))">
-            <option value="">-- Kies categorie --</option>
+            <option value="">@Localizer["ChooseCategory"]</option>
         </select>
     </div>
 
-    <button class="btn btn-primary">Opslaan</button>
-    <a asp-action="Index" class="btn btn-secondary">Annuleer</a>
+    <button type="submit" class="btn btn-primary">@Localizer["Save"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["Cancel"]</a>
 </form>
 
 @section Scripts{

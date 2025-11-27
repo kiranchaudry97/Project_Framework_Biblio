@@ -1,0 +1,24 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
+@model Biblio_Web.Models.ProfileViewModel
+@{
+    ViewData["Title"] = Localizer["Profile"];
+}
+
+<h1>@Localizer["Profile"]</h1>
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">@Localizer["Email"]</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">@Localizer["FullName"]</dt>
+            <dd class="col-sm-9">@Model.FullName</dd>
+        </dl>
+
+        <a asp-action="Edit" class="btn btn-primary">@Localizer["Edit"]</a>
+
+        <a asp-controller="Account" asp-action="ChangePassword" asp-route-id="@Model.Id" class="btn btn-primary ms-2">@Localizer["ChangePassword"]</a>
+        <a asp-action="Delete" class="btn btn-danger ms-2">@Localizer["Delete"]</a>
+    </div>
+</div>

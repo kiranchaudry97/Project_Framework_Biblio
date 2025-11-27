@@ -1,0 +1,19 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model Biblio_Web.Models.ProfileViewModel
+@{
+    ViewData["Title"] = Localizer["DeleteAccount"];
+}
+
+<h1>@Localizer["DeleteAccount"]</h1>
+<div class="card">
+    <div class="card-body">
+        <p>@Localizer["DeleteAccountConfirm"]</p>
+        <form asp-action="DeleteConfirmed" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <button class="btn btn-danger">@Localizer["Delete"]</button>
+            <a asp-action="Index" class="btn btn-secondary ms-2">@Localizer["Cancel"]</a>
+        </form>
+    </div>
+</div>

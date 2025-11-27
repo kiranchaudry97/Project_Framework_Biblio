@@ -1,31 +1,21 @@
 ﻿@model string?
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 
 @if (!string.IsNullOrEmpty(Model))
 {
-    <ul class="nav navbar-nav navbar-right">
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Hello @Model</a>
-        </li>
-        <li class="nav-item">
-            <form class="form-inline" asp-controller="Account" asp-action="LogoutPost" method="post" id="logoutForm">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="nav-link btn btn-link text-dark">Uitloggen</button>
-            </form>
-        </li>
-        <li class="nav-item">
-            <!-- GET fallback if POST is not available -->
-            <a class="nav-link text-muted small" asp-controller="Account" asp-action="Logout">(Logout fallback)</a>
-        </li>
-    </ul>
+    <div class="d-flex align-items-center">
+        <span class="nav-link text-dark mb-0">@Localizer["HelloUser", Model]</span>
+        <form class="d-inline ms-3" asp-controller="Account" asp-action="LogoutPost" method="post" id="logoutForm">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-link nav-link text-dark p-0 ms-2">@Localizer["Logout"]</button>
+        </form>
+    </div>
 }
 else
 {
-    <ul class="nav navbar-nav navbar-right">
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Inloggen</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Registreren</a>
-        </li>
-    </ul>
+    <div class="d-flex align-items-center">
+        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">@Localizer["Login"]</a>
+        <a class="nav-link text-dark ms-2" asp-area="Identity" asp-page="/Account/Register">@Localizer["Register"]</a>
+    </div>
 }

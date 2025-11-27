@@ -2,13 +2,13 @@
 @inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @model Biblio_Models.Entiteiten.Lid
 @{
-    ViewData["Title"] = Localizer["NewMember"];
+    ViewData["Title"] = Localizer["Edit"];
 }
 
-<h1>@ViewData["Title"]</h1>
+<h1>@Localizer["Edit"]</h1>
 
-<form asp-action="Create" method="post">
-    @Html.AntiForgeryToken()
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
     <div class="mb-3">
         <label class="form-label">@Localizer["Voornaam"]</label>
         <input asp-for="Voornaam" class="form-control" />

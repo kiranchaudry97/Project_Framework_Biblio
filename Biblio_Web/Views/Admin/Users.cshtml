@@ -1,20 +1,52 @@
 @using Biblio_Models.Entiteiten
 @using Microsoft.AspNetCore.Identity
-@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+@inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @model IEnumerable<UserViewModel>
 @{
-    ViewData["Title"] = "Gebruikersbeheer";
+    ViewData["Title"] = Localizer["UserManagement"];
+    var currentSearch = ViewBag.Search as string ?? string.Empty;
+    var selectedRole = ViewBag.SelectedRole as string ?? string.Empty;
+    var roles = ViewBag.Roles as List<string> ?? new List<string>();
 }
 
-<h1>Gebruikers</h1>
+<h1>@Localizer["Users"]</h1>
+
+<form method="get" class="row g-2 mb-3 align-items-center">
+    <div class="col-auto">
+        <input type="search" name="search" value="@currentSearch" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" />
+    </div>
+    <div class="col-auto">
+        <select name="role" class="form-select">
+            <option value="">-- @Localizer["AllRoles"] --</option>
+            @foreach(var r in roles)
+            {
+                if (r == selectedRole)
+                {
+                    <option value="@r" selected>@r</option>
+                }
+                else
+                {
+                    <option value="@r">@r</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary">@Localizer["Filter"]</button>
+    </div>
+    <div class="col-auto">
+        <a class="btn btn-success" asp-controller="Admin" asp-action="EditRoles">@Localizer["NewUser"]</a>
+    </div>
+</form>
+
 <table class="table table-striped">
     <thead>
         <tr>
             <th>@Localizer["User"]</th>
             <th>@Localizer["Email"]</th>
-            <th>Rollen</th>
-            <th>Geblokkeerd</th>
-            <th>Acties</th>
+            <th>@Localizer["Roles"]</th>
+            <th>@Localizer["Blocked"]</th>
+            <th>@Localizer["Actions"]</th>
         </tr>
     </thead>
     <tbody>
@@ -24,15 +56,15 @@
         <td>@u.UserName</td>
         <td>@u.Email</td>
         <td>@(string.Join(", ", u.Roles ?? new List<string>()))</td>
-        <td>@(u.Blocked ? "Ja" : "Nee")</td>
+        <td>@(u.Blocked ? Localizer["Yes"] : Localizer["No"])</td>
         <td>
-            <a class="btn btn-sm btn-primary" asp-action="EditRoles" asp-route-id="@u.Id">Rollen</a>
+            <a class="btn btn-sm btn-primary" asp-action="EditRoles" asp-route-id="@u.Id">@Localizer["Roles"]</a>
             <form asp-controller="Account" asp-action="ToggleBlock" method="post" class="d-inline">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@u.Id" />
-                <button type="submit" class="btn btn-sm btn-warning">@(u.Blocked ? "Deblokkeer" : "Blokkeer")</button>
+                <button type="submit" class="btn btn-sm btn-warning">@(u.Blocked ? Localizer["Unblock"] : Localizer["Block"])</button>
             </form>
-            <a class="btn btn-sm btn-primary ms-1" asp-controller="Account" asp-action="UserRoles" asp-route-id="@u.Id">Rollen</a>
+            <a class="btn btn-sm btn-danger ms-1" asp-controller="Admin" asp-action="Delete" asp-route-id="@u.Id">@Localizer["Delete"]</a>
         </td>
     </tr>
 }

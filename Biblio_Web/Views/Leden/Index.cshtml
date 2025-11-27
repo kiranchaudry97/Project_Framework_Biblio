@@ -1,11 +1,11 @@
-@using Microsoft.AspNetCore.Mvc.Localization
-@inject IViewLocalizer Localizer
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @model IEnumerable<Biblio_Models.Entiteiten.Lid>
 @{
-    ViewData["Title"] = Localizer["Title"];
+    ViewData["Title"] = Localizer["Members"];
 }
 
-<h1>@Localizer["Title"]</h1>
+<h1>@ViewData["Title"]</h1>
 <form method="get" class="row g-2">
     <div class="col-auto">
         <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" />

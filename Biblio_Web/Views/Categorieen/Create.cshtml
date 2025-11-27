@@ -1,19 +1,21 @@
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @model Biblio_Models.Entiteiten.Categorie
 @{
-    ViewData["Title"] = "Nieuwe categorie";
+    ViewData["Title"] = Localizer["NewCategory"];
 }
 
-<h1>Nieuwe categorie</h1>
+<h1>@ViewData["Title"]</h1>
 
 <form asp-action="Create" method="post">
     <div class="mb-3">
-        <label class="form-label">Naam</label>
+        <label class="form-label">@Localizer["ColumnName"]</label>
         <input asp-for="Naam" class="form-control" />
         <span asp-validation-for="Naam" class="text-danger"></span>
     </div>
 
-    <button class="btn btn-primary">Opslaan</button>
-    <a asp-action="Index" class="btn btn-secondary">Annuleer</a>
+    <button class="btn btn-primary">@Localizer["Save"]</button>
+    <a asp-action="Index" class="btn btn-secondary">@Localizer["Cancel"]</a>
 </form>
 
 @section Scripts{
