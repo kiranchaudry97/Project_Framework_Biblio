@@ -6,8 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
-using AutoMapper;
-using Biblio_Web.ApiModels;
 
 namespace Biblio_Web.Controllers.Api
 {
@@ -17,8 +15,7 @@ namespace Biblio_Web.Controllers.Api
     public class UitleningenApiController : ControllerBase
     {
         private readonly BiblioDbContext _db;
-        private readonly IMapper _mapper;
-        public UitleningenApiController(BiblioDbContext db, IMapper mapper) => (_db, _mapper) = (db, mapper);
+        public UitleningenApiController(BiblioDbContext db) => _db = db;
 
         // GET: api/uitleningen?page=1&pageSize=20
         [HttpGet]
@@ -38,33 +35,43 @@ namespace Biblio_Web.Controllers.Api
                 pageSize,
                 total,
                 totalPages,
-                items = _mapper.Map<IEnumerable<UitleningDto>>(items)
+                items
             };
 
             return Ok(result);
         }
 
         [HttpGet("late")]
-        public async Task<ActionResult<IEnumerable<UitleningDto>>> GetLate()
+        public async Task<ActionResult<IEnumerable<Lenen>>> GetLate()
         {
             var today = System.DateTime.Today;
             var list = await _db.Leningens.Include(l => l.Boek).Include(l => l.Lid).Where(l => l.DueDate < today && l.ReturnedAt == null && !l.IsDeleted).ToListAsync();
-            return Ok(_mapper.Map<IEnumerable<UitleningDto>>(list));
+            return Ok(list);
         }
 
         [HttpPost]
         [Authorize(Policy = "RequireStaff")]
-        public async Task<ActionResult<UitleningDto>> Post(UitleningDto model)
+        public async Task<ActionResult<Lenen>> Post(Lenen model)
         {
             if (!ModelState.IsValid) return BadRequest(new ValidationProblemDetails(ModelState));
             var exists = await _db.Leningens.AnyAsync(l => l.BoekId == model.BoekId && l.ReturnedAt == null && !l.IsDeleted);
             if (exists) return Conflict(new ProblemDetails { Title = "Conflict", Detail = "Book already loaned" });
-            var entity = _mapper.Map<Lenen>(model);
+
+            var entity = new Lenen
+            {
+                BoekId = model.BoekId,
+                LidId = model.LidId,
+                StartDate = model.StartDate,
+                DueDate = model.DueDate,
+                ReturnedAt = model.ReturnedAt,
+                IsClosed = model.IsClosed
+            };
+
             _db.Leningens.Add(entity);
             await _db.SaveChangesAsync();
+
             var saved = await _db.Leningens.Include(l => l.Boek).Include(l => l.Lid).FirstOrDefaultAsync(l => l.Id == entity.Id);
-            var dto = _mapper.Map<UitleningDto>(saved!);
-            return CreatedAtAction(nameof(Get), new { id = dto.Id }, dto);
+            return CreatedAtAction(nameof(Get), new { id = entity.Id }, saved);
         }
 
         [HttpPut("{id}/return")]
