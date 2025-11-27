@@ -15,6 +15,12 @@ namespace Biblio_Web.Controllers
 
         public IActionResult Index()
         {
+            // Redirect unauthenticated users to the Identity login page
+            if (User?.Identity?.IsAuthenticated != true)
+            {
+                return RedirectToAction("Login", "Account", new { area = "Identity" });
+            }
+
             return View();
         }
 

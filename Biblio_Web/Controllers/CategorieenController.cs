@@ -31,7 +31,13 @@ namespace Biblio_Web.Controllers
         }
 
         [Authorize(Policy = "RequireStaff")]
-        public IActionResult Create() => View();
+        public async Task<IActionResult> Create()
+        {
+            // provide lists so the view can show members/books dropdowns if desired
+            ViewBag.Leden = await _db.Leden.Where(l => !l.IsDeleted).OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToListAsync();
+            ViewBag.Boeken = await _db.Boeken.Where(b => !b.IsDeleted).OrderBy(b => b.Titel).ToListAsync();
+            return View();
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -44,6 +50,9 @@ namespace Biblio_Web.Controllers
                 await _db.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            // repopulate lists when returning view due to validation error
+            ViewBag.Leden = await _db.Leden.Where(l => !l.IsDeleted).OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToListAsync();
+            ViewBag.Boeken = await _db.Boeken.Where(b => !b.IsDeleted).OrderBy(b => b.Titel).ToListAsync();
             return View(c);
         }
 

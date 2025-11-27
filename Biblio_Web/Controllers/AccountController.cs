@@ -5,6 +5,7 @@ using Biblio_Models.Entiteiten;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using System.Collections.Generic;
+using Biblio_Web.Models;
 
 namespace Biblio_Web.Controllers
 {
@@ -21,30 +22,25 @@ namespace Biblio_Web.Controllers
             _roleManager = roleManager;
         }
 
+        // Redirect to Identity area login page to avoid duplicate login views
         [AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
         {
-            return View(new LoginViewModel { ReturnUrl = returnUrl ?? string.Empty });
+            var target = Url.Content("~/Identity/Account/Login");
+            if (!string.IsNullOrEmpty(returnUrl))
+                target += "?returnUrl=" + System.Net.WebUtility.UrlEncode(returnUrl);
+            return Redirect(target);
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginViewModel vm)
+        public IActionResult Login(LoginViewModel vm)
         {
-            if (!ModelState.IsValid) return View(vm);
-
-            var user = await _userManager.FindByEmailAsync(vm.Email ?? string.Empty);
-            if (user == null)
-            {
-                ModelState.AddModelError(string.Empty, "Onbekende gebruiker");
-                return View(vm);
-            }
-
-            var res = await _signInManager.PasswordSignInAsync(user, vm.Password ?? string.Empty, vm.RememberMe, false);
-            if (res.Succeeded) return Redirect(vm.ReturnUrl ?? "/");
-
-            ModelState.AddModelError(string.Empty, "Ongeldig wachtwoord");
-            return View(vm);
+            var returnUrl = vm?.ReturnUrl;
+            var target = Url.Content("~/Identity/Account/Login");
+            if (!string.IsNullOrEmpty(returnUrl))
+                target += "?returnUrl=" + System.Net.WebUtility.UrlEncode(returnUrl);
+            return Redirect(target);
         }
 
         // GET fallback logout: available anonymously and redirects to Login
@@ -52,13 +48,12 @@ namespace Biblio_Web.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Logout()
         {
-            // Sign out if still signed in, then redirect to Login with message
             if (User?.Identity?.IsAuthenticated == true)
             {
                 await _signInManager.SignOutAsync();
             }
             TempData["Message"] = "Je bent uitgelogd.";
-            return RedirectToAction("Login", "Account");
+            return Redirect(Url.Content("~/Identity/Account/Login"));
         }
 
         // POST logout (recommended)
@@ -69,30 +64,19 @@ namespace Biblio_Web.Controllers
         {
             await _signInManager.SignOutAsync();
             TempData["Message"] = "Je bent uitgelogd.";
-            return RedirectToAction("Login", "Account");
+            return Redirect(Url.Content("~/Identity/Account/Login"));
         }
 
+        // Redirect register to Identity UI
         [AllowAnonymous]
-        public IActionResult Register() => View(new RegisterViewModel());
+        public IActionResult Register() => Redirect(Url.Content("~/Identity/Account/Register"));
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> Register(RegisterViewModel vm)
+        public IActionResult Register(RegisterViewModel vm)
         {
-            if (!ModelState.IsValid) return View(vm);
-            var email = vm.Email ?? string.Empty;
-            var password = vm.Password ?? string.Empty;
-            var user = new AppUser { UserName = email, Email = email, FullName = vm.FullName };
-            var res = await _userManager.CreateAsync(user, password);
-            if (res.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, "Lid");
-                await _signInManager.SignInAsync(user, false);
-                return RedirectToAction("Index", "Home");
-            }
-
-            foreach (var e in res.Errors) ModelState.AddModelError(string.Empty, e.Description);
-            return View(vm);
+            // Forward to Identity registration UI
+            return Redirect(Url.Content("~/Identity/Account/Register"));
         }
 
         // --- Admin user management actions (use shared view models from Biblio_Models) ---
@@ -115,7 +99,7 @@ namespace Biblio_Web.Controllers
                 });
             }
 
-            return View("Users", model); // reuses Views/Admin/Users.cshtml (adjust view if needed)
+            return View("Users", model);
         }
 
         [HttpPost]
@@ -138,18 +122,86 @@ namespace Biblio_Web.Controllers
         [Authorize(Policy = "RequireAdmin")]
         public async Task<IActionResult> UserRoles(string id)
         {
+            // Redirect legacy user-roles view to the unified ChangePassword page (admin can reset there)
             if (string.IsNullOrEmpty(id)) return BadRequest();
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return NotFound();
+            return RedirectToAction(nameof(ChangePassword), new { id });
+        }
 
-            var roles = await _userManager.GetRolesAsync(user);
-            var vm = new UserRolesViewModel
+        [Authorize]
+        public async Task<IActionResult> ChangePassword(string? id)
+        {
+            // id is optional: if provided and caller is admin, admin can change other user's password
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+            ChangePasswordViewModel vm = new ChangePasswordViewModel();
+
+            if (!string.IsNullOrEmpty(id) && User.IsInRole("Admin"))
             {
-                UserName = user.UserName ?? string.Empty,
-                Roles = roles.ToList()
-            };
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null) return NotFound();
+                vm.UserId = user.Id;
+                vm.UserName = user.UserName ?? string.Empty;
+                vm.IsAdminChange = true;
+            }
+            else
+            {
+                vm.UserId = currentUser.Id;
+                vm.UserName = currentUser.UserName ?? string.Empty;
+                vm.IsAdminChange = false;
+            }
 
-            return View(vm); // create Views/Account/UserRoles.cshtml if needed
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel vm)
+        {
+            if (!ModelState.IsValid) return View(vm);
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
+
+            // If admin changing other user's password
+            if (vm.IsAdminChange && User.IsInRole("Admin") && vm.UserId != currentUser.Id)
+            {
+                var user = await _userManager.FindByIdAsync(vm.UserId);
+                if (user == null) return NotFound();
+
+                // generate token and reset
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var res = await _userManager.ResetPasswordAsync(user, token, vm.NewPassword);
+                if (res.Succeeded)
+                {
+                    TempData["Message"] = "Wachtwoord gewijzigd.";
+                    return RedirectToAction("Users", "Admin");
+                }
+                foreach (var e in res.Errors) ModelState.AddModelError(string.Empty, e.Description);
+                return View(vm);
+            }
+
+            // Normal user change: require current password
+            var targetUser = await _userManager.FindByIdAsync(vm.UserId);
+            if (targetUser == null) return NotFound();
+
+            var check = await _userManager.CheckPasswordAsync(targetUser, vm.CurrentPassword ?? string.Empty);
+            if (!check)
+            {
+                ModelState.AddModelError(string.Empty, "Huidig wachtwoord is onjuist.");
+                return View(vm);
+            }
+
+            var changeRes = await _userManager.ChangePasswordAsync(targetUser, vm.CurrentPassword ?? string.Empty, vm.NewPassword);
+            if (!changeRes.Succeeded)
+            {
+                foreach (var e in changeRes.Errors) ModelState.AddModelError(string.Empty, e.Description);
+                return View(vm);
+            }
+
+            TempData["Message"] = "Wachtwoord succesvol gewijzigd.";
+            return RedirectToAction("Index", "Profile");
         }
     }
 }
