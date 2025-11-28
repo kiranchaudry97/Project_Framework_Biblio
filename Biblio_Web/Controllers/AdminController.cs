@@ -167,5 +167,26 @@ namespace Biblio_Web.Controllers
 
             return RedirectToAction(nameof(Users));
         }
+
+        // GET: Admin/EditRolesIndex - show list of users with links to edit roles
+        public async Task<IActionResult> EditRolesIndex()
+        {
+            var users = _userManager.Users.ToList();
+            var model = new List<UserViewModel>();
+            foreach (var u in users)
+            {
+                var roles = await _userManager.GetRolesAsync(u);
+                model.Add(new UserViewModel
+                {
+                    Id = u.Id,
+                    UserName = u.UserName ?? string.Empty,
+                    Email = u.Email ?? string.Empty,
+                    Blocked = (u as AppUser)?.IsBlocked ?? false,
+                    Roles = roles.ToList()
+                });
+            }
+
+            return View("EditRolesIndex", model);
+        }
     }
 }
