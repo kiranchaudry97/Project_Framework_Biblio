@@ -1,0 +1,33 @@
+@model IEnumerable<UserViewModel>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
+
+@{
+    ViewData["Title"] = Localizer["EditRoles"];
+}
+
+<h1>@Localizer["EditRoles"]</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>@Localizer["User"]</th>
+            <th>@Localizer["Email"]</th>
+            <th>@Localizer["Roles"]</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach(var u in Model)
+{
+    <tr>
+        <td>@u.UserName</td>
+        <td>@u.Email</td>
+        <td>@(string.Join(", ", u.Roles ?? new List<string>()))</td>
+        <td>
+            <a class="btn btn-sm btn-primary" asp-action="EditRoles" asp-route-id="@u.Id">@Localizer["EditRoles"]</a>
+        </td>
+    </tr>
+}
+    </tbody>
+</table>

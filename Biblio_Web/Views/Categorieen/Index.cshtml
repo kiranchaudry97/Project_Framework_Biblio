@@ -1,17 +1,19 @@
 @model IEnumerable<Biblio_Models.Entiteiten.Categorie>
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @{
-    ViewData["Title"] = "Categorieën";
+    ViewData["Title"] = Localizer["Categories"];
 }
 
-<h1>Categorieën</h1>
+<h1>@Localizer["Categories"]</h1>
 @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
 {
-    <a class="btn btn-success mb-2" asp-action="Create">Nieuwe categorie</a>
+    <a class="btn btn-success mb-2" asp-action="Create">@Localizer["NewCategory"]</a>
 }
 
 <table class="table table-striped">
     <thead>
-        <tr><th>Naam</th><th></th></tr>
+        <tr><th>@Localizer["ColumnName"]</th><th></th></tr>
     </thead>
     <tbody>
 @foreach(var c in Model)
@@ -21,7 +23,7 @@
         <td>
             @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
             {
-                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@c.Id">Verwijderen</a>
+                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@c.Id">@Localizer["Delete"]</a>
             }
         </td>
     </tr>
