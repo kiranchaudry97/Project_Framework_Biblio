@@ -6,6 +6,11 @@
     ViewData["Title"] = Localizer["Languages"];
 }
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
 <h1>@Localizer["Languages"]</h1>
 
 <p>
