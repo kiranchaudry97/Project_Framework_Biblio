@@ -31,10 +31,8 @@ namespace Biblio_Web.Controllers
             }
             catch (Exception ex)
             {
-                // Common cause: database schema not up-to-date (missing IsDefault/IsDeleted column)
                 _logger.LogError(ex, "Failed to load languages. This can happen when the database schema is outdated.");
 
-                // Provide a helpful message in UI and return an empty list to avoid app crash.
                 TempData["ErrorMessage"] = "Database schema mismatch: missing language columns. Run EF migrations (dotnet ef database update) or check the database.";
                 return View(new System.Collections.Generic.List<Taal>());
             }
