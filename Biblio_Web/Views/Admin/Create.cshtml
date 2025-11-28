@@ -1,6 +1,6 @@
-@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Localization
 @model Biblio_Web.Models.AdminCreateUserViewModel
-@inject IViewLocalizer Localizer
+@inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
 @{
     ViewData["Title"] = Localizer["NewUser"];
 }
