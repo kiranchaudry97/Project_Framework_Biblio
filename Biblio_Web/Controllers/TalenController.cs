@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using System;
+using Microsoft.Extensions.Logging;
 
 namespace Biblio_Web.Controllers
 {
@@ -13,16 +14,30 @@ namespace Biblio_Web.Controllers
     public class TalenController : Controller
     {
         private readonly BiblioDbContext _db;
+        private readonly ILogger<TalenController> _logger;
 
-        public TalenController(BiblioDbContext db)
+        public TalenController(BiblioDbContext db, ILogger<TalenController> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
         {
-            var items = await _db.Talen.Where(t => !t.IsDeleted).ToListAsync();
-            return View(items);
+            try
+            {
+                var items = await _db.Talen.Where(t => !t.IsDeleted).ToListAsync();
+                return View(items);
+            }
+            catch (Exception ex)
+            {
+                // Common cause: database schema not up-to-date (missing IsDefault/IsDeleted column)
+                _logger.LogError(ex, "Failed to load languages. This can happen when the database schema is outdated.");
+
+                // Provide a helpful message in UI and return an empty list to avoid app crash.
+                TempData["ErrorMessage"] = "Database schema mismatch: missing language columns. Run EF migrations (dotnet ef database update) or check the database.";
+                return View(new System.Collections.Generic.List<Taal>());
+            }
         }
 
         public IActionResult Create() => View(new Taal());
