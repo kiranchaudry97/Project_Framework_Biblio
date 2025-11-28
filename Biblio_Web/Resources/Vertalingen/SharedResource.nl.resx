@@ -207,4 +207,26 @@
   <data name="ConfirmPassword" xml:space="preserve"><value>Bevestig wachtwoord</value></data>
   <data name="Languages" xml:space="preserve"><value>Talen</value></data>
 
+  <!-- Admin / User management keys -->
+  <data name="UserManagement" xml:space="preserve"><value>Gebruikersbeheer</value></data>
+  <data name="Users" xml:space="preserve"><value>Gebruikers</value></data>
+  <data name="AllRoles" xml:space="preserve"><value>Alle rollen</value></data>
+  <data name="NewUser" xml:space="preserve"><value>Nieuw gebruiker</value></data>
+  <data name="User" xml:space="preserve"><value>Gebruiker</value></data>
+  <data name="Roles" xml:space="preserve"><value>Rollen</value></data>
+  <data name="Blocked" xml:space="preserve"><value>Geblokkeerd</value></data>
+  <data name="Actions" xml:space="preserve"><value>Acties</value></data>
+  <data name="Yes" xml:space="preserve"><value>Ja</value></data>
+  <data name="No" xml:space="preserve"><value>Nee</value></data>
+  <data name="Unblock" xml:space="preserve"><value>Deblokkeren</value></data>
+  <data name="Block" xml:space="preserve"><value>Blokkeren</value></data>
+  <data name="EditRoles" xml:space="preserve"><value>Bewerk rollen</value></data>
+  <data name="EditRolesFor" xml:space="preserve"><value>Rollen bewerken voor {0}</value></data>
+  <data name="NoRolesFound" xml:space="preserve"><value>Geen bewerkbare rollen gevonden.</value></data>
+  <data name="Medewerker" xml:space="preserve"><value>Medewerker</value></data>
+  <data name="UserRoles" xml:space="preserve"><value>Gebruikersrollen</value></data>
+  <data name="UserRolesFor" xml:space="preserve"><value>Rollen voor {0}</value></data>
+  <data name="NoRoles" xml:space="preserve"><value>Geen rollen toegewezen</value></data>
+  <data name="UserAndRoles" xml:space="preserve"><value>Gebruikers en rollen</value></data>
+
 </root>
