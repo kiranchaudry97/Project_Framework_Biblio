@@ -23,19 +23,70 @@ namespace Biblio_Web.Controllers
                 culture = "nl";
 
             var cookieValue = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture));
-            Response.Cookies.Append(
-                CookieRequestCultureProvider.DefaultCookieName,
-                cookieValue,
-                new CookieOptions { Expires = DateTimeOffset.UtcNow.AddYears(1), IsEssential = true }
-            );
 
-            _logger.LogInformation("SetLanguage called. culture={culture}, returnUrl={returnUrl}, cookie={cookie}", culture, returnUrl, cookieValue);
+            // Use explicit cookie options to ensure the cookie is set and available across the site.
+            var options = new CookieOptions
+            {
+                Path = "/",
+                Expires = DateTimeOffset.UtcNow.AddYears(1),
+                IsEssential = true,
+                // Keep SameSite lax for insecure requests; require None for cross-site when secure.
+                SameSite = Request.IsHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Secure = Request.IsHttps,
+                HttpOnly = false
+            };
+
+            Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName, cookieValue, options);
+
+            _logger.LogInformation("SetLanguage called. culture={culture}, returnUrl={returnUrl}, cookie={cookie}, isHttps={isHttps}", culture, returnUrl, cookieValue, Request.IsHttps);
 
             // Set TempData so layout can show a toast confirming the language change
             TempData["LanguageChanged"] = culture;
 
+            // Normalize and sanitize returnUrl to avoid nested Culture/SetLanguage loops
             if (string.IsNullOrEmpty(returnUrl))
+            {
                 returnUrl = Url.Content("~/");
+            }
+            else
+            {
+                try
+                {
+                    // decode repeatedly up to a few levels to detect nested SetLanguage chains
+                    string decoded = returnUrl;
+                    for (int i = 0; i < 5; i++)
+                    {
+                        var next = System.Net.WebUtility.UrlDecode(decoded);
+                        if (string.Equals(next, decoded, StringComparison.Ordinal)) break;
+                        decoded = next;
+                    }
+
+                    // If the decoded URL contains a culture set action or a ReturnUrl param, avoid redirect loops
+                    if (!string.IsNullOrEmpty(decoded) && (decoded.IndexOf("/Culture/SetLanguage", StringComparison.OrdinalIgnoreCase) >= 0 || decoded.IndexOf("ReturnUrl=", StringComparison.OrdinalIgnoreCase) >= 0))
+                    {
+                        _logger.LogWarning("Rejecting returnUrl '{ReturnUrl}' (decoded: '{Decoded}') because it contains nested SetLanguage or ReturnUrl.", returnUrl, decoded);
+                        returnUrl = Url.Content("~/");
+                    }
+                    else
+                    {
+                        // Use the decoded value if it's safe
+                        returnUrl = decoded;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // log decode errors for debugging and fall back to safe root
+                    _logger.LogWarning(ex, "Failed to decode returnUrl '{ReturnUrl}' - redirecting to root.", returnUrl);
+                    returnUrl = Url.Content("~/");
+                }
+            }
+
+            // Ensure local url only and starts with '/'
+            if (!Url.IsLocalUrl(returnUrl) || !(returnUrl.StartsWith("/") || returnUrl.StartsWith("~/")))
+            {
+                _logger.LogWarning("Rejected returnUrl '{ReturnUrl}' because it is not a local path. Redirecting to root.", returnUrl);
+                returnUrl = Url.Content("~/");
+            }
 
             return LocalRedirect(returnUrl);
         }
