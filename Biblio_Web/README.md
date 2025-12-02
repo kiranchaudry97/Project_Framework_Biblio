@@ -41,6 +41,7 @@ Belangrijke NuGet‑pakketten
 - Microsoft.EntityFrameworkCore.SqlServer
 - Microsoft.AspNetCore.Identity.EntityFrameworkCore
 - Swashbuckle.AspNetCore (Swagger)
+- Microsoft.AspNetCore.OpenApi
 
 ## Datamodel (kort)
 De domeinmodellen staan in `Biblio_Models` (projectreferentie). Belangrijke entiteiten:
