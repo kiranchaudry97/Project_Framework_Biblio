@@ -49,14 +49,33 @@ namespace Biblio_Web.Areas.Identity.Pages.Account
             public bool RememberMe { get; set; }
         }
 
-        public void OnGet(string? returnUrl = null)
+        // Change OnGet to return IActionResult so we can redirect authenticated users directly to the dashboard
+        public IActionResult OnGet(string? returnUrl = null)
         {
+            // If the user is already authenticated, redirect to the home/dashboard page
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                // always send authenticated users to the app root (Home/Index)
+                return LocalRedirect(Url.Content("~/"));
+            }
+
             ReturnUrl = returnUrl ?? Url.Content("~/");
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
-            ReturnUrl = returnUrl ?? Url.Content("~/");
+            // Default to app root
+            var desiredReturn = returnUrl ?? Url.Content("~/");
+
+            // If the return URL is not local or points to the Culture setter (complex chain), fall back to root
+            if (!Url.IsLocalUrl(desiredReturn) || (desiredReturn?.IndexOf("/Culture/SetLanguage", System.StringComparison.OrdinalIgnoreCase) >= 0))
+            {
+                desiredReturn = Url.Content("~/");
+            }
+
+            ReturnUrl = desiredReturn;
+
             if (!ModelState.IsValid) return Page();
 
             // Use null-forgiving because validation attributes ensure values are present

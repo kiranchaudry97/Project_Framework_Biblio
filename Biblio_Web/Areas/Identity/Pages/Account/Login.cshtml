@@ -1,19 +1,16 @@
-
-
-
-
-
 @page
 @model Biblio_Web.Areas.Identity.Pages.Account.LoginModel
 @inject Microsoft.Extensions.Localization.IStringLocalizer<Biblio_Web.SharedResource> Localizer
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
+@using System.Globalization
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = Localizer["Welkom bij biblio!"];
 }
 
 <div class="form-centered">
     <div class="text-center mb-3">
         <a class="navbar-brand fw-bold fs-4" asp-area="" asp-controller="Home" asp-action="Index">Biblio</a>
+        <img src="~/images/login-illustration.svg" alt="Login illustration" class="img-fluid mt-3 mb-2" style="max-width:140px; display:block; margin:0 auto;" />
     </div>
 
     @if (User?.Identity?.IsAuthenticated == true)
@@ -22,7 +19,8 @@
     }
     else
     {
-        <h1 class="h3 mb-3 fw-semibold text-center">@ViewData["Title"]</h1>
+        <h1 class="h3 mb-3 fw-semibold text-center">@Localizer["Welkom bij biblio!"]</h1>
+        <h1 class="h3 mb-3 fw-semibold text-center">@Localizer["Welcome"]</h1>
     }
 
     <form method="post" class="needs-validation" novalidate>
@@ -64,6 +62,7 @@
         </div>
 
     </form>
+
 </div>
 
 @section Scripts {
@@ -71,10 +70,9 @@
         (function() {
             var cb = document.getElementById('showPassword');
             var pw = document.getElementById('Input_Password');
-            if (!cb || !pw) return;
-            cb.addEventListener('change', function() {
-                pw.type = this.checked ? 'text' : 'password';
-            });
+            if (cb && pw) cb.addEventListener('change', function() { pw.type = this.checked ? 'text' : 'password'; });
+
+            // culture select removed from this page because it's available in the site navigation
         })();
     </script>
 }
