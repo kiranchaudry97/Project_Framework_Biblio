@@ -6,6 +6,12 @@
 }
 
 <h1>@Localizer["Categories"]</h1>
+
+<!-- Category illustration -->
+<div class="text-center mb-3">
+    <img src="~/images/categorie-illustration.svg" alt="Categories illustration" class="img-fluid" style="max-width:120px; width:120px; height:auto; display:inline-block;" />
+</div>
+
 @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
 {
     <a class="btn btn-success mb-2" asp-action="Create">@Localizer["NewCategory"]</a>

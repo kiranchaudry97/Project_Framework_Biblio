@@ -14,7 +14,12 @@
     var selectedCategory = ViewBag.SelectedCategory as int?;
 }
 
-<h1>@ViewData["Title"]</h1>
+<h1 class="mb-2">@ViewData["Title"]</h1>
+
+<!-- Books illustration -->
+<div class="text-center mb-3">
+    <img src="~/images/books-illustration.svg" alt="Books illustration" class="img-fluid" style="max-width:120px; width:120px; height:auto; display:inline-block;" />
+</div>
 
 <form method="get" class="row g-2">
     <div class="col-auto">

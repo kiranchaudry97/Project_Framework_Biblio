@@ -6,6 +6,11 @@
 }
 
 <h1>@ViewData["Title"]</h1>
+
+<!-- Members illustration -->
+<div class="text-center mb-3">
+    <img src="~/images/leden-illustration.svg" alt="Members illustration" class="img-fluid" style="max-width:120px; width:120px; height:auto; display:inline-block;" />
+</div>
 <form method="get" class="row g-2">
     <div class="col-auto">
         <input type="text" name="search" value="@ViewContext.HttpContext.Request.Query["search"]" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" />
