@@ -1,0 +1,391 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- Core validation -->
+  <data name="Required" xml:space="preserve">
+    <value>Le champ {0} est requis.</value>
+  </data>
+  <data name="StringLength" xml:space="preserve">
+    <value>{0} doit contenir entre {2} et {1} caractères.</value>
+  </data>
+  <data name="EmailAddress" xml:space="preserve">
+    <value>Adresse e-mail invalide.</value>
+  </data>
+  <!-- Navigation / layout -->
+  <data name="Home" xml:space="preserve">
+    <value>Accueil</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Confidentialité</value>
+  </data>
+  <data name="Books" xml:space="preserve">
+    <value>Livres</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>Membres</value>
+  </data>
+  <data name="Loans" xml:space="preserve">
+    <value>Prêts</value>
+  </data>
+  <data name="Categories" xml:space="preserve">
+    <value>Catégories</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="QuickActions" xml:space="preserve">
+    <value>Actions rapides</value>
+  </data>
+  <!-- Actions / buttons -->
+  <data name="NewBook" xml:space="preserve">
+    <value>Nouveau livre</value>
+  </data>
+  <data name="NewMember" xml:space="preserve">
+    <value>Nouveau membre</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nouveau</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>Créer</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Détails</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <!-- Authentication -->
+  <data name="Login" xml:space="preserve">
+    <value>Connexion</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>S'inscrire</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Déconnexion</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="ToggleTheme" xml:space="preserve">
+    <value>Changer le thème</value>
+  </data>
+  <!-- Forms -->
+  <data name="Email" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Mot de passe</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirmer le mot de passe</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Rechercher par titre, auteur ou ISBN</value>
+  </data>
+  <!-- Notifications -->
+  <data name="LanguageChanged" xml:space="preserve">
+    <value>Langue modifiée</value>
+  </data>
+  <data name="LanguageSetTo" xml:space="preserve">
+    <value>Langue définie sur {0}</value>
+  </data>
+  <!-- Misc -->
+  <data name="Search" xml:space="preserve">
+    <value>Rechercher</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Retour</value>
+  </data>
+  <!-- Login / account specific keys -->
+  <data name="Welkom bij biblio!" xml:space="preserve">
+    <value>Bienvenue sur biblio !</value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Bienvenue</value>
+  </data>
+  <data name="Show Password" xml:space="preserve">
+    <value>Afficher le mot de passe</value>
+  </data>
+  <data name="Remember Me" xml:space="preserve">
+    <value>Se souvenir de moi</value>
+  </data>
+  <data name="Register Link" xml:space="preserve">
+    <value>S'inscrire</value>
+  </data>
+  <data name="Forgot Password Link" xml:space="preserve">
+    <value>Mot de passe oublié</value>
+  </data>
+  <data name="ForgotPasswordTitle" xml:space="preserve">
+    <value>Mot de passe oublié ?</value>
+  </data>
+  <data name="ResetButton" xml:space="preserve">
+    <value>Réinitialiser le mot de passe</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirmer le mot de passe</value>
+  </data>
+  <data name="SignIn" xml:space="preserve">
+    <value>Se connecter</value>
+  </data>
+  <!-- Home / Dashboard -->
+  <data name="WelcomeTitle" xml:space="preserve">
+    <value>Bienvenue chez Biblio – Gestion de la bibliothèque</value>
+  </data>
+  <data name="WelcomeSubtitlePart1" xml:space="preserve">
+    <value>Gérez les livres, les membres et les prêts depuis ce tableau de bord.</value>
+  </data>
+  <data name="WelcomeBiblio" xml:space="preserve">
+    <value>Bienvenue chez Biblio</value>
+  </data>
+  <data name="ManageBooks" xml:space="preserve">
+    <value>Gérer les livres</value>
+  </data>
+  <data name="ManageMembers" xml:space="preserve">
+    <value>Gérer les membres</value>
+  </data>
+  <!-- Books view / Create -->
+  <data name="Books_Create_Title" xml:space="preserve">
+    <value>Nouveau livre</value>
+  </data>
+  <data name="Books_Create_Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Books_Create_Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="Books_Index_Title" xml:space="preserve">
+    <value>Livres</value>
+  </data>
+  <data name="Books_Index_SearchPlaceholder" xml:space="preserve">
+    <value>Rechercher par titre, auteur ou ISBN</value>
+  </data>
+  <data name="Books_Index_New" xml:space="preserve">
+    <value>Nouveau</value>
+  </data>
+  <data name="Books_Index_ColumnTitle" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="Books_Index_ColumnAuthor" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="Books_Index_ColumnIsbn" xml:space="preserve">
+    <value>ISBN</value>
+  </data>
+  <data name="Books_Index_ColumnCategory" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="ColumnTitle" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="ColumnAuthor" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="ColumnIsbn" xml:space="preserve">
+    <value>ISBN</value>
+  </data>
+  <data name="ColumnCategory" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="ChooseCategory" xml:space="preserve">
+    <value>-- Choisissez une catégorie --</value>
+  </data>
+  <!-- Members view / Create -->
+  <data name="NewMember" xml:space="preserve">
+    <value>Nouveau membre</value>
+  </data>
+  <data name="Voornaam" xml:space="preserve">
+    <value>Prénom</value>
+  </data>
+  <data name="Achternaam" xml:space="preserve">
+    <value>Nom de famille</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <!-- Dutch field keys translated to French -->
+  <data name="Naam" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Auteur" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <!-- Password / profile -->
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Mot de passe actuel</value>
+  </data>
+  <data name="DaysLate" xml:space="preserve">
+    <value>DaysLate</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="DeleteAccount" xml:space="preserve">
+    <value>DeleteAccount</value>
+  </data>
+  <data name="DeleteAccountConfirm" xml:space="preserve">
+    <value>DeleteAccountConfirm</value>
+  </data>
+  <data name="DeleteConfirm" xml:space="preserve">
+    <value>DeleteConfirm</value>
+  </data>
+  <data name="DueDate" xml:space="preserve">
+    <value>Date d'échéance</value>
+  </data>
+  <data name="EditProfile" xml:space="preserve">
+    <value>EditProfile</value>
+  </data>
+  <data name="EditRoles" xml:space="preserve">
+    <value>EditRoles</value>
+  </data>
+  <data name="Filter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="FullName" xml:space="preserve">
+    <value>FullName</value>
+  </data>
+  <data name="IngeleverdOp" xml:space="preserve">
+    <value>Restitué le</value>
+  </data>
+  <data name="LoanCount" xml:space="preserve">
+    <value>LoanCount</value>
+  </data>
+  <data name="Medewerker" xml:space="preserve">
+    <value>Medewerker</value>
+  </data>
+  <data name="Member" xml:space="preserve">
+    <value>Member</value>
+  </data>
+  <data name="Naam" xml:space="preserve">
+    <value>Naam</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="NewCategory" xml:space="preserve">
+    <value>NewCategory</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>NewPassword</value>
+  </data>
+  <data name="NewUser" xml:space="preserve">
+    <value>NewUser</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="NoBooksLoaded" xml:space="preserve">
+    <value>NoBooksLoaded</value>
+  </data>
+  <data name="NoLateLoans" xml:space="preserve">
+    <value>NoLateLoans</value>
+  </data>
+  <data name="NoMembersLoaded" xml:space="preserve">
+    <value>NoMembersLoaded</value>
+  </data>
+  <data name="NoRoles" xml:space="preserve">
+    <value>NoRoles</value>
+  </data>
+  <data name="OnlyOpen" xml:space="preserve">
+    <value>OnlyOpen</value>
+  </data>
+  <data name="Return" xml:space="preserve">
+    <value>Return</value>
+  </data>
+  <data name="StartDate" xml:space="preserve">
+    <value>Date de début</value>
+  </data>
+  <data name="Unblock" xml:space="preserve">
+    <value>Unblock</value>
+  </data>
+  <data name="UserManagement" xml:space="preserve">
+    <value>UserManagement</value>
+  </data>
+  <data name="UserRoles" xml:space="preserve">
+    <value>UserRoles</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Users</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Admin</value>
+  </data>
+  <data name="AllBooks" xml:space="preserve">
+    <value>AllBooks</value>
+  </data>
+  <data name="AllMembers" xml:space="preserve">
+    <value>AllMembers</value>
+  </data>
+  <data name="AllRoles" xml:space="preserve">
+    <value>AllRoles</value>
+  </data>
+  <data name="Block" xml:space="preserve">
+    <value>Block</value>
+  </data>
+  <data name="Blocked" xml:space="preserve">
+    <value>Blocked</value>
+  </data>
+  <data name="Book" xml:space="preserve">
+    <value>Book</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>ChangePassword</value>
+  </data>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="ColumnEmail" xml:space="preserve">
+    <value>ColumnEmail</value>
+  </data>
+  <data name="ColumnFirstName" xml:space="preserve">
+    <value>ColumnFirstName</value>
+  </data>
+  <data name="ColumnLastName" xml:space="preserve">
+    <value>ColumnLastName</value>
+  </data>
+  <data name="ColumnName" xml:space="preserve">
+    <value>ColumnName</value>
+  </data>
+  <data name="Languages" xml:space="preserve">
+    <value>Languages</value>
+  </data>
+  <data name="Roles" xml:space="preserve">
+    <value>Roles</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
+  </data>
+</root>
