@@ -1,3 +1,8 @@
+/*
+API endpoints (DiagnosticsController)
+- GET /api/diagnostics/smoke   -> voer smoke-tests uit (DB, rollen, admin-gebruiker, boeken CRUD, aantal achterstallige leningen) (AllowAnonymous)
+*/
+
 // DiagnosticsController.cs
 // Doel: eenvoudige diagnostische API-endpoints voor healthchecks en smoke-tests.
 // Gebruik: biedt een /api/diagnostics/smoke endpoint dat snel controleert of kernfuncties werken
@@ -48,6 +53,7 @@ namespace Biblio_Web.Controllers.Api
         /// create/delete operatie op boeken, plus het tellen van achterstallige leningen.
         /// Retourneert een JSON-object met samenvattende flags en eventuele foutmeldingen.
         /// </summary>
+        // GET: api/diagnostics/smoke
         [HttpGet("smoke")]
         public async Task<IActionResult> SmokeTest()
         {
@@ -103,12 +109,12 @@ namespace Biblio_Web.Controllers.Api
                 errors.Add("Admin user check error: " + ex.Message);
             }
 
-            // Books CRUD smoke: create and delete a temporary book
+            // Boeken CRUD smoke: maak en verwijder een tijdelijk boek
             bool created = false, deleted = false;
             string bookMsg = string.Empty;
             try
             {
-                // find any category
+                // zoek een categorie
                 var cat = await _db.Categorien.FirstOrDefaultAsync();
                 if (cat == null)
                 {
@@ -123,7 +129,7 @@ namespace Biblio_Web.Controllers.Api
                 await _db.SaveChangesAsync();
                 created = b.Id > 0;
 
-                // now delete (hard-delete) to clean up
+                // nu verwijderen (hard-delete) om op te ruimen
                 if (created)
                 {
                     _db.Boeken.Remove(b);
@@ -134,7 +140,7 @@ namespace Biblio_Web.Controllers.Api
             catch (Exception ex)
             {
                 bookMsg = ex.Message;
-                errors.Add("Books CRUD error: " + ex.Message);
+                errors.Add("Boeken CRUD fout: " + ex.Message);
             }
 
             int overdueCount = 0;

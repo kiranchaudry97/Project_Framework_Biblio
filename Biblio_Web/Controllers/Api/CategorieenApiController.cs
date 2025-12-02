@@ -1,4 +1,13 @@
-﻿// CategorieenApiController.cs
+﻿/*
+API endpoints (CategorieenApiController)
+- GET  /api/categorieen            -> list categories (RequireStaff)
+- GET  /api/categorieen/{id}       -> get category detail (RequireStaff)
+- POST /api/categorieen            -> create category (RequireStaff)
+- PUT  /api/categorieen/{id}       -> update category (RequireStaff)
+- DELETE /api/categorieen/{id}     -> soft-delete category (RequireStaff)
+*/
+
+// CategorieenApiController.cs
 // Doel: API-controller voor het beheren van categorieën (CRUD) via JSON‑endpoints.
 // Gebruik: biedt beveiligde endpoints voor medewerkers/administrators om categorieën te lezen, aan te maken,
 //         bij te werken en zacht te verwijderen (soft‑delete). Wordt gebruikt door de admin UI of externe clients.
@@ -8,9 +17,7 @@
 // - Valideer input en retourneer ProblemDetails/ValidationProblemDetails voor consistente foutafhandeling.
 // - Beperk toegang via de `RequireStaff`-policy zodat alleen bevoegde gebruikers deze API kunnen gebruiken.
 
-/// <summary>
-/// API‑controller voor categorieën. Behandelt GET/POST/PUT/DELETE operaties.
-/// </summary>using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +35,7 @@ namespace Biblio_Web.Controllers.Api
         private readonly BiblioDbContext _db;
         public CategorieenApiController(BiblioDbContext db) => _db = db;
 
+        // GET: api/categorieen
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -35,6 +43,7 @@ namespace Biblio_Web.Controllers.Api
             return Ok(list);
         }
 
+        // GET: api/categorieen/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -43,6 +52,7 @@ namespace Biblio_Web.Controllers.Api
             return Ok(c);
         }
 
+        // POST: api/categorieen
         [HttpPost]
         public async Task<IActionResult> Post(Categorie model)
         {
@@ -56,6 +66,7 @@ namespace Biblio_Web.Controllers.Api
             return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
         }
 
+        // PUT: api/categorieen/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Categorie model)
         {
@@ -69,6 +80,7 @@ namespace Biblio_Web.Controllers.Api
             return NoContent();
         }
 
+        // DELETE: api/categorieen/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

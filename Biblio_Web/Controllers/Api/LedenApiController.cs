@@ -1,3 +1,12 @@
+/*
+API endpoints (LedenApiController)
+- GET  /api/leden?page=1&pageSize=20     -> paged list (RequireStaff)
+- GET  /api/leden/{id}                  -> get member detail (RequireStaff)
+- POST /api/leden                       -> create member (RequireStaff)
+- PUT  /api/leden/{id}                  -> update member (RequireStaff)
+- DELETE /api/leden/{id}                -> soft-delete member (RequireStaff)
+*/
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -40,6 +49,7 @@ namespace Biblio_Web.Controllers.Api
             return Ok(result);
         }
 
+        // GET: api/leden/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -48,6 +58,7 @@ namespace Biblio_Web.Controllers.Api
             return Ok(item);
         }
 
+        // POST: api/leden
         [HttpPost]
         public async Task<IActionResult> Post(Lid model)
         {
@@ -65,6 +76,7 @@ namespace Biblio_Web.Controllers.Api
             return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
         }
 
+        // PUT: api/leden/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Lid model)
         {
@@ -83,6 +95,7 @@ namespace Biblio_Web.Controllers.Api
             return NoContent();
         }
 
+        // DELETE: api/leden/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

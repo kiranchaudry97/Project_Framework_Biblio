@@ -1,3 +1,8 @@
+/*
+API endpoints (AuthController)
+- POST /api/auth/token       -> aanvraag van JWT: { "email": "..", "password": ".." }  (retourneert { access_token, expires })
+*/
+
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -41,6 +46,7 @@ namespace Biblio_Web.Controllers.Api
         /// Retourneert HTTP 400 bij ontbrekende gegevens, 401 bij ongeldige inloggegevens,
         /// en 200 met het token en vervaltijd bij succesvolle authenticatie.
         /// </summary>
+        // POST: api/auth/token (aanvraag token)
         [AllowAnonymous]
         [HttpPost("token")]
         public async Task<IActionResult> Token([FromBody] LoginRequest request)

@@ -1,3 +1,11 @@
+/*
+API endpoints (UitleningenApiController)
+- GET  /api/uitleningen?page=1&pageSize=20   -> paged list (RequireMember)
+- GET  /api/uitleningen/late                -> list overdue loans (RequireMember)
+- POST /api/uitleningen                      -> create loan (RequireStaff)
+- PUT  /api/uitleningen/{id}/return          -> mark loan returned (RequireStaff)
+*/
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +26,7 @@ namespace Biblio_Web.Controllers.Api
         public UitleningenApiController(BiblioDbContext db) => _db = db;
 
         // GET: api/uitleningen?page=1&pageSize=20
+        // GET  /api/uitleningen?page=1&pageSize=20   -> paged list (RequireMember)
         [HttpGet]
         public async Task<IActionResult> Get(int page = 1, int pageSize = 20)
         {
@@ -41,6 +50,8 @@ namespace Biblio_Web.Controllers.Api
             return Ok(result);
         }
 
+        // GET: api/uitleningen/late
+        // GET  /api/uitleningen/late                -> list overdue loans (RequireMember)
         [HttpGet("late")]
         public async Task<ActionResult<IEnumerable<Lenen>>> GetLate()
         {
@@ -49,6 +60,8 @@ namespace Biblio_Web.Controllers.Api
             return Ok(list);
         }
 
+        // POST: api/uitleningen
+        // POST /api/uitleningen                      -> create loan (RequireStaff)
         [HttpPost]
         [Authorize(Policy = "RequireStaff")]
         public async Task<ActionResult<Lenen>> Post(Lenen model)
@@ -74,6 +87,8 @@ namespace Biblio_Web.Controllers.Api
             return CreatedAtAction(nameof(Get), new { id = entity.Id }, saved);
         }
 
+        // PUT: api/uitleningen/{id}/return
+        // PUT  /api/uitleningen/{id}/return          -> mark loan returned (RequireStaff)
         [HttpPut("{id}/return")]
         [Authorize(Policy = "RequireStaff")]
         public async Task<IActionResult> Return(int id)

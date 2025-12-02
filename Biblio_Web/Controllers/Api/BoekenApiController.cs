@@ -1,3 +1,12 @@
+/*
+API endpoints (BoekenApiController)
+- GET  /api/boeken?page=1&pageSize=20      -> paged list (RequireMember)
+- GET  /api/boeken/{id}                   -> get book detail (RequireMember)
+- POST /api/boeken                        -> create book (RequireStaff)
+- PUT  /api/boeken/{id}                   -> update book (RequireStaff)
+- DELETE /api/boeken/{id}                 -> soft-delete book (RequireStaff)
+*/
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
