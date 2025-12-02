@@ -11,6 +11,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Biblio_Models.Entiteiten;
 
 namespace Biblio_Web.Controllers.Api
 {
