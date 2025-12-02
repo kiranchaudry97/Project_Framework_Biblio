@@ -34,11 +34,26 @@ namespace Biblio_Models.Migrations
                 {
                     table.PrimaryKey("PK_Talen", x => x.Id);
                 });
+
+            // Seed initial languages: nl, en, fr
+            migrationBuilder.InsertData(
+                table: "Talen",
+                columns: new[] { "Code", "Naam", "IsDefault", "IsDeleted" },
+                values: new object[,]
+                {
+                    { "nl", "Nederlands", true, false },
+                    { "en", "English", false, false },
+                    { "fr", "Français", false, false }
+                }
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            // Remove seeded languages by code
+            migrationBuilder.Sql("DELETE FROM Talen WHERE Code IN ('nl','en','fr')");
+
             migrationBuilder.DropTable(
                 name: "Talen");
 
