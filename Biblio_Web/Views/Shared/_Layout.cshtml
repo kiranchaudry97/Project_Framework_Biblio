@@ -68,6 +68,13 @@
                                        asp-route-culture="en"
                                        asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)">EN</a>
                                 </li>
+                                <li>
+                                    <a class="dropdown-item"
+                                       asp-controller="Culture"
+                                       asp-action="SetLanguage"
+                                       asp-route-culture="fr"
+                                       asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)">FR</a>
+                                </li>
                             </ul>
                         </li>
 
