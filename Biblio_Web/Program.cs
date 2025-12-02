@@ -154,109 +154,18 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Fallback voor ondersteunde culturen (wordt runtime vervangen door DB‑waarden indien beschikbaar)
-var fallbackSupportedCultures = new[] { new CultureInfo("nl"), new CultureInfo("en") };
-
 var app = builder.Build();
 
-// We bouwen RequestLocalizationOptions nadat DB is gemigreerd/geseed zodat ondersteunde culturen uit DB geladen kunnen worden.
+var supportedCultures = new[] { "nl", "en", "fr" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture(supportedCultures[0])
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
 
-// Zorg dat de database wordt aangemaakt/gemigreerd en seed rollen/gebruikers in development
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var db = services.GetRequiredService<BiblioDbContext>();
-        // gebruik async migratie
-        await db.Database.MigrateAsync();
+localizationOptions.RequestCultureProviders.Insert(0, new CookieRequestCultureProvider());
+localizationOptions.RequestCultureProviders.Insert(1, new QueryStringRequestCultureProvider());
 
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        var userManager = services.GetRequiredService<UserManager<AppUser>>();
-
-        string[] roles = new[] { "Admin", "Medewerker", "Lid" };
-        foreach (var r in roles)
-        {
-            var exists = await roleManager.RoleExistsAsync(r);
-            if (!exists)
-            {
-                await roleManager.CreateAsync(new IdentityRole(r));
-            }
-        }
-
-        var adminEmail = builder.Configuration["Seed:AdminEmail"] ?? "admin@biblio.local";
-        var adminPwd = builder.Configuration["Seed:AdminPassword"] ?? "Admin123!";
-        var admin = await userManager.FindByEmailAsync(adminEmail);
-        if (admin == null)
-        {
-            admin = new AppUser { UserName = adminEmail, Email = adminEmail, FullName = "Hoofdbeheerder" };
-            var res = await userManager.CreateAsync(admin, adminPwd);
-            if (res.Succeeded)
-            {
-                await userManager.AddToRoleAsync(admin, "Admin");
-            }
-        }
-
-        // Voer centrale seed uit (categorieën, boeken, leden, talen, testaccounts)
-        await SeedData.InitializeAsync(services);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Er trad een fout op tijdens het seeden van de DB.");
-    }
-}
-
-// Bouw nu localization options op basis van in DB opgeslagen talen wanneer beschikbaar
-RequestLocalizationOptions locOptions;
-try
-{
-    using var scope2 = app.Services.CreateScope();
-    var db = scope2.ServiceProvider.GetRequiredService<BiblioDbContext>();
-
-    // laad niet‑verwijderde talen gesorteerd op IsDefault desc zodat default eerst komt als aanwezig
-    var taalEntities = await db.Talen
-        .Where(t => !t.IsDeleted)
-        .OrderByDescending(t => t.IsDefault)
-        .ToListAsync();
-
-    var codes = taalEntities.Select(t => t.Code).Where(c => !string.IsNullOrWhiteSpace(c)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-
-    var cultures = (codes != null && codes.Count > 0)
-        ? codes.Select(c => {
-            try { return new CultureInfo(c); }
-            catch { return null; }
-        }).Where(ci => ci != null).Select(ci => ci!).ToList()
-        : fallbackSupportedCultures.ToList();
-
-    // kies default culture: eerst IsDefault uit DB, anders eerste culture in lijst
-    var defaultCulture = taalEntities.FirstOrDefault(t => t.IsDefault && !t.IsDeleted)?.Code
-                         ?? cultures.FirstOrDefault()?.Name
-                         ?? fallbackSupportedCultures.First().Name;
-
-    locOptions = new RequestLocalizationOptions
-    {
-        DefaultRequestCulture = new RequestCulture(defaultCulture),
-        SupportedCultures = cultures,
-        SupportedUICultures = cultures
-    };
-}
-catch
-{
-    // fallback wanneer DB niet bereikbaar is
-    locOptions = new RequestLocalizationOptions
-    {
-        DefaultRequestCulture = new RequestCulture(fallbackSupportedCultures.First().Name),
-        SupportedCultures = fallbackSupportedCultures.ToList(),
-        SupportedUICultures = fallbackSupportedCultures.ToList()
-    };
-}
-
-// Zorg dat de cookie provider de hoogste prioriteit heeft zodat gebruikerskeuze via cookie persistent is; querystring als secundair
-locOptions.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localization.CookieRequestCultureProvider());
-locOptions.RequestCultureProviders.Insert(1, new Microsoft.AspNetCore.Localization.QueryStringRequestCultureProvider());
-
-app.UseRequestLocalization(locOptions);
+app.UseRequestLocalization(localizationOptions);
 
 // Configureer de HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
