@@ -7,6 +7,10 @@
 
 <h1>@ViewData["Title"]</h1>
 
+<div class="text-center mb-3">
+    <img src="~/images/user-plus-illustration.svg" alt="Add user illustration" class="img-fluid" style="max-width:120px; width:120px; height:auto; display:inline-block;" />
+</div>
+
 <form asp-action="Create" method="post">
     @Html.AntiForgeryToken()
     <div class="mb-3">

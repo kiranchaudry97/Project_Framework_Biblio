@@ -7,6 +7,10 @@
 
 <h1>@ViewData["Title"]</h1>
 
+<div class="text-center mb-3">
+    <img src="~/images/edit-illustration.svg" alt="Edit illustration" class="img-fluid" style="max-width:120px; width:120px; height:auto; display:inline-block;" />
+</div>
+
 <form asp-action="Edit" method="post">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
