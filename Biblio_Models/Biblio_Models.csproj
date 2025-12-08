@@ -16,6 +16,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10" />
     <!-- SQL Server provider for EF Core -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
+    <!-- Add Sqlite provider for design-time sqlite usage -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
     <!-- Host package for building generic host in Program.cs -->
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
   </ItemGroup>
