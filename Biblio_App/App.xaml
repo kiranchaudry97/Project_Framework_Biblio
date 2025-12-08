@@ -8,6 +8,7 @@
         <ResourceDictionary>
             <conv:StringNotEmptyToBoolConverter x:Key="StringNotEmptyToBoolConverter" />
             <conv:DateToBoolConverter x:Key="DateToBoolConverter" />
+            <conv:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
