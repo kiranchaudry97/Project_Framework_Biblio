@@ -124,6 +124,7 @@ namespace Biblio_Models.Data
             .HasFilter("([Isbn] IS NOT NULL AND [Isbn] <> '')");
         }
     
+        /*
         internal class BiblioDbContextDesignTimeFactory : IDesignTimeDbContextFactory<BiblioDbContext>
         {
             public BiblioDbContext CreateDbContext(string[] args)
@@ -137,5 +138,6 @@ namespace Biblio_Models.Data
                 return new BiblioDbContext(optionsBuilder.Options);
             }
         }
+        */
     }
 }
