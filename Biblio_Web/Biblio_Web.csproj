@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <Folder Include="Areas\Identity\Data\" />
-    <Folder Include="Resources\Vertalingen\Backup\" />
   </ItemGroup>
 
   <ItemGroup>
