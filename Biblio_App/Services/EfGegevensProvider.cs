@@ -1,23 +1,26 @@
 using System.Threading.Tasks;
+using Biblio_App.Models;
 using Biblio_Models.Data;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Biblio_App.Services
 {
     public class EfGegevensProvider : IGegevensProvider
     {
-        private readonly BiblioDbContext _db;
+        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
 
-        public EfGegevensProvider(BiblioDbContext db)
+        public EfGegevensProvider(IDbContextFactory<BiblioDbContext> dbFactory)
         {
-            _db = db;
+            _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
         }
 
         public async Task<(int boeken, int leden, int openUitleningen)> GetTellersAsync()
         {
-            var boeken = await _db.Boeken.CountAsync();
-            var leden = await _db.Leden.CountAsync();
-            var openUitleningen = await _db.Leningens.CountAsync(l => l.ReturnedAt == null);
+            using var db = _dbFactory.CreateDbContext();
+            var boeken = await db.Boeken.CountAsync();
+            var leden = await db.Leden.CountAsync();
+            var openUitleningen = await db.Leningens.CountAsync(l => l.ReturnedAt == null);
             return (boeken, leden, openUitleningen);
         }
     }
