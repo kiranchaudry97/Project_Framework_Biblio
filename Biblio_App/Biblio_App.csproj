@@ -3,16 +3,6 @@
 	<PropertyGroup>
 		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
-		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
-
-		<!-- Note for MacCatalyst:
-		The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
-		When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
-		The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
-		either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
-		<!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
-
 		<OutputType>Exe</OutputType>
 		<RootNamespace>Biblio_App</RootNamespace>
 		<UseMaui>true</UseMaui>
@@ -65,30 +55,98 @@
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
 		
+		<!-- Include SQLite native bundle so SQLite works on all MAUI platforms -->
+		<PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.0.7" />
+		<!-- Add SQL Server provider so app can connect to the same DB as web when configured -->
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Biblio_Models\Biblio_Models.csproj" />
 	</ItemGroup>
 
+	<!-- Remove any accidental root-level Pages XAML from previous structure -->
 	<ItemGroup>
-	  <MauiXaml Update="Pages\BoekenPagina.xaml">
+		<MauiXaml Remove="Pages\*.xaml" />
+		<Compile Remove="Pages\*.xaml.cs" />
+	</ItemGroup>
+
+	<!-- Explicitly include intended XAML files in new folder structure -->
+	<ItemGroup>
+	  <MauiXaml Update="Pages\Account\LoginPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\CategorieenPagina.xaml">
+	  <MauiXaml Update="Pages\Account\ProfilePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\LedenPagina.xaml">
+	  <MauiXaml Update="Pages\Account\UsersPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Pages\UitleningenPagina.xaml">
+
+	  <MauiXaml Update="Pages\Boek\BoekCreatePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Pages\Boek\BoekDetailsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\Boek\BoekenPagina.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+
+	  <MauiXaml Update="Pages\Categorieen\CategorieenPagina.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+
+	  <MauiXaml Update="Pages\Instellingen\InstellingenPagina.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+
+	  <MauiXaml Update="Pages\Lid\LedenPagina.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Pages\Lid\LidDetailsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+
+	  <MauiXaml Update="Pages\Uitlening\UitleningenPagina.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+
+	  <MauiXaml Update="Pages\Account\LoginPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+
+	  <MauiXaml Update="AppShell.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="App.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="MainPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Controllers\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Page Include="Pages\LidDetailsPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </Page>
 	</ItemGroup>
 
 </Project>
