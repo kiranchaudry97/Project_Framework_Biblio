@@ -2,68 +2,75 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:Biblio_App.ViewModels"
-             xmlns:models="clr-namespace:Biblio_Models.Entiteiten;assembly=Biblio_Models"
-             x:Class="Biblio_App.MainPage"
+             x:Class="Biblio_App.Pages.MainPage"
              x:DataType="viewmodel:MainViewModel">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Padding="30,12"
-            Spacing="12">
+    <Grid RowDefinitions="Auto, * , Auto" BackgroundColor="#fafafa">
+        <!-- Top bar with title and hamburger is provided by Shell on mobile -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20" Spacing="20" HorizontalOptions="Center" VerticalOptions="Start">
 
-            <Label
-                Text="Dashboard"
-                FontSize="20"
-                FontAttributes="Bold" />
+                <Frame HasShadow="True" CornerRadius="10" BackgroundColor="White" Padding="24" WidthRequest="360">
+                    <VerticalStackLayout HorizontalOptions="Center">
+                        <Label Text="Welkom bij Biblio – Bibliotheekbeheer" FontSize="20" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                        <Label Text="Beheer boeken, leden en uitleningen via dit dashboard." TextColor="#666" HorizontalTextAlignment="Center" Margin="0,8" />
 
-            <HorizontalStackLayout Spacing="24">
-                <VerticalStackLayout>
-                    <Label Text="Totaal boeken" FontAttributes="Bold" />
-                    <Label Text="{Binding TotaalBoeken}" />
-                </VerticalStackLayout>
+                        <!-- Overview tiles -->
+                        <Grid ColumnDefinitions="*,*,* ,*" RowDefinitions="Auto" ColumnSpacing="12" Margin="0,12">
+                            <!-- Books -->
+                            <Frame BackgroundColor="{StaticResource Primary}" CornerRadius="8" HasShadow="False" Padding="12">
+                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label Text="Boeken" FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center" />
+                                    <Label Text="{Binding TotaalBoeken}" FontSize="20" FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center" />
+                                    <Button Text="Beheer" Command="{Binding NavigateToBoekenCommand}" BackgroundColor="Transparent" TextColor="White" />
+                                </VerticalStackLayout>
+                            </Frame>
 
-                <VerticalStackLayout>
-                    <Label Text="Totaal leden" FontAttributes="Bold" />
-                    <Label Text="{Binding TotaalLeden}" />
-                </VerticalStackLayout>
+                            <!-- Members -->
+                            <Frame BackgroundColor="{StaticResource PrimaryDark}" CornerRadius="8" HasShadow="False" Padding="12">
+                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label Text="Leden" FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center" />
+                                    <Label Text="{Binding TotaalLeden}" FontSize="20" FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center" />
+                                    <Button Text="Beheer" Command="{Binding NavigateToLedenCommand}" BackgroundColor="Transparent" TextColor="White" />
+                                </VerticalStackLayout>
+                            </Frame>
 
-                <VerticalStackLayout>
-                    <Label Text="Open uitleningen" FontAttributes="Bold" />
-                    <Label Text="{Binding OpenUitleningen}" />
-                </VerticalStackLayout>
-            </HorizontalStackLayout>
+                            <!-- Loans -->
+                            <Frame BackgroundColor="{StaticResource Secondary}" CornerRadius="8" HasShadow="False" Padding="12">
+                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label Text="Open uitleningen" FontAttributes="Bold" TextColor="{StaticResource PrimaryDarkText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{Binding OpenUitleningen}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource PrimaryDarkText}" HorizontalTextAlignment="Center" />
+                                    <Button Text="Beheer" Command="{Binding NavigateToUitleningenCommand}" BackgroundColor="Transparent" TextColor="{StaticResource PrimaryDarkText}" />
+                                </VerticalStackLayout>
+                            </Frame>
 
-            <Label Text="Synchronisatie" FontAttributes="Bold" />
-            <HorizontalStackLayout Spacing="8">
-                <Label Text="{Binding SynchronisatieStatus}" VerticalOptions="Center" />
-                <Button Text="Vernieuwen" Command="{Binding VernieuwenAsyncCommand}" />
-            </HorizontalStackLayout>
+                            <!-- Categories (no count available) -->
+                            <Frame BackgroundColor="White" CornerRadius="8" HasShadow="False" Padding="12" BorderColor="{StaticResource Gray100}">
+                                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label Text="Categorieën" FontAttributes="Bold" TextColor="#333" HorizontalTextAlignment="Center" />
+                                    <Label Text="-" FontSize="20" FontAttributes="Bold" TextColor="#333" HorizontalTextAlignment="Center" />
+                                    <Button Text="Beheer" Command="{Binding NavigateToCategorieenCommand}" BackgroundColor="Transparent" TextColor="#333" />
+                                </VerticalStackLayout>
+                            </Frame>
+                        </Grid>
 
-            <CollectionView ItemsSource="{Binding Boeken}" SelectionMode="Single" SelectedItem="{Binding SelectedBoek}">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:Boek">
-                        <Frame Padding="8" Margin="4">
-                            <VerticalStackLayout>
-                                <Label Text="{Binding Titel}" FontAttributes="Bold" />
-                                <Label Text="{Binding Auteur}" FontSize="12" />
-                            </VerticalStackLayout>
-                        </Frame>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                        <!-- Actions -->
+                        <HorizontalStackLayout Spacing="12" Margin="0,12" HorizontalOptions="Center">
+                            <Button Text="Vernieuwen" BackgroundColor="#0d6efd" TextColor="White" CornerRadius="6" Command="{Binding VernieuwenAsyncCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}" />
+                            <Button Text="Synchroniseer (API -> lokaal)" BackgroundColor="#198754" TextColor="White" CornerRadius="6" Command="{Binding SyncCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}" />
+                        </HorizontalStackLayout>
 
-            <HorizontalStackLayout Spacing="8">
-                <Button Text="Voeg toe" Command="{Binding VoegToeCommand}" />
-                <Button Text="Boeken" Command="{Binding NavigateToBoekenCommand}" />
-                <Button Text="Leden" Command="{Binding NavigateToLedenCommand}" />
-                <Button Text="Uitleningen" Command="{Binding NavigateToUitleningenCommand}" />
-                <Button Text="Categorieën" Command="{Binding NavigateToCategorieenCommand}" />
-            </HorizontalStackLayout>
+                        <Label Text="{Binding SynchronisatieStatus}" TextColor="#666" FontSize="12" HorizontalTextAlignment="Center" Margin="0,6" />
 
-            <Label Text="Geselecteerd boek:" FontAttributes="Bold" />
-            <Label Text="{Binding SelectedBoek.DisplayName}" />
+                    </VerticalStackLayout>
+                </Frame>
 
-        </VerticalStackLayout>
-    </ScrollView>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <StackLayout Grid.Row="2" BackgroundColor="White" Padding="12" HorizontalOptions="FillAndExpand">
+            <Label Text="© 2025 - Biblio" HorizontalOptions="Center" TextColor="#666" />
+        </StackLayout>
+    </Grid>
 
 </ContentPage>
