@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xaml-comp compile="true" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Biblio_App.Pages.Account.ProfilePage"
+             Title="Profiel">
+
+    <VerticalStackLayout Padding="20" Spacing="12">
+        <Label Text="Profiel" FontAttributes="Bold" FontSize="20" />
+
+        <Frame Style="{StaticResource WelcomeCardStyle}">
+            <VerticalStackLayout Spacing="8">
+                <Label Text="E-mail" FontAttributes="Bold" />
+                <Label Text="{Binding Email}" />
+
+                <Label Text="Volledige naam" FontAttributes="Bold" />
+                <Label Text="{Binding FullName}" />
+
+                <Label Text="Rollen" FontAttributes="Bold" />
+                <Label Text="{Binding Roles}" />
+
+                <Button Text="Logout" Clicked="OnLogoutClicked" Style="{StaticResource PrimaryButton}" />
+            </VerticalStackLayout>
+        </Frame>
+    </VerticalStackLayout>
+</ContentPage>

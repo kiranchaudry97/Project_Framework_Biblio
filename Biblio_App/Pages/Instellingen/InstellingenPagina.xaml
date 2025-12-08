@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xaml-comp compile="true" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:Biblio_App.ViewModels"
+             x:Class="Biblio_App.Pages.InstellingenPagina"
+             x:DataType="viewmodel:InstellingenViewModel"
+             Title="Instellingen">
+
+    <VerticalStackLayout Padding="20" Spacing="12">
+        <Label Text="Instellingen" Style="{StaticResource PageHeaderLabel}" />
+
+        <Frame Style="{StaticResource WelcomeCardStyle}">
+            <VerticalStackLayout Spacing="12">
+                <Label Text="Taal" />
+                <Picker ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" />
+
+                <Label Text="Synchronisatie" />
+                <Switch IsToggled="{Binding AutoSync}" />
+
+                <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
+                    <Button Text="Synchroniseer nu" Command="{Binding SyncNowCommand}" Style="{StaticResource PrimaryButton}" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}" />
+                    <Button Text="Controleer API" Command="{Binding CheckApiCommand}" Style="{StaticResource OutlineActionButton}" />
+                </HorizontalStackLayout>
+
+                <Label Text="Status:" />
+                <Label Text="{Binding StatusMessage}" />
+
+                <BoxView HeightRequest="1" Color="{StaticResource Gray100}" />
+
+                <Label Text="Database" FontAttributes="Bold" />
+                <Label Text="{Binding DatabaseInfo}" />
+                <Button Text="Laad database info" Command="{Binding LoadDatabaseInfoCommand}" />
+                <Button Text="Reset lokale DB" Clicked="OnResetDbClicked" />
+            </VerticalStackLayout>
+        </Frame>
+    </VerticalStackLayout>
+</ContentPage>

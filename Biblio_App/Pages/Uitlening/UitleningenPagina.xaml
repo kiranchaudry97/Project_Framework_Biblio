@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xaml-comp compile="true" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:Biblio_App.ViewModels"
+             xmlns:models="clr-namespace:Biblio_Models.Entiteiten;assembly=Biblio_Models"
+             x:Class="Biblio_App.Pages.UitleningenPagina"
+             x:Name="PageRoot"
+             x:DataType="viewmodel:UitleningenViewModel"
+             Title="Uitleningen">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+            <Label Text="Uitleningen" Style="{StaticResource PageHeaderLabel}" />
+
+            <!-- Status / counts for debugging -->
+            <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
+                <Label Text="Leden:" />
+                <Label Text="{Binding LedenCount}" FontAttributes="Bold" />
+                <Label Text="Uitleningen:" />
+                <Label Text="{Binding UitleningenCount}" FontAttributes="Bold" />
+                <Label Text="Boeken:" />
+                <Label Text="{Binding BoekenCount}" FontAttributes="Bold" />
+            </HorizontalStackLayout>
+
+            <!-- DB path display and copy button -->
+            <HorizontalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
+                <Label Text="DB pad:" VerticalOptions="Center" />
+                <Label x:Name="DbPathLabel" Text="(niet geladen)" LineBreakMode="TailTruncation" HorizontalOptions="FillAndExpand" VerticalOptions="Center" />
+                <Button Text="Kopieer pad" Clicked="OnCopyDbPathClicked" />
+            </HorizontalStackLayout>
+
+            <Label Text="{Binding LastError}" TextColor="Crimson" HorizontalOptions="Center" IsVisible="{Binding LastError, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
+
+            <Frame Style="{StaticResource WelcomeCardStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <!-- Filters (adapted from web design) -->
+                    <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
+                        <Entry Grid.Column="0" Grid.Row="0" Placeholder="Zoeken..." Text="{Binding SearchText}" />
+                        <Button Grid.Column="1" Grid.Row="0" Text="Filter" Command="{Binding ZoekCommand}" Style="{StaticResource PrimaryButton}" />
+
+                        <StackLayout Grid.ColumnSpan="2" Grid.Row="1" Orientation="Horizontal" Spacing="8">
+                            <Picker Title="Categorie" ItemsSource="{Binding Categorieen}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedCategory}" />
+                            <Picker Title="Lid" ItemsSource="{Binding LedenList}" ItemDisplayBinding="{Binding Voornaam}" SelectedItem="{Binding SelectedLid}" />
+                            <Picker Title="Boek" ItemsSource="{Binding BoekenList}" ItemDisplayBinding="{Binding Titel}" SelectedItem="{Binding SelectedBoek}" />
+                            <StackLayout Orientation="Horizontal" VerticalOptions="Center">
+                                <Label Text="Alleen open" VerticalOptions="Center" />
+                                <Switch IsToggled="{Binding OnlyOpen}" />
+                            </StackLayout>
+                            <Button Text="Nieuw" Command="{Binding NieuwCommand}" Style="{StaticResource OutlineActionButton}" />
+                        </StackLayout>
+                    </Grid>
+
+                    <!-- List of loans -->
+                    <CollectionView ItemsSource="{Binding Uitleningen}" SelectionMode="Single" SelectedItem="{Binding SelectedUitlening, Mode=TwoWay}" HeightRequest="260">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Lenen">
+                                <Frame Padding="10" Margin="4">
+                                    <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
+                                        <StackLayout Grid.Column="0">
+                                            <Label Text="{Binding Boek.Titel}" FontAttributes="Bold" />
+                                            <Label FontSize="12" TextColor="{StaticResource Gray500}">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="" />
+                                                        <Span Text="{Binding Lid.Voornaam}" />
+                                                        <Span Text=" " />
+                                                        <Span Text="{Binding Lid.AchterNaam}" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                            <Label Text="{Binding StartDate, StringFormat='Start: {0:d}'}" FontSize="12" />
+                                            <Label Text="{Binding DueDate, StringFormat='Tot: {0:d}'}" FontSize="12" />
+                                            <Label Text="{Binding ReturnedAt, StringFormat='Ingeleverd: {0:d}'}" FontSize="12" />
+                                        </StackLayout>
+
+                                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" Spacing="6">
+                                            <Button Text="Inzien" Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.NieuwCommand}" Style="{StaticResource OutlineActionButton}" />
+                                            <Button Text="Inleveren" Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.ReturnCommand}" CommandParameter="{Binding .}" Style="{StaticResource PrimaryButton}" />
+                                            <Button Text="Verwijderen" Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}" CommandParameter="{Binding .}" BackgroundColor="Crimson" TextColor="White" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <!-- Edit / create form -->
+                    <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="10">
+                        <VerticalStackLayout Spacing="8">
+                            <Picker x:Name="BoekPicker" ItemsSource="{Binding BoekenList}" ItemDisplayBinding="{Binding Titel}" SelectedItem="{Binding SelectedBoek}" />
+                            <Picker x:Name="LidPicker" ItemsSource="{Binding LedenList}" ItemDisplayBinding="{Binding Voornaam}" SelectedItem="{Binding SelectedLid}" />
+                            <DatePicker x:Name="StartDatePicker" Date="{Binding StartDate}" />
+                            <DatePicker x:Name="DueDatePicker" Date="{Binding DueDate}" />
+                            <Switch IsToggled="{Binding ReturnedAt, Converter={StaticResource DateToBoolConverter}, Mode=TwoWay}" />
+
+                            <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
+                                <Button Text="Nieuw" Command="{Binding NieuwCommand}" Style="{StaticResource OutlineActionButton}" />
+                                <Button Text="Verwijderen" Command="{Binding VerwijderCommand}" BackgroundColor="Crimson" TextColor="White" />
+                                <Button Text="Opslaan" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

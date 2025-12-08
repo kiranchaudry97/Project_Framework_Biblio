@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xaml-comp compile="true" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Biblio_App.ViewModels"
+             x:Class="Biblio_App.Pages.Account.UsersPage"
+             x:DataType="vm:UsersViewModel"
+             Title="Gebruikers">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+            <Label Text="Gebruikers beheer" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" />
+
+            <Frame Style="{StaticResource WelcomeCardStyle}">
+                <VerticalStackLayout Spacing="10">
+                    <CollectionView ItemsSource="{Binding Users}" SelectionMode="Single" SelectedItem="{Binding SelectedUser}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Padding="8" Margin="4">
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                        <VerticalStackLayout Grid.Column="0">
+                                            <Label Text="{Binding Email}" FontAttributes="Bold" />
+                                            <Label Text="{Binding FullName}" FontSize="12" TextColor="{StaticResource Gray500}" />
+                                        </VerticalStackLayout>
+
+                                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
+                                            <HorizontalStackLayout Spacing="8">
+                                                <CheckBox IsChecked="{Binding IsAdmin}" />
+                                                <Label Text="Admin" VerticalOptions="Center" />
+                                            </HorizontalStackLayout>
+                                            <HorizontalStackLayout Spacing="8">
+                                                <CheckBox IsChecked="{Binding IsStaff}" />
+                                                <Label Text="Medewerker" VerticalOptions="Center" />
+                                            </HorizontalStackLayout>
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
+                        <Button Text="Nieuw" Command="{Binding NewCommand}" Style="{StaticResource OutlineActionButton}" />
+                        <Button Text="Opslaan rollen" Command="{Binding SaveRolesCommand}" Style="{StaticResource PrimaryButton}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

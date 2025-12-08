@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xaml-comp compile="true" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:Biblio_App.ViewModels"
+             xmlns:models="clr-namespace:Biblio_Models.Entiteiten;assembly=Biblio_Models"
+             x:Class="Biblio_App.Pages.CategorieenPagina"
+             x:DataType="viewmodel:CategorieenViewModel"
+             Title="Categorieen">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+            <Label Text="Categorieen" Style="{StaticResource PageHeaderLabel}" />
+
+            <Frame Style="{StaticResource WelcomeCardStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <CollectionView ItemsSource="{Binding Categorien}" SelectionMode="Single" VerticalOptions="FillAndExpand">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:Categorie">
+                                <Grid Padding="8">
+                                    <Label Text="{Binding Naam}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="10">
+                        <VerticalStackLayout Spacing="8">
+                            <Entry Placeholder="Naam" />
+                            <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
+                                <Button Text="Nieuw" Style="{StaticResource OutlineActionButton}" />
+                                <Button Text="Verwijderen" BackgroundColor="Crimson" TextColor="White" />
+                                <Button Text="Opslaan" Style="{StaticResource PrimaryButton}" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xaml-comp compile="true" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodel="clr-namespace:Biblio_App.ViewModels"
+             x:Class="Biblio_App.Pages.Boek.BoekCreatePage"
+             x:DataType="viewmodel:BoekenViewModel"
+             Title="Nieuw boek">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
+            <Label Text="Nieuw boek" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" TextColor="{StaticResource White}" />
+
+            <Frame Style="{StaticResource WelcomeCardStyle}">
+                <VerticalStackLayout Spacing="8">
+                    <Entry Placeholder="Titel" Text="{Binding Titel, Mode=TwoWay}" />
+                    <Entry Placeholder="Auteur" Text="{Binding Auteur, Mode=TwoWay}" />
+                    <Entry Placeholder="ISBN" Text="{Binding Isbn, Mode=TwoWay}" />
+                    <Picker Title="Categorie" ItemsSource="{Binding Categorien}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" />
+
+                    <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
+                        <Button Text="Annuleer" Clicked="OnCancelClicked" Style="{StaticResource OutlineActionButton}" />
+                        <Button Text="Opslaan" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
