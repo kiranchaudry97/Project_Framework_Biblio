@@ -5,13 +5,49 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:Biblio_App.Pages"
     xmlns:local="clr-namespace:Biblio_App"
-    Title="Biblio_App">
+    Title="Biblio">
 
-    <TabBar>
-        <ShellContent Title="Home" ContentTemplate="{DataTemplate local:MainPage}" />
-        <ShellContent Title="Boeken" ContentTemplate="{DataTemplate pages:BoekenPagina}" />
-        <ShellContent Title="Leden" ContentTemplate="{DataTemplate pages:LedenPagina}" />
-        <ShellContent Title="Uitleningen" ContentTemplate="{DataTemplate pages:UitleningenPagina}" />
-        <ShellContent Title="Categorieën" ContentTemplate="{DataTemplate pages:CategorieenPagina}" />
-    </TabBar>
+    <!-- Flyout header with title, theme toggle and language picker -->
+    <Shell.FlyoutHeader>
+        <Grid Padding="12" BackgroundColor="{StaticResource Primary}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Label Text="Biblio" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" TextColor="{StaticResource White}" />
+
+            <Button x:Name="ThemeToggleButton" Grid.Column="1" WidthRequest="40" HeightRequest="36" Margin="8,0" Clicked="OnThemeToggleClicked" BackgroundColor="Transparent" />
+
+            <Picker x:Name="LanguagePicker" Grid.Column="2" WidthRequest="90" SelectedIndexChanged="OnLanguageChanged" Title="Taal" />
+        </Grid>
+    </Shell.FlyoutHeader>
+
+    <!-- Use emoji prefixes as lightweight icons so no extra image files are required -->
+    <FlyoutItem Title="Menu" FlyoutDisplayOptions="AsMultipleItems">
+        <ShellContent Title="📚 Boeken" ContentTemplate="{DataTemplate pages:BoekenPagina}" />
+        <ShellContent Title="👥 Leden" ContentTemplate="{DataTemplate pages:LedenPagina}" />
+        <ShellContent Title="🧾 Uitleningen" ContentTemplate="{DataTemplate pages:UitleningenPagina}" />
+        <ShellContent Title="🏷️ Categorieën" ContentTemplate="{DataTemplate pages:CategorieenPagina}" />
+        <ShellContent Title="⚙️ Instellingen" ContentTemplate="{DataTemplate pages:InstellingenPagina}" />
+    </FlyoutItem>
+
+    <MenuItem Text="Instellingen" Command="{Binding Source={x:Static local:AppShell.Instance}, Path=OpenSettingsCommand}" />
+
+    <!-- Profile / account menu items -->
+    <MenuItem x:Name="ProfileMenuItem" Text="👤 Profiel" Clicked="OnProfileClicked" />
+    <MenuItem x:Name="LogoutMenuItem" Text="🔒 Logout" Clicked="OnLogoutClicked" />
+
+    <!-- Quick actions in the flyout footer -->
+    <Shell.FlyoutFooter>
+        <VerticalStackLayout Padding="12" Spacing="8" BackgroundColor="{StaticResource Primary}">
+            <Label Text="Snelkoppelingen" FontSize="14" TextColor="{StaticResource White}" />
+            <Button Text="+ Nieuw boek" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Clicked="QuickNewBook_Clicked" x:Name="QuickNewBookButton" />
+            <Button Text="+ Nieuw lid" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Clicked="QuickNewMember_Clicked" x:Name="QuickNewMemberButton" />
+            <!-- Quick link to settings -->
+            <Button Text="Instellingen" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Command="{Binding Source={x:Static local:AppShell.Instance}, Path=OpenSettingsCommand}" />
+        </VerticalStackLayout>
+    </Shell.FlyoutFooter>
+
 </Shell>
