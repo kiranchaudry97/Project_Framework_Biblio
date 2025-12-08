@@ -186,3 +186,40 @@ body.dark-mode .btn-primary {
 .nav-item.dropdown .dropdown-menu {
   margin-top: 6px;
 }
+
+/* Icon and illustration helpers */
+.svg-icon {
+  width: 32px;
+  height: auto;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.svg-icon-small {
+  width: 24px;
+  height: auto;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.illustration-lg {
+  max-width: 140px;
+  width: 140px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.illustration-md {
+  max-width: 120px;
+  width: 120px;
+  height: auto;
+  display: inline-block;
+}
+
+.illustration-sm {
+  max-width: 80px;
+  width: 80px;
+  height: auto;
+  display: inline-block;
+}
