@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Biblio_App.Services;
 using Biblio_Models.Entiteiten;
+using Biblio_App.Models;
 
 namespace Biblio_App.ViewModels
 {
@@ -16,6 +17,7 @@ namespace Biblio_App.ViewModels
         private readonly Action? _openLedenAction;
         private readonly Action? _openUitleningenAction;
         private readonly Action? _openCategorieenAction;
+        private readonly IDataSyncService? _dataSync;
 
         [ObservableProperty]
         private ObservableCollection<Boek> boeken = new ObservableCollection<Boek>();
@@ -42,20 +44,22 @@ namespace Biblio_App.ViewModels
         private bool isBusy;
 
         // Parameterless ctor for tooling
-        public MainViewModel() : this(null, null, null, null, null) { }
+        public MainViewModel() : this(null, null, null, null, null, null) { }
 
         // DI ctor used in MauiProgram
         public MainViewModel(IGegevensProvider? gegevensProvider = null,
                              Action? openBoeken = null,
                              Action? openLeden = null,
                              Action? openUitleningen = null,
-                             Action? openCategorieen = null)
+                             Action? openCategorieen = null,
+                             IDataSyncService? dataSync = null)
         {
             _gegevensProvider = gegevensProvider;
             _openBoekenAction = openBoeken;
             _openLedenAction = openLeden;
             _openUitleningenAction = openUitleningen;
             _openCategorieenAction = openCategorieen;
+            _dataSync = dataSync;
 
             // initialize status
             IsVerbonden = NetworkInterface.GetIsNetworkAvailable();
@@ -123,5 +127,42 @@ namespace Biblio_App.ViewModels
 
         [RelayCommand]
         public void NavigateToCategorieen() => _openCategorieenAction?.Invoke();
+
+        // Sync command to pull remote data and store locally
+        [RelayCommand]
+        public async Task SyncAsync()
+        {
+            if (IsBusy) return;
+            IsBusy = true;
+            try
+            {
+                SynchronisatieStatus = "Synchroniseren...";
+                if (_dataSync == null)
+                {
+                    SynchronisatieStatus = "Geen sync-service beschikbaar.";
+                    return;
+                }
+
+                await _dataSync.SyncAllAsync();
+                SynchronisatieStatus = "Synchronisatie voltooid.";
+
+                // Optionally refresh counts after sync
+                if (_gegevensProvider != null)
+                {
+                    var result = await _gegevensProvider.GetTellersAsync();
+                    TotaalBoeken = result.boeken;
+                    TotaalLeden = result.leden;
+                    OpenUitleningen = result.openUitleningen;
+                }
+            }
+            catch (Exception ex)
+            {
+                SynchronisatieStatus = $"Fout bij synchronisatie: {ex.Message}";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
     }
 }

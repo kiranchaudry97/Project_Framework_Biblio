@@ -1,12 +1,9 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Biblio_Models.Entiteiten;
-using Biblio_App.Services;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
-using Biblio_Models.Data;
-using Microsoft.EntityFrameworkCore;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,13 +11,19 @@ using System.ComponentModel.DataAnnotations;
 using System.Collections;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using Biblio_App.Models;
+using Biblio_App.Services;
+using System.Collections.Generic;
+using Biblio_Models.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace Biblio_App.ViewModels
 {
     public partial class LedenViewModel : ObservableValidator
     {
         private readonly IGegevensProvider? _gegevensProvider;
-        private readonly BiblioDbContext _db;
+        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
 
         public ObservableCollection<Lid> Leden { get; } = new ObservableCollection<Lid>();
 
@@ -54,6 +57,9 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string validationMessage = string.Empty;
 
+        [ObservableProperty]
+        private string searchText = string.Empty;
+
         // Per-field error properties
         public string VoornaamError => GetFirstError(nameof(Voornaam));
         public string AchternaamError => GetFirstError(nameof(Achternaam));
@@ -67,16 +73,43 @@ namespace Biblio_App.ViewModels
         public IAsyncRelayCommand OpslaanCommand { get; }
         public IAsyncRelayCommand VerwijderCommand { get; }
 
-        public LedenViewModel(BiblioDbContext db, IGegevensProvider? gegevensProvider = null)
+        // item-level commands
+        public IRelayCommand<Lid> ItemDetailsCommand { get; }
+        public IRelayCommand<Lid> ItemEditCommand { get; }
+        public IAsyncRelayCommand<Lid> ItemDeleteCommand { get; }
+
+        public IRelayCommand ZoekCommand { get; }
+
+        public LedenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, IGegevensProvider? gegevensProvider = null)
         {
-            _db = db ?? throw new ArgumentNullException(nameof(db));
+            _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _gegevensProvider = gegevensProvider;
 
             NieuwCommand = new RelayCommand(Nieuw);
             OpslaanCommand = new AsyncRelayCommand(OpslaanAsync);
             VerwijderCommand = new AsyncRelayCommand(VerwijderAsync);
 
-            LoadLeden();
+            ItemDetailsCommand = new AsyncRelayCommand<Lid>(async l => await NavigateToDetailsAsync(l));
+            ItemEditCommand = new RelayCommand<Lid>(l => { if (l != null) SelectedLid = l; });
+            ItemDeleteCommand = new AsyncRelayCommand<Lid>(async l => await DeleteItemAsync(l));
+
+            ZoekCommand = new RelayCommand(async () => await LoadLedenAsync());
+
+            _ = LoadLedenAsync();
+        }
+
+        private async Task NavigateToDetailsAsync(Lid? l)
+        {
+            if (l == null) return;
+            try
+            {
+                await Shell.Current.GoToAsync($"{nameof(Pages.LidDetailsPage)}?lidId={l.Id}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                await ShowAlertAsync("Fout", "Kan detailspagina niet openen.");
+            }
         }
 
         partial void OnSelectedLidChanged(Lid? value)
@@ -106,11 +139,25 @@ namespace Biblio_App.ViewModels
             }
         }
 
-        private void LoadLeden()
+        private async Task LoadLedenAsync()
         {
-            var list = _db.Leden.AsNoTracking().ToList();
-            Leden.Clear();
-            foreach (var l in list) Leden.Add(l);
+            try
+            {
+                using var db = _dbFactory.CreateDbContext();
+                var q = db.Leden.AsNoTracking().Where(l => !l.IsDeleted).AsQueryable();
+                if (!string.IsNullOrWhiteSpace(SearchText))
+                {
+                    var s = SearchText.Trim();
+                    q = q.Where(l => (l.Voornaam ?? string.Empty).Contains(s) || (l.AchterNaam ?? string.Empty).Contains(s) || (l.Email ?? string.Empty).Contains(s));
+                }
+                var list = await q.OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToListAsync();
+                Leden.Clear();
+                foreach (var l in list) Leden.Add(l);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
         }
 
         private void Nieuw()
@@ -128,7 +175,6 @@ namespace Biblio_App.ViewModels
 
         private void BuildValidationMessage()
         {
-            // aggregate errors from properties
             var props = new[] { nameof(Voornaam), nameof(Achternaam), nameof(Email), nameof(Telefoon), nameof(Adres) };
             var messages = new List<string>();
             var notifier = (System.ComponentModel.INotifyDataErrorInfo)this;
@@ -137,10 +183,7 @@ namespace Biblio_App.ViewModels
                 var errors = notifier.GetErrors(p) as IEnumerable;
                 if (errors != null)
                 {
-                    foreach (var e in errors)
-                    {
-                        messages.Add(e?.ToString());
-                    }
+                    foreach (var e in errors) messages.Add(e?.ToString());
                 }
             }
 
@@ -154,10 +197,7 @@ namespace Biblio_App.ViewModels
             var errors = notifier.GetErrors(propertyName) as IEnumerable;
             if (errors != null)
             {
-                foreach (var e in errors)
-                {
-                    if (e != null) return e.ToString();
-                }
+                foreach (var e in errors) if (e != null) return e.ToString();
             }
             return string.Empty;
         }
@@ -185,18 +225,9 @@ namespace Biblio_App.ViewModels
                 return;
             }
 
-            // unique email check
-            var selectedId = SelectedLid != null ? SelectedLid.Id : 0;
-            var exists = _db.Leden.Any(l => l.Email == Email && l.Id != selectedId);
-            if (exists)
-            {
-                ValidationMessage = "Email bestaat al in de database.";
-                await ShowAlertAsync("Validatie", ValidationMessage);
-                return;
-            }
-
             try
             {
+                using var db = _dbFactory.CreateDbContext();
                 if (SelectedLid == null)
                 {
                     var nieuw = new Lid
@@ -207,11 +238,12 @@ namespace Biblio_App.ViewModels
                         Telefoon = Telefoon,
                         Adres = Adres
                     };
-                    _db.Leden.Add(nieuw);
+
+                    db.Leden.Add(nieuw);
                 }
                 else
                 {
-                    var existing = await _db.Leden.FindAsync(SelectedLid.Id);
+                    var existing = await db.Leden.FindAsync(SelectedLid.Id);
                     if (existing != null)
                     {
                         existing.Voornaam = Voornaam;
@@ -219,21 +251,16 @@ namespace Biblio_App.ViewModels
                         existing.Email = Email;
                         existing.Telefoon = Telefoon;
                         existing.Adres = Adres;
-                        _db.Leden.Update(existing);
+                        db.Leden.Update(existing);
                     }
                 }
 
-                await _db.SaveChangesAsync();
-                LoadLeden();
+                await db.SaveChangesAsync();
+                await LoadLedenAsync();
+
                 SelectedLid = null;
                 ValidationMessage = string.Empty;
                 await ShowAlertAsync("Gereed", "Lid opgeslagen.");
-            }
-            catch (DbUpdateException ex)
-            {
-                ValidationMessage = "Fout bij opslaan. Controleer ingevoerde waarden en probeer opnieuw.";
-                System.Diagnostics.Debug.WriteLine(ex);
-                await ShowAlertAsync("Fout", ValidationMessage);
             }
             catch (Exception ex)
             {
@@ -247,23 +274,50 @@ namespace Biblio_App.ViewModels
         {
             ValidationMessage = string.Empty;
             if (SelectedLid == null) return;
-            var existing = await _db.Leden.FindAsync(SelectedLid.Id);
-            if (existing != null)
+
+            try
             {
-                try
+                using var db = _dbFactory.CreateDbContext();
+                var existing = await db.Leden.FindAsync(SelectedLid.Id);
+                if (existing != null)
                 {
-                    _db.Leden.Remove(existing);
-                    await _db.SaveChangesAsync();
-                    LoadLeden();
-                    SelectedLid = null;
-                    await ShowAlertAsync("Gereed", "Lid verwijderd.");
+                    db.Leden.Remove(existing);
+                    await db.SaveChangesAsync();
                 }
-                catch (DbUpdateException ex)
+
+                await LoadLedenAsync();
+                SelectedLid = null;
+                await ShowAlertAsync("Gereed", "Lid verwijderd.");
+            }
+            catch (Exception ex)
+            {
+                ValidationMessage = "Onverwachte fout bij verwijderen.";
+                System.Diagnostics.Debug.WriteLine(ex);
+                await ShowAlertAsync("Fout", ValidationMessage);
+            }
+        }
+
+        private async Task DeleteItemAsync(Lid? item)
+        {
+            if (item == null) return;
+
+            try
+            {
+                using var db = _dbFactory.CreateDbContext();
+                var existing = await db.Leden.FindAsync(item.Id);
+                if (existing != null)
                 {
-                    ValidationMessage = "Fout bij verwijderen. Dit lid kan gekoppeld zijn aan uitleningen of andere records.";
-                    System.Diagnostics.Debug.WriteLine(ex);
-                    await ShowAlertAsync("Fout", ValidationMessage);
+                    db.Leden.Remove(existing);
+                    await db.SaveChangesAsync();
                 }
+
+                await LoadLedenAsync();
+                await ShowAlertAsync("Gereed", "Lid verwijderd.");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                await ShowAlertAsync("Fout", "Onverwachte fout bij verwijderen.");
             }
         }
 

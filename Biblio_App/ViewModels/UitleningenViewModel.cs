@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 using System.Windows.Input;
-using Biblio_Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
@@ -13,16 +12,21 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel.DataAnnotations;
 using System.Collections;
+using Biblio_App.Services;
+using Biblio_Models.Data;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Biblio_App.ViewModels
 {
     public partial class UitleningenViewModel : ObservableValidator
     {
-        private readonly BiblioDbContext _db;
+        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
 
         public ObservableCollection<Lenen> Uitleningen { get; } = new ObservableCollection<Lenen>();
         public ObservableCollection<Boek> BoekenList { get; } = new ObservableCollection<Boek>();
         public ObservableCollection<Lid> LedenList { get; } = new ObservableCollection<Lid>();
+        public ObservableCollection<Categorie> Categorieen { get; } = new ObservableCollection<Categorie>();
 
         [ObservableProperty]
         private Lenen? selectedUitlening;
@@ -48,6 +52,23 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string validationMessage = string.Empty;
 
+        // filter/search
+        [ObservableProperty]
+        private string searchText = string.Empty;
+
+        [ObservableProperty]
+        private Categorie? selectedCategory;
+
+        [ObservableProperty]
+        private bool onlyOpen;
+
+        [ObservableProperty]
+        private string lastError = string.Empty;
+
+        public int LedenCount => LedenList?.Count ?? 0;
+        public int UitleningenCount => Uitleningen?.Count ?? 0;
+        public int BoekenCount => BoekenList?.Count ?? 0;
+
         // per-field errors (keep BoekId/LidId errors but also show object-based)
         public string BoekError => SelectedBoek == null ? "" : string.Empty; // placeholder, main errors via ValidationMessage
         public string LidError => SelectedLid == null ? "" : string.Empty;
@@ -60,15 +81,23 @@ namespace Biblio_App.ViewModels
         public IAsyncRelayCommand OpslaanCommand { get; }
         public IAsyncRelayCommand VerwijderCommand { get; }
 
-        public UitleningenViewModel(BiblioDbContext db)
+        public IRelayCommand ZoekCommand { get; }
+        public IAsyncRelayCommand<Lenen?> ReturnCommand { get; }
+        public IAsyncRelayCommand<Lenen?> DeleteCommand { get; }
+
+        public UitleningenViewModel(IDbContextFactory<BiblioDbContext> dbFactory)
         {
-            _db = db ?? throw new ArgumentNullException(nameof(db));
+            _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
 
             NieuwCommand = new RelayCommand(Nieuw);
             OpslaanCommand = new AsyncRelayCommand(OpslaanAsync);
             VerwijderCommand = new AsyncRelayCommand(VerwijderAsync);
 
-            LoadData();
+            ZoekCommand = new RelayCommand(async () => await LoadDataWithFiltersAsync());
+            ReturnCommand = new AsyncRelayCommand<Lenen?>(ReturnAsync);
+            DeleteCommand = new AsyncRelayCommand<Lenen?>(DeleteAsync);
+
+            _ = LoadDataAsync();
         }
 
         partial void OnSelectedUitleningChanged(Lenen? value)
@@ -97,17 +126,93 @@ namespace Biblio_App.ViewModels
             }
         }
 
-        private void LoadData()
+        private void RaiseCountProperties()
         {
-            var list = _db.Leningens.Include(l => l.Boek).Include(l => l.Lid).AsNoTracking().ToList();
-            Uitleningen.Clear();
-            foreach (var u in list) Uitleningen.Add(u);
+            OnPropertyChanged(nameof(LedenCount));
+            OnPropertyChanged(nameof(UitleningenCount));
+            OnPropertyChanged(nameof(BoekenCount));
+        }
 
-            BoekenList.Clear();
-            foreach (var b in _db.Boeken.AsNoTracking().ToList()) BoekenList.Add(b);
+        private async Task LoadDataAsync()
+        {
+            try
+            {
+                using var db = _dbFactory.CreateDbContext();
+                var uit = await db.Leningens.Include(l => l.Boek).Include(l => l.Lid).AsNoTracking().OrderByDescending(l => l.StartDate).ToListAsync();
+                Uitleningen.Clear();
+                foreach (var u in uit) Uitleningen.Add(u);
 
-            LedenList.Clear();
-            foreach (var l in _db.Leden.AsNoTracking().ToList()) LedenList.Add(l);
+                var boeken = await db.Boeken.AsNoTracking().Where(b => !b.IsDeleted).OrderBy(b => b.Titel).ToListAsync();
+                BoekenList.Clear();
+                foreach (var b in boeken) BoekenList.Add(b);
+
+                var leden = await db.Leden.AsNoTracking().OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToListAsync();
+                LedenList.Clear();
+                foreach (var l in leden) LedenList.Add(l);
+
+                var cats = await db.Categorien.AsNoTracking().Where(c => !c.IsDeleted).OrderBy(c => c.Naam).ToListAsync();
+                Categorieen.Clear();
+                Categorieen.Add(new Categorie { Id = 0, Naam = "Alle" });
+                foreach (var c in cats) Categorieen.Add(c);
+
+                SelectedCategory = Categorieen.FirstOrDefault();
+
+                // reset last error on successful load
+                LastError = string.Empty;
+
+                // update counts
+                RaiseCountProperties();
+            }
+            catch (Exception ex)
+            {
+                LastError = ex.Message;
+                Debug.WriteLine(ex);
+                RaiseCountProperties();
+            }
+        }
+
+        // Public wrapper so page can explicitly request a reload when appearing
+        public async Task EnsureDataLoadedAsync()
+        {
+            await LoadDataAsync();
+        }
+
+        private async Task LoadDataWithFiltersAsync()
+        {
+            try
+            {
+                using var db = _dbFactory.CreateDbContext();
+                var query = db.Leningens.Include(l => l.Boek).Include(l => l.Lid).AsNoTracking().AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(SearchText))
+                {
+                    var s = SearchText.Trim().ToLowerInvariant();
+                    query = query.Where(l => (l.Boek != null && (l.Boek.Titel ?? string.Empty).ToLower().Contains(s))
+                        || (l.Boek != null && (l.Boek.Auteur ?? string.Empty).ToLower().Contains(s))
+                        || (l.Lid != null && ((l.Lid.Voornaam ?? string.Empty) + " " + (l.Lid.AchterNaam ?? string.Empty)).ToLower().Contains(s))
+                        || (l.Lid != null && (l.Lid.Email ?? string.Empty).ToLower().Contains(s))
+                    );
+                }
+
+                if (SelectedCategory != null && SelectedCategory.Id != 0)
+                {
+                    var catId = SelectedCategory.Id;
+                    query = query.Where(l => l.Boek != null && l.Boek.CategorieID == catId);
+                }
+
+                if (OnlyOpen)
+                {
+                    query = query.Where(l => l.ReturnedAt == null);
+                }
+
+                var list = await query.OrderByDescending(l => l.StartDate).ToListAsync();
+                Uitleningen.Clear();
+                foreach (var u in list) Uitleningen.Add(u);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
         }
 
         private void Nieuw() => SelectedUitlening = null;
@@ -126,7 +231,6 @@ namespace Biblio_App.ViewModels
                 }
             }
 
-            // object selection errors
             if (SelectedBoek == null) messages.Add("Boek is verplicht.");
             if (SelectedLid == null) messages.Add("Lid is verplicht.");
 
@@ -168,6 +272,7 @@ namespace Biblio_App.ViewModels
 
             try
             {
+                using var db = _dbFactory.CreateDbContext();
                 if (SelectedUitlening == null)
                 {
                     var nieuw = new Lenen
@@ -178,11 +283,11 @@ namespace Biblio_App.ViewModels
                         DueDate = DueDate,
                         ReturnedAt = ReturnedAt
                     };
-                    _db.Leningens.Add(nieuw);
+                    db.Leningens.Add(nieuw);
                 }
                 else
                 {
-                    var existing = await _db.Leningens.FindAsync(SelectedUitlening.Id);
+                    var existing = await db.Leningens.FindAsync(SelectedUitlening.Id);
                     if (existing != null)
                     {
                         existing.BoekId = SelectedBoek.Id;
@@ -190,12 +295,13 @@ namespace Biblio_App.ViewModels
                         existing.StartDate = StartDate;
                         existing.DueDate = DueDate;
                         existing.ReturnedAt = ReturnedAt;
-                        _db.Leningens.Update(existing);
+                        db.Leningens.Update(existing);
                     }
                 }
 
-                await _db.SaveChangesAsync();
-                LoadData();
+                await db.SaveChangesAsync();
+
+                await LoadDataAsync();
                 SelectedUitlening = null;
                 ValidationMessage = string.Empty;
                 await ShowAlertAsync("Gereed", "Uitlening opgeslagen.");
@@ -217,23 +323,95 @@ namespace Biblio_App.ViewModels
         private async Task VerwijderAsync()
         {
             if (SelectedUitlening == null) return;
-            var existing = await _db.Leningens.FindAsync(SelectedUitlening.Id);
-            if (existing != null)
+
+            try
             {
-                try
+                using var db = _dbFactory.CreateDbContext();
+                var existing = await db.Leningens.FindAsync(SelectedUitlening.Id);
+                if (existing != null)
                 {
-                    _db.Leningens.Remove(existing);
-                    await _db.SaveChangesAsync();
-                    LoadData();
-                    SelectedUitlening = null;
-                    await ShowAlertAsync("Gereed", "Uitlening verwijderd.");
+                    db.Leningens.Remove(existing);
+                    await db.SaveChangesAsync();
                 }
-                catch (DbUpdateException ex)
+
+                await LoadDataAsync();
+                SelectedUitlening = null;
+                await ShowAlertAsync("Gereed", "Uitlening verwijderd.");
+            }
+            catch (DbUpdateException ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                ValidationMessage = "Kan uitlening niet verwijderen; mogelijk gekoppeld.";
+                await ShowAlertAsync("Fout", ValidationMessage);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                ValidationMessage = "Onverwachte fout bij verwijderen uitlening.";
+                await ShowAlertAsync("Fout", ValidationMessage);
+            }
+        }
+
+        private async Task DeleteAsync(Lenen? item)
+        {
+            if (item == null) return;
+
+            try
+            {
+                using var db = _dbFactory.CreateDbContext();
+                var existing = await db.Leningens.FindAsync(item.Id);
+                if (existing != null)
                 {
-                    System.Diagnostics.Debug.WriteLine(ex);
-                    ValidationMessage = "Kan uitlening niet verwijderen; mogelijk gekoppeld.";
-                    await ShowAlertAsync("Fout", ValidationMessage);
+                    db.Leningens.Remove(existing);
+                    await db.SaveChangesAsync();
                 }
+
+                await LoadDataAsync();
+                await ShowAlertAsync("Gereed", "Uitlening verwijderd.");
+            }
+            catch (DbUpdateException ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                ValidationMessage = "Kan uitlening niet verwijderen; mogelijk gekoppeld.";
+                await ShowAlertAsync("Fout", ValidationMessage);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                ValidationMessage = "Onverwachte fout bij verwijderen uitlening.";
+                await ShowAlertAsync("Fout", ValidationMessage);
+            }
+        }
+
+        private async Task ReturnAsync(Lenen? item)
+        {
+            if (item == null) return;
+
+            try
+            {
+                using var db = _dbFactory.CreateDbContext();
+                var existing = await db.Leningens.FindAsync(item.Id);
+                if (existing != null)
+                {
+                    existing.ReturnedAt = DateTime.Now;
+                    db.Leningens.Update(existing);
+                    await db.SaveChangesAsync();
+                }
+
+                await LoadDataAsync();
+                await ShowAlertAsync("Gereed", "Boek als ingeleverd gemarkeerd.");
+            }
+            catch (DbUpdateException ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                ValidationMessage = "Kan uitlening niet updaten.";
+                await ShowAlertAsync("Fout", ValidationMessage);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                ValidationMessage = "Onverwachte fout bij updaten uitlening.";
+                await ShowAlertAsync("Fout", ValidationMessage);
             }
         }
 
