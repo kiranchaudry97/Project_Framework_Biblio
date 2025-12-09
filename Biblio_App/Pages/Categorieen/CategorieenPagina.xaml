@@ -18,7 +18,7 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:Categorie">
                                 <Grid Padding="8">
-                                    <Label Text="{Binding Naam}" />
+                                    <Label Text="{Binding Naam}" TextColor="{StaticResource Gray900}" />
                                 </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>

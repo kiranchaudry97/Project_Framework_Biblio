@@ -20,12 +20,12 @@ namespace Biblio_App.Pages
         {
             base.OnAppearing();
 
-            // Ensure categories and books are loaded when the page appears so the category picker shows all items
+            // Zorg dat categorieën en boeken geladen zijn wanneer de pagina verschijnt zodat de categorie-picker alle items toont
             if (VM != null)
             {
                 await VM.EnsureCategoriesLoadedAsync();
 
-                // if no selected filter set, pick first (typically 'Alle')
+                // als er geen geselecteerde filter is, kies de eerste (meestal 'Alle')
                 if (VM.SelectedFilterCategorie == null && VM.Categorien?.Count > 0)
                 {
                     VM.SelectedFilterCategorie = VM.Categorien.FirstOrDefault();
@@ -69,14 +69,14 @@ namespace Biblio_App.Pages
             }
         }
 
-        // New click handlers for the image buttons
+        // Nieuwe click-handlers voor de afbeeldingsknoppen
         private async void OnDetailsClicked(object sender, EventArgs e)
         {
             try
             {
                 if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Boek boek)
                 {
-                    // navigate to a details page or show alert with basic info
+                    // navigeer naar de detailpagina of toon een melding met basisinformatie
                     await DisplayAlert("Details", $"{boek.Titel}\n{boek.Auteur}\nISBN: {boek.Isbn}", "OK");
                 }
             }
@@ -99,8 +99,33 @@ namespace Biblio_App.Pages
         {
             try
             {
-                // navigate to the create page route using fully-qualified type name for nameof
+                // navigeer naar de aanmaakpagina via de geregistreerde route (typename gebruikt voor nameof)
                 await Shell.Current.GoToAsync(nameof(Biblio_App.Pages.Boek.BoekCreatePage));
+            }
+            catch { }
+        }
+
+        // Toon volledige tekst wanneer op een afgeknot label wordt getapt
+        private async void OnLabelTapped(object sender, EventArgs e)
+        {
+            try
+            {
+                if (sender is Label lbl)
+                {
+                    var text = lbl.Text;
+                    // Probeer meer context uit BindingContext te halen indien beschikbaar (boek)
+                    if (lbl.BindingContext is Biblio_Models.Entiteiten.Boek boek)
+                    {
+                        // bepaal welke eigenschap is aangeraakt op basis van de kolom (gebruik index van parent grid children)
+                        // fallback: toon titel + auteur + isbn
+                        text = $"{boek.Titel}\n{boek.Auteur}\nISBN: {boek.Isbn}\nCategorie: {boek.CategorieID}";
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(text))
+                    {
+                        await DisplayAlert("Volledige tekst", text, "OK");
+                    }
+                }
             }
             catch { }
         }

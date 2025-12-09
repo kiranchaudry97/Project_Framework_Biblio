@@ -4,8 +4,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:Biblio_App.ViewModels"
              xmlns:models="clr-namespace:Biblio_Models.Entiteiten;assembly=Biblio_Models"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              x:Class="Biblio_App.Pages.LedenPagina"
              x:DataType="viewmodel:LedenViewModel"
+             mc:Ignorable="d"
+             d:DataType="viewmodel:LedenViewModel"
              Title="Leden">
 
     <ScrollView>
@@ -43,9 +47,36 @@
                                         </VerticalStackLayout>
 
                                         <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
-                                            <ImageButton Source="details-illustration.svg" WidthRequest="28" HeightRequest="28" BackgroundColor="Transparent" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ItemDetailsCommand}" CommandParameter="{Binding .}" />
-                                            <ImageButton Source="edit-illustration.svg" WidthRequest="28" HeightRequest="28" BackgroundColor="Transparent" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ItemEditCommand}" CommandParameter="{Binding .}" />
-                                            <ImageButton Source="delete-illustration.svg" WidthRequest="28" HeightRequest="28" BackgroundColor="Transparent" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ItemDeleteCommand}" CommandParameter="{Binding .}" />
+
+                                            <Button Text="Details"
+                                                    ImageSource="details_illustration.svg"
+                                                    ContentLayout="Top,2"
+                                                    WidthRequest="64"
+                                                    HeightRequest="64"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ItemDetailsCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    AutomationProperties.Name="Details" />
+
+                                            <Button Text="Bewerk"
+                                                    ImageSource="edit_illustration.svg"
+                                                    ContentLayout="Top,2"
+                                                    WidthRequest="64"
+                                                    HeightRequest="64"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ItemEditCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    AutomationProperties.Name="Bewerk" />
+
+                                            <Button Text="Verwijder"
+                                                    ImageSource="delete_illustration.svg"
+                                                    ContentLayout="Top,2"
+                                                    WidthRequest="64"
+                                                    HeightRequest="64"
+                                                    BackgroundColor="Crimson"
+                                                    TextColor="White"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ItemDeleteCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    AutomationProperties.Name="Verwijder" />
+
                                         </HorizontalStackLayout>
                                     </Grid>
                                 </Frame>
