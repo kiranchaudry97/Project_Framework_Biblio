@@ -480,4 +480,20 @@
         <Setter Property="Padding" Value="10" />
     </Style>
 
+    <!-- Inline action buttons used in lists (compact, link-like) -->
+    <Style x:Key="InlineActionButton" TargetType="Button" BasedOn="{StaticResource Button}">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BootstrapPrimary}, Dark={StaticResource White}}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="MinimumWidthRequest" Value="0" />
+        <Setter Property="MinimumHeightRequest" Value="0" />
+    </Style>
+
+    <!-- Inline delete button (compact, red link) -->
+    <Style x:Key="InlineDeleteButton" TargetType="Button" BasedOn="{StaticResource InlineActionButton}">
+        <Setter Property="TextColor" Value="Crimson" />
+    </Style>
+
 </ResourceDictionary>
