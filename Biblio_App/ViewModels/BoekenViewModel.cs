@@ -17,6 +17,8 @@ using System.Threading;
 using Biblio_App.Models.Pagination;
 using Biblio_Models.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Maui.ApplicationModel;
+using System.Diagnostics;
 
 namespace Biblio_App.ViewModels
 {
@@ -56,6 +58,21 @@ namespace Biblio_App.ViewModels
         private string searchText = string.Empty;
 
         [ObservableProperty]
+        private int page = 1;
+
+        [ObservableProperty]
+        private int pageSize = 10;
+
+        [ObservableProperty]
+        private int totalPages;
+
+        [ObservableProperty]
+        private int totalCount;
+
+        // Read-only display for the page indicator (e.g. "Pagina 1 / 5")
+        public string PageDisplay => TotalPages > 0 ? $"Pagina {Page} / {TotalPages}" : $"Pagina {Page}";
+
+        [ObservableProperty]
         private Categorie? selectedFilterCategorie;
 
         [ObservableProperty]
@@ -76,6 +93,10 @@ namespace Biblio_App.ViewModels
         public IAsyncRelayCommand VerwijderCommand { get; }
         public IRelayCommand ZoekCommand { get; }
 
+        public IRelayCommand NextPageCommand { get; }
+        public IRelayCommand PrevPageCommand { get; }
+        public IRelayCommand<int> GoToPageCommand { get; }
+
         // item commands
         public IRelayCommand<Boek> ItemDetailsCommand { get; }
         public IRelayCommand<Boek> ItemEditCommand { get; }
@@ -92,8 +113,12 @@ namespace Biblio_App.ViewModels
             VerwijderCommand = new AsyncRelayCommand(VerwijderAsync);
             ZoekCommand = new RelayCommand(async () => await ZoekAsync());
 
+            NextPageCommand = new RelayCommand(async () => { Page++; await LoadBooksAsync(); });
+            PrevPageCommand = new RelayCommand(async () => { if (Page > 1) { Page--; await LoadBooksAsync(); } });
+            GoToPageCommand = new RelayCommand<int>(async p => { if (p >= 1) { Page = p; await LoadBooksAsync(); } });
+
             ItemDetailsCommand = new RelayCommand<Boek>(async b => await NavigateToDetailsAsync(b));
-            ItemEditCommand = new RelayCommand<Boek>(b => { if (b != null) SelectedBoek = b; });
+            ItemEditCommand = new AsyncRelayCommand<Boek>(async b => await NavigateToEditAsync(b));
             ItemDeleteCommand = new AsyncRelayCommand<Boek>(async b => await DeleteItemAsync(b));
 
             _ = LoadCategoriesAsync();
@@ -158,6 +183,33 @@ namespace Biblio_App.ViewModels
             SelectedFilterCategorie = Categorien.FirstOrDefault();
         }
 
+        // Ensure categories are loaded (used by pages when navigated with query params)
+        public async Task EnsureCategoriesLoadedAsync()
+        {
+            if (Categorien == null || Categorien.Count == 0)
+            {
+                await LoadCategoriesAsync();
+            }
+        }
+
+        private async Task ShowAlertAsync(string title, string message)
+        {
+            try
+            {
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    if (Application.Current?.MainPage != null)
+                    {
+                        await Application.Current.MainPage.DisplayAlert(title, message, "OK");
+                    }
+                });
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+
         private async Task LoadBooksAsync()
         {
             // prefer sync service when available
@@ -176,7 +228,12 @@ namespace Biblio_App.ViewModels
             try
             {
                 using var db = _dbFactory.CreateDbContext();
-                var list = await db.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).OrderBy(b => b.Titel).ToListAsync();
+                var q = db.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).OrderBy(b => b.Titel).AsQueryable();
+                TotalCount = await q.CountAsync();
+                TotalPages = (int)Math.Ceiling(TotalCount / (double)PageSize);
+                if (Page < 1) Page = 1;
+                if (Page > TotalPages && TotalPages > 0) Page = TotalPages;
+                var list = await q.Skip((Page - 1) * PageSize).Take(PageSize).ToListAsync();
                 Boeken.Clear();
                 foreach (var b in list) Boeken.Add(b);
             }
@@ -210,18 +267,23 @@ namespace Biblio_App.ViewModels
                 catch { /* fallback */ }
             }
 
-            // local filtering
+            // local filtering with paging
             using var db = _dbFactory.CreateDbContext();
-            var itemsLocal = await db.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).ToListAsync();
+            var q = db.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).AsQueryable();
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 var s = SearchText.Trim().ToLowerInvariant();
-                itemsLocal = itemsLocal.Where(b => (b.Titel ?? string.Empty).ToLower().Contains(s) || (b.Auteur ?? string.Empty).ToLower().Contains(s) || (b.Isbn ?? string.Empty).ToLower().Contains(s)).ToList();
+                q = q.Where(b => (b.Titel ?? string.Empty).ToLower().Contains(s) || (b.Auteur ?? string.Empty).ToLower().Contains(s) || (b.Isbn ?? string.Empty).ToLower().Contains(s));
             }
             if (SelectedFilterCategorie != null && SelectedFilterCategorie.Id != 0)
             {
-                itemsLocal = itemsLocal.Where(b => b.CategorieID == SelectedFilterCategorie.Id).ToList();
+                q = q.Where(b => b.CategorieID == SelectedFilterCategorie.Id);
             }
+            TotalCount = await q.CountAsync();
+            TotalPages = (int)Math.Ceiling(TotalCount / (double)PageSize);
+            if (Page < 1) Page = 1;
+            if (Page > TotalPages && TotalPages > 0) Page = TotalPages;
+            var itemsLocal = await q.OrderBy(b => b.Titel).Skip((Page - 1) * PageSize).Take(PageSize).ToListAsync();
             Boeken.Clear();
             foreach (var b in itemsLocal) Boeken.Add(b);
         }
@@ -390,6 +452,7 @@ namespace Biblio_App.ViewModels
             if (b == null) return;
             try
             {
+                Debug.WriteLine($"NavigateToDetailsAsync called for Boek Id={b.Id}");
                 await Shell.Current.GoToAsync($"{nameof(Pages.BoekDetailsPage)}?boekId={b.Id}");
             }
             catch (Exception ex)
@@ -399,11 +462,28 @@ namespace Biblio_App.ViewModels
             }
         }
 
+        private async Task NavigateToEditAsync(Boek? b)
+        {
+            if (b == null) return;
+            try
+            {
+                Debug.WriteLine($"NavigateToEditAsync called for Boek Id={b.Id}");
+                // Navigate to the BoekCreatePage and pass the id so the page/viewmodel can load the book for editing
+                await Shell.Current.GoToAsync($"{nameof(Pages.Boek.BoekCreatePage)}?boekId={b.Id}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                await ShowAlertAsync("Fout", "Kan bewerkpagina niet openen.");
+            }
+        }
+
         private async Task DeleteItemAsync(Boek? b)
         {
             if (b == null) return;
             try
             {
+                Debug.WriteLine($"DeleteItemAsync called for Boek Id={b.Id}");
                 if (_sync != null)
                 {
                     await _sync.DeleteBoekAsync(b.Id);
@@ -431,33 +511,15 @@ namespace Biblio_App.ViewModels
             }
         }
 
-        private async Task ShowAlertAsync(string title, string message)
+        // Generated property change partials from CommunityToolkit will call these when Page or TotalPages change.
+        partial void OnPageChanged(int value)
         {
-            try
-            {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    if (Application.Current?.MainPage != null)
-                    {
-                        await Application.Current.MainPage.DisplayAlert(title, message, "OK");
-                    }
-                });
-            }
-            catch { }
+            OnPropertyChanged(nameof(PageDisplay));
         }
 
-        // public helper to ensure categories/books are loaded when page appears
-        public async Task EnsureCategoriesLoadedAsync()
+        partial void OnTotalPagesChanged(int value)
         {
-            try
-            {
-                await LoadCategoriesAsync();
-                await LoadBooksAsync();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex);
-            }
+            OnPropertyChanged(nameof(PageDisplay));
         }
     }
 }

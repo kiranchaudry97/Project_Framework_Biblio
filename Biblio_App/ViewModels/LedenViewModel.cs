@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using Biblio_Models.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Biblio_App.ViewModels
 {
@@ -90,7 +91,7 @@ namespace Biblio_App.ViewModels
             VerwijderCommand = new AsyncRelayCommand(VerwijderAsync);
 
             ItemDetailsCommand = new AsyncRelayCommand<Lid>(async l => await NavigateToDetailsAsync(l));
-            ItemEditCommand = new RelayCommand<Lid>(l => { if (l != null) SelectedLid = l; });
+            ItemEditCommand = new AsyncRelayCommand<Lid>(async l => await NavigateToEditAsync(l));
             ItemDeleteCommand = new AsyncRelayCommand<Lid>(async l => await DeleteItemAsync(l));
 
             ZoekCommand = new RelayCommand(async () => await LoadLedenAsync());
@@ -103,12 +104,28 @@ namespace Biblio_App.ViewModels
             if (l == null) return;
             try
             {
+                Debug.WriteLine($"NavigateToDetailsAsync called for Lid Id={l.Id}");
                 await Shell.Current.GoToAsync($"{nameof(Pages.LidDetailsPage)}?lidId={l.Id}");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
                 await ShowAlertAsync("Fout", "Kan detailspagina niet openen.");
+            }
+        }
+
+        private async Task NavigateToEditAsync(Lid? l)
+        {
+            if (l == null) return;
+            try
+            {
+                Debug.WriteLine($"NavigateToEditAsync called for Lid Id={l.Id}");
+                await Shell.Current.GoToAsync($"{nameof(Pages.LidDetailsPage)}?lidId={l.Id}&edit=true");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+                await ShowAlertAsync("Fout", "Kan bewerkpagina niet openen.");
             }
         }
 
@@ -214,6 +231,7 @@ namespace Biblio_App.ViewModels
 
         private async Task OpslaanAsync()
         {
+            Debug.WriteLine("OpslaanAsync called for LedenViewModel");
             // validate properties using DataAnnotations on VM
             ClearErrors();
             ValidateAllProperties();
@@ -291,7 +309,7 @@ namespace Biblio_App.ViewModels
             }
             catch (Exception ex)
             {
-                ValidationMessage = "Onverwachte fout bij verwijderen.";
+                ValidationMessage = "Onverwachte fout bij verwerken.";
                 System.Diagnostics.Debug.WriteLine(ex);
                 await ShowAlertAsync("Fout", ValidationMessage);
             }
@@ -303,6 +321,7 @@ namespace Biblio_App.ViewModels
 
             try
             {
+                Debug.WriteLine($"DeleteItemAsync called for Lid Id={item.Id}");
                 using var db = _dbFactory.CreateDbContext();
                 var existing = await db.Leden.FindAsync(item.Id);
                 if (existing != null)
