@@ -12,7 +12,7 @@ namespace Biblio_App.Pages.Account
 
         private async void OnLoginClicked(object sender, System.EventArgs e)
         {
-            // navigeer naar de web-login of toon een korte melding
+            // Navigeer naar de web-login of toon een korte melding aan de gebruiker.
             await DisplayAlert("Login", "Gebruik de web-app voor inloggen.", "OK");
         }
     }
