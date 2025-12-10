@@ -1,12 +1,19 @@
 using Biblio_App.ViewModels;
 using Microsoft.Maui.Controls;
 using System.Linq;
+using System;
+using Microsoft.Maui.Storage;
+using Microsoft.Extensions.DependencyInjection;
+using Biblio_App.Services;
+using Microsoft.Maui.Graphics;
+using Microsoft.Maui.ApplicationModel;
 
 namespace Biblio_App.Pages
 {
     public partial class BoekenPagina : ContentPage
     {
         private BoekenViewModel VM => BindingContext as BoekenViewModel;
+        private ILanguageService? _languageService;
 
         public BoekenPagina(BoekenViewModel vm)
         {
@@ -14,6 +21,22 @@ namespace Biblio_App.Pages
             BindingContext = vm;
             if (vm != null)
                 vm.PropertyChanged += Vm_PropertyChanged;
+
+            // resolve language service if possible
+            try
+            {
+                _languageService = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>();
+            }
+            catch { }
+
+            // attach tap recognizer to the language label so it's clickable
+            try
+            {
+                var tap = new TapGestureRecognizer();
+                tap.Tapped += OnLanguageLabelTapped;
+                PageLanguageLabel.GestureRecognizers.Add(tap);
+            }
+            catch { }
         }
 
         protected override async void OnAppearing()
@@ -31,6 +54,32 @@ namespace Biblio_App.Pages
                     VM.SelectedFilterCategorie = VM.Categorien.FirstOrDefault();
                 }
             }
+
+            // Initialize page language label from language service or preferences
+            try
+            {
+                string code = _languageService?.CurrentCulture?.TwoLetterISOLanguageName ?? Preferences.Default.Get("biblio-culture", "nl");
+                SetLanguageLabelFromCode(code);
+
+                if (_languageService != null)
+                {
+                    _languageService.LanguageChanged += LanguageService_LanguageChanged;
+                }
+            }
+            catch { }
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            try
+            {
+                if (_languageService != null)
+                {
+                    _languageService.LanguageChanged -= LanguageService_LanguageChanged;
+                }
+            }
+            catch { }
         }
 
         private void Vm_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -126,6 +175,60 @@ namespace Biblio_App.Pages
                         await DisplayAlert("Volledige tekst", text, "OK");
                     }
                 }
+            }
+            catch { }
+        }
+
+        // When the language label is tapped, show action sheet to pick language
+        private async void OnLanguageLabelTapped(object? sender, EventArgs e)
+        {
+            try
+            {
+                var action = await DisplayActionSheet("Taal", "Annuleren", null, "NL", "EN");
+                if (string.IsNullOrEmpty(action) || action == "Annuleren") return;
+
+                var code = action.ToLowerInvariant();
+                try
+                {
+                    var svc = _languageService ?? App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>();
+                    svc?.SetLanguage(code);
+                    SetLanguageLabelFromCode(code);
+
+                    // also refresh viewmodel localized strings immediately
+                    try { VM?.RefreshLocalizedStrings(); } catch { }
+                }
+                catch { }
+            }
+            catch { }
+        }
+
+        private void LanguageService_LanguageChanged(object? sender, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    try
+                    {
+                        SetLanguageLabelFromCode(culture.TwoLetterISOLanguageName);
+                        try { VM?.RefreshLocalizedStrings(); } catch { }
+                    }
+                    catch { }
+                });
+            }
+            catch { }
+        }
+
+        private void SetLanguageLabelFromCode(string? code)
+        {
+            if (string.IsNullOrEmpty(code)) return;
+            try
+            {
+                var txt = code.ToLowerInvariant() == "en" ? "EN" : "NL";
+                PageLanguageLabel.Text = txt;
+
+                // Always show language text in white
+                PageLanguageLabel.TextColor = Colors.White;
             }
             catch { }
         }

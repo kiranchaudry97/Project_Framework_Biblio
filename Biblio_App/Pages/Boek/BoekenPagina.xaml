@@ -6,24 +6,41 @@
              xmlns:models="clr-namespace:Biblio_Models.Entiteiten;assembly=Biblio_Models"
              x:Class="Biblio_App.Pages.BoekenPagina"
              x:DataType="viewmodel:BoekenViewModel"
-             Title="Boeken"
+             Title="{Binding PageTitle}"
              x:Name="Page">
+
+    <!-- Title area with language picker on the right -->
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*,Auto" Padding="0,0,8,0" VerticalOptions="Center">
+            <Label Text="{Binding PageTitle}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" Grid.Column="0" />
+
+            <!-- Replaced Picker with a tappable Label so text is white on all platforms -->
+            <Label x:Name="PageLanguageLabel"
+                   Grid.Column="1"
+                   WidthRequest="48"
+                   Margin="0,0,12,0"
+                   VerticalOptions="Center"
+                   HorizontalOptions="End"
+                   TextColor="{StaticResource White}"
+                   BackgroundColor="Transparent"
+                   HorizontalTextAlignment="End" />
+        </Grid>
+    </Shell.TitleView>
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
-            <Label Text="Boeken" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" TextColor="{StaticResource White}" />
-
+            <!-- main content unchanged -->
             <Frame Style="{StaticResource WelcomeCardStyle}">
                 <VerticalStackLayout Spacing="12">
 
                     <!-- Search/filter row -->
                     <VerticalStackLayout Spacing="8">
                         <HorizontalStackLayout Spacing="8">
-                            <SearchBar Placeholder="Zoek op titel, auteur of ISBN..." Text="{Binding SearchText}" HorizontalOptions="FillAndExpand" />
-                            <Button Text="Zoek" Command="{Binding ZoekCommand}" />
+                            <SearchBar Placeholder="{Binding SearchPlaceholder}" Text="{Binding SearchText}" HorizontalOptions="FillAndExpand" />
+                            <Button Text="{Binding SearchButtonText}" Command="{Binding ZoekCommand}" />
                         </HorizontalStackLayout>
                         <HorizontalStackLayout Spacing="8">
-                            <Picker Title="Categorie" ItemsSource="{Binding Categorien}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedFilterCategorie}" WidthRequest="200" HorizontalTextAlignment="Start" />
+                            <Picker Title="{Binding CategoryTitle}" ItemsSource="{Binding Categorien}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedFilterCategorie}" WidthRequest="200" HorizontalTextAlignment="Start" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
 
@@ -36,9 +53,9 @@
                     <CollectionView ItemsSource="{Binding Boeken}" SelectionMode="Single" SelectedItem="{Binding SelectedBoek, Mode=TwoWay}" VerticalOptions="FillAndExpand">
                         <CollectionView.Header>
                             <Grid ColumnDefinitions="2*,2*,Auto" Padding="8">
-                                <Label Text="Titel" Grid.Column="0" FontAttributes="Bold" TextColor="{StaticResource Gray900}" />
-                                <Label Text="Auteur" Grid.Column="1" FontAttributes="Bold" TextColor="{StaticResource Gray900}" />
-                                <Label Text="Acties" Grid.Column="2" FontAttributes="Bold" TextColor="{StaticResource Gray900}" HorizontalOptions="End" />
+                                <Label Text="{Binding HeaderTitle}" Grid.Column="0" FontAttributes="Bold" TextColor="{StaticResource Gray900}" />
+                                <Label Text="{Binding HeaderAuthor}" Grid.Column="1" FontAttributes="Bold" TextColor="{StaticResource Gray900}" />
+                                <Label Text="{Binding HeaderActions}" Grid.Column="2" FontAttributes="Bold" TextColor="{StaticResource Gray900}" HorizontalOptions="End" />
                             </Grid>
                         </CollectionView.Header>
 
@@ -59,17 +76,17 @@
 
                                     <!-- Actions stacked vertically -->
                                     <VerticalStackLayout Grid.Column="2" Spacing="6" VerticalOptions="Center" HorizontalOptions="End">
-                                        <Button Text="Details"
+                                        <Button Text="{Binding BindingContext.DetailsButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                                 Style="{StaticResource InlineActionButton}"
                                                 Command="{Binding BindingContext.ItemDetailsCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                                 CommandParameter="{Binding .}" />
 
-                                        <Button Text="Bewerk"
+                                        <Button Text="{Binding BindingContext.EditButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                                 Style="{StaticResource InlineActionButton}"
                                                 Command="{Binding BindingContext.ItemEditCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                                 CommandParameter="{Binding .}" />
 
-                                        <Button Text="Verwijder"
+                                        <Button Text="{Binding BindingContext.DeleteButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                                 Style="{StaticResource InlineDeleteButton}"
                                                 Command="{Binding BindingContext.ItemDeleteCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                                 CommandParameter="{Binding .}" />
@@ -89,7 +106,7 @@
                             </Frame>
                         </HorizontalStackLayout>
 
-                        <Button Grid.Column="2" Text="&gt;&gt;" Command="{Binding NextPageCommand}" Style="{StaticResource PrimaryButton}" WidthRequest="56" HeightRequest="40" />
+                        <Button Grid.Column="2" Text=">&gt;" Command="{Binding NextPageCommand}" Style="{StaticResource PrimaryButton}" WidthRequest="56" HeightRequest="40" />
                     </Grid>
 
                     <BoxView HeightRequest="1" Color="{StaticResource Gray200}" />
@@ -97,16 +114,16 @@
                     <!-- Edit/add form -->
                     <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="10">
                         <VerticalStackLayout Spacing="8">
-                            <Entry x:Name="TitelEntry" Placeholder="Titel" Text="{Binding Titel, Mode=TwoWay}" />
-                            <Entry x:Name="AuteurEntry" Placeholder="Auteur" Text="{Binding Auteur, Mode=TwoWay}" />
-                            <Entry x:Name="IsbnEntry" Placeholder="ISBN" Text="{Binding Isbn, Mode=TwoWay}" />
+                            <Entry x:Name="TitelEntry" Placeholder="{Binding HeaderTitle}" Text="{Binding Titel, Mode=TwoWay}" />
+                            <Entry x:Name="AuteurEntry" Placeholder="{Binding HeaderAuthor}" Text="{Binding Auteur, Mode=TwoWay}" />
+                            <Entry x:Name="IsbnEntry" Placeholder="{Binding IsbnPlaceholder}" Text="{Binding Isbn, Mode=TwoWay}" />
 
-                            <Picker x:Name="EditCategoriePicker" Title="Categorie" ItemsSource="{Binding Categorien}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" HorizontalTextAlignment="Start" />
+                            <Picker x:Name="EditCategoriePicker" Title="{Binding CategoryTitle}" ItemsSource="{Binding Categorien}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" HorizontalTextAlignment="Start" />
 
                             <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
-                                <Button Text="Nieuw" Command="{Binding NieuwCommand}" Style="{StaticResource OutlineActionButton}" />
-                                <Button Text="Verwijderen" Command="{Binding VerwijderCommand}" BackgroundColor="Crimson" TextColor="White" />
-                                <Button Text="Opslaan" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
+                                <Button Text="{Binding NewButtonText}" Command="{Binding NieuwCommand}" Style="{StaticResource OutlineActionButton}" />
+                                <Button Text="{Binding DeleteButtonText}" Command="{Binding VerwijderCommand}" BackgroundColor="Crimson" TextColor="White" />
+                                <Button Text="{Binding SaveButtonText}" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
                             </HorizontalStackLayout>
                         </VerticalStackLayout>
                     </Border>

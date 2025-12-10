@@ -22,6 +22,7 @@ namespace Biblio_App.ViewModels
     {
         private readonly IDataSyncService? _sync;
         private readonly IDbContextFactory<BiblioDbContext>? _dbFactory;
+        private readonly ILanguageService? _languageService;
 
         public ObservableCollection<string> Languages { get; } = new ObservableCollection<string> { "NL", "EN" };
 
@@ -43,12 +44,74 @@ namespace Biblio_App.ViewModels
         public ICommand SyncNowCommand { get; }
         public ICommand CheckApiCommand { get; }
 
-        public InstellingenViewModel(IDataSyncService? sync = null, IDbContextFactory<BiblioDbContext>? dbFactory = null)
+        public InstellingenViewModel(IDataSyncService? sync = null, IDbContextFactory<BiblioDbContext>? dbFactory = null, ILanguageService? languageService = null)
         {
             _sync = sync;
             _dbFactory = dbFactory;
+            _languageService = languageService;
+
             SyncNowCommand = new AsyncRelayCommand(ExecuteSyncNowAsync);
             CheckApiCommand = new AsyncRelayCommand(ExecuteCheckApiAsync);
+
+            // Initialize SelectedLanguage from language service if available
+            try
+            {
+                if (_languageService?.CurrentCulture != null)
+                {
+                    SelectedLanguage = _languageService.CurrentCulture.TwoLetterISOLanguageName.ToUpperInvariant();
+                }
+                else
+                {
+                    // fallback to preferences
+                    var code = Preferences.Default.ContainsKey("biblio-culture") ? Preferences.Default.Get("biblio-culture", "nl") : "nl";
+                    SelectedLanguage = code.ToUpperInvariant();
+                }
+
+                if (_languageService != null)
+                {
+                    _languageService.LanguageChanged += LanguageChangedHandler;
+                }
+            }
+            catch { }
+
+        }
+
+        // Keep the VM in sync when language service fires
+        private void LanguageChangedHandler(object? sender, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                var code = culture.TwoLetterISOLanguageName.ToUpperInvariant();
+                if (SelectedLanguage != code)
+                {
+                    SelectedLanguage = code;
+                }
+            }
+            catch { }
+        }
+
+        partial void OnSelectedLanguageChanged(string value)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(value)) return;
+                var code = value.Trim().ToLowerInvariant();
+                if (_languageService != null)
+                {
+                    _languageService.SetLanguage(code);
+                }
+                else
+                {
+                    try { Preferences.Default.Set("biblio-culture", code); } catch { }
+                    var culture = new System.Globalization.CultureInfo(code);
+                    System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+                    System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+                    // Refresh UI by recreating main page (best-effort)
+                    try { Application.Current.MainPage = new AppShell(); } catch { }
+                }
+            }
+            catch { }
         }
 
         private async Task ExecuteSyncNowAsync()
@@ -70,7 +133,7 @@ namespace Biblio_App.ViewModels
                 // show a short alert (acts like a toast)
                 try
                 {
-                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(async () =>
                     {
                         if (Application.Current?.MainPage != null)
                         {
@@ -88,7 +151,7 @@ namespace Biblio_App.ViewModels
                 StatusMessage = "Fout bij synchronisatie: " + ex.Message;
                 try
                 {
-                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(async () =>
                     {
                         if (Application.Current?.MainPage != null)
                         {

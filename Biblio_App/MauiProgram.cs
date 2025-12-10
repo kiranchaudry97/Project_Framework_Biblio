@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Biblio_App.Models;
 using Microsoft.Extensions.Configuration; // configuratie-extensies
 using System.IO;
+using System.Globalization;
 
 namespace Biblio_App
 {
@@ -23,6 +24,9 @@ namespace Biblio_App
 
             // Laad optionele appsettings.json zodat het API-basisadres of de connectiestring zonder codewijzigingen geconfigureerd kan worden
             builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+            // Register language service which also applies saved culture in ctor
+            builder.Services.AddSingleton<ILanguageService, LanguageService>();
 
             builder
                 .UseMauiApp<App>()

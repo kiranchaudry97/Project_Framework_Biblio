@@ -16,12 +16,22 @@ using Biblio_App.Services;
 using Biblio_Models.Data;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Resources;
+using System.Globalization;
+using System.Reflection;
+using Biblio_Models.Resources;
+using System.IO;
+using System.Xml.Linq;
 
 namespace Biblio_App.ViewModels
 {
     public partial class UitleningenViewModel : ObservableValidator
     {
         private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
+        private readonly ILanguageService? _languageService;
+        private ResourceManager? _sharedResourceManager;
+        private Dictionary<string, string>? _resxFileStrings; // fallback loaded from web resx on disk
+        private bool _resourceManagerInitialized = false;
 
         public ObservableCollection<Lenen> Uitleningen { get; } = new ObservableCollection<Lenen>();
         public ObservableCollection<Boek> BoekenList { get; } = new ObservableCollection<Boek>();
@@ -31,7 +41,43 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private Lenen? selectedUitlening;
 
-        // form selection objects
+        // localized UI strings
+        [ObservableProperty]
+        private string pageHeaderText = string.Empty;
+        [ObservableProperty]
+        private string membersLabel = string.Empty;
+        [ObservableProperty]
+        private string loansLabel = string.Empty;
+        [ObservableProperty]
+        private string booksLabel = string.Empty;
+        [ObservableProperty]
+        private string dbPathLabelText = string.Empty;
+        [ObservableProperty]
+        private string copyPathButtonText = string.Empty;
+        [ObservableProperty]
+        private string searchPlaceholderText = string.Empty;
+        [ObservableProperty]
+        private string filterButtonText = string.Empty;
+        [ObservableProperty]
+        private string categoryTitle = string.Empty;
+        [ObservableProperty]
+        private string memberTitle = string.Empty;
+        [ObservableProperty]
+        private string bookTitle = string.Empty;
+        [ObservableProperty]
+        private string onlyOpenText = string.Empty;
+        [ObservableProperty]
+        private string viewButtonText = string.Empty;
+        [ObservableProperty]
+        private string returnButtonText = string.Empty;
+        [ObservableProperty]
+        private string newButtonText = string.Empty;
+        [ObservableProperty]
+        private string saveButtonText = string.Empty;
+        [ObservableProperty]
+        private string deleteButtonText = string.Empty;
+
+        // existing properties remain
         [ObservableProperty]
         private Boek? selectedBoek;
 
@@ -85,9 +131,10 @@ namespace Biblio_App.ViewModels
         public IAsyncRelayCommand<Lenen?> ReturnCommand { get; }
         public IAsyncRelayCommand<Lenen?> DeleteCommand { get; }
 
-        public UitleningenViewModel(IDbContextFactory<BiblioDbContext> dbFactory)
+        public UitleningenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, ILanguageService? languageService = null)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
+            _languageService = languageService;
 
             NieuwCommand = new RelayCommand(Nieuw);
             OpslaanCommand = new AsyncRelayCommand(OpslaanAsync);
@@ -97,34 +144,246 @@ namespace Biblio_App.ViewModels
             ReturnCommand = new AsyncRelayCommand<Lenen?>(ReturnAsync);
             DeleteCommand = new AsyncRelayCommand<Lenen?>(DeleteAsync);
 
+            // initialize localized strings
+            UpdateLocalizedStrings();
+            try
+            {
+                if (_languageService != null)
+                {
+                    _languageService.LanguageChanged += (s, c) => Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => UpdateLocalizedStrings());
+                }
+            }
+            catch { }
+
             _ = LoadDataAsync();
         }
 
-        partial void OnSelectedUitleningChanged(Lenen? value)
+        private void EnsureResourceManagerInitialized()
         {
-            if (value != null)
+            if (_resourceManagerInitialized) return;
+            _resourceManagerInitialized = true;
+
+            try
             {
-                SelectedBoek = value.Boek;
-                SelectedLid = value.Lid;
-                StartDate = value.StartDate;
-                DueDate = value.DueDate;
-                ReturnedAt = value.ReturnedAt;
-                ValidationMessage = string.Empty;
-                ClearErrors();
-                RaiseFieldErrorProperties();
+                var webAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
+                if (webAsm != null)
+                {
+                    foreach (var name in new[] { "Biblio_Web.Resources.Vertalingen.SharedResource", "Biblio_Web.Resources.SharedResource", "Biblio_Web.SharedResource" })
+                    {
+                        try
+                        {
+                            var rm = new ResourceManager(name, webAsm);
+                            var test = rm.GetString("Members", CultureInfo.CurrentUICulture);
+                            if (!string.IsNullOrEmpty(test))
+                            {
+                                _sharedResourceManager = rm;
+                                break;
+                            }
+                        }
+                        catch { }
+                    }
+                }
             }
-            else
+            catch { }
+
+            try
             {
-                SelectedBoek = null;
-                SelectedLid = null;
-                StartDate = DateTime.Now;
-                DueDate = DateTime.Now.AddDays(14);
-                ReturnedAt = null;
-                ValidationMessage = string.Empty;
-                ClearErrors();
-                RaiseFieldErrorProperties();
+                var modelType = typeof(SharedModelResource);
+                if (modelType != null && _sharedResourceManager == null)
+                {
+                    _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", modelType.Assembly);
+                }
+            }
+            catch { }
+
+            // try loading resx files from repo as fallback (development)
+            TryLoadResxFromRepo();
+        }
+
+        private void TryLoadResxFromRepo()
+        {
+            try
+            {
+                var baseDir = AppContext.BaseDirectory;
+                var dir = new DirectoryInfo(baseDir);
+                for (int i = 0; i < 8 && dir != null; i++)
+                {
+                    var candidate = Path.Combine(dir.FullName, "Biblio_Web", "Resources", "Vertalingen");
+                    if (Directory.Exists(candidate))
+                    {
+                        var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+                        var tryNames = new[] {
+                            $"SharedResource.{culture.Name}.resx",
+                            $"SharedResource.{culture.TwoLetterISOLanguageName}.resx",
+                            "SharedResource.nl.resx"
+                        };
+
+                        foreach (var name in tryNames)
+                        {
+                            var path = Path.Combine(candidate, name);
+                            if (File.Exists(path))
+                            {
+                                LoadResxFile(path);
+                                return;
+                            }
+                        }
+
+                        var candidate2 = Path.Combine(dir.FullName, "Biblio_Web", "Resources");
+                        foreach (var name in tryNames)
+                        {
+                            var path = Path.Combine(candidate2, name);
+                            if (File.Exists(path))
+                            {
+                                LoadResxFile(path);
+                                return;
+                            }
+                        }
+                    }
+                    dir = dir.Parent;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"TryLoadResxFromRepo error: {ex}");
             }
         }
+
+        private void LoadResxFile(string path)
+        {
+            try
+            {
+                var doc = XDocument.Load(path);
+                var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var data in doc.Root.Elements("data"))
+                {
+                    var name = data.Attribute("name")?.Value;
+                    var val = data.Element("value")?.Value;
+                    if (!string.IsNullOrEmpty(name) && val != null)
+                    {
+                        dict[name] = val;
+                    }
+                }
+                _resxFileStrings = dict;
+                Debug.WriteLine($"Loaded resx fallback from {path} with {_resxFileStrings.Count} keys.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"LoadResxFile error: {ex}");
+            }
+        }
+
+        private string Localize(string key)
+        {
+            try
+            {
+                var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+
+                // Prefer resx file values loaded from repo (developer convenience)
+                if (_resxFileStrings != null && _resxFileStrings.TryGetValue(key, out var rf) && !string.IsNullOrEmpty(rf))
+                {
+                    return rf;
+                }
+
+                if (_sharedResourceManager != null)
+                {
+                    try
+                    {
+                        var val = _sharedResourceManager.GetString(key, culture);
+                        if (!string.IsNullOrEmpty(val)) return val;
+                    }
+                    catch { }
+                }
+
+                var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
+                if (code == "en")
+                {
+                    return key switch
+                    {
+                        "Members" => "Members",
+                        "Loans" => "Loans",
+                        "Books" => "Books",
+                        "DbPath" => "DB path:",
+                        "CopyPath" => "Copy path",
+                        "SearchPlaceholder" => "Search...",
+                        "Filter" => "Filter",
+                        "Category" => "Category",
+                        "Member" => "Member",
+                        "Book" => "Book",
+                        "OnlyOpen" => "Only open",
+                        "View" => "View",
+                        "Return" => "Return",
+                        "New" => "New",
+                        "Save" => "Save",
+                        "Delete" => "Delete",
+                        _ => key
+                    };
+                }
+
+                return key switch
+                {
+                    "Members" => "Leden",
+                    "Loans" => "Uitleningen",
+                    "Books" => "Boeken",
+                    "DbPath" => "DB pad:",
+                    "CopyPath" => "Kopieer pad",
+                    "SearchPlaceholder" => "Zoeken...",
+                    "Filter" => "Filter",
+                    "Category" => "Categorie",
+                    "Member" => "Lid",
+                    "Book" => "Boek",
+                    "OnlyOpen" => "Alleen open",
+                    "View" => "Inzien",
+                    "Return" => "Inleveren",
+                    "New" => "Nieuw",
+                    "Save" => "Opslaan",
+                    "Delete" => "Verwijder",
+                    _ => key
+                };
+            }
+            catch { return key; }
+        }
+
+        private void UpdateLocalizedStrings()
+        {
+            // ensure resource manager available
+            try { EnsureResourceManagerInitialized(); } catch { }
+
+            // Diagnostic logging to help track localization issues
+            try
+            {
+                var cur = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+                Debug.WriteLine($"[Localization] UpdateLocalizedStrings called. Culture: {cur?.Name ?? "(null)"}");
+                Debug.WriteLine($"[Localization] SharedResourceManager set: {_sharedResourceManager != null}");
+                var testLoans = _sharedResourceManager != null ? _sharedResourceManager.GetString("Loans", cur) : null;
+                Debug.WriteLine($"[Localization] ResourceManager Loans='{testLoans ?? "(null)"}'");
+                if (_resxFileStrings != null)
+                {
+                    Debug.WriteLine($"[Localization] ResxFallback contains 'Loans': {_resxFileStrings.ContainsKey("Loans")}");
+                }
+            }
+            catch { }
+
+            PageHeaderText = Localize("Loans");
+            MembersLabel = Localize("Members");
+            LoansLabel = Localize("Loans");
+            BooksLabel = Localize("Books");
+            DbPathLabelText = Localize("DbPath");
+            CopyPathButtonText = Localize("CopyPath");
+            SearchPlaceholderText = Localize("SearchPlaceholder");
+            FilterButtonText = Localize("Filter");
+            CategoryTitle = Localize("Category");
+            MemberTitle = Localize("Member");
+            BookTitle = Localize("Book");
+            OnlyOpenText = Localize("OnlyOpen");
+            ViewButtonText = Localize("View");
+            ReturnButtonText = Localize("Return");
+            NewButtonText = Localize("New");
+            SaveButtonText = Localize("Save");
+            DeleteButtonText = Localize("Delete");
+        }
+
+        // keep the rest of the existing methods unchanged
+        private void Nieuw() => SelectedUitlening = null;
 
         private void RaiseCountProperties()
         {
@@ -171,7 +430,6 @@ namespace Biblio_App.ViewModels
             }
         }
 
-        // Public wrapper so page can explicitly request a reload when appearing
         public async Task EnsureDataLoadedAsync()
         {
             await LoadDataAsync();
@@ -214,8 +472,6 @@ namespace Biblio_App.ViewModels
                 System.Diagnostics.Debug.WriteLine(ex);
             }
         }
-
-        private void Nieuw() => SelectedUitlening = null;
 
         private void BuildValidationMessage()
         {

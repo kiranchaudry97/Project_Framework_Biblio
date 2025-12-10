@@ -18,6 +18,11 @@ using Biblio_Models.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Diagnostics;
+using System.Resources;
+using System.Globalization;
+using System.Reflection;
+using Biblio_Models.Resources;
+using Biblio_App.Services;
 
 namespace Biblio_App.ViewModels
 {
@@ -25,6 +30,9 @@ namespace Biblio_App.ViewModels
     {
         private readonly IGegevensProvider? _gegevensProvider;
         private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
+        private readonly ILanguageService? _languageService;
+        private ResourceManager? _sharedResourceManager;
+        private bool _resourceManagerInitialized = false;
 
         public ObservableCollection<Lid> Leden { get; } = new ObservableCollection<Lid>();
 
@@ -81,10 +89,37 @@ namespace Biblio_App.ViewModels
 
         public IRelayCommand ZoekCommand { get; }
 
-        public LedenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, IGegevensProvider? gegevensProvider = null)
+        // localized UI strings
+        [ObservableProperty]
+        private string pageTitle = string.Empty;
+        [ObservableProperty]
+        private string searchPlaceholder = string.Empty;
+        [ObservableProperty]
+        private string searchButtonText = string.Empty;
+        [ObservableProperty]
+        private string newButtonText = string.Empty;
+        [ObservableProperty]
+        private string detailsButtonText = string.Empty;
+        [ObservableProperty]
+        private string editButtonText = string.Empty;
+        [ObservableProperty]
+        private string deleteButtonText = string.Empty;
+        [ObservableProperty]
+        private string saveButtonText = string.Empty;
+        [ObservableProperty]
+        private string firstNamePlaceholder = string.Empty;
+        [ObservableProperty]
+        private string lastNamePlaceholder = string.Empty;
+        [ObservableProperty]
+        private string emailPlaceholder = string.Empty;
+        [ObservableProperty]
+        private string phonePlaceholder = string.Empty;
+
+        public LedenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _gegevensProvider = gegevensProvider;
+            _languageService = languageService;
 
             NieuwCommand = new RelayCommand(Nieuw);
             OpslaanCommand = new AsyncRelayCommand(OpslaanAsync);
@@ -96,7 +131,116 @@ namespace Biblio_App.ViewModels
 
             ZoekCommand = new RelayCommand(async () => await LoadLedenAsync());
 
+            // initialize localized strings
+            UpdateLocalizedStrings();
+            try
+            {
+                if (_languageService != null)
+                {
+                    _languageService.LanguageChanged += (s, c) => Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => UpdateLocalizedStrings());
+                }
+            }
+            catch { }
+
             _ = LoadLedenAsync();
+        }
+
+        private void EnsureResourceManagerInitialized()
+        {
+            if (_resourceManagerInitialized) return;
+            _resourceManagerInitialized = true;
+            try
+            {
+                var asm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
+                if (asm != null)
+                {
+                    var candidates = new[] {
+                        "Biblio_Web.Resources.Vertalingen.SharedResource",
+                        "Biblio_Web.Resources.SharedResource",
+                        "Biblio_Web.SharedResource"
+                    };
+                    foreach (var baseName in candidates)
+                    {
+                        try
+                        {
+                            var rm = new ResourceManager(baseName, asm);
+                            var test = rm.GetString("Members", CultureInfo.CurrentUICulture);
+                            if (!string.IsNullOrEmpty(test)) { _sharedResourceManager = rm; return; }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+
+            try
+            {
+                var modelType = typeof(SharedModelResource);
+                _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", modelType.Assembly);
+            }
+            catch { }
+        }
+
+        private string Localize(string key)
+        {
+            EnsureResourceManagerInitialized();
+            var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+            if (_sharedResourceManager != null)
+            {
+                try { var v = _sharedResourceManager.GetString(key, culture); if (!string.IsNullOrEmpty(v)) return v; } catch { }
+            }
+            var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
+            if (code == "en")
+            {
+                return key switch
+                {
+                    "Members" => "Members",
+                    "SearchPlaceholder" => "Search",
+                    "Search" => "Search",
+                    "New" => "New",
+                    "Details" => "Details",
+                    "Edit" => "Edit",
+                    "Delete" => "Delete",
+                    "Save" => "Save",
+                    "FirstName" => "First name",
+                    "LastName" => "Last name",
+                    "Email" => "Email",
+                    "Phone" => "Phone",
+                    _ => key
+                };
+            }
+            return key switch
+            {
+                "Members" => "Leden",
+                "SearchPlaceholder" => "Zoeken...",
+                "Search" => "Zoek",
+                "New" => "Nieuw",
+                "Details" => "Details",
+                "Edit" => "Bewerk",
+                "Delete" => "Verwijder",
+                "Save" => "Opslaan",
+                "FirstName" => "Voornaam",
+                "LastName" => "Achternaam",
+                "Email" => "Email",
+                "Phone" => "Telefoon",
+                _ => key
+            };
+        }
+
+        private void UpdateLocalizedStrings()
+        {
+            PageTitle = Localize("Members");
+            SearchPlaceholder = Localize("SearchPlaceholder");
+            SearchButtonText = Localize("Search");
+            NewButtonText = Localize("New");
+            DetailsButtonText = Localize("Details");
+            EditButtonText = Localize("Edit");
+            DeleteButtonText = Localize("Delete");
+            SaveButtonText = Localize("Save");
+            FirstNamePlaceholder = Localize("FirstName");
+            LastNamePlaceholder = Localize("LastName");
+            EmailPlaceholder = Localize("Email");
+            PhonePlaceholder = Localize("Phone");
         }
 
         private async Task NavigateToDetailsAsync(Lid? l)

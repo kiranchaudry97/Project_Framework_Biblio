@@ -19,6 +19,10 @@ using Biblio_Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Maui.ApplicationModel;
 using System.Diagnostics;
+using System.Resources;
+using System.Reflection;
+using System.Globalization;
+using Biblio_Models.Resources;
 
 namespace Biblio_App.ViewModels
 {
@@ -27,6 +31,10 @@ namespace Biblio_App.ViewModels
         private readonly IGegevensProvider? _gegevensProvider;
         private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
         private readonly IDataSyncService? _sync;
+        private readonly ILanguageService? _languageService;
+
+        private ResourceManager? _sharedResourceManager;
+        private bool _resourceManagerInitialized = false;
 
         private CancellationTokenSource? _searchCts;
 
@@ -102,11 +110,52 @@ namespace Biblio_App.ViewModels
         public IRelayCommand<Boek> ItemEditCommand { get; }
         public IAsyncRelayCommand<Boek> ItemDeleteCommand { get; }
 
-        public BoekenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, IDataSyncService? sync = null, IGegevensProvider? gegevensProvider = null)
+        // localized UI strings
+        [ObservableProperty]
+        private string pageTitle = string.Empty;
+
+        [ObservableProperty]
+        private string headerTitle = string.Empty;
+
+        [ObservableProperty]
+        private string headerAuthor = string.Empty;
+
+        [ObservableProperty]
+        private string headerActions = string.Empty;
+
+        [ObservableProperty]
+        private string searchPlaceholder = string.Empty;
+
+        [ObservableProperty]
+        private string searchButtonText = string.Empty;
+
+        [ObservableProperty]
+        private string categoryTitle = string.Empty;
+
+        [ObservableProperty]
+        private string newButtonText = string.Empty;
+
+        [ObservableProperty]
+        private string deleteButtonText = string.Empty;
+
+        [ObservableProperty]
+        private string saveButtonText = string.Empty;
+
+        [ObservableProperty]
+        private string isbnPlaceholder = string.Empty;
+
+        [ObservableProperty]
+        private string detailsButtonText = string.Empty;
+
+        [ObservableProperty]
+        private string editButtonText = string.Empty;
+
+        public BoekenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, IDataSyncService? sync = null, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _sync = sync;
             _gegevensProvider = gegevensProvider;
+            _languageService = languageService;
 
             NieuwCommand = new RelayCommand(Nieuw);
             OpslaanCommand = new AsyncRelayCommand(OpslaanAsync);
@@ -121,8 +170,188 @@ namespace Biblio_App.ViewModels
             ItemEditCommand = new AsyncRelayCommand<Boek>(async b => await NavigateToEditAsync(b));
             ItemDeleteCommand = new AsyncRelayCommand<Boek>(async b => await DeleteItemAsync(b));
 
+            // initialize localized strings
+            UpdateLocalizedStrings();
+
+            if (_languageService != null)
+            {
+                try
+                {
+                    // Ensure UI updates happen on the main thread when language changes
+                    _languageService.LanguageChanged += (s, c) => Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => UpdateLocalizedStrings());
+                }
+                catch { }
+            }
+
             _ = LoadCategoriesAsync();
             _ = LoadBooksAsync();
+        }
+
+        private void EnsureResourceManagerInitialized()
+        {
+            if (_resourceManagerInitialized) return;
+            _resourceManagerInitialized = true;
+
+            try
+            {
+                var webType = AppDomain.CurrentDomain.GetAssemblies()
+                    .Select(a => a.GetType("Biblio_Web.SharedResource", false))
+                    .FirstOrDefault(t => t != null);
+                if (webType != null)
+                {
+                    var asm = webType.Assembly;
+                    _sharedResourceManager = new ResourceManager("Biblio_Web.Resources.Vertalingen.SharedResource", asm);
+                    return;
+                }
+            }
+            catch { }
+
+            // Try to locate the Biblio_Web assembly explicitly and pick common resource base names.
+            try
+            {
+                var asm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
+                if (asm == null)
+                {
+                    try { asm = Assembly.Load("Biblio_Web"); } catch { asm = null; }
+                }
+
+                if (asm != null)
+                {
+                    var candidates = new[] {
+                        "Biblio_Web.Resources.Vertalingen.SharedResource",
+                        "Biblio_Web.Resources.SharedResource",
+                        "Biblio_Web.SharedResource"
+                    };
+
+                    foreach (var baseName in candidates)
+                    {
+                        try
+                        {
+                            var rm = new ResourceManager(baseName, asm);
+                            // quick test to see if resource exists
+                            var test = rm.GetString("Boeken", CultureInfo.CurrentUICulture);
+                            if (!string.IsNullOrEmpty(test))
+                            {
+                                _sharedResourceManager = rm;
+                                return;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+
+            try
+            {
+                var modelType = typeof(SharedModelResource);
+                if (modelType != null)
+                {
+                    var asm = modelType.Assembly;
+                    _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", asm);
+                    return;
+                }
+            }
+            catch { }
+        }
+
+        private string Localize(string key, string? arg = null)
+        {
+            EnsureResourceManagerInitialized();
+
+            var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+            if (_sharedResourceManager != null)
+            {
+                try
+                {
+                    var value = _sharedResourceManager.GetString(key, culture);
+                    if (!string.IsNullOrEmpty(value)) return arg != null ? string.Format(culture, value, arg) : value;
+                }
+                catch { }
+            }
+
+            // fallback based on culture: English for 'en', otherwise Dutch
+            var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
+            if (code == "en")
+            {
+                return key switch
+                {
+                    "Boeken" => "Books",
+                    "Titel" => "Title",
+                    "Auteur" => "Author",
+                    "Acties" => "Actions",
+                    "Actie" => "Action",
+                    "ZoekPlaceholder" => "Search by title, author or ISBN...",
+                    "Zoek" => "Search",
+                    "Categorie" => "Category",
+                    "Nieuw" => "New",
+                    "Verwijderen" => "Delete",
+                    "Opslaan" => "Save",
+                    "ISBN" => "ISBN",
+                    "Details" => "Details",
+                    "Bewerk" => "Edit",
+                    "Alle" => "All",
+                    "Page" => "Page",
+                    // headers used in list
+                    "ActiesHeader" => "Actions",
+                    "TitelHeader" => "Title",
+                    "AuteurHeader" => "Author",
+                    _ => key
+                };
+            }
+
+            // default Dutch fallback
+            return key switch
+            {
+                "Boeken" => "Boeken",
+                "Titel" => "Titel",
+                "Auteur" => "Auteur",
+                "Acties" => "Acties",
+                "Actie" => "Actie",
+                "ZoekPlaceholder" => "Zoek op titel, auteur of ISBN...",
+                "Zoek" => "Zoek",
+                "Categorie" => "Categorie",
+                "Nieuw" => "Nieuw",
+                "Verwijderen" => "Verwijderen",
+                "Opslaan" => "Opslaan",
+                "ISBN" => "ISBN",
+                "Details" => "Details",
+                "Bewerk" => "Bewerk",
+                "Alle" => "Alle",
+                "Page" => "Pagina",
+                // headers used in list
+                "ActiesHeader" => "Acties",
+                "TitelHeader" => "Titel",
+                "AuteurHeader" => "Auteur",
+                _ => key
+            };
+        }
+
+        private void UpdateLocalizedStrings()
+        {
+            PageTitle = Localize("Boeken");
+            HeaderTitle = Localize("Titel");
+            HeaderAuthor = Localize("Auteur");
+            HeaderActions = Localize("Acties");
+            SearchPlaceholder = Localize("ZoekPlaceholder");
+            SearchButtonText = Localize("Zoek");
+            CategoryTitle = Localize("Categorie");
+            NewButtonText = Localize("Nieuw");
+            DeleteButtonText = Localize("Verwijderen");
+            SaveButtonText = Localize("Opslaan");
+            IsbnPlaceholder = Localize("ISBN");
+            DetailsButtonText = Localize("Details");
+            EditButtonText = Localize("Bewerk");
+        }
+
+        // Public helper to force updating localized strings from UI thread
+        public void RefreshLocalizedStrings()
+        {
+            try
+            {
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => UpdateLocalizedStrings());
+            }
+            catch { }
         }
 
         partial void OnSelectedBoekChanged(Boek? value)
@@ -180,6 +409,7 @@ namespace Biblio_App.ViewModels
                 foreach (var c in cats) Categorien.Add(c);
             }
             catch { }
+
             SelectedFilterCategorie = Categorien.FirstOrDefault();
         }
 
@@ -196,7 +426,7 @@ namespace Biblio_App.ViewModels
         {
             try
             {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
+                await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(async () =>
                 {
                     if (Application.Current?.MainPage != null)
                     {
@@ -268,8 +498,8 @@ namespace Biblio_App.ViewModels
             }
 
             // local filtering with paging
-            using var db = _dbFactory.CreateDbContext();
-            var q = db.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).AsQueryable();
+            using var db2 = _dbFactory.CreateDbContext();
+            var q = db2.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).AsQueryable();
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 var s = SearchText.Trim().ToLowerInvariant();

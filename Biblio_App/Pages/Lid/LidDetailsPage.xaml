@@ -5,11 +5,12 @@
              xmlns:models="clr-namespace:Biblio_Models.Entiteiten;assembly=Biblio_Models"
              x:Class="Biblio_App.Pages.LidDetailsPage"
              x:DataType="models:Lid"
-             Title="Lid details">
+             x:Name="Page"
+             Title="{Binding PageHeaderText, Source={x:Reference Page}}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
-            <Label Text="Lid details" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" TextColor="{StaticResource White}" />
+            <Label Text="{Binding PageHeaderText, Source={x:Reference Page}}" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" TextColor="{StaticResource White}" />
 
             <Frame Style="{StaticResource WelcomeCardStyle}">
                 <VerticalStackLayout Spacing="8">
@@ -18,8 +19,8 @@
                     <Label Text="{Binding Email}" FontSize="14" />
 
                     <HorizontalStackLayout HorizontalOptions="End" Spacing="12">
-                        <Button Style="{StaticResource PrimaryButton}" Text="Bewerk" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCommand}" WidthRequest="120" />
-                        <Button Style="{StaticResource PrimaryButton}" Text="Terug" Clicked="OnBackClicked" WidthRequest="120" />
+                        <Button Style="{StaticResource PrimaryButton}" Text="{Binding EditButtonText, Source={x:Reference Page}}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCommand}" WidthRequest="120" />
+                        <Button Style="{StaticResource PrimaryButton}" Text="{Binding BackButtonText, Source={x:Reference Page}}" Clicked="OnBackClicked" WidthRequest="120" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Frame>

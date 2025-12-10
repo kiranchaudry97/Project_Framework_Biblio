@@ -5,22 +5,23 @@
              xmlns:viewmodel="clr-namespace:Biblio_App.ViewModels"
              x:Class="Biblio_App.Pages.Boek.BoekCreatePage"
              x:DataType="viewmodel:BoekenViewModel"
-             Title="Nieuw boek">
+             x:Name="Page"
+             Title="{Binding PageHeaderText, Source={x:Reference Page}}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
-            <Label Text="Nieuw boek" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" TextColor="{StaticResource White}" />
+            <Label Text="{Binding PageHeaderText, Source={x:Reference Page}}" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" TextColor="{StaticResource White}" />
 
             <Frame Style="{StaticResource WelcomeCardStyle}">
                 <VerticalStackLayout Spacing="8">
-                    <Entry Placeholder="Titel" Text="{Binding Titel, Mode=TwoWay}" />
-                    <Entry Placeholder="Auteur" Text="{Binding Auteur, Mode=TwoWay}" />
-                    <Entry Placeholder="ISBN" Text="{Binding Isbn, Mode=TwoWay}" />
-                    <Picker Title="Categorie" ItemsSource="{Binding Categorien}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" />
+                    <Entry Placeholder="{Binding TitelPlaceholder, Source={x:Reference Page}}" Text="{Binding Titel, Mode=TwoWay}" />
+                    <Entry Placeholder="{Binding AuteurPlaceholder, Source={x:Reference Page}}" Text="{Binding Auteur, Mode=TwoWay}" />
+                    <Entry Placeholder="{Binding IsbnPlaceholder, Source={x:Reference Page}}" Text="{Binding Isbn, Mode=TwoWay}" />
+                    <Picker Title="{Binding CategoryTitle, Source={x:Reference Page}}" ItemsSource="{Binding Categorien}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" />
 
                     <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
-                        <Button Text="Annuleer" Clicked="OnCancelClicked" Style="{StaticResource OutlineActionButton}" />
-                        <Button Text="Opslaan" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
+                        <Button Text="{Binding CancelButtonText, Source={x:Reference Page}}" Clicked="OnCancelClicked" Style="{StaticResource OutlineActionButton}" />
+                        <Button Text="{Binding SaveButtonText, Source={x:Reference Page}}" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Frame>

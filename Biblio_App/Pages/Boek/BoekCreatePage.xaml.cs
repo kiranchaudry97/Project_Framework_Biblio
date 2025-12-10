@@ -1,15 +1,130 @@
 using Biblio_App.ViewModels;
 using Microsoft.Maui.Controls;
 using System.Linq;
+using System.Resources;
+using System.Globalization;
+using Biblio_Models.Resources;
+using Microsoft.Extensions.DependencyInjection;
+using Biblio_App.Services;
+using System;
 
 namespace Biblio_App.Pages.Boek
 {
     public partial class BoekCreatePage : ContentPage
     {
+        private BoekenViewModel VM => BindingContext as BoekenViewModel;
+        private ILanguageService? _languageService;
+        private ResourceManager? _sharedResourceManager;
+
+        public static readonly BindableProperty PageHeaderTextProperty = BindableProperty.Create(nameof(PageHeaderText), typeof(string), typeof(BoekCreatePage), default(string));
+        public static readonly BindableProperty TitelPlaceholderProperty = BindableProperty.Create(nameof(TitelPlaceholder), typeof(string), typeof(BoekCreatePage), default(string));
+        public static readonly BindableProperty AuteurPlaceholderProperty = BindableProperty.Create(nameof(AuteurPlaceholder), typeof(string), typeof(BoekCreatePage), default(string));
+        public static readonly BindableProperty IsbnPlaceholderProperty = BindableProperty.Create(nameof(IsbnPlaceholder), typeof(string), typeof(BoekCreatePage), default(string));
+        public static readonly BindableProperty CategoryTitleProperty = BindableProperty.Create(nameof(CategoryTitle), typeof(string), typeof(BoekCreatePage), default(string));
+        public static readonly BindableProperty CancelButtonTextProperty = BindableProperty.Create(nameof(CancelButtonText), typeof(string), typeof(BoekCreatePage), default(string));
+        public static readonly BindableProperty SaveButtonTextProperty = BindableProperty.Create(nameof(SaveButtonText), typeof(string), typeof(BoekCreatePage), default(string));
+
+        public string PageHeaderText { get => (string)GetValue(PageHeaderTextProperty); set => SetValue(PageHeaderTextProperty, value); }
+        public string TitelPlaceholder { get => (string)GetValue(TitelPlaceholderProperty); set => SetValue(TitelPlaceholderProperty, value); }
+        public string AuteurPlaceholder { get => (string)GetValue(AuteurPlaceholderProperty); set => SetValue(AuteurPlaceholderProperty, value); }
+        public string IsbnPlaceholder { get => (string)GetValue(IsbnPlaceholderProperty); set => SetValue(IsbnPlaceholderProperty, value); }
+        public string CategoryTitle { get => (string)GetValue(CategoryTitleProperty); set => SetValue(CategoryTitleProperty, value); }
+        public string CancelButtonText { get => (string)GetValue(CancelButtonTextProperty); set => SetValue(CancelButtonTextProperty, value); }
+        public string SaveButtonText { get => (string)GetValue(SaveButtonTextProperty); set => SetValue(SaveButtonTextProperty, value); }
+
         public BoekCreatePage(BoekenViewModel vm)
         {
             InitializeComponent();
             BindingContext = vm;
+
+            try { _languageService = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>(); } catch { }
+            InitializeSharedResourceManager();
+            UpdateLocalizedStrings();
+        }
+
+        private void InitializeSharedResourceManager()
+        {
+            try
+            {
+                var webAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
+                if (webAsm != null)
+                {
+                    foreach (var name in new[] { "Biblio_Web.Resources.Vertalingen.SharedResource", "Biblio_Web.Resources.SharedResource", "Biblio_Web.SharedResource" })
+                    {
+                        try
+                        {
+                            var rm = new ResourceManager(name, webAsm);
+                            var test = rm.GetString("Boeken", CultureInfo.CurrentUICulture);
+                            if (!string.IsNullOrEmpty(test))
+                            {
+                                _sharedResourceManager = rm;
+                                return;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+
+                var modelType = typeof(SharedModelResource);
+                if (modelType != null)
+                {
+                    _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", modelType.Assembly);
+                }
+            }
+            catch { }
+        }
+
+        private string Localize(string key)
+        {
+            try
+            {
+                var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+                if (_sharedResourceManager != null)
+                {
+                    var val = _sharedResourceManager.GetString(key, culture);
+                    if (!string.IsNullOrEmpty(val)) return val;
+                }
+
+                var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
+                if (code == "en")
+                {
+                    return key switch
+                    {
+                        "Boeken" => "Books",
+                        "Titel" => "Title",
+                        "Auteur" => "Author",
+                        "ISBN" => "ISBN",
+                        "Categorie" => "Category",
+                        "Annuleer" => "Cancel",
+                        "Opslaan" => "Save",
+                        _ => key
+                    };
+                }
+
+                return key switch
+                {
+                    "Boeken" => "Nieuw boek",
+                    "Titel" => "Titel",
+                    "Auteur" => "Auteur",
+                    "ISBN" => "ISBN",
+                    "Categorie" => "Categorie",
+                    "Annuleer" => "Annuleer",
+                    "Opslaan" => "Opslaan",
+                    _ => key
+                };
+            }
+            catch { return key; }
+        }
+
+        private void UpdateLocalizedStrings()
+        {
+            PageHeaderText = Localize("Boeken");
+            TitelPlaceholder = Localize("Titel");
+            AuteurPlaceholder = Localize("Auteur");
+            IsbnPlaceholder = Localize("ISBN");
+            CategoryTitle = Localize("Categorie");
+            CancelButtonText = Localize("Annuleer");
+            SaveButtonText = Localize("Opslaan");
         }
 
         public void ApplyQueryAttributes(System.Collections.Generic.IDictionary<string, object> query)
@@ -19,18 +134,14 @@ namespace Biblio_App.Pages.Boek
             {
                 if (int.TryParse(val.ToString(), out var id))
                 {
-                    // stel het geselecteerde boek in zodat de viewmodel het in bewerkbare velden laadt
                     var vm = BindingContext as BoekenViewModel;
                     if (vm != null)
                     {
-                        // zoek het boek eerst in de reeds geladen collectie
                         var b = vm.Boeken.FirstOrDefault(x => x.Id == id);
                         if (b != null) vm.SelectedBoek = b;
                         else
                         {
-                            // anders asynchroon uit de database laden (fire-and-forget)
                             _ = vm.EnsureCategoriesLoadedAsync();
-                            // na EnsureCategoriesLoadedAsync opnieuw proberen te vinden
                             var found = vm.Boeken.FirstOrDefault(x => x.Id == id);
                             if (found != null) vm.SelectedBoek = found;
                         }

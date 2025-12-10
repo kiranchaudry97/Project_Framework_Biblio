@@ -7,6 +7,11 @@ using CommunityToolkit.Mvvm.Input;
 using Biblio_App.Services;
 using Biblio_Models.Entiteiten;
 using Biblio_App.Models;
+using System.Globalization;
+using System.Resources;
+using System.Linq;
+using System.Reflection;
+using Biblio_Models.Resources;
 
 namespace Biblio_App.ViewModels
 {
@@ -18,6 +23,10 @@ namespace Biblio_App.ViewModels
         private readonly Action? _openUitleningenAction;
         private readonly Action? _openCategorieenAction;
         private readonly IDataSyncService? _dataSync;
+        private readonly ILanguageService? _languageService;
+
+        private ResourceManager? _sharedResourceManager;
+        private bool _resourceManagerInitialized = false;
 
         [ObservableProperty]
         private ObservableCollection<Boek> boeken = new ObservableCollection<Boek>();
@@ -44,7 +53,7 @@ namespace Biblio_App.ViewModels
         private bool isBusy;
 
         // Parameterless ctor for tooling
-        public MainViewModel() : this(null, null, null, null, null, null) { }
+        public MainViewModel() : this(null, null, null, null, null, null, null) { }
 
         // DI ctor used in MauiProgram
         public MainViewModel(IGegevensProvider? gegevensProvider = null,
@@ -52,7 +61,8 @@ namespace Biblio_App.ViewModels
                              Action? openLeden = null,
                              Action? openUitleningen = null,
                              Action? openCategorieen = null,
-                             IDataSyncService? dataSync = null)
+                             IDataSyncService? dataSync = null,
+                             ILanguageService? languageService = null)
         {
             _gegevensProvider = gegevensProvider;
             _openBoekenAction = openBoeken;
@@ -60,10 +70,25 @@ namespace Biblio_App.ViewModels
             _openUitleningenAction = openUitleningen;
             _openCategorieenAction = openCategorieen;
             _dataSync = dataSync;
+            _languageService = languageService;
 
             // initialize status
             IsVerbonden = NetworkInterface.GetIsNetworkAvailable();
-            SynchronisatieStatus = IsVerbonden ? "Online" : "Offline - offlinegegevens in gebruik";
+            SynchronisatieStatus = IsVerbonden ? Localize("Online") : Localize("Offline");
+
+            // subscribe to language changes to update localized strings
+            try
+            {
+                if (_languageService != null)
+                {
+                    _languageService.LanguageChanged += (s, c) =>
+                    {
+                        // update status message when language changes
+                        SynchronisatieStatus = IsVerbonden ? Localize("Online") : Localize("Offline");
+                    };
+                }
+            }
+            catch { }
 
             // sample data for design/runtime when DB/provider not available
             if (Boeken.Count == 0)
@@ -82,7 +107,7 @@ namespace Biblio_App.ViewModels
             try
             {
                 IsVerbonden = NetworkInterface.GetIsNetworkAvailable();
-                SynchronisatieStatus = IsVerbonden ? "Online" : "Offline - offlinegegevens in gebruik";
+                SynchronisatieStatus = IsVerbonden ? Localize("Online") : Localize("Offline");
 
                 if (_gegevensProvider != null && IsVerbonden)
                 {
@@ -92,11 +117,11 @@ namespace Biblio_App.ViewModels
                         TotaalBoeken = result.boeken;
                         TotaalLeden = result.leden;
                         OpenUitleningen = result.openUitleningen;
-                        SynchronisatieStatus = "Online";
+                        SynchronisatieStatus = Localize("Online");
                     }
                     catch (Exception ex)
                     {
-                        SynchronisatieStatus = $"Online (fout bij ophalen gegevens): {ex.Message}";
+                        SynchronisatieStatus = Localize("OnlineWithError", ex.Message);
                     }
                 }
             }
@@ -136,15 +161,15 @@ namespace Biblio_App.ViewModels
             IsBusy = true;
             try
             {
-                SynchronisatieStatus = "Synchroniseren...";
+                SynchronisatieStatus = Localize("Syncing");
                 if (_dataSync == null)
                 {
-                    SynchronisatieStatus = "Geen sync-service beschikbaar.";
+                    SynchronisatieStatus = Localize("NoSyncService");
                     return;
                 }
 
                 await _dataSync.SyncAllAsync();
-                SynchronisatieStatus = "Synchronisatie voltooid.";
+                SynchronisatieStatus = Localize("SyncComplete");
 
                 // Optionally refresh counts after sync
                 if (_gegevensProvider != null)
@@ -157,12 +182,82 @@ namespace Biblio_App.ViewModels
             }
             catch (Exception ex)
             {
-                SynchronisatieStatus = $"Fout bij synchronisatie: {ex.Message}";
+                SynchronisatieStatus = Localize("SyncError", ex.Message);
             }
             finally
             {
                 IsBusy = false;
             }
+        }
+
+        private void EnsureResourceManagerInitialized()
+        {
+            if (_resourceManagerInitialized) return;
+            _resourceManagerInitialized = true;
+
+            // Try web shared resource first (Biblio_Web.Resources.Vertalingen.SharedResource)
+            try
+            {
+                var webType = AppDomain.CurrentDomain.GetAssemblies()
+                    .Select(a => a.GetType("Biblio_Web.SharedResource", false))
+                    .FirstOrDefault(t => t != null);
+                if (webType != null)
+                {
+                    var asm = webType.Assembly;
+                    _sharedResourceManager = new ResourceManager("Biblio_Web.Resources.Vertalingen.SharedResource", asm);
+                    return;
+                }
+            }
+            catch { }
+
+            // Fallback to SharedModelResource in Biblio_Models
+            try
+            {
+                var modelType = typeof(SharedModelResource);
+                if (modelType != null)
+                {
+                    var asm = modelType.Assembly;
+                    _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", asm);
+                    return;
+                }
+            }
+            catch { }
+
+            // if neither found, leave null
+        }
+
+        private string Localize(string key, string? arg = null)
+        {
+            EnsureResourceManagerInitialized();
+
+            var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+
+            if (_sharedResourceManager != null)
+            {
+                try
+                {
+                    var value = _sharedResourceManager.GetString(key, culture);
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        return arg != null ? string.Format(culture, value, arg) : value;
+                    }
+                }
+                catch { }
+            }
+
+            // Fallback inline translations
+            var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
+            return key switch
+            {
+                "Online" => code == "en" ? "Online" : "Online",
+                "Offline" => code == "en" ? "Offline - offline data in use" : "Offline - offlinegegevens in gebruik",
+                "Syncing" => code == "en" ? "Synchronizing..." : "Synchroniseren...",
+                "NoSyncService" => code == "en" ? "No sync service available." : "Geen sync-service beschikbaar.",
+                "SyncComplete" => code == "en" ? "Synchronization complete." : "Synchronisatie voltooid.",
+                "SyncError" => code == "en" ? $"Error during synchronization: {arg}" : $"Fout bij synchronisatie: {arg}",
+                "OnlineWithError" => code == "en" ? $"Online (error fetching data): {arg}" : $"Online (fout bij ophalen gegevens): {arg}",
+                _ => key
+            };
         }
     }
 }

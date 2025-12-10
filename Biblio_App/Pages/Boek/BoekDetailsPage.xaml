@@ -5,28 +5,29 @@
              xmlns:models="clr-namespace:Biblio_Models.Entiteiten;assembly=Biblio_Models"
              x:Class="Biblio_App.Pages.BoekDetailsPage"
              x:DataType="models:Boek"
-             Title="Boek details">
+             x:Name="Page"
+             Title="{Binding PageHeaderText, Source={x:Reference Page}}">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
-            <Label Text="Boek details" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" TextColor="{StaticResource White}" />
+            <Label Text="{Binding PageHeaderText, Source={x:Reference Page}}" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" TextColor="{StaticResource White}" />
 
             <Frame Style="{StaticResource WelcomeCardStyle}">
                 <VerticalStackLayout Spacing="8">
                     <Label Text="{Binding Titel}" FontAttributes="Bold" FontSize="18" TextColor="{StaticResource Gray900}" />
                     <Label Text="{Binding Auteur}" FontSize="14" TextColor="{StaticResource Gray900}" />
                     <Label Text="{Binding Isbn}" FontSize="14" TextColor="{StaticResource Gray900}" />
-                    <Label Text="{Binding categorie.Naam, StringFormat='Categorie: {0}'}" FontSize="14" TextColor="{StaticResource Gray900}" />
+                    <Label Text="{Binding categorie.Naam, StringFormat='{Binding CategoryLabel, Source={x:Reference Page}}: {0}'}" FontSize="14" TextColor="{StaticResource Gray900}" />
 
                     <!-- Buttons aligned to the right and using PrimaryButton style -->
                     <HorizontalStackLayout HorizontalOptions="End" Spacing="12" VerticalOptions="Center">
                         <Button Style="{StaticResource PrimaryButton}"
-                                Text="Bewerk"
+                                Text="{Binding EditButtonText, Source={x:Reference Page}}"
                                 Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCommand}"
                                 WidthRequest="120"
                                 HorizontalOptions="End" />
                         <Button Style="{StaticResource PrimaryButton}"
-                                Text="Terug"
+                                Text="{Binding BackButtonText, Source={x:Reference Page}}"
                                 Clicked="OnBackClicked"
                                 WidthRequest="120"
                                 HorizontalOptions="End" />
