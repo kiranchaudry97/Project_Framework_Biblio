@@ -14,8 +14,10 @@ namespace Biblio_Models.Data
         public DbSet<Boek> Boeken { get; set; } = null!;
         public DbSet<Lid> Leden { get; set; } = null!;
         public DbSet<Lenen> Leningens { get; set; } = null!;
+        public DbSet<LocalLenen> LocalLeningens { get; set; } = null!;
         public DbSet<Categorie> Categorien { get; set; } = null!;
         public DbSet<Taal> Talen { get; set; } = null!;
+        public DbSet<LocalLid> LocalLeden { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
