@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Biblio_Models.Entiteiten;
+using System;
 
 namespace Biblio_Models.Data
 {
@@ -16,10 +17,15 @@ namespace Biblio_Models.Data
         public DbSet<Categorie> Categorien { get; set; } = null!;
         public DbSet<Taal> Talen { get; set; } = null!;
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            // Reuse mappings from BiblioDbContext conventions; no extra mapping required here.
-            base.OnModelCreating(modelBuilder);
+            if (!options.IsConfigured)
+            {
+                var folder = Environment.SpecialFolder.LocalApplicationData;
+                var path = Environment.GetFolderPath(folder);
+                var DbPath = System.IO.Path.Join(path, "BiblioApp.db");
+                options.UseSqlite($"Data Source={DbPath}");
+            }
         }
     }
 }
