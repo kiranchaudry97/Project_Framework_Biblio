@@ -229,5 +229,36 @@
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Cookie consent banner (simple, localized) -->
+    @if (!Context.Request.Cookies.ContainsKey("biblio_cookie_consent"))
+    {
+        <div id="cookieConsent" class="position-fixed bottom-0 start-0 end-0 mb-0 p-3" style="z-index:1050;">
+            <div class="container">
+                <div class="alert alert-dark d-flex align-items-center justify-content-between mb-0">
+                    <div>
+                        <strong>@Localizer["CookieNoticeTitle"]</strong>
+                        <div class="small">@Localizer["CookieNoticeText"]</div>
+                    </div>
+                    <div class="text-end">
+                        <button id="acceptCookies" class="btn btn-primary btn-sm me-2">@Localizer["AcceptCookies"]</button>
+                        <a href="@Url.Action("Privacy","Home")" class="btn btn-link btn-sm">@Localizer["CookieSettings"]</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            (function(){
+                try {
+                    document.getElementById('acceptCookies').addEventListener('click', function(){
+                        var expiry = new Date(); expiry.setFullYear(expiry.getFullYear()+1);
+                        document.cookie = 'biblio_cookie_consent=1; path=/; expires=' + expiry.toUTCString() + ';';
+                        var el = document.getElementById('cookieConsent'); if (el) el.remove();
+                    });
+                } catch(e) { /* ignore */ }
+            })();
+        </script>
+    }
 </body>
 </html>

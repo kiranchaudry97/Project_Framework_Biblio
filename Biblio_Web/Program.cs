@@ -21,6 +21,7 @@ using Microsoft.OpenApi.Models;
 using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
 using Biblio_Models.Seed;
+using Biblio_Web.Middleware; // added for cookie provider
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,9 @@ var connectionString = builder.Configuration.GetConnectionString(ConnKey)
 
 // Localisatie - gebruik de map Vertalingen (bevat de volledige SharedResource.*.resx bestanden)
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources/Vertalingen");
+
+// Register default cookie policy options provider
+builder.Services.AddSingleton<ICookiePolicyOptionsProvider, DefaultCookiePolicyOptionsProvider>();
 
 // DbContext configureren en tijdelijk waarschuwing over pending model changes onderdrukken (maak migrations aan)
 builder.Services.AddDbContext<BiblioDbContext>(options =>
@@ -189,6 +193,15 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Apply cookie policy from provider (ensures consent handling and same-site/secure defaults)
+try
+{
+    var provider = app.Services.GetService<ICookiePolicyOptionsProvider>();
+    var opts = provider?.GetOptions() ?? new CookiePolicyOptions();
+    app.UseCookiePolicy(opts);
+}
+catch { /* ignore if provider not available */ }
 
 app.UseAuthentication();
 app.UseAuthorization();

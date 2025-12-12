@@ -1,11 +1,64 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
-  <resheader name="version"><value>2.0</value></resheader>
-  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
 
-   
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -68,7 +121,7 @@
     <value>Le champ {0} est requis.</value>
   </data>
   <data name="StringLength" xml:space="preserve">
-    <value>{0} doit contenir entre {2} et {1} caractères.</value>
+    <value>{0} doit contenir entre {2} et {1} caract�res.</value>
   </data>
   <data name="EmailAddress" xml:space="preserve">
     <value>Adresse e-mail invalide.</value>
@@ -77,7 +130,7 @@
     <value>Accueil</value>
   </data>
   <data name="Privacy" xml:space="preserve">
-    <value>Confidentialité</value>
+    <value>Confidentialit�</value>
   </data>
   <data name="Books" xml:space="preserve">
     <value>Livres</value>
@@ -86,7 +139,7 @@
     <value>Membres</value>
   </data>
   <data name="Loans" xml:space="preserve">
-    <value>Prêts</value>
+    <value>Pr�ts</value>
   </data>
   <data name="Categories" xml:space="preserve">
     <value>Catégories</value>
@@ -107,7 +160,7 @@
     <value>Admin</value>
   </data>
   <data name="ToggleTheme" xml:space="preserve">
-    <value>Changer le thème</value>
+    <value>Changer le théme</value>
   </data>
   <data name="Login" xml:space="preserve">
     <value>Connexion</value>
@@ -120,18 +173,6 @@
   </data>
   <data name="Profile" xml:space="preserve">
     <value>Profil</value>
-  </data>
-  <data name="BooksTitle" xml:space="preserve">
-    <value>Titre</value>
-  </data>
-  <data name="BookTitle" xml:space="preserve">
-    <value>Livre</value>
-  </data>
-  <data name="CategoriesTitle" xml:space="preserve">
-    <value>es-tu sûr</value>
-  </data>
-  <data name="CategoryTitle" xml:space="preserve">
-    <value>Catégorie</value>
   </data>
   <data name="New" xml:space="preserve">
     <value>Nouveau</value>
@@ -152,31 +193,34 @@
     <value>Modifier</value>
   </data>
   <data name="Details" xml:space="preserve">
-    <value>Détails</value>
+    <value>D�tails</value>
   </data>
   <data name="Delete" xml:space="preserve">
     <value>Supprimer</value>
   </data>
   <data name="DeleteConfirm" xml:space="preserve">
-    <value>DeleteConfirm</value>
+    <value>étes-vous sur de vouloir supprimer cet élément ?</value>
   </data>
   <data name="Confirm" xml:space="preserve">
-    <value>es-tu sûr</value>
+    <value>etes-vous sur ?</value>
   </data>
   <data name="WelcomeTitle" xml:space="preserve">
-    <value>Bienvenue chez Biblio – Gestion de la bibliothèque</value>
+    <value>Bienvenue chez Biblio é Gestion de la bibliothéque</value>
   </data>
   <data name="WelcomeSubtitlePart1" xml:space="preserve">
-    <value>Gérez les livres, les membres et les prêts depuis ce tableau de bord.</value>
+    <value>Gérez les livres, les membres et les préts depuis ce tableau de bord.</value>
   </data>
   <data name="WelcomeBiblio" xml:space="preserve">
     <value>Bienvenue chez Biblio</value>
   </data>
+  <data name="HelloUser" xml:space="preserve">
+    <value>Bonjour, {0} !</value>
+  </data>
+  <data name="NotLoggedIn" xml:space="preserve">
+    <value>Vous n'etes pas connecte.</value>
+  </data>
   <data name="DashboardDescription" xml:space="preserve">
-    <value>
-
-Gérez les livres et les prêts depuis ce tableau de bord. Utilisez le menu pour commencer.
-</value>
+    <value>Gérez les livres et les préts depuis ce tableau de bord. Utilisez le menu pour commencer.</value>
   </data>
   <data name="ManageBooks" xml:space="preserve">
     <value>Gérer les livres</value>
@@ -184,17 +228,26 @@ Gérez les livres et les prêts depuis ce tableau de bord. Utilisez le menu pour
   <data name="ManageMembers" xml:space="preserve">
     <value>Gérer les membres</value>
   </data>
+  <data name="EditProfileTitle" xml:space="preserve">
+    <value>Modifier le profil</value>
+  </data>
+  <data name="UserName" xml:space="preserve">
+    <value>Nom d'utilisateur</value>
+  </data>
   <data name="FullName" xml:space="preserve">
-    <value>FullName</value>
+    <value>Nom complet</value>
   </data>
   <data name="Email" xml:space="preserve">
     <value>E-mail</value>
   </data>
   <data name="EditProfile" xml:space="preserve">
-    <value>EditProfile</value>
+    <value>Modifier le profil</value>
   </data>
   <data name="ChangePassword" xml:space="preserve">
-    <value>ChangePassword</value>
+    <value>Changer le mot de passe</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Titre</value>
   </data>
   <data name="SearchPlaceholder" xml:space="preserve">
     <value>Rechercher par titre, auteur ou ISBN</value>
@@ -209,55 +262,73 @@ Gérez les livres et les prêts depuis ce tableau de bord. Utilisez le menu pour
     <value>ISBN</value>
   </data>
   <data name="ColumnCategory" xml:space="preserve">
-    <value>Catégorie</value>
+    <value>Categorie</value>
   </data>
   <data name="ChooseCategory" xml:space="preserve">
-    <value>-- Choisissez une catégorie --</value>
+    <value>-- Choisissez une cat�gorie --</value>
   </data>
   <data name="Member" xml:space="preserve">
-    <value>Member</value>
+    <value>Membre</value>
   </data>
   <data name="StartDate" xml:space="preserve">
     <value>Date de début</value>
   </data>
   <data name="DueDate" xml:space="preserve">
-    <value>Date d'échéance</value>
+    <value>Date d'�ch�ance</value>
   </data>
   <data name="IngeleverdOp" xml:space="preserve">
     <value>Restitué le</value>
   </data>
   <data name="DaysLate" xml:space="preserve">
-    <value>DaysLate</value>
+    <value>Jours de retard</value>
   </data>
   <data name="NoLateLoans" xml:space="preserve">
-    <value>NoLateLoans</value>
+    <value>Aucun prét en retard</value>
   </data>
   <data name="Naam" xml:space="preserve">
-    <value>Naam</value>
+    <value>Nom</value>
   </data>
   <data name="Created" xml:space="preserve">
-    <value>Créer</value>
+    <value>Crée</value>
   </data>
   <data name="LoanCount" xml:space="preserve">
-    <value>LoanCount</value>
+    <value>Nombre de préts</value>
   </data>
   <data name="NewCategory" xml:space="preserve">
-    <value>NewCategory</value>
+    <value>Nouvelle cat�gorie</value>
   </data>
   <data name="ColumnName" xml:space="preserve">
-    <value>ColumnName</value>
+    <value>Nom</value>
   </data>
   <data name="ForgotPasswordTitle" xml:space="preserve">
     <value>Mot de passe oublié ?</value>
   </data>
+  <data name="ForgotPasswordSubtitle" xml:space="preserve">
+    <value>Saisissez votre adresse e-mail.</value>
+  </data>
+  <data name="EmailPlaceholder" xml:space="preserve">
+    <value>nom@exemple.com</value>
+  </data>
   <data name="ResetButton" xml:space="preserve">
-    <value>Réinitialiser le mot de passe</value>
+    <value>Reinitialiser le mot de passe</value>
+  </data>
+  <data name="LoginStatus_HelloUser" xml:space="preserve">
+    <value>Bonjour {0}</value>
   </data>
   <data name="Search" xml:space="preserve">
     <value>Rechercher</value>
   </data>
+  <data name="NewItem" xml:space="preserve">
+    <value>Nouveau</value>
+  </data>
+  <data name="Titel" xml:space="preserve">
+    <value>Titre</value>
+  </data>
   <data name="Auteur" xml:space="preserve">
     <value>Auteur</value>
+  </data>
+  <data name="ISBN" xml:space="preserve">
+    <value>ISBN</value>
   </data>
   <data name="Categorie" xml:space="preserve">
     <value>Catégorie</value>
@@ -265,102 +336,20 @@ Gérez les livres et les prêts depuis ce tableau de bord. Utilisez le menu pour
   <data name="Voornaam" xml:space="preserve">
     <value>Prénom</value>
   </data>
-  <data name="niet " xml:space="preserve">
-    <value>Nom de famille</value>
+  <data name="Telefoon" xml:space="preserve">
+    <value>Téléphone</value>
   </data>
   <data name="Adres" xml:space="preserve">
-    <value>Adresse </value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Content" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
-  </data>
-  <data name="Category" xml:space="preserve">
-    <value>Category</value>
-  </data>
-  <data name="Filter" xml:space="preserve">
-    <value>Filter</value>
-  </data>
-  <data name="ColumnFirstName" xml:space="preserve">
-    <value>ColumnFirstName</value>
-  </data>
-  <data name="ColumnLastName" xml:space="preserve">
-    <value>ColumnLastName</value>
-  </data>
-  <data name="ColumnEmail" xml:space="preserve">
-    <value>ColumnEmail</value>
-  </data>
-  <data name="AllMembers" xml:space="preserve">
-    <value>AllMembers</value>
-  </data>
-  <data name="AllBooks" xml:space="preserve">
-    <value>AllBooks</value>
-  </data>
-  <data name="OnlyOpen" xml:space="preserve">
-    <value>OnlyOpen</value>
-  </data>
-  <data name="Book" xml:space="preserve">
-    <value>Book</value>
-  </data>
-  <data name="Return" xml:space="preserve">
-    <value>Return</value>
-  </data>
-  <data name="SignIn" xml:space="preserve">
-    <value>Se connecter</value>
-  </data>
-  <data name="Books_Index_Title" xml:space="preserve">
-    <value>Livres</value>
-  </data>
-  <data name="Books_Index_SearchPlaceholder" xml:space="preserve">
-    <value>Rechercher par titre, auteur ou ISBN</value>
-  </data>
-  <data name="Books_Index_New" xml:space="preserve">
-    <value>Nouveau</value>
-  </data>
-  <data name="Books_Index_ColumnTitle" xml:space="preserve">
-    <value>Titre</value>
-  </data>
-  <data name="Books_Index_ColumnAuthor" xml:space="preserve">
-    <value>Auteur</value>
-  </data>
-  <data name="Books_Index_ColumnIsbn" xml:space="preserve">
-    <value>ISBN</value>
-  </data>
-  <data name="Books_Index_ColumnCategory" xml:space="preserve">
-    <value>Catégorie</value>
-  </data>
-  <data name="Books_Index_Edit" xml:space="preserve">
-    <value> modifier</value>
-  </data>
-  <data name="Books_Index_Details" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
-  </data>
-  <data name="Books_Index_Delete" xml:space="preserve">
-    <value>supprimer</value>
-  </data>
-  <data name="Books_Create_Title" xml:space="preserve">
-    <value>Nouveau livre</value>
-  </data>
-  <data name="Books_Create_Save" xml:space="preserve">
-    <value>Enregistrer</value>
-  </data>
-  <data name="Books_Create_Cancel" xml:space="preserve">
-    <value>Annuler</value>
-  </data>
-  <data name="Next" xml:space="preserve">
-    <value>Next</value>
-  </data>
-  <data name="Actions" xml:space="preserve">
-    <value>Actions</value>
+    <value>Adresse</value>
   </data>
   <data name="AllRoles" xml:space="preserve">
-    <value>AllRoles</value>
+    <value>Tous les réles</value>
   </data>
   <data name="Block" xml:space="preserve">
-    <value>Block</value>
+    <value>Bloquer</value>
   </data>
   <data name="Blocked" xml:space="preserve">
-    <value>Blocked</value>
+    <value>Bloqué</value>
   </data>
   <data name="Code" xml:space="preserve">
     <value>Code</value>
@@ -372,49 +361,49 @@ Gérez les livres et les prêts depuis ce tableau de bord. Utilisez le menu pour
     <value>Mot de passe actuel</value>
   </data>
   <data name="Default" xml:space="preserve">
-    <value>Default</value>
+    <value>Par defaut</value>
   </data>
   <data name="DeleteAccount" xml:space="preserve">
-    <value>DeleteAccount</value>
+    <value>Supprimer le compte</value>
   </data>
   <data name="DeleteAccountConfirm" xml:space="preserve">
-    <value>DeleteAccountConfirm</value>
+    <value>étes-vous sur de vouloir supprimer votre compte ?</value>
   </data>
   <data name="EditRoles" xml:space="preserve">
-    <value>EditRoles</value>
+    <value>Modifier les r�les</value>
   </data>
   <data name="Forgot Password Link" xml:space="preserve">
-    <value>Mot de passe oublié</value>
+    <value>Mot de passe oublie</value>
   </data>
   <data name="LanguageChanged" xml:space="preserve">
     <value>Langue modifiée</value>
   </data>
   <data name="Languages" xml:space="preserve">
-    <value>Languages</value>
+    <value>Langues</value>
   </data>
   <data name="Medewerker" xml:space="preserve">
-    <value>Medewerker</value>
+    <value>Employé</value>
   </data>
   <data name="Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Nom</value>
   </data>
   <data name="NewPassword" xml:space="preserve">
-    <value>NewPassword</value>
+    <value>Nouveau mot de passe</value>
   </data>
   <data name="NewUser" xml:space="preserve">
-    <value>NewUser</value>
+    <value>Nouvel utilisateur</value>
   </data>
   <data name="No" xml:space="preserve">
-    <value>No</value>
+    <value>Non</value>
   </data>
   <data name="NoBooksLoaded" xml:space="preserve">
-    <value>NoBooksLoaded</value>
+    <value>Aucun livre chargé</value>
   </data>
   <data name="NoMembersLoaded" xml:space="preserve">
-    <value>NoMembersLoaded</value>
+    <value>Aucun membre chargé</value>
   </data>
   <data name="NoRoles" xml:space="preserve">
-    <value>NoRoles</value>
+    <value>Aucun role</value>
   </data>
   <data name="Password" xml:space="preserve">
     <value>Mot de passe</value>
@@ -432,19 +421,19 @@ Gérez les livres et les prêts depuis ce tableau de bord. Utilisez le menu pour
     <value>Afficher le mot de passe</value>
   </data>
   <data name="Unblock" xml:space="preserve">
-    <value>Unblock</value>
+    <value>Débloquer</value>
   </data>
   <data name="User" xml:space="preserve">
-    <value>User</value>
+    <value>Utilisateur</value>
   </data>
   <data name="UserManagement" xml:space="preserve">
-    <value>UserManagement</value>
+    <value>Gestion des utilisateurs</value>
   </data>
   <data name="UserRoles" xml:space="preserve">
-    <value>UserRoles</value>
+    <value>Roles d'utilisateur</value>
   </data>
   <data name="Users" xml:space="preserve">
-    <value>Users</value>
+    <value>Utilisateurs</value>
   </data>
   <data name="Welcome" xml:space="preserve">
     <value>Bienvenue</value>
@@ -453,9 +442,39 @@ Gérez les livres et les prêts depuis ce tableau de bord. Utilisez le menu pour
     <value>Bienvenue sur biblio !</value>
   </data>
   <data name="Yes" xml:space="preserve">
-    <value>Yes</value>
+    <value>Oui</value>
   </data>
   <data name="LanguageSetTo" xml:space="preserve">
     <value>Langue définie sur {0}</value>
+  </data>
+  <data name="EditRolesFor" xml:space="preserve">
+    <value>Modifier les r�les de {0}</value>
+  </data>
+  <data name="NoRolesFound" xml:space="preserve">
+    <value>Aucun role modifiable trouve.</value>
+  </data>
+  <data name="UserRolesFor" xml:space="preserve">
+    <value>Roles de {0}</value>
+  </data>
+  <data name="UserAndRoles" xml:space="preserve">
+    <value>Utilisateurs et réles</value>
+  </data>
+  <data name="Achternaam" xml:space="preserve">
+    <value>Nom de famille</value>
+  </data>
+  <data name="NoResults" xml:space="preserve">
+    <value>Aucun résultat trouvé</value>
+  </data>
+  <data name="CookieNoticeTitle" xml:space="preserve">
+    <value>Notification de cookie</value>
+  </data>
+  <data name="CookieNoticeText" xml:space="preserve">
+    <value>Nous utilisons des cookies pour am�liorer votre exp�rience. En acceptant, vous consentez � l'utilisation de cookies non essentiels.</value>
+  </data>
+  <data name="&#x8;" xml:space="preserve">
+    <value>Accepter les cookies</value>
+  </data>
+  <data name="CookieSettings" xml:space="preserve">
+    <value>Paramétres des cookies</value>
   </data>
 </root>

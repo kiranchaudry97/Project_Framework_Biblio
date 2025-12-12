@@ -19,7 +19,7 @@
 <form method="get" class="row g-2 mb-2 align-items-end">
     <div class="col-12 col-md-5">
         <label class="form-label visually-hidden">@Localizer["Search"]</label>
-        <input type="search" name="search" value="@currentSearch" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" />
+        <input id="searchInput" type="search" name="search" value="@currentSearch" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" />
     </div>
 
     <div class="col-12 col-md-3">
@@ -126,7 +126,7 @@
             <th></th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="loansTbody">
 @foreach(var u in Model)
 {
     <tr>
@@ -150,3 +150,56 @@
 }
     </tbody>
 </table>
+
+@section Scripts {
+    <script>
+        (function () {
+            var debounce = function (fn, delay) {
+                var t;
+                return function () { var args = arguments; clearTimeout(t); t = setTimeout(function () { fn.apply(null, args); }, delay); };
+            };
+
+            var updateTable = function (data) {
+                var $tb = $('#loansTbody');
+                if (!$tb.length) return;
+                $tb.empty();
+                if (!data || !data.items || data.items.length === 0) {
+                    $tb.append('<tr><td colspan="6" class="text-muted">@Localizer["NoResults"]</td></tr>');
+                    return;
+                }
+                data.items.forEach(function (l) {
+                    var lid = l.lid ? ((l.lid.voornaam || '') + ' ' + (l.lid.achterNaam || '')) : '';
+                    var boek = l.boek ? (l.boek.titel || '') : '';
+                    var start = l.startDate ? new Date(l.startDate).toLocaleDateString() : '';
+                    var due = l.dueDate ? new Date(l.dueDate).toLocaleDateString() : '';
+                    var returned = l.returnedAt ? new Date(l.returnedAt).toLocaleDateString() : '-';
+                    var row = '<tr>' +
+                        '<td>' + lid + '</td>' +
+                        '<td>' + boek + '</td>' +
+                        '<td>' + start + '</td>' +
+                        '<td>' + due + '</td>' +
+                        '<td>' + returned + '</td>' +
+                        '<td></td>' +
+                        '</tr>';
+                    $tb.append(row);
+                });
+            };
+
+            var doSearch = debounce(function () {
+                var q = $('#searchInput').val();
+                var url = '/api/uitleningen?page=1&pageSize=50';
+                if (q && q.length > 0) url += '&search=' + encodeURIComponent(q);
+                $.getJSON(url).done(function (res) {
+                    // API returns { items: [...] }
+                    updateTable(res);
+                }).fail(function () {
+                    // ignore failures for live search
+                });
+            }, 400);
+
+            $(function () {
+                $('#searchInput').on('input', doSearch);
+            });
+        })();
+    </script>
+}
