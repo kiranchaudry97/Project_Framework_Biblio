@@ -60,10 +60,6 @@ namespace Biblio_App.ViewModels
         private string? telefoon;
 
         [ObservableProperty]
-        [StringLength(300, ErrorMessage = "Adres is te lang.")]
-        private string? adres;
-
-        [ObservableProperty]
         private string validationMessage = string.Empty;
 
         [ObservableProperty]
@@ -74,7 +70,6 @@ namespace Biblio_App.ViewModels
         public string AchternaamError => GetFirstError(nameof(Achternaam));
         public string EmailError => GetFirstError(nameof(Email));
         public string TelefoonError => GetFirstError(nameof(Telefoon));
-        public string AdresError => GetFirstError(nameof(Adres));
 
         public bool HasValidationErrors => !string.IsNullOrEmpty(ValidationMessage) || HasErrors;
 
@@ -282,7 +277,6 @@ namespace Biblio_App.ViewModels
                 Achternaam = value.AchterNaam;
                 Email = value.Email;
                 Telefoon = value.Telefoon;
-                Adres = value.Adres;
                 ValidationMessage = string.Empty;
                 ClearErrors();
                 RaiseFieldErrorProperties();
@@ -293,7 +287,6 @@ namespace Biblio_App.ViewModels
                 Achternaam = string.Empty;
                 Email = string.Empty;
                 Telefoon = null;
-                Adres = null;
                 ValidationMessage = string.Empty;
                 ClearErrors();
                 RaiseFieldErrorProperties();
@@ -328,7 +321,6 @@ namespace Biblio_App.ViewModels
             Achternaam = string.Empty;
             Email = string.Empty;
             Telefoon = null;
-            Adres = null;
             ValidationMessage = string.Empty;
             ClearErrors();
             RaiseFieldErrorProperties();
@@ -336,7 +328,7 @@ namespace Biblio_App.ViewModels
 
         private void BuildValidationMessage()
         {
-            var props = new[] { nameof(Voornaam), nameof(Achternaam), nameof(Email), nameof(Telefoon), nameof(Adres) };
+            var props = new[] { nameof(Voornaam), nameof(Achternaam), nameof(Email), nameof(Telefoon) };
             var messages = new List<string>();
             var notifier = (System.ComponentModel.INotifyDataErrorInfo)this;
             foreach (var p in props)
@@ -369,7 +361,6 @@ namespace Biblio_App.ViewModels
             OnPropertyChanged(nameof(AchternaamError));
             OnPropertyChanged(nameof(EmailError));
             OnPropertyChanged(nameof(TelefoonError));
-            OnPropertyChanged(nameof(AdresError));
             OnPropertyChanged(nameof(HasValidationErrors));
         }
 
@@ -397,8 +388,7 @@ namespace Biblio_App.ViewModels
                         Voornaam = Voornaam,
                         AchterNaam = Achternaam,
                         Email = Email,
-                        Telefoon = Telefoon,
-                        Adres = Adres
+                        Telefoon = Telefoon
                     };
 
                     db.Leden.Add(nieuw);
@@ -412,7 +402,6 @@ namespace Biblio_App.ViewModels
                         existing.AchterNaam = Achternaam;
                         existing.Email = Email;
                         existing.Telefoon = Telefoon;
-                        existing.Adres = Adres;
                         db.Leden.Update(existing);
                     }
                 }
