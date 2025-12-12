@@ -229,10 +229,6 @@ namespace Biblio_Models.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("Naam");
 
-                    b.Property<string>("Adres")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
