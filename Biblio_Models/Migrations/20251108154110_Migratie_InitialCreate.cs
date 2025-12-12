@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -78,7 +78,6 @@ namespace Biblio_Models.Migrations
                     Naam = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     Tel = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Adres = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
