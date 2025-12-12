@@ -68,8 +68,7 @@ namespace Biblio_Web.Controllers.Api
                 Voornaam = model.Voornaam,
                 AchterNaam = model.AchterNaam,
                 Email = model.Email,
-                Telefoon = model.Telefoon,
-                Adres = model.Adres
+                Telefoon = model.Telefoon
             };
             _db.Leden.Add(entity);
             await _db.SaveChangesAsync();
@@ -88,7 +87,6 @@ namespace Biblio_Web.Controllers.Api
             existing.AchterNaam = model.AchterNaam;
             existing.Email = model.Email;
             existing.Telefoon = model.Telefoon;
-            existing.Adres = model.Adres;
 
             _db.Leden.Update(existing);
             await _db.SaveChangesAsync();
