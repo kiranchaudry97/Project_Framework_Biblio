@@ -6,11 +6,12 @@
 // - Wordt gebruikt in queries (LINQ) en soft-delete filtering
 
 // Doel: Lid-entiteit met validatie en relatie naar uitleningen.
-// Beschrijving: Bevat voornaam, naam, e-mail (uniek in DB), telefoon en adres;
+// Beschrijving: Bevat voornaam, naam, e-mail (uniek in DB), telefoon;
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 using System.Linq;
 using System.Text;
@@ -35,10 +36,35 @@ namespace Biblio_Models.Entiteiten
         [Phone]
         public string? Telefoon { get; set; }
 
-        [StringLength(300)]
-        public string? Adres { get; set; }
-
         public ICollection<Lenen> Leningens { get; set; } = new List<Lenen>();
 
+    }
+
+    // Local variant used on device: separate entity (no inheritance) to avoid EF key/type conflicts
+    [Table("LocalLeden")]
+    public class LocalLid
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public long Id { get; set; }
+
+        [Required]
+        [StringLength(100, MinimumLength = 1)]
+        public string Voornaam { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(100, MinimumLength = 1)]
+        public string AchterNaam { get; set; } = string.Empty;
+
+        [EmailAddress]
+        public string? Email { get; set; }
+
+        [Phone]
+        public string? Telefoon { get; set; }
+
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
+
+        public ICollection<LocalLenen>? LocalLeningens { get; set; }
     }
 }

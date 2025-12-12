@@ -29,6 +29,7 @@ namespace Biblio_Models.Entiteiten
         // FK → Category
         [Required(ErrorMessage = "Categorie is verplicht.")]
         public int CategorieID { get; set; }
+        [ForeignKey("CategorieID")]
         public Categorie? categorie { get; set; }
 
 
