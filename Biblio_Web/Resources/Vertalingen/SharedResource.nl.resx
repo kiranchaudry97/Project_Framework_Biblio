@@ -1,5 +1,110 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -7,12 +112,11 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <!-- Core validation -->
   <data name="Required" xml:space="preserve">
     <value>Het veld {0} is verplicht.</value>
   </data>
@@ -22,7 +126,6 @@
   <data name="EmailAddress" xml:space="preserve">
     <value>Ongeldig e-mailadres.</value>
   </data>
-  <!-- UI labels -->
   <data name="Home" xml:space="preserve">
     <value>Home</value>
   </data>
@@ -74,7 +177,6 @@
   <data name="SiteName" xml:space="preserve">
     <value>Biblio</value>
   </data>
-  <!-- Page title keys -->
   <data name="BooksTitle" xml:space="preserve">
     <value>Boeken</value>
   </data>
@@ -93,7 +195,6 @@
   <data name="CategoryTitle" xml:space="preserve">
     <value>Categorie</value>
   </data>
-  <!-- Generic actions -->
   <data name="New" xml:space="preserve">
     <value>Nieuw</value>
   </data>
@@ -124,7 +225,6 @@
   <data name="Confirm" xml:space="preserve">
     <value>Weet u het zeker?</value>
   </data>
-  <!-- Dashboard -->
   <data name="WelcomeTitle" xml:space="preserve">
     <value>Welkom bij Biblio – Bibliotheekbeheer</value>
   </data>
@@ -153,7 +253,6 @@
   <data name="ManageMembers" xml:space="preserve">
     <value>Beheer leden</value>
   </data>
-  <!-- Profile / Edit -->
   <data name="EditProfileTitle" xml:space="preserve">
     <value>Wijzig profiel</value>
   </data>
@@ -172,12 +271,11 @@
   <data name="ChangePassword" xml:space="preserve">
     <value>Wachtwoord wijzigen</value>
   </data>
-  <!-- Books view -->
   <data name="Title" xml:space="preserve">
-    <value>Titel</value>
+    <value>Boeken</value>
   </data>
   <data name="SearchPlaceholder" xml:space="preserve">
-    <value>Zoeken op titel, auteur of ISBN</value>
+    <value>Zoeken...</value>
   </data>
   <data name="ColumnTitle" xml:space="preserve">
     <value>Titel</value>
@@ -192,9 +290,8 @@
     <value>Categorie</value>
   </data>
   <data name="ChooseCategory" xml:space="preserve">
-    <value>-- Kies categorie --</value>
+    <value>Kies categorie</value>
   </data>
-  <!-- Loans / Overdue -->
   <data name="Member" xml:space="preserve">
     <value>Lid</value>
   </data>
@@ -213,7 +310,6 @@
   <data name="NoLateLoans" xml:space="preserve">
     <value>Geen achterstallige uitleningen</value>
   </data>
-  <!-- Member details -->
   <data name="Naam" xml:space="preserve">
     <value>Naam</value>
   </data>
@@ -223,14 +319,12 @@
   <data name="LoanCount" xml:space="preserve">
     <value>Aantal uitleningen</value>
   </data>
-  <!-- Categories -->
   <data name="NewCategory" xml:space="preserve">
     <value>Nieuwe categorie</value>
   </data>
   <data name="ColumnName" xml:space="preserve">
     <value>Naam</value>
   </data>
-  <!-- Account / Forgot password -->
   <data name="ForgotPasswordTitle" xml:space="preserve">
     <value>Wachtwoord vergeten?</value>
   </data>
@@ -243,18 +337,15 @@
   <data name="ResetButton" xml:space="preserve">
     <value>Reset wachtwoord</value>
   </data>
-  <!-- Login status component -->
   <data name="LoginStatus_HelloUser" xml:space="preserve">
     <value>Hallo {0}</value>
   </data>
-  <!-- Other common keys -->
   <data name="Search" xml:space="preserve">
     <value>Zoeken</value>
   </data>
   <data name="NewItem" xml:space="preserve">
     <value>Nieuw</value>
   </data>
-  <!-- Dutch-labeled field keys included for model binding and validation messages (also used in views) -->
   <data name="Titel" xml:space="preserve">
     <value>Titel</value>
   </data>
@@ -270,7 +361,7 @@
   <data name="Voornaam" xml:space="preserve">
     <value>Voornaam</value>
   </data>
-  <data name="Achternaam" xml:space="preserve">
+  <data name="niet " xml:space="preserve">
     <value>Achternaam</value>
   </data>
   <data name="Telefoon" xml:space="preserve">
@@ -279,7 +370,6 @@
   <data name="Adres" xml:space="preserve">
     <value>Adres</value>
   </data>
-  <!-- Book content/description -->
   <data name="Content" xml:space="preserve">
     <value>Inhoud</value>
   </data>
@@ -289,23 +379,9 @@
   <data name="Category" xml:space="preserve">
     <value>Categorie</value>
   </data>
-  <data name="Member" xml:space="preserve">
-    <value>Lid</value>
-  </data>
-  <!-- Table actions -->
   <data name="Filter" xml:space="preserve">
     <value>Filter</value>
   </data>
-  <data name="Edit" xml:space="preserve">
-    <value>Bewerken</value>
-  </data>
-  <data name="Details" xml:space="preserve">
-    <value>Details</value>
-  </data>
-  <data name="Delete" xml:space="preserve">
-    <value>Verwijderen</value>
-  </data>
-  <!-- Additional columns and labels -->
   <data name="ColumnFirstName" xml:space="preserve">
     <value>Voornaam</value>
   </data>
@@ -333,7 +409,6 @@
   <data name="SignIn" xml:space="preserve">
     <value>Inloggen</value>
   </data>
-  <!-- Centralized keys copied from per-view resx files -->
   <data name="Books_Index_Title" xml:space="preserve">
     <value>Boeken</value>
   </data>
@@ -373,99 +448,32 @@
   <data name="Books_Create_Cancel" xml:space="preserve">
     <value>Annuleer</value>
   </data>
-  <data name="Title" xml:space="preserve">
-    <value>Boeken</value>
-  </data>
-  <data name="SearchPlaceholder" xml:space="preserve">
-    <value>Zoeken...</value>
-  </data>
-  <data name="Filter" xml:space="preserve">
-    <value>Filter</value>
-  </data>
-  <data name="New" xml:space="preserve">
-    <value>Nieuw</value>
-  </data>
-  <data name="ChooseCategory" xml:space="preserve">
-    <value>Kies categorie</value>
-  </data>
-  <data name="Back" xml:space="preserve">
-    <value>Terug</value>
-  </data>
   <data name="Next" xml:space="preserve">
     <value>Volgende</value>
   </data>
-  <data name="ColumnTitle" xml:space="preserve">
-    <value>Titel</value>
+  <data name="Actions" xml:space="preserve">
+    <value>Acties</value>
   </data>
-  <data name="ColumnAuthor" xml:space="preserve">
-    <value>Auteur</value>
+  <data name="AllRoles" xml:space="preserve">
+    <value>Alle rollen</value>
   </data>
-  <data name="ColumnIsbn" xml:space="preserve">
-    <value>ISBN</value>
+  <data name="Block" xml:space="preserve">
+    <value>Blokkeren</value>
   </data>
-  <data name="ColumnCategory" xml:space="preserve">
-    <value>Categorie</value>
+  <data name="Blocked" xml:space="preserve">
+    <value>Geblokkeerd</value>
   </data>
-  <data name="Edit" xml:space="preserve">
-    <value>Bewerken</value>
+  <data name="Code" xml:space="preserve">
+    <value>Code</value>
   </data>
-  <data name="Details" xml:space="preserve">
-    <value>Details</value>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Bevestig wachtwoord</value>
   </data>
-  <data name="Delete" xml:space="preserve">
-    <value>Verwijderen</value>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>CurrentPassword</value>
   </data>
-  <data name="NewMember" xml:space="preserve">
-    <value>Nieuw lid</value>
-  </data>
-  <data name="Voornaam" xml:space="preserve">
-    <value>Voornaam</value>
-  </data>
-  <data name="Achternaam" xml:space="preserve">
-    <value>Achternaam</value>
-  </data>
-  <data name="Email" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="Save" xml:space="preserve">
-    <value>Opslaan</value>
-  </data>
-  <data name="Cancel" xml:space="preserve">
-    <value>Annuleren</value>
-  </data>
-  <data name="Welkom bij biblio!" xml:space="preserve">
-    <value>Welkom bij biblio!</value>
-  </data>
-  <data name="Welcome" xml:space="preserve">
-    <value>Welkom</value>
-  </data>
-  <data name="Email" xml:space="preserve">
-    <value>E-mail</value>
-  </data>
-  <data name="Password" xml:space="preserve">
-    <value>Wachtwoord</value>
-  </data>
-  <data name="Show Password" xml:space="preserve">
-    <value>Toon wachtwoord</value>
-  </data>
-  <data name="Remember Me" xml:space="preserve">
-    <value>Onthoud mij</value>
-  </data>
-  <data name="Register Link" xml:space="preserve">
-    <value>Registreren</value>
-  </data>
-  <data name="Forgot Password Link" xml:space="preserve">
-    <value>Wachtwoord vergeten</value>
-  </data>
-  <data name="Login" xml:space="preserve">
-    <value>Inloggen</value>
-  </data>
-  <!-- Added keys to cover remaining view usages -->
-  <data name="LanguageChanged" xml:space="preserve">
-    <value>Taal gewijzigd</value>
-  </data>
-  <data name="LanguageSetTo" xml:space="preserve">
-    <value>Taal ingesteld op {0}</value>
+  <data name="Default" xml:space="preserve">
+    <value>Standaard</value>
   </data>
   <data name="DeleteAccount" xml:space="preserve">
     <value>Account verwijderen</value>
@@ -473,84 +481,20 @@
   <data name="DeleteAccountConfirm" xml:space="preserve">
     <value>Weet u zeker dat u uw account wilt verwijderen?</value>
   </data>
-  <data name="Default" xml:space="preserve">
-    <value>Standaard</value>
+  <data name="EditRoles" xml:space="preserve">
+    <value>Bewerk rollen</value>
   </data>
-  <data name="Code" xml:space="preserve">
-    <value>Code</value>
+  <data name="Forgot Password Link" xml:space="preserve">
+    <value>Wachtwoord vergeten</value>
   </data>
-  <data name="Naam" xml:space="preserve">
-    <value>Naam</value>
-  </data>
-  <data name="ConfirmPassword" xml:space="preserve">
-    <value>Bevestig wachtwoord</value>
+  <data name="LanguageChanged" xml:space="preserve">
+    <value>Taal gewijzigd</value>
   </data>
   <data name="Languages" xml:space="preserve">
     <value>Talen</value>
   </data>
-  <!-- Admin / User management keys -->
-  <data name="UserManagement" xml:space="preserve">
-    <value>Gebruikersbeheer</value>
-  </data>
-  <data name="Users" xml:space="preserve">
-    <value>Gebruikers</value>
-  </data>
-  <data name="AllRoles" xml:space="preserve">
-    <value>Alle rollen</value>
-  </data>
-  <data name="NewUser" xml:space="preserve">
-    <value>Nieuw gebruiker</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Gebruiker</value>
-  </data>
-  <data name="Roles" xml:space="preserve">
-    <value>Rollen</value>
-  </data>
-  <data name="Blocked" xml:space="preserve">
-    <value>Geblokkeerd</value>
-  </data>
-  <data name="Actions" xml:space="preserve">
-    <value>Acties</value>
-  </data>
-  <data name="Yes" xml:space="preserve">
-    <value>Ja</value>
-  </data>
-  <data name="No" xml:space="preserve">
-    <value>Nee</value>
-  </data>
-  <data name="Unblock" xml:space="preserve">
-    <value>Deblokkeren</value>
-  </data>
-  <data name="Block" xml:space="preserve">
-    <value>Blokkeren</value>
-  </data>
-  <data name="EditRoles" xml:space="preserve">
-    <value>Bewerk rollen</value>
-  </data>
-  <data name="EditRolesFor" xml:space="preserve">
-    <value>Rollen bewerken voor {0}</value>
-  </data>
-  <data name="NoRolesFound" xml:space="preserve">
-    <value>Geen bewerkbare rollen gevonden.</value>
-  </data>
   <data name="Medewerker" xml:space="preserve">
     <value>Medewerker</value>
-  </data>
-  <data name="UserRoles" xml:space="preserve">
-    <value>Gebruikersrollen</value>
-  </data>
-  <data name="UserRolesFor" xml:space="preserve">
-    <value>Rollen voor {0}</value>
-  </data>
-  <data name="NoRoles" xml:space="preserve">
-    <value>Geen rollen toegewezen</value>
-  </data>
-  <data name="UserAndRoles" xml:space="preserve">
-    <value>Gebruikers en rollen</value>
-  </data>
-  <data name="CurrentPassword" xml:space="preserve">
-    <value>CurrentPassword</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
@@ -558,10 +502,73 @@
   <data name="NewPassword" xml:space="preserve">
     <value>NewPassword</value>
   </data>
+  <data name="NewUser" xml:space="preserve">
+    <value>Nieuw gebruiker</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Nee</value>
+  </data>
   <data name="NoBooksLoaded" xml:space="preserve">
     <value>NoBooksLoaded</value>
   </data>
   <data name="NoMembersLoaded" xml:space="preserve">
     <value>NoMembersLoaded</value>
+  </data>
+  <data name="NoRoles" xml:space="preserve">
+    <value>Geen rollen toegewezen</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Wachtwoord</value>
+  </data>
+  <data name="Register Link" xml:space="preserve">
+    <value>Registreren</value>
+  </data>
+  <data name="Remember Me" xml:space="preserve">
+    <value>Onthoud mij</value>
+  </data>
+  <data name="Roles" xml:space="preserve">
+    <value>Rollen</value>
+  </data>
+  <data name="Show Password" xml:space="preserve">
+    <value>Toon wachtwoord</value>
+  </data>
+  <data name="Unblock" xml:space="preserve">
+    <value>Deblokkeren</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Gebruiker</value>
+  </data>
+  <data name="UserManagement" xml:space="preserve">
+    <value>Gebruikersbeheer</value>
+  </data>
+  <data name="UserRoles" xml:space="preserve">
+    <value>Gebruikersrollen</value>
+  </data>
+  <data name="Users" xml:space="preserve">
+    <value>Gebruikers</value>
+  </data>
+  <data name="Welcome" xml:space="preserve">
+    <value>Welkom</value>
+  </data>
+  <data name="Welkom bij biblio!" xml:space="preserve">
+    <value>Welkom bij biblio!</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+  <data name="LanguageSetTo" xml:space="preserve">
+    <value>Taal ingesteld op {0}</value>
+  </data>
+  <data name="EditRolesFor" xml:space="preserve">
+    <value>Rollen bewerken voor {0}</value>
+  </data>
+  <data name="NoRolesFound" xml:space="preserve">
+    <value>Geen bewerkbare rollen gevonden.</value>
+  </data>
+  <data name="UserRolesFor" xml:space="preserve">
+    <value>Rollen voor {0}</value>
+  </data>
+  <data name="UserAndRoles" xml:space="preserve">
+    <value>Gebruikers en rollen</value>
   </data>
 </root>
