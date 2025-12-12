@@ -126,8 +126,79 @@ namespace Biblio_Models.Migrations.Local
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Adres")
-                        .HasMaxLength(300)
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Telefoon")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Voornaam")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Leden");
+                });
+
+            modelBuilder.Entity("Biblio_Models.Entiteiten.LocalLenen", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BoekId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LidId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("LocalLidId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ReturnedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BoekId");
+
+                    b.HasIndex("LidId");
+
+                    b.HasIndex("LocalLidId");
+
+                    b.ToTable("LocalLeningens");
+                });
+
+            modelBuilder.Entity("Biblio_Models.Entiteiten.LocalLid", b =>
+                {
+                    b.Property<long>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AchterNaam")
+                        .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -149,7 +220,7 @@ namespace Biblio_Models.Migrations.Local
 
                     b.HasKey("Id");
 
-                    b.ToTable("Leden");
+                    b.ToTable("LocalLeden");
                 });
 
             modelBuilder.Entity("Biblio_Models.Entiteiten.Taal", b =>
@@ -209,6 +280,31 @@ namespace Biblio_Models.Migrations.Local
                     b.Navigation("Lid");
                 });
 
+            modelBuilder.Entity("Biblio_Models.Entiteiten.LocalLenen", b =>
+                {
+                    b.HasOne("Biblio_Models.Entiteiten.Boek", "Boek")
+                        .WithMany()
+                        .HasForeignKey("BoekId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Biblio_Models.Entiteiten.Lid", "Lid")
+                        .WithMany()
+                        .HasForeignKey("LidId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Biblio_Models.Entiteiten.LocalLid", "LocalLid")
+                        .WithMany("LocalLeningens")
+                        .HasForeignKey("LocalLidId");
+
+                    b.Navigation("Boek");
+
+                    b.Navigation("Lid");
+
+                    b.Navigation("LocalLid");
+                });
+
             modelBuilder.Entity("Biblio_Models.Entiteiten.Boek", b =>
                 {
                     b.Navigation("leent");
@@ -222,6 +318,11 @@ namespace Biblio_Models.Migrations.Local
             modelBuilder.Entity("Biblio_Models.Entiteiten.Lid", b =>
                 {
                     b.Navigation("Leningens");
+                });
+
+            modelBuilder.Entity("Biblio_Models.Entiteiten.LocalLid", b =>
+                {
+                    b.Navigation("LocalLeningens");
                 });
 #pragma warning restore 612, 618
         }
