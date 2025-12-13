@@ -15,7 +15,7 @@ namespace Biblio_App.Pages
     public partial class CategorieenPagina : ContentPage
     {
         private CategorieenViewModel VM => BindingContext as CategorieenViewModel;
-        private ILanguageService? _languageService;
+        private ILanguageService? _language_service;
         private ResourceManager? _sharedResourceManager;
 
         public static readonly BindableProperty PageHeaderTextProperty = BindableProperty.Create(nameof(PageHeaderText), typeof(string), typeof(CategorieenPagina), default(string));
@@ -35,18 +35,10 @@ namespace Biblio_App.Pages
             InitializeComponent();
             BindingContext = vm;
 
-            try { _languageService = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>(); } catch { }
+            try { _language_service = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>(); } catch { }
 
             InitializeSharedResourceManager();
             UpdateLocalizedStrings();
-
-            try
-            {
-                var tap = new TapGestureRecognizer();
-                tap.Tapped += OnLanguageLabelTapped;
-                PageLanguageLabel.GestureRecognizers.Add(tap);
-            }
-            catch { }
         }
 
         private void InitializeSharedResourceManager()
@@ -85,7 +77,7 @@ namespace Biblio_App.Pages
         {
             try
             {
-                var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+                var culture = _language_service?.CurrentCulture ?? CultureInfo.CurrentUICulture;
                 if (_sharedResourceManager != null)
                 {
                     var val = _sharedResourceManager.GetString(key, culture);
@@ -133,12 +125,9 @@ namespace Biblio_App.Pages
             base.OnAppearing();
             try
             {
-                string code = _languageService?.CurrentCulture?.TwoLetterISOLanguageName ?? Preferences.Default.Get("biblio-culture", "nl");
-                SetLanguageLabelFromCode(code);
-
-                if (_languageService != null)
+                if (_language_service != null)
                 {
-                    _languageService.LanguageChanged += LanguageService_LanguageChanged;
+                    _language_service.LanguageChanged += LanguageService_LanguageChanged;
                 }
             }
             catch { }
@@ -149,9 +138,9 @@ namespace Biblio_App.Pages
             base.OnDisappearing();
             try
             {
-                if (_languageService != null)
+                if (_language_service != null)
                 {
-                    _languageService.LanguageChanged -= LanguageService_LanguageChanged;
+                    _language_service.LanguageChanged -= LanguageService_LanguageChanged;
                 }
             }
             catch { }
@@ -163,41 +152,8 @@ namespace Biblio_App.Pages
             {
                 Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    SetLanguageLabelFromCode(culture.TwoLetterISOLanguageName);
                     UpdateLocalizedStrings();
                 });
-            }
-            catch { }
-        }
-
-        private void SetLanguageLabelFromCode(string? code)
-        {
-            if (string.IsNullOrEmpty(code)) return;
-            try
-            {
-                var txt = code.ToLowerInvariant() == "en" ? "EN" : "NL";
-                PageLanguageLabel.Text = txt;
-                PageLanguageLabel.TextColor = Colors.White;
-            }
-            catch { }
-        }
-
-        private async void OnLanguageLabelTapped(object? sender, EventArgs e)
-        {
-            try
-            {
-                var action = await DisplayActionSheet("Taal", "Annuleren", null, "NL", "EN");
-                if (string.IsNullOrEmpty(action) || action == "Annuleren") return;
-
-                var code = action.ToLowerInvariant();
-                try
-                {
-                    var svc = _languageService ?? App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>();
-                    svc?.SetLanguage(code);
-                    SetLanguageLabelFromCode(code);
-                    UpdateLocalizedStrings();
-                }
-                catch { }
             }
             catch { }
         }

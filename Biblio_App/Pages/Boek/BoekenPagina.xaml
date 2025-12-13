@@ -9,21 +9,9 @@
              Title="{Binding PageTitle}"
              x:Name="Page">
 
-    <!-- Title area with language picker on the right -->
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto" Padding="0,0,8,0" VerticalOptions="Center">
-            <Label Text="{Binding PageTitle}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" Grid.Column="0" />
-
-            <!-- Replaced Picker with a tappable Label so text is white on all platforms -->
-            <Label x:Name="PageLanguageLabel"
-                   Grid.Column="1"
-                   WidthRequest="48"
-                   Margin="0,0,12,0"
-                   VerticalOptions="Center"
-                   HorizontalOptions="End"
-                   TextColor="{StaticResource White}"
-                   BackgroundColor="Transparent"
-                   HorizontalTextAlignment="End" />
+        <Grid Padding="0,0,8,0" VerticalOptions="Center">
+            <Label Text="{Binding PageTitle}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" />
         </Grid>
     </Shell.TitleView>
 

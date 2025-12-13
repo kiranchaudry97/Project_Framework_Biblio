@@ -10,7 +10,7 @@ using Microsoft.Maui.ApplicationModel;
 
 namespace Biblio_App.Pages
 {
-    public partial class BoekenPagina : ContentPage
+    public partial class BoekenPagina : ContentPage, ILocalizable
     {
         private BoekenViewModel VM => BindingContext as BoekenViewModel;
         private ILanguageService? _languageService;
@@ -27,16 +27,7 @@ namespace Biblio_App.Pages
             {
                 _languageService = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>();
             }
-            catch { }
 
-            // attach tap recognizer to the language label so it's clickable
-            try
-            {
-                var tap = new TapGestureRecognizer();
-                tap.Tapped += OnLanguageLabelTapped;
-                PageLanguageLabel.GestureRecognizers.Add(tap);
-            }
-            catch { }
         }
 
         protected override async void OnAppearing()
@@ -55,12 +46,8 @@ namespace Biblio_App.Pages
                 }
             }
 
-            // Initialize page language label from language service or preferences
             try
             {
-                string code = _languageService?.CurrentCulture?.TwoLetterISOLanguageName ?? Preferences.Default.Get("biblio-culture", "nl");
-                SetLanguageLabelFromCode(code);
-
                 if (_languageService != null)
                 {
                     _languageService.LanguageChanged += LanguageService_LanguageChanged;
@@ -179,29 +166,6 @@ namespace Biblio_App.Pages
             catch { }
         }
 
-        // When the language label is tapped, show action sheet to pick language
-        private async void OnLanguageLabelTapped(object? sender, EventArgs e)
-        {
-            try
-            {
-                var action = await DisplayActionSheet("Taal", "Annuleren", null, "NL", "EN");
-                if (string.IsNullOrEmpty(action) || action == "Annuleren") return;
-
-                var code = action.ToLowerInvariant();
-                try
-                {
-                    var svc = _languageService ?? App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>();
-                    svc?.SetLanguage(code);
-                    SetLanguageLabelFromCode(code);
-
-                    // also refresh viewmodel localized strings immediately
-                    try { VM?.RefreshLocalizedStrings(); } catch { }
-                }
-                catch { }
-            }
-            catch { }
-        }
-
         private void LanguageService_LanguageChanged(object? sender, System.Globalization.CultureInfo culture)
         {
             try
@@ -210,8 +174,21 @@ namespace Biblio_App.Pages
                 {
                     try
                     {
-                        SetLanguageLabelFromCode(culture.TwoLetterISOLanguageName);
-                        try { VM?.RefreshLocalizedStrings(); } catch { }
+                        try
+                        {
+                            if (VM is Biblio_App.Services.ILocalizable loc)
+                            {
+                                loc.UpdateLocalizedStrings();
+                            }
+                            else
+                            {
+                                VM?.RefreshLocalizedStrings();
+                            }
+                        }
+                        catch { }
+
+                        try { this.ForceLayout(); this.InvalidateMeasure(); }
+                        catch { }
                     }
                     catch { }
                 });
@@ -219,16 +196,39 @@ namespace Biblio_App.Pages
             catch { }
         }
 
-        private void SetLanguageLabelFromCode(string? code)
+        public void UpdateLocalizedStrings()
         {
-            if (string.IsNullOrEmpty(code)) return;
+#if DEBUG
             try
             {
-                var txt = code.ToLowerInvariant() == "en" ? "EN" : "NL";
-                PageLanguageLabel.Text = txt;
+                System.Diagnostics.Debug.WriteLine("BoekenPagina.UpdateLocalizedStrings called");
+                if (System.Diagnostics.Debugger.IsAttached)
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
+            }
+            catch { }
+#endif
+            try
+            {
+                if (VM is Biblio_App.Services.ILocalizable locVm)
+                {
+                    try { locVm.UpdateLocalizedStrings(); } catch { }
+                }
+                else
+                {
+                    try { VM?.RefreshLocalizedStrings(); } catch { }
+                }
 
-                // Always show language text in white
-                PageLanguageLabel.TextColor = Colors.White;
+                try
+                {
+                    Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        try { this.ForceLayout(); this.InvalidateMeasure(); }
+                        catch { }
+                    });
+                }
+                catch { }
             }
             catch { }
         }
