@@ -154,7 +154,7 @@
     <value>Nieuw Boek</value>
   </data>
   <data name="NewMember" xml:space="preserve">
-    <value>Niewe leden </value>
+    <value>Nieuw lid</value>
   </data>
   <data name="Admin" xml:space="preserve">
     <value>Admin</value>
@@ -352,7 +352,7 @@
     <value>Verwijderen</value>
   </data>
   <data name="Books_Create_Title" xml:space="preserve">
-    <value>Nieuwe Boek</value>
+    <value>Nieuw Boek</value>
   </data>
   <data name="Books_Create_Save" xml:space="preserve">
     <value>Opslaan</value>
@@ -400,10 +400,10 @@
     <value>Naam</value>
   </data>
   <data name="NewPassword" xml:space="preserve">
-    <value>Nieuwe Wachtwoord</value>
+    <value>Nieuw Wachtwoord</value>
   </data>
   <data name="NewUser" xml:space="preserve">
-    <value>Nieuwe gebruiker</value>
+    <value>Nieuw Gebruiker</value>
   </data>
   <data name="No" xml:space="preserve">
     <value>Neen</value>
