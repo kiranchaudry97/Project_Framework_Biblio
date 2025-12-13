@@ -3,4 +3,32 @@
   <data name="Required" xml:space="preserve"><value>The {0} field is required.</value></data>
   <data name="StringLength" xml:space="preserve"><value>{0} must be between {2} and {1} characters long.</value></data>
   <data name="IsbnInvalid" xml:space="preserve"><value>Invalid ISBN.</value></data>
+
+  <!-- Shared UI keys -->
+  <data name="Books" xml:space="preserve"><value>Books</value></data>
+  <data name="Members" xml:space="preserve"><value>Members</value></data>
+  <data name="Loans" xml:space="preserve"><value>Loans</value></data>
+  <data name="DbPath" xml:space="preserve"><value>DB path:</value></data>
+  <data name="CopyPath" xml:space="preserve"><value>Copy path</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Search by title, author or ISBN</value></data>
+  <data name="Filter" xml:space="preserve"><value>Filter</value></data>
+  <data name="Category" xml:space="preserve"><value>Category</value></data>
+  <data name="Member" xml:space="preserve"><value>Member</value></data>
+  <data name="Book" xml:space="preserve"><value>Book</value></data>
+  <data name="OnlyOpen" xml:space="preserve"><value>Only open</value></data>
+  <data name="View" xml:space="preserve"><value>View</value></data>
+  <data name="Return" xml:space="preserve"><value>Return</value></data>
+  <data name="New" xml:space="preserve"><value>New</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="OK" xml:space="preserve"><value>OK</value></data>
+  <data name="Page" xml:space="preserve"><value>Page</value></data>
+  <data name="Actions" xml:space="preserve"><value>Actions</value></data>
+  <data name="Details" xml:space="preserve"><value>Details</value></data>
+  <data name="Edit" xml:space="preserve"><value>Edit</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="NewBook" xml:space="preserve"><value>New book</value></data>
+  <data name="NewMember" xml:space="preserve"><value>New member</value></data>
+  <data name="QuickActions" xml:space="preserve"><value>Quick actions</value></data>
+  <data name="NewCategory" xml:space="preserve"><value>New Category</value></data>
 </root>

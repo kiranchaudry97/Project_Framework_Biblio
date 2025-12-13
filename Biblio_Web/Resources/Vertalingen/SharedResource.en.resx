@@ -208,7 +208,7 @@
     <value>Are you sure?</value>
   </data>
   <data name="WelcomeTitle" xml:space="preserve">
-    <value>Welcome to Biblio � Library management</value>
+    <value>Welcome to Biblio - Library management</value>
   </data>
   <data name="WelcomeSubtitlePart1" xml:space="preserve">
     <value>Manage books, members and loans from this dashboard.</value>
@@ -256,7 +256,7 @@
     <value>Title</value>
   </data>
   <data name="SearchPlaceholder" xml:space="preserve">
-    <value>Search by title, author or ISBN</value>
+    <value>Search...</value>
   </data>
   <data name="ColumnTitle" xml:space="preserve">
     <value>Title</value>
@@ -462,8 +462,8 @@
   <data name="UserRolesFor" xml:space="preserve">
     <value>User roles for {0}</value>
   </data>
-  <data name="UserAndRoles" xml:space="preserve">
-    <value>Users and roles</value>
+  <data name="UserAndResponsibilities" xml:space="preserve">
+    <value>Users and responsibilities</value>
   </data>
   <data name="Member" xml:space="preserve">
     <value>Member</value>
@@ -581,5 +581,17 @@
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="DbPath" xml:space="preserve">
+    <value>DB path:</value>
+  </data>
+  <data name="CopyPath" xml:space="preserve">
+    <value>Copy path</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="UserAndRoles" xml:space="preserve">
+    <value>User and Roles</value>
   </data>
 </root>

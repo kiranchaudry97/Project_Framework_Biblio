@@ -139,7 +139,7 @@
     <value>Membres</value>
   </data>
   <data name="Loans" xml:space="preserve">
-    <value>Préts</value>
+    <value>Prêts</value>
   </data>
   <data name="Categories" xml:space="preserve">
     <value>Catégories</value>
@@ -256,7 +256,7 @@
     <value>Titre</value>
   </data>
   <data name="SearchPlaceholder" xml:space="preserve">
-    <value>Rechercher par titre, auteur ou ISBN</value>
+    <value>Recherche...</value>
   </data>
   <data name="ColumnTitle" xml:space="preserve">
     <value>Titre</value>
@@ -289,10 +289,10 @@
     <value>Content</value>
   </data>
   <data name="Category" xml:space="preserve">
-    <value>Categorié</value>
+    <value>Catégorie</value>
   </data>
   <data name="Filter" xml:space="preserve">
-    <value>Filter</value>
+    <value>Filtrer</value>
   </data>
   <data name="ColumnFirstName" xml:space="preserve">
     <value>Prénom</value>
@@ -313,10 +313,10 @@
     <value>Ouvert uniquement</value>
   </data>
   <data name="Book" xml:space="preserve">
-    <value>Livres</value>
+    <value>Livre</value>
   </data>
   <data name="Return" xml:space="preserve">
-    <value>Returné</value>
+    <value>Retour</value>
   </data>
   <data name="SignIn" xml:space="preserve">
     <value>Se connecter</value>
@@ -462,8 +462,8 @@
   <data name="UserRolesFor" xml:space="preserve">
     <value>Roles de {0}</value>
   </data>
-  <data name="UserAndRoles" xml:space="preserve">
-    <value>Utilisateurs et réles</value>
+  <data name="UserAndResponsibilities" xml:space="preserve">
+    <value>Utilisateurs et responsabilités</value>
   </data>
   <data name="Member" xml:space="preserve">
     <value>Membre</value>
@@ -581,5 +581,17 @@
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="DbPath" xml:space="preserve">
+    <value>Chemin DB :</value>
+  </data>
+  <data name="CopyPath" xml:space="preserve">
+    <value>Copier le chemin</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>Voir</value>
+  </data>
+  <data name="UserAndRoles" xml:space="preserve">
+    <value>Utilisateurs et réles</value>
   </data>
 </root>

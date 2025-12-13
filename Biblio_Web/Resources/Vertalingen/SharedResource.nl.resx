@@ -462,8 +462,8 @@
   <data name="UserRolesFor" xml:space="preserve">
     <value>Rollen van {0}</value>
   </data>
-  <data name="UserAndRoles" xml:space="preserve">
-    <value>Gebruikers en realiteit</value>
+  <data name="UserAndResponsibilities" xml:space="preserve">
+    <value>Gebruikers en verantwoordelijkheden</value>
   </data>
   <data name="Member" xml:space="preserve">
     <value>Leden</value>
@@ -581,5 +581,17 @@
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
+  </data>
+  <data name="DbPath" xml:space="preserve">
+    <value>DB pad:</value>
+  </data>
+  <data name="CopyPath" xml:space="preserve">
+    <value>Kopieer pad</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>Inzien</value>
+  </data>
+  <data name="UserAndRoles" xml:space="preserve">
+    <value>Gebruikers en realiteit</value>
   </data>
 </root>

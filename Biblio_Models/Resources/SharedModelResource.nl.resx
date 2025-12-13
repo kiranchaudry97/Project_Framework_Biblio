@@ -3,4 +3,33 @@
   <data name="Required" xml:space="preserve"><value>Het veld {0} is verplicht.</value></data>
   <data name="StringLength" xml:space="preserve"><value>{0} moet tussen {2} en {1} tekens bevatten.</value></data>
   <data name="IsbnInvalid" xml:space="preserve"><value>Ongeldige ISBN.</value></data>
+
+  <!-- Shared UI keys -->
+  <data name="Books" xml:space="preserve"><value>Boeken</value></data>
+  <data name="Members" xml:space="preserve"><value>Leden</value></data>
+  <data name="Loans" xml:space="preserve"><value>Uitleningen</value></data>
+  <data name="Settings" xml:space="preserve"><value>Instellingen</value></data>
+  <data name="DbPath" xml:space="preserve"><value>DB pad:</value></data>
+  <data name="CopyPath" xml:space="preserve"><value>Kopieer pad</value></data>
+  <data name="SearchPlaceholder" xml:space="preserve"><value>Zoek op titel, auteur of ISBN</value></data>
+  <data name="Filter" xml:space="preserve"><value>Filter</value></data>
+  <data name="Category" xml:space="preserve"><value>Categorie</value></data>
+  <data name="Member" xml:space="preserve"><value>Lid</value></data>
+  <data name="Book" xml:space="preserve"><value>Boek</value></data>
+  <data name="OnlyOpen" xml:space="preserve"><value>Alleen open</value></data>
+  <data name="View" xml:space="preserve"><value>Inzien</value></data>
+  <data name="Return" xml:space="preserve"><value>Inleveren</value></data>
+  <data name="New" xml:space="preserve"><value>Nieuw</value></data>
+  <data name="Save" xml:space="preserve"><value>Opslaan</value></data>
+  <data name="Delete" xml:space="preserve"><value>Verwijder</value></data>
+  <data name="OK" xml:space="preserve"><value>OK</value></data>
+  <data name="Page" xml:space="preserve"><value>Pagina</value></data>
+  <data name="Actions" xml:space="preserve"><value>Acties</value></data>
+  <data name="Details" xml:space="preserve"><value>Details</value></data>
+  <data name="Edit" xml:space="preserve"><value>Bewerk</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Annuleren</value></data>
+  <data name="NewBook" xml:space="preserve"><value>Nieuw boek</value></data>
+  <data name="NewMember" xml:space="preserve"><value>Nieuw lid</value></data>
+  <data name="QuickActions" xml:space="preserve"><value>Snelkoppelingen</value></data>
+  <data name="NewCategory" xml:space="preserve"><value>Nieuwe Categorie</value></data>
 </root>
