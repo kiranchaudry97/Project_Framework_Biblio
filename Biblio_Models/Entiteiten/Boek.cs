@@ -37,6 +37,9 @@ namespace Biblio_Models.Entiteiten
 
         [NotMapped]
         public string DisplayName => string.IsNullOrWhiteSpace(Auteur) ? Titel : $"{Titel} — {Auteur}";
+
+        [NotMapped]
+        public string CategorieNaam { get; set; } = string.Empty;
     }
 }
 

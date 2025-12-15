@@ -4,16 +4,19 @@ using Biblio_Models.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Biblio_Models.Migrations
+namespace Biblio_Models.Migrations._202512_add_refresh_token
 {
     [DbContext(typeof(BiblioDbContext))]
-    partial class BiblioDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251215183216_AddRefreshToken")]
+    partial class AddRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

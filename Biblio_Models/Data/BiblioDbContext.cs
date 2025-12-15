@@ -112,6 +112,19 @@ namespace Biblio_Models.Data
 
             b.Entity<Taal>().HasQueryFilter(t => !t.IsDeleted);
 
+            // register RefreshToken entity
+            b.Entity<RefreshToken>(e =>
+            {
+                e.ToTable("RefreshTokens");
+                e.Property(r => r.Id).HasColumnName("Id");
+                e.Property(r => r.Token).HasColumnName("Token").IsRequired();
+                e.Property(r => r.UserId).HasColumnName("UserId").IsRequired();
+                e.Property(r => r.Expires).HasColumnName("Expires");
+                e.Property(r => r.CreatedUtc).HasColumnName("CreatedUtc");
+                e.Property(r => r.Revoked).HasColumnName("Revoked");
+                e.Property(r => r.ReplacedByToken).HasColumnName("ReplacedByToken");
+            });
+
             // Unieke indexes voor data-integriteit
             b.Entity<Lid>()
             .HasIndex(m => m.Email)
