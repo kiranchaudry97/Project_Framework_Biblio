@@ -189,6 +189,19 @@ namespace Biblio_App.Pages
                 }
             }
             catch { }
+
+            // Initialize VM data without blocking UI thread
+            try
+            {
+                if (BindingContext is UitleningenViewModel vm)
+                {
+                    _ = vm.InitializeAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
         }
 
         protected override void OnDisappearing()
@@ -232,6 +245,50 @@ namespace Biblio_App.Pages
                 else
                 {
                     try { await DisplayAlert("Leeg", "Er is geen pad geladen.", "OK"); } catch { }
+                }
+            }
+            catch { }
+        }
+
+        private void OnItemHeaderTapped(object sender, EventArgs e)
+        {
+            try
+            {
+                // sender will be the StackLayout (header) inside the DataTemplate
+                if (sender is View header)
+                {
+                    // Find the Frame/DataTemplate parent by climbing up the visual tree
+                    Element current = header;
+                    while (current != null && !(current is Frame))
+                    {
+                        current = current.Parent;
+                    }
+
+                    if (current is Frame frame)
+                    {
+                        // The details StackLayout is named 'Details' inside the DataTemplate
+                        var details = frame.FindByName<StackLayout>("Details");
+                        if (details != null)
+                        {
+                            details.IsVisible = !details.IsVisible;
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private async void OnViewLoanClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                if (sender is Button btn && btn.BindingContext is Biblio_Models.Entiteiten.Lenen lenen)
+                {
+                    var boek = lenen.Boek?.Titel ?? "-";
+                    var lid = (lenen.Lid?.Voornaam ?? "") + " " + (lenen.Lid?.AchterNaam ?? "");
+                    var start = lenen.StartDate.ToString("dd-MM-yyyy");
+                    var due = lenen.DueDate.ToString("dd-MM-yyyy");
+                    await DisplayAlert(Localize("View"), $"{lid}\n{boek}\n{start} - {due}", "OK");
                 }
             }
             catch { }

@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Biblio_App.Pages
 {
-    public partial class CategorieenPagina : ContentPage
+    public partial class CategorieenPagina : ContentPage, ILocalizable
     {
         private CategorieenViewModel VM => BindingContext as CategorieenViewModel;
         private ILanguageService? _language_service;
@@ -45,6 +45,27 @@ namespace Biblio_App.Pages
         {
             try
             {
+                // Prefer MAUI app resources first
+                var appAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_App", StringComparison.OrdinalIgnoreCase));
+                if (appAsm != null)
+                {
+                    foreach (var name in new[] { "Biblio_App.Resources.Vertalingen.SharedResource", "Biblio_App.Resources.SharedResource", "Biblio_App.SharedResource" })
+                    {
+                        try
+                        {
+                            var rm = new ResourceManager(name, appAsm);
+                            var test = rm.GetString("Categories", CultureInfo.CurrentUICulture);
+                            if (!string.IsNullOrEmpty(test))
+                            {
+                                _sharedResourceManager = rm;
+                                return;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+
+                // Then try web project resources
                 var webAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
                 if (webAsm != null)
                 {
@@ -77,6 +98,26 @@ namespace Biblio_App.Pages
         {
             try
             {
+                // try AppShell helper first
+                try
+                {
+                    var shell = AppShell.Instance;
+                    if (shell != null)
+                    {
+                        var locMethod = typeof(AppShell).GetMethod("Localize", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                        if (locMethod != null)
+                        {
+                            try
+                            {
+                                var fromShell = locMethod.Invoke(shell, new object[] { key }) as string;
+                                if (!string.IsNullOrEmpty(fromShell)) return fromShell;
+                            }
+                            catch { }
+                        }
+                    }
+                }
+                catch { }
+
                 var culture = _language_service?.CurrentCulture ?? CultureInfo.CurrentUICulture;
                 if (_sharedResourceManager != null)
                 {
@@ -98,6 +139,19 @@ namespace Biblio_App.Pages
                     };
                 }
 
+                if (code == "fr")
+                {
+                    return key switch
+                    {
+                        "Categories" => "Catégories",
+                        "Name" => "Nom",
+                        "New" => "Nouveau",
+                        "Save" => "Enregistrer",
+                        "Delete" => "Supprimer",
+                        _ => key
+                    };
+                }
+
                 return key switch
                 {
                     "Categories" => "Categorieen",
@@ -111,13 +165,25 @@ namespace Biblio_App.Pages
             catch { return key; }
         }
 
-        private void UpdateLocalizedStrings()
+        public void UpdateLocalizedStrings()
         {
+            // ensure viewmodel-localized strings are updated first
+            try
+            {
+                if (VM is Biblio_App.Services.ILocalizable locVm)
+                {
+                    try { locVm.UpdateLocalizedStrings(); } catch { }
+                }
+            }
+            catch { }
+
             PageHeaderText = Localize("Categories");
             NamePlaceholder = Localize("Name");
             NewButtonText = Localize("New");
             SaveButtonText = Localize("Save");
             DeleteButtonText = Localize("Delete");
+
+            try { RefreshTitleFromViewModel(); } catch { }
         }
 
         protected override async void OnAppearing()
@@ -153,7 +219,19 @@ namespace Biblio_App.Pages
                 Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
                 {
                     UpdateLocalizedStrings();
+                    try { RefreshTitleFromViewModel(); } catch { }
                 });
+            }
+            catch { }
+        }
+
+        private void RefreshTitleFromViewModel()
+        {
+            try
+            {
+                var title = PageHeaderText ?? string.Empty;
+                try { this.Title = title; } catch { }
+                try { if (TitleLabel != null) TitleLabel.Text = title; } catch { }
             }
             catch { }
         }

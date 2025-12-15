@@ -5,11 +5,18 @@
              xmlns:vm="clr-namespace:Biblio_App.ViewModels"
              x:Class="Biblio_App.Pages.Account.UsersPage"
              x:DataType="vm:UsersViewModel"
-             Title="Gebruikers">
+             Title="Gebruikers"
+             x:Name="Page">
+
+    <Shell.TitleView>
+        <Grid Padding="0,0,8,0" VerticalOptions="Center">
+            <Label x:Name="TitleLabel" Text="Gebruikers" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" />
+        </Grid>
+    </Shell.TitleView>
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
-            <Label Text="Gebruikers beheer" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" />
+            <Label x:Name="HeaderLabel" Text="Gebruikers beheer" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" />
 
             <Frame Style="{StaticResource WelcomeCardStyle}">
                 <VerticalStackLayout Spacing="10">
@@ -26,11 +33,11 @@
                                         <VerticalStackLayout Grid.Column="1" HorizontalOptions="End">
                                             <HorizontalStackLayout Spacing="8">
                                                 <CheckBox IsChecked="{Binding IsAdmin}" />
-                                                <Label Text="Admin" VerticalOptions="Center" />
+                                                <Label Text="{Binding Source={x:Reference Page}, Path=AdminLabelText}" VerticalOptions="Center" />
                                             </HorizontalStackLayout>
                                             <HorizontalStackLayout Spacing="8">
                                                 <CheckBox IsChecked="{Binding IsStaff}" />
-                                                <Label Text="Medewerker" VerticalOptions="Center" />
+                                                <Label Text="{Binding Source={x:Reference Page}, Path=StaffLabelText}" VerticalOptions="Center" />
                                             </HorizontalStackLayout>
                                         </VerticalStackLayout>
                                     </Grid>
@@ -40,8 +47,8 @@
                     </CollectionView>
 
                     <HorizontalStackLayout HorizontalOptions="End" Spacing="8">
-                        <Button Text="Nieuw" Command="{Binding NewCommand}" Style="{StaticResource OutlineActionButton}" />
-                        <Button Text="Opslaan rollen" Command="{Binding SaveRolesCommand}" Style="{StaticResource PrimaryButton}" />
+                        <Button x:Name="NewButton" Text="Nieuw" Command="{Binding NewCommand}" Style="{StaticResource OutlineActionButton}" />
+                        <Button x:Name="SaveRolesButton" Text="Opslaan rollen" Command="{Binding SaveRolesCommand}" Style="{StaticResource PrimaryButton}" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Frame>

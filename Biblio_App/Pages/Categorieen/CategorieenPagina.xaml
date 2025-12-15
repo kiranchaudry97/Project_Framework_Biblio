@@ -11,7 +11,8 @@
 
     <Shell.TitleView>
         <Grid ColumnDefinitions="*,Auto" Padding="0,0,8,0" VerticalOptions="Center">
-            <Label Text="{Binding PageHeaderText, Source={x:Reference Page}}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" Grid.Column="0" />
+            <!-- named TitleLabel so code-behind can force-update the displayed title when language changes -->
+            <Label x:Name="TitleLabel" Text="{Binding PageHeaderText, Source={x:Reference Page}}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" Grid.Column="0" />
             <Label x:Name="PageLanguageLabel"
                    Grid.Column="1"
                    WidthRequest="48"

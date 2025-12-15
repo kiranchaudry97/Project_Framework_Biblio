@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Biblio_App.Pages
 {
-    public partial class LidDetailsPage : ContentPage, IQueryAttributable
+    public partial class LidDetailsPage : ContentPage, IQueryAttributable, ILocalizable
     {
         private ILanguageService? _languageService;
         private ResourceManager? _sharedResourceManager;
@@ -101,11 +101,46 @@ namespace Biblio_App.Pages
             catch { return key; }
         }
 
-        private void UpdateLocalizedStrings()
+        public void UpdateLocalizedStrings()
         {
             PageHeaderText = Localize("Details");
             EditButtonText = Localize("Edit");
             BackButtonText = Localize("Back");
+        }
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            try
+            {
+                if (_languageService != null)
+                {
+                    _languageService.LanguageChanged += LanguageService_LanguageChanged;
+                }
+            }
+            catch { }
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            try
+            {
+                if (_languageService != null)
+                {
+                    _languageService.LanguageChanged -= LanguageService_LanguageChanged;
+                }
+            }
+            catch { }
+        }
+
+        private void LanguageService_LanguageChanged(object? sender, System.Globalization.CultureInfo culture)
+        {
+            try
+            {
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => UpdateLocalizedStrings());
+            }
+            catch { }
         }
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)

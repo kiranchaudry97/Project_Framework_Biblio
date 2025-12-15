@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace Biblio_App.Pages
 {
-    public partial class LedenPagina : ContentPage
+    public partial class LedenPagina : ContentPage, ILocalizable
     {
         private LedenViewModel VM => BindingContext as LedenViewModel;
         private ILanguageService? _language_service;
@@ -23,7 +23,6 @@ namespace Biblio_App.Pages
         public static readonly BindableProperty PageHeaderTextProperty = BindableProperty.Create(nameof(PageHeaderText), typeof(string), typeof(LedenPagina), default(string));
         public static readonly BindableProperty SearchPlaceholderTextProperty = BindableProperty.Create(nameof(SearchPlaceholderText), typeof(string), typeof(LedenPagina), default(string));
         public static readonly BindableProperty SearchButtonTextProperty = BindableProperty.Create(nameof(SearchButtonText), typeof(string), typeof(LedenPagina), default(string));
-        public static readonly BindableProperty NewButtonTextProperty = BindableProperty.Create(nameof(NewButtonText), typeof(string), typeof(LedenPagina), default(string));
         public static readonly BindableProperty DetailsButtonTextProperty = BindableProperty.Create(nameof(DetailsButtonText), typeof(string), typeof(LedenPagina), default(string));
         public static readonly BindableProperty EditButtonTextProperty = BindableProperty.Create(nameof(EditButtonText), typeof(string), typeof(LedenPagina), default(string));
         public static readonly BindableProperty DeleteButtonTextProperty = BindableProperty.Create(nameof(DeleteButtonText), typeof(string), typeof(LedenPagina), default(string));
@@ -36,7 +35,6 @@ namespace Biblio_App.Pages
         public string PageHeaderText { get => (string)GetValue(PageHeaderTextProperty); set => SetValue(PageHeaderTextProperty, value); }
         public string SearchPlaceholderText { get => (string)GetValue(SearchPlaceholderTextProperty); set => SetValue(SearchPlaceholderTextProperty, value); }
         public string SearchButtonText { get => (string)GetValue(SearchButtonTextProperty); set => SetValue(SearchButtonTextProperty, value); }
-        public string NewButtonText { get => (string)GetValue(NewButtonTextProperty); set => SetValue(NewButtonTextProperty, value); }
         public string DetailsButtonText { get => (string)GetValue(DetailsButtonTextProperty); set => SetValue(DetailsButtonTextProperty, value); }
         public string EditButtonText { get => (string)GetValue(EditButtonTextProperty); set => SetValue(EditButtonTextProperty, value); }
         public string DeleteButtonText { get => (string)GetValue(DeleteButtonTextProperty); set => SetValue(DeleteButtonTextProperty, value); }
@@ -122,7 +120,7 @@ namespace Biblio_App.Pages
                         "Members" => "Members",
                         "SearchPlaceholder" => "Search...",
                         "Search" => "Search",
-                        "New" => "New",
+              
                         "Details" => "Details",
                         "Edit" => "Edit",
                         "Delete" => "Delete",
@@ -141,7 +139,7 @@ namespace Biblio_App.Pages
                     "Members" => "Leden",
                     "SearchPlaceholder" => "Zoeken...",
                     "Search" => "Zoek",
-                    "New" => "Nieuw",
+                 
                     "Details" => "Details",
                     "Edit" => "Bewerk",
                     "Delete" => "Verwijder",
@@ -156,12 +154,11 @@ namespace Biblio_App.Pages
             catch { return key; }
         }
 
-        private void UpdateLocalizedStrings()
+        public void UpdateLocalizedStrings()
         {
             PageHeaderText = Localize("Members");
             SearchPlaceholderText = Localize("SearchPlaceholder");
             SearchButtonText = Localize("Search");
-            NewButtonText = Localize("New");
             DetailsButtonText = Localize("Details");
             EditButtonText = Localize("Edit");
             DeleteButtonText = Localize("Delete");
@@ -170,6 +167,9 @@ namespace Biblio_App.Pages
             PageLastNamePlaceholder = Localize("LastName");
             PageEmailPlaceholder = Localize("Email");
             PagePhonePlaceholder = Localize("Phone");
+
+            // explicitly refresh the title label in the title view
+            try { RefreshTitleFromViewModel(); } catch { }
         }
 
         protected override async void OnAppearing()
@@ -178,6 +178,16 @@ namespace Biblio_App.Pages
 
             try
             {
+                // Ensure viewmodel has initialized data (loads members) when the page appears
+                try
+                {
+                    if (VM != null)
+                    {
+                        await VM.InitializeAsync();
+                    }
+                }
+                catch { }
+
                 if (_language_service != null)
                 {
                     _language_service.LanguageChanged += LanguageService_LanguageChanged;
@@ -206,7 +216,72 @@ namespace Biblio_App.Pages
                 Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
                 {
                     UpdateLocalizedStrings();
+                    try { RefreshTitleFromViewModel(); } catch { }
                 });
+            }
+            catch { }
+        }
+
+        private void RefreshTitleFromViewModel()
+        {
+            try
+            {
+                var title = PageHeaderText ?? string.Empty;
+                try { this.Title = title; } catch { }
+                try { if (PageLanguageLabel != null) PageLanguageLabel.Text = title; } catch { }
+            }
+            catch { }
+        }
+
+        // New click handler for details ImageButton
+        private async void OnDetailsClicked(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Lid lid)
+                {
+                    // Set the selected item on the VM so the bound form fields are populated
+                    try
+                    {
+                        if (VM != null)
+                        {
+                            VM.SelectedLid = lid;
+                            return;
+                        }
+                    }
+                    catch { }
+
+                    // fallback: show details alert if VM not available
+                    var title = AppShell.Instance?.Translate("Details") ?? "Details";
+                    var ok = AppShell.Instance?.Translate("OK") ?? "OK";
+                    var emailLabel = AppShell.Instance?.Translate("Email") ?? "Email";
+                    var phoneLabel = AppShell.Instance?.Translate("Phone") ?? "Phone";
+
+                    var body = $"{lid.Voornaam} {lid.AchterNaam}\n{emailLabel}: {lid.Email}\n{phoneLabel}: {lid.Telefoon}";
+                    await DisplayAlert(title, body, ok);
+                }
+            }
+            catch { }
+        }
+
+        // New click handler for edit ImageButton
+        private void OnEditClicked(object? sender, EventArgs e)
+        {
+            try
+            {
+                if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Lid lid)
+                {
+                    try
+                    {
+                        if (VM != null)
+                        {
+                            VM.SelectedLid = lid;
+                            // focus the first input so user can immediately edit
+                            try { Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => VoornaamEntry?.Focus()); } catch { }
+                        }
+                    }
+                    catch { }
+                }
             }
             catch { }
         }

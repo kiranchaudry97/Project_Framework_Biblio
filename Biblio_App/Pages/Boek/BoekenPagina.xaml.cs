@@ -27,7 +27,7 @@ namespace Biblio_App.Pages
             {
                 _languageService = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>();
             }
-
+            catch { }
         }
 
         protected override async void OnAppearing()
@@ -83,6 +83,12 @@ namespace Biblio_App.Pages
                     TitelEntry?.Focus();
                 }
             }
+
+            // ensure title label reflects changes to PageTitle property on the ViewModel
+            if (e.PropertyName == nameof(BoekenViewModel.PageTitle))
+            {
+                RefreshTitleFromViewModel();
+            }
         }
 
         private void FocusFirstError()
@@ -112,8 +118,23 @@ namespace Biblio_App.Pages
             {
                 if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Boek boek)
                 {
-                    // navigeer naar de detailpagina of toon een melding met basisinformatie
-                    await DisplayAlert("Details", $"{boek.Titel}\n{boek.Auteur}\nISBN: {boek.Isbn}", "OK");
+                    // Set the selected item on the VM so form fields are populated
+                    try
+                    {
+                        if (VM != null)
+                        {
+                            VM.SelectedBoek = boek;
+                            return;
+                        }
+                    }
+                    catch { }
+
+                    // fallback: navigeer naar de detailpagina of toon een melding met basisinformatie
+                    var title = AppShell.Instance?.Translate("Details") ?? "Details";
+                    var okText = AppShell.Instance?.Translate("OK") ?? "OK";
+                    var isbnLabel = AppShell.Instance?.Translate("ISBN") ?? "ISBN";
+                    var body = $"{boek.Titel}\n{boek.Auteur}\n{isbnLabel}: {boek.Isbn}";
+                    await DisplayAlert(title, body, okText);
                 }
             }
             catch { }
@@ -125,7 +146,14 @@ namespace Biblio_App.Pages
             {
                 if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Boek boek)
                 {
-                    VM.SelectedBoek = boek;
+                    try
+                    {
+                        if (VM != null)
+                        {
+                            VM.SelectedBoek = boek;
+                        }
+                    }
+                    catch { }
                 }
             }
             catch { }
@@ -154,12 +182,16 @@ namespace Biblio_App.Pages
                     {
                         // bepaal welke eigenschap is aangeraakt op basis van de kolom (gebruik index van parent grid children)
                         // fallback: toon titel + auteur + isbn
-                        text = $"{boek.Titel}\n{boek.Auteur}\nISBN: {boek.Isbn}\nCategorie: {boek.CategorieID}";
+                        var isbnLabel = AppShell.Instance?.Translate("ISBN") ?? "ISBN";
+                        var categoryLabel = AppShell.Instance?.Translate("Category") ?? "Category";
+                        text = $"{boek.Titel}\n{boek.Auteur}\n{isbnLabel}: {boek.Isbn}\n{categoryLabel}: {boek.CategorieID}";
                     }
 
                     if (!string.IsNullOrWhiteSpace(text))
                     {
-                        await DisplayAlert("Volledige tekst", text, "OK");
+                        var title = AppShell.Instance?.Translate("Details") ?? "Details";
+                        var okText = AppShell.Instance?.Translate("OK") ?? "OK";
+                        await DisplayAlert(title, text, okText);
                     }
                 }
             }
@@ -189,6 +221,9 @@ namespace Biblio_App.Pages
 
                         try { this.ForceLayout(); this.InvalidateMeasure(); }
                         catch { }
+
+                        // Explicitly refresh page title display after viewmodel updated
+                        try { RefreshTitleFromViewModel(); } catch { }
                     }
                     catch { }
                 });
@@ -226,9 +261,27 @@ namespace Biblio_App.Pages
                     {
                         try { this.ForceLayout(); this.InvalidateMeasure(); }
                         catch { }
+
+                        try { RefreshTitleFromViewModel(); } catch { }
                     });
                 }
                 catch { }
+            }
+            catch { }
+        }
+
+        private void RefreshTitleFromViewModel()
+        {
+            try
+            {
+                if (VM == null) return;
+                var title = VM.PageTitle ?? string.Empty;
+
+                // Update the Bindable Title property (so Shell.Title/Backstack reflect it)
+                try { this.Title = title; } catch { }
+
+                // Update the in-TitleView Label explicitly (XAML binding may not refresh in some platforms)
+                try { if (TitleLabel != null) TitleLabel.Text = title; } catch { }
             }
             catch { }
         }

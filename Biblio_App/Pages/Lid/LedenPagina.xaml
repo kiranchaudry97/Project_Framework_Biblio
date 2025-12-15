@@ -9,12 +9,13 @@
              x:Class="Biblio_App.Pages.LedenPagina"
              x:DataType="viewmodel:LedenViewModel"
              mc:Ignorable="d"
-             d:DataType="viewmodel:LedenViewModel"
-             Title="{Binding PageTitle}">
+             Title="{Binding PageTitle}"
+             x:Name="Page">
 
     <Shell.TitleView>
         <Grid ColumnDefinitions="*,Auto" Padding="0,0,8,0" VerticalOptions="Center">
-            <Label Text="{Binding PageTitle}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" Grid.Column="0" />
+            <!-- named TitleLabel so code-behind can force-update the displayed title when language changes -->
+            <Label x:Name="TitleLabel" Text="{Binding PageTitle}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" Grid.Column="0" />
 
             <!-- Replaced Picker with a tappable Label so text is white on all platforms -->
             <Label x:Name="PageLanguageLabel"
@@ -25,7 +26,8 @@
                    HorizontalOptions="End"
                    TextColor="{StaticResource White}"
                    BackgroundColor="Transparent"
-                   HorizontalTextAlignment="End" />
+                   HorizontalTextAlignment="End"
+                   IsVisible="False" />
         </Grid>
     </Shell.TitleView>
 
@@ -41,7 +43,6 @@
                             <Button Text="{Binding SearchButtonText}" Command="{Binding ZoekCommand}" />
                         </HorizontalStackLayout>
                         <HorizontalStackLayout Spacing="8">
-                            <Button Text="{Binding NewButtonText}" Command="{Binding NieuwCommand}" Style="{StaticResource OutlineActionButton}" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
 
@@ -65,34 +66,28 @@
 
                                         <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
 
-                                            <Button Text="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DetailsButtonText}"
-                                                    ImageSource="details_illustration.svg"
-                                                    ContentLayout="Top,2"
-                                                    WidthRequest="64"
-                                                    HeightRequest="64"
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ItemDetailsCommand}"
-                                                    CommandParameter="{Binding .}"
-                                                    AutomationProperties.Name="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DetailsButtonText}" />
+                                            <ImageButton Source="details_illustration.svg"
+                                                         WidthRequest="24"
+                                                         HeightRequest="24"
+                                                         BackgroundColor="Transparent"
+                                                         Clicked="OnDetailsClicked"
+                                                         AutomationProperties.Name="{Binding BindingContext.DetailsButtonText, Source={x:Reference Page}}" />
 
-                                            <Button Text="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditButtonText}"
-                                                    ImageSource="edit_illustration.svg"
-                                                    ContentLayout="Top,2"
-                                                    WidthRequest="64"
-                                                    HeightRequest="64"
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ItemEditCommand}"
-                                                    CommandParameter="{Binding .}"
-                                                    AutomationProperties.Name="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditButtonText}" />
+                                            <ImageButton Source="edit_illustration.svg"
+                                                         WidthRequest="24"
+                                                         HeightRequest="24"
+                                                         BackgroundColor="Transparent"
+                                                         Clicked="OnEditClicked"
+                                                         CommandParameter="{Binding .}"
+                                                         AutomationProperties.Name="{Binding BindingContext.EditButtonText, Source={x:Reference Page}}" />
 
-                                            <Button Text="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteButtonText}"
-                                                    ImageSource="delete_illustration.svg"
-                                                    ContentLayout="Top,2"
-                                                    WidthRequest="64"
-                                                    HeightRequest="64"
-                                                    BackgroundColor="Crimson"
-                                                    TextColor="White"
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ItemDeleteCommand}"
-                                                    CommandParameter="{Binding .}"
-                                                    AutomationProperties.Name="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteButtonText}" />
+                                            <ImageButton Source="delete_illustration.svg"
+                                                         WidthRequest="24"
+                                                         HeightRequest="24"
+                                                         BackgroundColor="Transparent"
+                                                         Command="{Binding BindingContext.ItemDeleteCommand, Source={x:Reference Page}}"
+                                                         CommandParameter="{Binding .}"
+                                                         AutomationProperties.Name="{Binding BindingContext.DeleteButtonText, Source={x:Reference Page}}" />
 
                                         </HorizontalStackLayout>
                                     </Grid>
@@ -100,6 +95,20 @@
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
+
+                    <!-- Overview / breadcrumb similar to books page -->
+                    <Label Text="{Binding PageHeaderText}" HorizontalOptions="Fill" HorizontalTextAlignment="Center" TextColor="{StaticResource Primary}"
+                           FontAttributes="Bold" FontSize="14" Margin="0,18,0,6" />
+
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="12" Padding="0,0,0,6">
+                        <Label Text="Overzicht" TextColor="{StaticResource Gray700}" FontAttributes="Bold" />
+                        <Label Text="-" TextColor="{StaticResource Gray400}" />
+                        <Label Text="Details" TextColor="{StaticResource Gray700}" />
+                        <Label Text="-" TextColor="{StaticResource Gray400}" />
+                        <Label Text="Bewerk" TextColor="{StaticResource Gray700}" />
+                        <Label Text="-" TextColor="{StaticResource Gray400}" />
+                        <Label Text="Verwijder" TextColor="{StaticResource Gray700}" />
+                    </HorizontalStackLayout>
 
                     <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="10">
                         <VerticalStackLayout Spacing="8">
@@ -109,9 +118,15 @@
                             <Entry x:Name="TelefoonEntry" Text="{Binding Telefoon, Mode=TwoWay}" Placeholder="{Binding PhonePlaceholder}" Keyboard="Telephone" />
 
                             <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
-                                <Button Text="{Binding NewButtonText}" Command="{Binding NieuwCommand}" Style="{StaticResource OutlineActionButton}" />
-                                <Button Text="{Binding DeleteButtonText}" Command="{Binding VerwijderCommand}" BackgroundColor="Crimson" TextColor="White" />
-                                <Button Text="{Binding SaveButtonText}" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
+                                <Button Text="{Binding NewButtonText, FallbackValue='Nieuw'}"
+                                        Command="{Binding NieuwCommand}"
+                                        Style="{StaticResource OutlineActionButtonSmall}" />
+                                <Button Text="{Binding DeleteButtonText}"
+                                        Command="{Binding VerwijderCommand}"
+                                        Style="{StaticResource DangerButtonSmall}" />
+                                <Button Text="{Binding SaveButtonText}"
+                                        Command="{Binding OpslaanCommand}"
+                                        Style="{StaticResource PrimaryButtonSmall}" />
                             </HorizontalStackLayout>
                         </VerticalStackLayout>
                     </Border>

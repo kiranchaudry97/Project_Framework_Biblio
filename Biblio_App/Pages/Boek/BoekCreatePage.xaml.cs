@@ -10,7 +10,7 @@ using System;
 
 namespace Biblio_App.Pages.Boek
 {
-    public partial class BoekCreatePage : ContentPage
+    public partial class BoekCreatePage : ContentPage, ILocalizable
     {
         private BoekenViewModel VM => BindingContext as BoekenViewModel;
         private ILanguageService? _languageService;
@@ -116,7 +116,7 @@ namespace Biblio_App.Pages.Boek
             catch { return key; }
         }
 
-        private void UpdateLocalizedStrings()
+        public void UpdateLocalizedStrings()
         {
             PageHeaderText = Localize("Boeken");
             TitelPlaceholder = Localize("Titel");

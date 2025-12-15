@@ -7,11 +7,12 @@
              x:Class="Biblio_App.Pages.UitleningenPagina"
              x:Name="PageRoot"
              x:DataType="viewmodel:UitleningenViewModel"
-             Title="{Binding PageHeaderText, Source={x:Reference PageRoot}}">
+             Title="{Binding PageHeaderText}">
 
     <Shell.TitleView>
         <Grid ColumnDefinitions="*,Auto" Padding="0,0,8,0" VerticalOptions="Center">
-            <Label Text="{Binding PageHeaderText, Source={x:Reference PageRoot}}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" Grid.Column="0" />
+            <!-- named TitleLabel so code-behind can force-update the displayed title when language changes -->
+            <Label x:Name="TitleLabel" Text="{Binding PageHeaderText}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" Grid.Column="0" />
             <Label x:Name="PageLanguageLabel"
                    Grid.Column="1"
                    WidthRequest="48"
@@ -26,98 +27,104 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="12">
-            <Label Text="{Binding PageHeaderText, Source={x:Reference PageRoot}}" Style="{StaticResource PageHeaderLabel}" />
+            <Label Text="{Binding PageHeaderText}" Style="{StaticResource PageHeaderLabel}" />
 
             <!-- Status / counts for debugging -->
             <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
-                <Label Text="{Binding MembersLabel, Source={x:Reference PageRoot}}" />
-                <Label Text="{Binding LedenCount}" FontAttributes="Bold" />
-                <Label Text="{Binding LoansLabel, Source={x:Reference PageRoot}}" />
-                <Label Text="{Binding UitleningenCount}" FontAttributes="Bold" />
-                <Label Text="{Binding BooksLabel, Source={x:Reference PageRoot}}" />
-                <Label Text="{Binding BoekenCount}" FontAttributes="Bold" />
+                <Label Text="{Binding MembersLabel}" TextColor="{StaticResource White}" />
+                <Label Text="{Binding LedenCount}" FontAttributes="Bold" TextColor="{StaticResource White}" />
+                <Label Text="{Binding LoansLabel}" TextColor="{StaticResource White}" />
+                <Label Text="{Binding UitleningenCount}" FontAttributes="Bold" TextColor="{StaticResource White}" />
+                <Label Text="{Binding BooksLabel}" TextColor="{StaticResource White}" />
+                <Label Text="{Binding BoekenCount}" FontAttributes="Bold" TextColor="{StaticResource White}" />
             </HorizontalStackLayout>
 
             <!-- DB path display and copy button -->
             <HorizontalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
-                <Label Text="{Binding DbPathLabelText, Source={x:Reference PageRoot}}" VerticalOptions="Center" />
-                <Label x:Name="DbPathLabel" Text="(niet geladen)" LineBreakMode="TailTruncation" HorizontalOptions="FillAndExpand" VerticalOptions="Center" />
-                <Button Text="{Binding CopyPathButtonText, Source={x:Reference PageRoot}}" Clicked="OnCopyDbPathClicked" />
+                <Label Text="{Binding DbPathLabelText}" VerticalOptions="Center" TextColor="{StaticResource White}" />
+                <Label x:Name="DbPathLabel" Text="{Binding DbPathNotLoadedText}" LineBreakMode="TailTruncation" HorizontalOptions="FillAndExpand" VerticalOptions="Center" TextColor="{StaticResource White}" />
+                <Button Text="{Binding CopyPathButtonText}" Clicked="OnCopyDbPathClicked" />
             </HorizontalStackLayout>
 
             <Label Text="{Binding LastError}" TextColor="Crimson" HorizontalOptions="Center" IsVisible="{Binding LastError, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
 
             <Frame Style="{StaticResource WelcomeCardStyle}">
                 <VerticalStackLayout Spacing="12">
-                    <!-- Filters (adapted from web design) -->
-                    <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
-                        <Entry Grid.Column="0" Grid.Row="0" Placeholder="{Binding SearchPlaceholderText, Source={x:Reference PageRoot}}" Text="{Binding SearchText}" />
-                        <Button Grid.Column="1" Grid.Row="0" Text="{Binding FilterButtonText, Source={x:Reference PageRoot}}" Command="{Binding ZoekCommand}" Style="{StaticResource PrimaryButton}" />
-
-                        <StackLayout Grid.ColumnSpan="2" Grid.Row="1" Orientation="Horizontal" Spacing="8">
-                            <Picker Title="{Binding CategoryTitle, Source={x:Reference PageRoot}}" ItemsSource="{Binding Categorieen}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedCategory}" />
-                            <Picker Title="{Binding MemberTitle, Source={x:Reference PageRoot}}" ItemsSource="{Binding LedenList}" ItemDisplayBinding="{Binding Voornaam}" SelectedItem="{Binding SelectedLid}" />
-                            <Picker Title="{Binding BookTitle, Source={x:Reference PageRoot}}" ItemsSource="{Binding BoekenList}" ItemDisplayBinding="{Binding Titel}" SelectedItem="{Binding SelectedBoek}" />
-                            <StackLayout Orientation="Horizontal" VerticalOptions="Center">
-                                <Label Text="{Binding OnlyOpenText, Source={x:Reference PageRoot}}" VerticalOptions="Center" />
-                                <Switch IsToggled="{Binding OnlyOpen}" />
-                            </StackLayout>
-                            <Button Text="{Binding NewButtonText, Source={x:Reference PageRoot}}" Command="{Binding NieuwCommand}" Style="{StaticResource OutlineActionButton}" />
-                        </StackLayout>
+                    <!-- Filters (adapted from web design) - simplified: only search + filter button -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Entry Grid.Column="0" Placeholder="Zoek op titel, auteur of ISBN" Text="{Binding SearchText}" BackgroundColor="Transparent" PlaceholderColor="{StaticResource Gray500}" />
+                        <Button Grid.Column="1" Text="{Binding FilterButtonText}" Command="{Binding ZoekCommand}" BackgroundColor="{StaticResource Primary}" TextColor="White" CornerRadius="10" WidthRequest="88" HeightRequest="44" Margin="8,0,0,0" />
                     </Grid>
 
-                    <!-- List of loans -->
-                    <CollectionView ItemsSource="{Binding Uitleningen}" SelectionMode="Single" SelectedItem="{Binding SelectedUitlening, Mode=TwoWay}" HeightRequest="260">
+                    <!-- List of loans with item card matching screenshot -->
+                    <CollectionView ItemsSource="{Binding Uitleningen}" SelectionMode="Single" SelectedItem="{Binding SelectedUitlening, Mode=TwoWay}">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:Lenen">
-                                <Frame Padding="10" Margin="4">
-                                    <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
-                                        <StackLayout Grid.Column="0">
-                                            <Label Text="{Binding Boek.Titel}" FontAttributes="Bold" />
-                                            <Label FontSize="12" TextColor="{StaticResource Gray500}">
-                                                <Label.FormattedText>
-                                                    <FormattedString>
-                                                        <Span Text="" />
-                                                        <Span Text="{Binding Lid.Voornaam}" />
-                                                        <Span Text=" " />
-                                                        <Span Text="{Binding Lid.AchterNaam}" />
-                                                    </FormattedString>
-                                                </Label.FormattedText>
-                                            </Label>
-                                            <Label Text="{Binding StartDate, StringFormat='Start: {0:d}'}" FontSize="12" />
-                                            <Label Text="{Binding DueDate, StringFormat='Tot: {0:d}'}" FontSize="12" />
-                                            <Label Text="{Binding ReturnedAt, StringFormat='Ingeleverd: {0:d}'}" FontSize="12" />
-                                        </StackLayout>
+                                <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="0" BackgroundColor="White" Margin="0,6">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8" />
+                                    </Border.StrokeShape>
+                                    <Grid Padding="12">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <StackLayout Grid.Column="0" Spacing="2">
+                                                <Label Text="{Binding Lid.Voornaam}" TextColor="{StaticResource Gray900}" FontAttributes="Bold" />
+                                                <Label Text="{Binding Boek.Titel}" TextColor="{StaticResource Gray700}" />
+                                            </StackLayout>
 
-                                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" Spacing="6">
-                                            <Button Text="{Binding ViewButtonText, Source={x:Reference PageRoot}}" Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.NieuwCommand}" Style="{StaticResource OutlineActionButton}" />
-                                            <Button Text="{Binding ReturnButtonText, Source={x:Reference PageRoot}}" Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.ReturnCommand}" CommandParameter="{Binding .}" Style="{StaticResource PrimaryButton}" />
-                                            <Button Text="{Binding DeleteButtonText, Source={x:Reference PageRoot}}" Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DeleteCommand}" CommandParameter="{Binding .}" BackgroundColor="Crimson" TextColor="White" />
-                                        </VerticalStackLayout>
-                                    </Grid>
-                                </Frame>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-
-                    <!-- Edit / create form -->
-                    <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="10">
-                        <VerticalStackLayout Spacing="8">
-                            <Picker x:Name="BoekPicker" ItemsSource="{Binding BoekenList}" ItemDisplayBinding="{Binding Titel}" SelectedItem="{Binding SelectedBoek}" />
-                            <Picker x:Name="LidPicker" ItemsSource="{Binding LedenList}" ItemDisplayBinding="{Binding Voornaam}" SelectedItem="{Binding SelectedLid}" />
-                            <DatePicker x:Name="StartDatePicker" Date="{Binding StartDate}" />
-                            <DatePicker x:Name="DueDatePicker" Date="{Binding DueDate}" />
-                            <Switch IsToggled="{Binding ReturnedAt, Converter={StaticResource DateToBoolConverter}, Mode=TwoWay}" />
-
-                            <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
-                                <Button Text="{Binding NewButtonText, Source={x:Reference PageRoot}}" Command="{Binding NieuwCommand}" Style="{StaticResource OutlineActionButton}" />
-                                <Button Text="{Binding DeleteButtonText, Source={x:Reference PageRoot}}" Command="{Binding VerwijderCommand}" BackgroundColor="Crimson" TextColor="White" />
-                                <Button Text="{Binding SaveButtonText, Source={x:Reference PageRoot}}" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
-                            </HorizontalStackLayout>
-                        </VerticalStackLayout>
-                    </Border>
-                </VerticalStackLayout>
-            </Frame>
+                                            <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center" Spacing="6">
+                                                <!-- Replace textual delete with icon button for consistent UI -->
+                                                <HorizontalStackLayout Spacing="6" HorizontalOptions="End">
+                                                    <ImageButton Source="checklist_ok_illustration.svg"
+                                                                  WidthRequest="24"
+                                                                  HeightRequest="24"
+                                                                  BackgroundColor="Transparent"
+                                                                  Command="{Binding Path=BindingContext.ReturnCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                                  CommandParameter="{Binding .}"
+                                                                  AutomationProperties.Name="{Binding Path=BindingContext.ReturnButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}" />
+                                                    <ImageButton Source="delete_illustration.svg"
+                                                                 WidthRequest="24"
+                                                                 HeightRequest="24"
+                                                                 BackgroundColor="Transparent"
+                                                                 Command="{Binding Path=BindingContext.DeleteCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                                 CommandParameter="{Binding .}"
+                                                                 AutomationProperties.Name="{Binding Path=BindingContext.DeleteButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}" />
+                                                </HorizontalStackLayout>
+                                             </VerticalStackLayout>
+                                         </Grid>
+                                     </Grid>
+                                 </Border>
+                             </DataTemplate>
+                         </CollectionView.ItemTemplate>
+                     </CollectionView>
+ 
+                     <!-- Edit / create form -->
+                     <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="10">
+                         <VerticalStackLayout Spacing="8">
+                             <!-- remove external labels for Boek/Lid, keep inline Title on pickers -->
+                             <Picker x:Name="BoekPicker" ItemsSource="{Binding BoekenList}" ItemDisplayBinding="{Binding Titel}" SelectedItem="{Binding SelectedBoek}" Title="{Binding BookTitle}" />
+ 
+                             <Picker x:Name="LidPicker" ItemsSource="{Binding LedenList}" ItemDisplayBinding="{Binding Voornaam}" SelectedItem="{Binding SelectedLid}" Title="{Binding MemberTitle}" />
+ 
+                             <Label Text="{Binding StartLabel}" TextColor="{StaticResource Gray700}" />
+                             <DatePicker x:Name="StartDatePicker" Date="{Binding StartDate}" />
+ 
+                             <Label Text="{Binding DueLabel}" TextColor="{StaticResource Gray700}" />
+                             <DatePicker x:Name="DueDatePicker" Date="{Binding DueDate}" />
+ 
+                             <HorizontalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="Start">
+                                 <Label Text="{Binding ReturnedLabel}" TextColor="{StaticResource Gray700}" VerticalOptions="Center" />
+                                 <Switch IsToggled="{Binding ReturnedAt, Converter={StaticResource DateToBoolConverter}, Mode=TwoWay}" />
+                             </HorizontalStackLayout>
+ 
+                             <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
+                                <!-- textual delete button for form -->
+                                <Button Text="{Binding DeleteButtonText}" Command="{Binding VerwijderCommand}" Style="{StaticResource DangerButtonSmall}" />
+                                <Button Text="{Binding SaveButtonText}" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
+                             </HorizontalStackLayout>
+                         </VerticalStackLayout>
+                     </Border>
+                 </VerticalStackLayout>
+             </Frame>
 
         </VerticalStackLayout>
     </ScrollView>
