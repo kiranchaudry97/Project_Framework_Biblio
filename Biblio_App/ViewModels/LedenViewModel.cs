@@ -26,7 +26,7 @@ using Biblio_App.Services;
 
 namespace Biblio_App.ViewModels
 {
-    public partial class LedenViewModel : ObservableValidator
+    public partial class LedenViewModel : ObservableValidator, Biblio_App.Services.ILocalizable
     {
         private readonly IGegevensProvider? _gegevensProvider;
         private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
@@ -40,19 +40,19 @@ namespace Biblio_App.ViewModels
         private Lid? selectedLid;
 
         [ObservableProperty]
-        [Required(ErrorMessage = "Voornaam is verplicht.")]
-        [StringLength(100, ErrorMessage = "Voornaam is te lang.")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
+        [StringLength(100, ErrorMessageResourceName = "StringLength", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
         private string voornaam = string.Empty;
 
         [ObservableProperty]
-        [Required(ErrorMessage = "Achternaam is verplicht.")]
-        [StringLength(100, ErrorMessage = "Achternaam is te lang.")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
+        [StringLength(100, ErrorMessageResourceName = "StringLength", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
         private string achternaam = string.Empty;
 
         [ObservableProperty]
-        [Required(ErrorMessage = "Email is verplicht.")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
         [EmailAddress(ErrorMessage = "Ongeldig e-mailadres.")]
-        [StringLength(256, ErrorMessage = "Email is te lang.")]
+        [StringLength(256, ErrorMessageResourceName = "StringLength", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
         private string email = string.Empty;
 
         [ObservableProperty]
@@ -137,7 +137,25 @@ namespace Biblio_App.ViewModels
             }
             catch { }
 
-            _ = LoadLedenAsync();
+            // Do NOT trigger data loading directly in constructor; this can cause startup/UI thread blocking and ANRs.
+            // Call InitializeAsync from the page's OnAppearing so loading occurs after page construction and on the UI-friendly async path.
+        }
+
+        private bool _initialized = false;
+
+        // Public initializer to be called from the page (OnAppearing) so we avoid blocking startup/UI thread
+        public async Task InitializeAsync()
+        {
+            if (_initialized) return;
+            _initialized = true;
+            try
+            {
+                await LoadLedenAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
         }
 
         private void EnsureResourceManagerInitialized()
@@ -178,21 +196,42 @@ namespace Biblio_App.ViewModels
 
         private string Localize(string key)
         {
+            // Prefer AppShell localization when available so Shell and pages use same resource lookups
+            try
+            {
+                var shell = AppShell.Instance;
+                if (shell != null)
+                {
+                    try
+                    {
+                        var fromShell = shell.Translate(key);
+                        if (!string.IsNullOrEmpty(fromShell)) return fromShell;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+
             EnsureResourceManagerInitialized();
             var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
             if (_sharedResourceManager != null)
             {
-                try { var v = _sharedResourceManager.GetString(key, culture); if (!string.IsNullOrEmpty(v)) return v; } catch { }
+                try
+                {
+                    var val = _sharedResourceManager.GetString(key, culture);
+                    if (!string.IsNullOrEmpty(val)) return val;
+                }
+                catch { }
             }
+
             var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
             if (code == "en")
             {
                 return key switch
                 {
                     "Members" => "Members",
-                    "SearchPlaceholder" => "Search",
+                    "SearchPlaceholder" => "Search...",
                     "Search" => "Search",
-                    "New" => "New",
                     "Details" => "Details",
                     "Edit" => "Edit",
                     "Delete" => "Delete",
@@ -201,18 +240,50 @@ namespace Biblio_App.ViewModels
                     "LastName" => "Last name",
                     "Email" => "Email",
                     "Phone" => "Phone",
+                    "Ready" => "Ready",
+                    "SavedMember" => "Member saved.",
+                    "DeletedMember" => "Member deleted.",
+                    "Error" => "Error",
+                    "ErrorSavingMember" => "Error saving member.",
+                    "ErrorDeletingMember" => "Error deleting member.",
                     _ => key
                 };
             }
+
+            if (code == "fr")
+            {
+                return key switch
+                {
+                    "Members" => "Membres",
+                    "SearchPlaceholder" => "Rechercher...",
+                    "Search" => "Rechercher",
+                    "Details" => "Détails",
+                    "Edit" => "Modifier",
+                    "Delete" => "Supprimer",
+                    "Ready" => "Terminé",
+                    "SavedMember" => "Membre enregistré.",
+                    "DeletedMember" => "Membre supprimé.",
+                    "Error" => "Erreur",
+                    "ErrorSavingMember" => "Erreur lors de l'enregistrement du membre.",
+                    "ErrorDeletingMember" => "Erreur lors de la suppression du membre.",
+                    _ => key
+                };
+            }
+
             return key switch
             {
                 "Members" => "Leden",
                 "SearchPlaceholder" => "Zoeken...",
                 "Search" => "Zoek",
-                "New" => "Nieuw",
                 "Details" => "Details",
                 "Edit" => "Bewerk",
                 "Delete" => "Verwijder",
+                "Ready" => "Gereed",
+                "SavedMember" => "Lid opgeslagen.",
+                "DeletedMember" => "Lid verwijderd.",
+                "Error" => "Fout",
+                "ErrorSavingMember" => "Fout bij opslaan lid.",
+                "ErrorDeletingMember" => "Fout bij verwijderen lid.",
                 "Save" => "Opslaan",
                 "FirstName" => "Voornaam",
                 "LastName" => "Achternaam",
@@ -222,11 +293,18 @@ namespace Biblio_App.ViewModels
             };
         }
 
-        private void UpdateLocalizedStrings()
+        // expose public UpdateLocalizedStrings to satisfy ILocalizable; keep core logic in a separate method
+        public void UpdateLocalizedStrings()
+        {
+            UpdateLocalizedStringsCore();
+        }
+
+        private void UpdateLocalizedStringsCore()
         {
             PageTitle = Localize("Members");
             SearchPlaceholder = Localize("SearchPlaceholder");
             SearchButtonText = Localize("Search");
+            // localized label for the New button
             NewButtonText = Localize("New");
             DetailsButtonText = Localize("Details");
             EditButtonText = Localize("Edit");
@@ -236,6 +314,9 @@ namespace Biblio_App.ViewModels
             LastNamePlaceholder = Localize("LastName");
             EmailPlaceholder = Localize("Email");
             PhonePlaceholder = Localize("Phone");
+
+            // refresh computed properties
+            OnPropertyChanged(nameof(PageTitle));
         }
 
         private async Task NavigateToDetailsAsync(Lid? l)
@@ -409,15 +490,18 @@ namespace Biblio_App.ViewModels
                 await db.SaveChangesAsync();
                 await LoadLedenAsync();
 
+                // notify other pages/viewmodels that members changed
+                try { Microsoft.Maui.Controls.MessagingCenter.Send(this, "MembersChanged"); } catch { }
+
                 SelectedLid = null;
                 ValidationMessage = string.Empty;
-                await ShowAlertAsync("Gereed", "Lid opgeslagen.");
+                await ShowAlertAsync(Localize("Ready"), Localize("SavedMember"));
             }
             catch (Exception ex)
             {
                 ValidationMessage = "Onverwachte fout bij opslaan.";
                 System.Diagnostics.Debug.WriteLine(ex);
-                await ShowAlertAsync("Fout", ValidationMessage);
+                await ShowAlertAsync(Localize("Error"), Localize("ErrorSavingMember"));
             }
         }
 
@@ -437,14 +521,18 @@ namespace Biblio_App.ViewModels
                 }
 
                 await LoadLedenAsync();
+
+                // notify other pages/viewmodels that members changed
+                try { Microsoft.Maui.Controls.MessagingCenter.Send(this, "MembersChanged"); } catch { }
+
                 SelectedLid = null;
-                await ShowAlertAsync("Gereed", "Lid verwijderd.");
+                await ShowAlertAsync(Localize("Ready"), Localize("DeletedMember"));
             }
             catch (Exception ex)
             {
                 ValidationMessage = "Onverwachte fout bij verwerken.";
                 System.Diagnostics.Debug.WriteLine(ex);
-                await ShowAlertAsync("Fout", ValidationMessage);
+                await ShowAlertAsync(Localize("Error"), Localize("ErrorDeletingMember"));
             }
         }
 
@@ -464,12 +552,16 @@ namespace Biblio_App.ViewModels
                 }
 
                 await LoadLedenAsync();
-                await ShowAlertAsync("Gereed", "Lid verwijderd.");
+
+                // notify other pages/viewmodels that members changed
+                try { Microsoft.Maui.Controls.MessagingCenter.Send(this, "MembersChanged"); } catch { }
+
+                await ShowAlertAsync(Localize("Ready"), Localize("DeletedMember"));
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
-                await ShowAlertAsync("Fout", "Onverwachte fout bij verwijderen.");
+                await ShowAlertAsync(Localize("Error"), Localize("ErrorDeletingMember"));
             }
         }
 

@@ -22,10 +22,12 @@ using System.Reflection;
 using Biblio_Models.Resources;
 using System.IO;
 using System.Xml.Linq;
+using Microsoft.Maui.Storage;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Biblio_App.ViewModels
 {
-    public partial class UitleningenViewModel : ObservableValidator
+    public partial class UitleningenViewModel : ObservableValidator, Biblio_App.Services.ILocalizable
     {
         private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
         private readonly ILanguageService? _languageService;
@@ -77,6 +79,16 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string deleteButtonText = string.Empty;
 
+        // additional localized labels
+        [ObservableProperty]
+        private string startLabel = string.Empty;
+        [ObservableProperty]
+        private string dueLabel = string.Empty;
+        [ObservableProperty]
+        private string returnedLabel = string.Empty;
+        [ObservableProperty]
+        private string dbPathNotLoadedText = string.Empty;
+
         // existing properties remain
         [ObservableProperty]
         private Boek? selectedBoek;
@@ -85,11 +97,11 @@ namespace Biblio_App.ViewModels
         private Lid? selectedLid;
 
         [ObservableProperty]
-        [Required(ErrorMessage = "Startdatum is verplicht.")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
         private DateTime startDate = DateTime.Now;
 
         [ObservableProperty]
-        [Required(ErrorMessage = "Einddatum is verplicht.")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
         private DateTime dueDate = DateTime.Now.AddDays(14);
 
         [ObservableProperty]
@@ -111,9 +123,18 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string lastError = string.Empty;
 
+        [ObservableProperty]
+        private string selectedFilter = "Alle";
+
         public int LedenCount => LedenList?.Count ?? 0;
         public int UitleningenCount => Uitleningen?.Count ?? 0;
         public int BoekenCount => BoekenList?.Count ?? 0;
+
+        // Path to local sqlite DB used by the app
+        public string DbPath => Path.Combine(FileSystem.AppDataDirectory, "biblio.db");
+
+        // Combined debug info shown on the UI (counts + db path)
+        public string DebugInfo => $"Leden: {LedenCount}  Uitleningen: {UitleningenCount}  Boeken: {BoekenCount}\nDB: {DbPath}";
 
         // per-field errors (keep BoekId/LidId errors but also show object-based)
         public string BoekError => SelectedBoek == null ? "" : string.Empty; // placeholder, main errors via ValidationMessage
@@ -128,8 +149,11 @@ namespace Biblio_App.ViewModels
         public IAsyncRelayCommand VerwijderCommand { get; }
 
         public IRelayCommand ZoekCommand { get; }
+        public IRelayCommand<string> SetFilterCommand { get; }
         public IAsyncRelayCommand<Lenen?> ReturnCommand { get; }
         public IAsyncRelayCommand<Lenen?> DeleteCommand { get; }
+
+        public IAsyncRelayCommand SyncCommand => new AsyncRelayCommand(async () => await ExecuteSyncAsync());
 
         public UitleningenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, ILanguageService? languageService = null)
         {
@@ -144,6 +168,16 @@ namespace Biblio_App.ViewModels
             ReturnCommand = new AsyncRelayCommand<Lenen?>(ReturnAsync);
             DeleteCommand = new AsyncRelayCommand<Lenen?>(DeleteAsync);
 
+            SetFilterCommand = new RelayCommand<string>(async (p) =>
+            {
+                if (string.IsNullOrWhiteSpace(p)) return;
+                SelectedFilter = p;
+                await LoadDataWithFiltersAsync();
+            });
+
+            // listen for members changes to refresh members list
+            try { Microsoft.Maui.Controls.MessagingCenter.Subscribe<LedenViewModel>(this, "MembersChanged", async (vm) => { await LoadMembersAsync(); }); } catch { }
+
             // initialize localized strings
             UpdateLocalizedStrings();
             try
@@ -155,7 +189,42 @@ namespace Biblio_App.ViewModels
             }
             catch { }
 
-            _ = LoadDataAsync();
+            // Do not load data directly from constructor; this can block startup/UI thread on some devices.
+            // Pages should call InitializeAsync/EnsureDataLoadedAsync during OnAppearing.
+        }
+
+        private bool _initialized = false;
+
+        // Public initializer to be called from the page (OnAppearing)
+        public async Task InitializeAsync()
+        {
+            if (_initialized) return;
+            _initialized = true;
+            try
+            {
+                await EnsureDataLoadedAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
+
+        private async Task LoadMembersAsync()
+        {
+            try
+            {
+                using var db = _dbFactory.CreateDbContext();
+                var leden = await db.Leden.AsNoTracking().OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToListAsync();
+                LedenList.Clear();
+                foreach (var l in leden) LedenList.Add(l);
+                OnPropertyChanged(nameof(LedenCount));
+                OnPropertyChanged(nameof(DebugInfo));
+            }
+            catch (Exception ex)
+            {
+                LastError = ex.Message;
+            }
         }
 
         private void EnsureResourceManagerInitialized()
@@ -165,14 +234,15 @@ namespace Biblio_App.ViewModels
 
             try
             {
-                var webAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
-                if (webAsm != null)
+                // Prefer the MAUI app's own resources first
+                var appAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_App", StringComparison.OrdinalIgnoreCase));
+                if (appAsm != null)
                 {
-                    foreach (var name in new[] { "Biblio_Web.Resources.Vertalingen.SharedResource", "Biblio_Web.Resources.SharedResource", "Biblio_Web.SharedResource" })
+                    foreach (var name in new[] { "Biblio_App.Resources.Vertalingen.SharedResource", "Biblio_App.Resources.SharedResource", "Biblio_App.SharedResource" })
                     {
                         try
                         {
-                            var rm = new ResourceManager(name, webAsm);
+                            var rm = new ResourceManager(name, appAsm);
                             var test = rm.GetString("Members", CultureInfo.CurrentUICulture);
                             if (!string.IsNullOrEmpty(test))
                             {
@@ -183,15 +253,46 @@ namespace Biblio_App.ViewModels
                         catch { }
                     }
                 }
-            }
-            catch { }
 
-            try
-            {
-                var modelType = typeof(SharedModelResource);
-                if (modelType != null && _sharedResourceManager == null)
+                // Next prefer shared model resource (Biblio_Models)
+                if (_sharedResourceManager == null)
                 {
-                    _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", modelType.Assembly);
+                    try
+                    {
+                        var modelType = typeof(SharedModelResource);
+                        if (modelType != null)
+                        {
+                            _sharedResourceManager = Biblio_Models.Resources.SharedModelResource.ResourceManager;
+                        }
+                    }
+                    catch { }
+                }
+
+                // Finally try web project's resources as fallback
+                if (_sharedResourceManager == null)
+                {
+                    try
+                    {
+                        var webAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
+                        if (webAsm != null)
+                        {
+                            foreach (var name in new[] { "Biblio_Web.Resources.Vertalingen.SharedResource", "Biblio_Web.Resources.SharedResource", "Biblio_Web.SharedResource" })
+                            {
+                                try
+                                {
+                                    var rm = new ResourceManager(name, webAsm);
+                                    var test = rm.GetString("Members", CultureInfo.CurrentUICulture);
+                                    if (!string.IsNullOrEmpty(test))
+                                    {
+                                        _sharedResourceManager = rm;
+                                        break;
+                                    }
+                                }
+                                catch { }
+                            }
+                        }
+                    }
+                    catch { }
                 }
             }
             catch { }
@@ -276,92 +377,159 @@ namespace Biblio_App.ViewModels
         {
             try
             {
-                var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
-
-                // Prefer resx file values loaded from repo (developer convenience)
-                if (_resxFileStrings != null && _resxFileStrings.TryGetValue(key, out var rf) && !string.IsNullOrEmpty(rf))
+                var shell = AppShell.Instance;
+                if (shell != null)
                 {
-                    return rf;
-                }
-
-                if (_sharedResourceManager != null)
-                {
-                    try
+                    var locMethod = typeof(AppShell).GetMethod("Localize", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                    if (locMethod != null)
                     {
-                        var val = _sharedResourceManager.GetString(key, culture);
-                        if (!string.IsNullOrEmpty(val)) return val;
+                        try
+                        {
+                            var fromShell = locMethod.Invoke(shell, new object[] { key }) as string;
+                            if (!string.IsNullOrEmpty(fromShell)) return fromShell;
+                        }
+                        catch { }
                     }
-                    catch { }
-                }
-
-                var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
-                if (code == "en")
-                {
-                    return key switch
-                    {
-                        "Members" => "Members",
-                        "Loans" => "Loans",
-                        "Books" => "Books",
-                        "DbPath" => "DB path:",
-                        "CopyPath" => "Copy path",
-                        "SearchPlaceholder" => "Search...",
-                        "Filter" => "Filter",
-                        "Category" => "Category",
-                        "Member" => "Member",
-                        "Book" => "Book",
-                        "OnlyOpen" => "Only open",
-                        "View" => "View",
-                        "Return" => "Return",
-                        "New" => "New",
-                        "Save" => "Save",
-                        "Delete" => "Delete",
-                        _ => key
-                    };
-                }
-
-                return key switch
-                {
-                    "Members" => "Leden",
-                    "Loans" => "Uitleningen",
-                    "Books" => "Boeken",
-                    "DbPath" => "DB pad:",
-                    "CopyPath" => "Kopieer pad",
-                    "SearchPlaceholder" => "Zoeken...",
-                    "Filter" => "Filter",
-                    "Category" => "Categorie",
-                    "Member" => "Lid",
-                    "Book" => "Boek",
-                    "OnlyOpen" => "Alleen open",
-                    "View" => "Inzien",
-                    "Return" => "Inleveren",
-                    "New" => "Nieuw",
-                    "Save" => "Opslaan",
-                    "Delete" => "Verwijder",
-                    _ => key
-                };
-            }
-            catch { return key; }
-        }
-
-        private void UpdateLocalizedStrings()
-        {
-            // ensure resource manager available
-            try { EnsureResourceManagerInitialized(); } catch { }
-
-            // Diagnostic logging to help track localization issues
-            try
-            {
-                var cur = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
-                Debug.WriteLine($"[Localization] UpdateLocalizedStrings called. Culture: {cur?.Name ?? "(null)"}");
-                Debug.WriteLine($"[Localization] SharedResourceManager set: {_sharedResourceManager != null}");
-                var testLoans = _sharedResourceManager != null ? _sharedResourceManager.GetString("Loans", cur) : null;
-                Debug.WriteLine($"[Localization] ResourceManager Loans='{testLoans ?? "(null)"}'");
-                if (_resxFileStrings != null)
-                {
-                    Debug.WriteLine($"[Localization] ResxFallback contains 'Loans': {_resxFileStrings.ContainsKey("Loans")}");
                 }
             }
             catch { }
+
+            EnsureResourceManagerInitialized();
+            var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+            if (_sharedResourceManager != null)
+            {
+                try
+                {
+                    var val = _sharedResourceManager.GetString(key, culture);
+                    if (!string.IsNullOrEmpty(val)) return val;
+                }
+                catch { }
+            }
+
+            var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
+            if (code == "en")
+            {
+                return key switch
+                {
+                    "Members" => "Members",
+                    "Loans" => "Loans",
+                    "Books" => "Books",
+                    "DbPath" => "DB path:",
+                    "CopyPath" => "Copy path",
+                    "SearchPlaceholder" => "Search...",
+                    "Filter" => "Filter",
+                    "Category" => "Category",
+                    "Member" => "Member",
+                    "Book" => "Book",
+                    "OnlyOpen" => "Only open",
+                    "View" => "View",
+                    "Return" => "Return",
+                    "New" => "New",
+                    "Save" => "Save",
+                    "Delete" => "Delete",
+                    "StartLabel" => "Start:",
+                    "DueLabel" => "Due:",
+                    "ReturnedLabel" => "Returned:",
+                    "DbPathNotLoaded" => "(not loaded)",
+                    "Validation" => "Validation",
+                    "Ready" => "Ready",
+                    "Error" => "Error",
+                    "SavedLoan" => "Loan saved.",
+                    "DeletedLoan" => "Loan deleted.",
+                    "BookMarkedReturned" => "Book marked as returned.",
+                    "Validation_BookRequired" => "Book is required.",
+                    "Validation_MemberRequired" => "Member is required.",
+                    "ErrorSavingLoan" => "Error saving loan.",
+                    "ErrorDeletingLoan" => "Error deleting loan.",
+                    "ErrorUpdatingLoan" => "Error updating loan.",
+                    "OK" => "OK",
+                    _ => key
+                };
+            }
+
+            if (code == "fr")
+            {
+                return key switch
+                {
+                    "Members" => "Membres",
+                    "Loans" => "Prêts",
+                    "Books" => "Livres",
+                    "DbPath" => "Chemin DB:",
+                    "CopyPath" => "Copier le chemin",
+                    "SearchPlaceholder" => "Rechercher...",
+                    "Filter" => "Filtrer",
+                    "Category" => "Catégorie",
+                    "Member" => "Membre",
+                    "Book" => "Livre",
+                    "OnlyOpen" => "Seulement ouverts",
+                    "View" => "Voir",
+                    "Return" => "Retourner",
+                    "New" => "Nouveau",
+                    "Save" => "Enregistrer",
+                    "Delete" => "Supprimer",
+                    "StartLabel" => "Début:",
+                    "DueLabel" => "Échéance:",
+                    "ReturnedLabel" => "Rendu:",
+                    "DbPathNotLoaded" => "(non chargé)",
+                    "Validation" => "Validation",
+                    "Ready" => "Terminé",
+                    "Error" => "Erreur",
+                    "SavedLoan" => "Prêt enregistré.",
+                    "DeletedLoan" => "Prêt supprimé.",
+                    "BookMarkedReturned" => "Livre marqué comme rendu.",
+                    "Validation_BookRequired" => "Le livre est obligatoire.",
+                    "Validation_MemberRequired" => "Le membre est obligatoire.",
+                    "ErrorSavingLoan" => "Erreur lors de l'enregistrement du prêt.",
+                    "ErrorDeletingLoan" => "Erreur lors de la suppression du prêt.",
+                    "ErrorUpdatingLoan" => "Erreur lors de la mise à jour du prêt.",
+                    "OK" => "OK",
+                    _ => key
+                };
+            }
+
+            return key switch
+            {
+                "Members" => "Leden",
+                "Loans" => "Uitleningen",
+                "Books" => "Boeken",
+                "DbPath" => "DB pad:",
+                "CopyPath" => "Kopieer pad",
+                "SearchPlaceholder" => "Zoeken...",
+                "Filter" => "Filter",
+                "Category" => "Categorie",
+                "Member" => "Lid",
+                "Book" => "Boek",
+                "OnlyOpen" => "Alleen open",
+                "View" => "Inzien",
+                "Return" => "Inleveren",
+                "New" => "Nieuw",
+                "Save" => "Opslaan",
+                "Delete" => "Verwijder",
+                "StartLabel" => "Start:",
+                "DueLabel" => "Tot:",
+                "ReturnedLabel" => "Ingeleverd:",
+                "DbPathNotLoaded" => "(niet geladen)",
+                "Validation" => "Validatie",
+                "Ready" => "Gereed",
+                "Error" => "Fout",
+                "SavedLoan" => "Uitlening opgeslagen.",
+                "DeletedLoan" => "Uitlening verwijderd.",
+                "BookMarkedReturned" => "Boek als ingeleverd gemarkeerd.",
+                "Validation_BookRequired" => "Boek is verplicht.",
+                "Validation_MemberRequired" => "Lid is verplicht.",
+                "ErrorSavingLoan" => "Fout bij opslaan uitlening.",
+                "ErrorDeletingLoan" => "Kan uitlening niet verwijderen; mogelijk gekoppeld.",
+                "ErrorUpdatingLoan" => "Kan uitlening niet updaten.",
+                "OK" => "OK",
+                _ => key
+            };
+        }
+
+        // public UpdateLocalizedStrings to satisfy ILocalizable
+        public void UpdateLocalizedStrings()
+        {
+            // ensure resource manager available
+            try { EnsureResourceManagerInitialized(); } catch { }
 
             PageHeaderText = Localize("Loans");
             MembersLabel = Localize("Members");
@@ -380,6 +548,37 @@ namespace Biblio_App.ViewModels
             NewButtonText = Localize("New");
             SaveButtonText = Localize("Save");
             DeleteButtonText = Localize("Delete");
+
+            // debug what was resolved so we can see problems in Output window
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"[UitleningenViewModel] Localized ReturnButtonText='{ReturnButtonText}', DeleteButtonText='{DeleteButtonText}'");
+            }
+            catch { }
+
+            // ensure visible fallbacks
+            if (string.IsNullOrWhiteSpace(ReturnButtonText)) ReturnButtonText = "Inleveren";
+            if (string.IsNullOrWhiteSpace(DeleteButtonText)) DeleteButtonText = "Verwijderen";
+
+            // notify UI that these properties changed
+            try
+            {
+                OnPropertyChanged(nameof(ReturnButtonText));
+                OnPropertyChanged(nameof(DeleteButtonText));
+            }
+            catch { }
+
+            // additional labels
+            StartLabel = Localize("StartLabel");
+            DueLabel = Localize("DueLabel");
+            ReturnedLabel = Localize("ReturnedLabel");
+            DbPathNotLoadedText = Localize("DbPathNotLoaded");
+
+            // notify computed/derived properties
+            OnPropertyChanged(nameof(PageHeaderText));
+            OnPropertyChanged(nameof(MembersLabel));
+            OnPropertyChanged(nameof(LoansLabel));
+            OnPropertyChanged(nameof(BooksLabel));
         }
 
         // keep the rest of the existing methods unchanged
@@ -390,6 +589,7 @@ namespace Biblio_App.ViewModels
             OnPropertyChanged(nameof(LedenCount));
             OnPropertyChanged(nameof(UitleningenCount));
             OnPropertyChanged(nameof(BoekenCount));
+            OnPropertyChanged(nameof(DebugInfo));
         }
 
         private async Task LoadDataAsync()
@@ -445,11 +645,25 @@ namespace Biblio_App.ViewModels
                 if (!string.IsNullOrWhiteSpace(SearchText))
                 {
                     var s = SearchText.Trim().ToLowerInvariant();
-                    query = query.Where(l => (l.Boek != null && (l.Boek.Titel ?? string.Empty).ToLower().Contains(s))
-                        || (l.Boek != null && (l.Boek.Auteur ?? string.Empty).ToLower().Contains(s))
-                        || (l.Lid != null && ((l.Lid.Voornaam ?? string.Empty) + " " + (l.Lid.AchterNaam ?? string.Empty)).ToLower().Contains(s))
-                        || (l.Lid != null && (l.Lid.Email ?? string.Empty).ToLower().Contains(s))
-                    );
+
+                    if (string.Equals(SelectedFilter, "Lid", StringComparison.OrdinalIgnoreCase))
+                    {
+                        query = query.Where(l => l.Lid != null && (((l.Lid.Voornaam ?? "") + " " + (l.Lid.AchterNaam ?? "")).ToLower().Contains(s)
+                            || (l.Lid.Email ?? "").ToLower().Contains(s)));
+                    }
+                    else if (string.Equals(SelectedFilter, "Boek", StringComparison.OrdinalIgnoreCase))
+                    {
+                        query = query.Where(l => l.Boek != null && (((l.Boek.Titel ?? "").ToLower().Contains(s))
+                            || ((l.Boek.Auteur ?? "").ToLower().Contains(s))));
+                    }
+                    else
+                    {
+                        // Alle (default) - search across both
+                        query = query.Where(l => (l.Boek != null && (l.Boek.Titel ?? string.Empty).ToLower().Contains(s))
+                            || (l.Boek != null && (l.Boek.Auteur ?? string.Empty).ToLower().Contains(s))
+                            || (l.Lid != null && (((l.Lid.Voornaam ?? string.Empty) + " " + (l.Lid.AchterNaam ?? string.Empty)).ToLower().Contains(s)))
+                            || (l.Lid != null && (l.Lid.Email ?? string.Empty).ToLower().Contains(s)));
+                    }
                 }
 
                 if (SelectedCategory != null && SelectedCategory.Id != 0)
@@ -487,8 +701,8 @@ namespace Biblio_App.ViewModels
                 }
             }
 
-            if (SelectedBoek == null) messages.Add("Boek is verplicht.");
-            if (SelectedLid == null) messages.Add("Lid is verplicht.");
+            if (SelectedBoek == null) messages.Add(Localize("Validation_BookRequired"));
+            if (SelectedLid == null) messages.Add(Localize("Validation_MemberRequired"));
 
             ValidationMessage = string.Join("\n", messages.Where(m => !string.IsNullOrWhiteSpace(m)));
             RaiseFieldErrorProperties();
@@ -522,7 +736,7 @@ namespace Biblio_App.ViewModels
             if (HasErrors || SelectedBoek == null || SelectedLid == null)
             {
                 BuildValidationMessage();
-                await ShowAlertAsync("Validatie", ValidationMessage);
+                await ShowAlertAsync(Localize("Validation"), ValidationMessage);
                 return;
             }
 
@@ -560,19 +774,19 @@ namespace Biblio_App.ViewModels
                 await LoadDataAsync();
                 SelectedUitlening = null;
                 ValidationMessage = string.Empty;
-                await ShowAlertAsync("Gereed", "Uitlening opgeslagen.");
+                await ShowAlertAsync(Localize("Ready"), Localize("SavedLoan"));
             }
             catch (DbUpdateException ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
-                ValidationMessage = "Fout bij opslaan uitlening.";
-                await ShowAlertAsync("Fout", ValidationMessage);
+                ValidationMessage = Localize("ErrorSavingLoan");
+                await ShowAlertAsync(Localize("Error"), ValidationMessage);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
-                ValidationMessage = "Onverwachte fout bij opslaan uitlening.";
-                await ShowAlertAsync("Fout", ValidationMessage);
+                ValidationMessage = Localize("ErrorSavingLoan");
+                await ShowAlertAsync(Localize("Error"), ValidationMessage);
             }
         }
 
@@ -592,19 +806,19 @@ namespace Biblio_App.ViewModels
 
                 await LoadDataAsync();
                 SelectedUitlening = null;
-                await ShowAlertAsync("Gereed", "Uitlening verwijderd.");
+                await ShowAlertAsync(Localize("Ready"), Localize("DeletedLoan"));
             }
             catch (DbUpdateException ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
-                ValidationMessage = "Kan uitlening niet verwijderen; mogelijk gekoppeld.";
-                await ShowAlertAsync("Fout", ValidationMessage);
+                ValidationMessage = Localize("ErrorDeletingLoan");
+                await ShowAlertAsync(Localize("Error"), ValidationMessage);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
-                ValidationMessage = "Onverwachte fout bij verwijderen uitlening.";
-                await ShowAlertAsync("Fout", ValidationMessage);
+                ValidationMessage = Localize("ErrorDeletingLoan");
+                await ShowAlertAsync(Localize("Error"), ValidationMessage);
             }
         }
 
@@ -623,19 +837,19 @@ namespace Biblio_App.ViewModels
                 }
 
                 await LoadDataAsync();
-                await ShowAlertAsync("Gereed", "Uitlening verwijderd.");
+                await ShowAlertAsync(Localize("Ready"), Localize("DeletedLoan"));
             }
             catch (DbUpdateException ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
-                ValidationMessage = "Kan uitlening niet verwijderen; mogelijk gekoppeld.";
-                await ShowAlertAsync("Fout", ValidationMessage);
+                ValidationMessage = Localize("ErrorDeletingLoan");
+                await ShowAlertAsync(Localize("Error"), ValidationMessage);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
-                ValidationMessage = "Onverwachte fout bij verwijderen uitlening.";
-                await ShowAlertAsync("Fout", ValidationMessage);
+                ValidationMessage = Localize("ErrorDeletingLoan");
+                await ShowAlertAsync(Localize("Error"), ValidationMessage);
             }
         }
 
@@ -655,19 +869,41 @@ namespace Biblio_App.ViewModels
                 }
 
                 await LoadDataAsync();
-                await ShowAlertAsync("Gereed", "Boek als ingeleverd gemarkeerd.");
+                await ShowAlertAsync(Localize("Ready"), Localize("BookMarkedReturned"));
             }
             catch (DbUpdateException ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
-                ValidationMessage = "Kan uitlening niet updaten.";
-                await ShowAlertAsync("Fout", ValidationMessage);
+                ValidationMessage = Localize("ErrorUpdatingLoan");
+                await ShowAlertAsync(Localize("Error"), ValidationMessage);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex);
-                ValidationMessage = "Onverwachte fout bij updaten uitlening.";
-                await ShowAlertAsync("Fout", ValidationMessage);
+                ValidationMessage = Localize("ErrorUpdatingLoan");
+                await ShowAlertAsync(Localize("Error"), ValidationMessage);
+            }
+        }
+
+        private async Task ExecuteSyncAsync()
+        {
+            try
+            {
+                // Resolve IDataSyncService from the current MAUI DI container
+                var ds = App.Current?.Handler?.MauiContext?.Services?.GetService<IDataSyncService>();
+                if (ds == null)
+                {
+                    LastError = "No sync service available.";
+                    return;
+                }
+
+                await ds.SyncAllAsync();
+                // reload local data after sync
+                await LoadDataAsync();
+            }
+            catch (Exception ex)
+            {
+                LastError = ex.Message;
             }
         }
 
@@ -679,7 +915,7 @@ namespace Biblio_App.ViewModels
                 {
                     if (Application.Current?.MainPage != null)
                     {
-                        await Application.Current.MainPage.DisplayAlert(title, message, "OK");
+                        await Application.Current.MainPage.DisplayAlert(title, message, Localize("OK"));
                     }
                 });
             }

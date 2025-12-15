@@ -26,7 +26,7 @@ using Biblio_Models.Resources;
 
 namespace Biblio_App.ViewModels
 {
-    public partial class BoekenViewModel : ObservableValidator
+    public partial class BoekenViewModel : ObservableValidator, ILocalizable
     {
         private readonly IGegevensProvider? _gegevensProvider;
         private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
@@ -45,17 +45,17 @@ namespace Biblio_App.ViewModels
         private Boek? selectedBoek;
 
         [ObservableProperty]
-        [Required(ErrorMessage = "Titel is verplicht.")]
-        [StringLength(200, ErrorMessage = "Titel is te lang.")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
+        [StringLength(200, ErrorMessageResourceName = "StringLength", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
         private string titel = string.Empty;
 
         [ObservableProperty]
-        [Required(ErrorMessage = "Auteur is verplicht.")]
-        [StringLength(200, ErrorMessage = "Auteur is te lang.")]
+        [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
+        [StringLength(200, ErrorMessageResourceName = "StringLength", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
         private string auteur = string.Empty;
 
         [ObservableProperty]
-        [StringLength(17, ErrorMessage = "ISBN is te lang.")]
+        [StringLength(17, ErrorMessageResourceName = "StringLength", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
         private string isbn = string.Empty;
 
         [ObservableProperty]
@@ -78,7 +78,7 @@ namespace Biblio_App.ViewModels
         private int totalCount;
 
         // Read-only display for the page indicator (e.g. "Pagina 1 / 5")
-        public string PageDisplay => TotalPages > 0 ? $"Pagina {Page} / {TotalPages}" : $"Pagina {Page}";
+        public string PageDisplay => TotalPages > 0 ? $"{Localize("Page")} {Page} / {TotalPages}" : $"{Localize("Page")} {Page}";
 
         [ObservableProperty]
         private Categorie? selectedFilterCategorie;
@@ -99,15 +99,15 @@ namespace Biblio_App.ViewModels
         public IRelayCommand NieuwCommand { get; }
         public IAsyncRelayCommand OpslaanCommand { get; }
         public IAsyncRelayCommand VerwijderCommand { get; }
-        public IRelayCommand ZoekCommand { get; }
+        public IAsyncRelayCommand ZoekCommand { get; }
 
-        public IRelayCommand NextPageCommand { get; }
-        public IRelayCommand PrevPageCommand { get; }
-        public IRelayCommand<int> GoToPageCommand { get; }
+        public IAsyncRelayCommand NextPageCommand { get; }
+        public IAsyncRelayCommand PrevPageCommand { get; }
+        public IAsyncRelayCommand<int> GoToPageCommand { get; }
 
         // item commands
-        public IRelayCommand<Boek> ItemDetailsCommand { get; }
-        public IRelayCommand<Boek> ItemEditCommand { get; }
+        public IAsyncRelayCommand<Boek> ItemDetailsCommand { get; }
+        public IAsyncRelayCommand<Boek> ItemEditCommand { get; }
         public IAsyncRelayCommand<Boek> ItemDeleteCommand { get; }
 
         // localized UI strings
@@ -150,6 +150,24 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string editButtonText = string.Empty;
 
+        [ObservableProperty]
+        private string overviewText = string.Empty;
+
+        [ObservableProperty]
+        private string prevButtonText = "<<";
+
+        [ObservableProperty]
+        private string nextButtonText = ">>";
+
+        [ObservableProperty]
+        private int boekenCount;
+
+        [ObservableProperty]
+        private int ledenCount;
+
+        [ObservableProperty]
+        private int openUitleningenCount;
+
         public BoekenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, IDataSyncService? sync = null, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
@@ -160,18 +178,26 @@ namespace Biblio_App.ViewModels
             NieuwCommand = new RelayCommand(Nieuw);
             OpslaanCommand = new AsyncRelayCommand(OpslaanAsync);
             VerwijderCommand = new AsyncRelayCommand(VerwijderAsync);
-            ZoekCommand = new RelayCommand(async () => await ZoekAsync());
+            ZoekCommand = new AsyncRelayCommand(ZoekAsync);
 
-            NextPageCommand = new RelayCommand(async () => { Page++; await LoadBooksAsync(); });
-            PrevPageCommand = new RelayCommand(async () => { if (Page > 1) { Page--; await LoadBooksAsync(); } });
-            GoToPageCommand = new RelayCommand<int>(async p => { if (p >= 1) { Page = p; await LoadBooksAsync(); } });
+            NextPageCommand = new AsyncRelayCommand(async () => { Page++; await LoadBooksAsync(); });
+            PrevPageCommand = new AsyncRelayCommand(async () => { if (Page > 1) { Page--; await LoadBooksAsync(); } });
+            GoToPageCommand = new AsyncRelayCommand<int>(async p => { if (p >= 1) { Page = p; await LoadBooksAsync(); } });
 
-            ItemDetailsCommand = new RelayCommand<Boek>(async b => await NavigateToDetailsAsync(b));
+            // Navigate to a dedicated details page instead of showing an in-place popup
+            ItemDetailsCommand = new AsyncRelayCommand<Boek>(async b => await NavigateToDetailsAsync(b));
             ItemEditCommand = new AsyncRelayCommand<Boek>(async b => await NavigateToEditAsync(b));
             ItemDeleteCommand = new AsyncRelayCommand<Boek>(async b => await DeleteItemAsync(b));
 
             // initialize localized strings
             UpdateLocalizedStrings();
+
+            // Diagnostic: log resource names and lookup results to help debug missing translations
+            try
+            {
+                LogResourceDiagnostics();
+            }
+            catch { }
 
             if (_languageService != null)
             {
@@ -183,8 +209,21 @@ namespace Biblio_App.ViewModels
                 catch { }
             }
 
-            _ = LoadCategoriesAsync();
-            _ = LoadBooksAsync();
+            // safely start background loads and observe exceptions
+            RunSafe(LoadCategoriesAsync());
+            RunSafe(LoadBooksAsync());
+            RunSafe(LoadCountersAsync());
+        }
+
+        private void RunSafe(Task task)
+        {
+            _ = task.ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    try { Debug.WriteLine(t.Exception); } catch { }
+                }
+            }, TaskScheduler.Default);
         }
 
         private void EnsureResourceManagerInitialized()
@@ -201,6 +240,9 @@ namespace Biblio_App.ViewModels
                 {
                     var asm = webType.Assembly;
                     _sharedResourceManager = new ResourceManager("Biblio_Web.Resources.Vertalingen.SharedResource", asm);
+#if DEBUG
+                    try { Debug.WriteLine($"BoekenViewModel: using ResourceManager base='{_sharedResourceManager.BaseName}' from assembly='{asm.GetName().Name}'"); } catch { }
+#endif
                     return;
                 }
             }
@@ -233,6 +275,9 @@ namespace Biblio_App.ViewModels
                             if (!string.IsNullOrEmpty(test))
                             {
                                 _sharedResourceManager = rm;
+#if DEBUG
+                                try { Debug.WriteLine($"BoekenViewModel: selected ResourceManager base='{baseName}' from assembly='{asm.GetName().Name}' (test key returned='{test}')"); } catch { }
+#endif
                                 return;
                             }
                         }
@@ -244,107 +289,271 @@ namespace Biblio_App.ViewModels
 
             try
             {
-                var modelType = typeof(SharedModelResource);
-                if (modelType != null)
+                // Prefer the shared model resource's static ResourceManager to ensure a single source of truth
+                _sharedResourceManager = Biblio_Models.Resources.SharedModelResource.ResourceManager;
+#if DEBUG
+                try { Debug.WriteLine($"BoekenViewModel: using SharedModelResource.ResourceManager base='{_sharedResourceManager.BaseName}'"); } catch { }
+#endif
+                return;
+            }
+            catch { }
+
+            try
+            {
+                // Also try the MAUI app assembly's resources (Biblio_App) so added resx in the app project is discovered
+                var appAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_App", StringComparison.OrdinalIgnoreCase));
+                if (appAsm != null)
                 {
-                    var asm = modelType.Assembly;
-                    _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", asm);
-                    return;
+                    var appCandidates = new[] {
+                        "Biblio_App.Resources.Vertalingen.SharedResource",
+                        "Biblio_App.Resources.SharedResource",
+                        "Biblio_App.SharedResource"
+                    };
+
+                    foreach (var baseName in appCandidates)
+                    {
+                        try
+                        {
+                            var rm = new ResourceManager(baseName, appAsm);
+                            var test = rm.GetString("Boeken", CultureInfo.CurrentUICulture);
+                            if (!string.IsNullOrEmpty(test))
+                            {
+                                _sharedResourceManager = rm;
+#if DEBUG
+                                try { Debug.WriteLine($"BoekenViewModel: selected ResourceManager base='{baseName}' from assembly='{appAsm.GetName().Name}' (test key returned='{test}')"); } catch { }
+#endif
+                                return;
+                            }
+                        }
+                        catch { }
+                    }
                 }
             }
             catch { }
+
+#if DEBUG
+            try
+            {
+                if (_sharedResourceManager == null)
+                {
+                    Debug.WriteLine("BoekenViewModel: No ResourceManager selected. Assemblies loaded:");
+                    foreach (var a in AppDomain.CurrentDomain.GetAssemblies())
+                    {
+                        try { Debug.WriteLine($"  assembly: {a.GetName().Name}, resources: {string.Join(",", a.GetManifestResourceNames().Take(10))}"); } catch { }
+                    }
+                }
+            }
+            catch { }
+#endif
         }
 
         private string Localize(string key, string? arg = null)
         {
             EnsureResourceManagerInitialized();
 
+            // If AppShell instance exists, prefer its localization logic so flyout and pages are consistent
+            try
+            {
+                var shell = AppShell.Instance;
+                if (shell != null)
+                {
+                    var locMethod = typeof(AppShell).GetMethod("Localize", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                    if (locMethod != null)
+                    {
+                        try
+                        {
+                            var result = locMethod.Invoke(shell, new object[] { key }) as string;
+#if DEBUG
+                            try { Debug.WriteLine($"BoekenViewModel.Localize: AppShell.Localize returned='{result}' for key='{key}'"); } catch { }
+#endif
+                            if (!string.IsNullOrEmpty(result)) return arg != null ? string.Format(System.Globalization.CultureInfo.CurrentUICulture, result, arg) : result;
+                        }
+                        catch { /* ignore reflection failures and fallback */ }
+                    }
+                }
+            }
+            catch { }
+
             var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+#if DEBUG
+            try { Debug.WriteLine($"BoekenViewModel.Localize: using culture={culture.Name} and ResourceManager={( _sharedResourceManager != null ? _sharedResourceManager.BaseName : "<null>")}"); } catch { }
+#endif
             if (_sharedResourceManager != null)
             {
                 try
                 {
                     var value = _sharedResourceManager.GetString(key, culture);
+#if DEBUG
+                    try { Debug.WriteLine($"BoekenViewModel.Localize: ResourceManager.GetString returned='{value}' for key='{key}'"); } catch { }
+#endif
                     if (!string.IsNullOrEmpty(value)) return arg != null ? string.Format(culture, value, arg) : value;
                 }
                 catch { }
             }
 
             // fallback based on culture: English for 'en', otherwise Dutch
-            var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
-            if (code == "en")
+            var langCode = culture.TwoLetterISOLanguageName?.ToLowerInvariant() ?? string.Empty;
+            if (langCode == "en")
             {
+#if DEBUG
+                try { Debug.WriteLine($"BoekenViewModel.Localize: falling back to hard-coded English for key='{key}'"); } catch { }
+#endif
                 return key switch
                 {
                     "Boeken" => "Books",
+                    "Books" => "Books",
                     "Titel" => "Title",
+                    "Title" => "Title",
                     "Auteur" => "Author",
+                    "Author" => "Author",
                     "Acties" => "Actions",
+                    "ActiesHeader" => "Actions",
                     "Actie" => "Action",
                     "ZoekPlaceholder" => "Search by title, author or ISBN...",
+                    "SearchPlaceholder" => "Search by title, author or ISBN...",
                     "Zoek" => "Search",
+                    "Search" => "Search",
                     "Categorie" => "Category",
+                    "Category" => "Category",
                     "Nieuw" => "New",
+                    "New" => "New",
                     "Verwijderen" => "Delete",
+                    "Delete" => "Delete",
                     "Opslaan" => "Save",
+                    "Save" => "Save",
                     "ISBN" => "ISBN",
                     "Details" => "Details",
                     "Bewerk" => "Edit",
+                    "Edit" => "Edit",
+                    // overview text for books page
+                    "BooksOverview" => "Overview of books — here you can view details, edit books and then add a new book",
                     "Alle" => "All",
+                    "All" => "All",
                     "Page" => "Page",
-                    // headers used in list
-                    "ActiesHeader" => "Actions",
-                    "TitelHeader" => "Title",
-                    "AuteurHeader" => "Author",
+                    "Prev" => "Previous",
+                    "Next" => "Next",
                     _ => key
                 };
             }
 
-            // default Dutch fallback
+            if (langCode == "fr")
+            {
+#if DEBUG
+                try { Debug.WriteLine($"BoekenViewModel.Localize: falling back to hard-coded French for key='{key}'"); } catch { }
+#endif
+                return key switch
+                {
+                    "Boeken" => "Livres",
+                    "Books" => "Livres",
+                    "Titel" => "Titre",
+                    "Title" => "Titre",
+                    "Auteur" => "Auteur",
+                    "Author" => "Auteur",
+                    "Acties" => "Actions",
+                    "ActiesHeader" => "Actions",
+                    "Actie" => "Action",
+                    "ZoekPlaceholder" => "Rechercher par titre, auteur ou ISBN...",
+                    "SearchPlaceholder" => "Rechercher par titre, auteur ou ISBN...",
+                    "Zoek" => "Rechercher",
+                    "Search" => "Rechercher",
+                    "Categorie" => "Catégorie",
+                    "Category" => "Catégorie",
+                    "Nieuw" => "Nouveau",
+                    "New" => "Nouveau",
+                    "Verwijderen" => "Supprimer",
+                    "Delete" => "Supprimer",
+                    "Opslaan" => "Enregistrer",
+                    "Save" => "Enregistrer",
+                    "ISBN" => "ISBN",
+                    "Details" => "Détails",
+                    "Bewerk" => "Modifier",
+                    "Edit" => "Modifier",
+                    // overview text for books page (French)
+                    "BooksOverview" => "Aperçu des livres — ici, vous pouvez voir les détails, modifier les livres et ensuite ajouter un nouveau livre",
+                    "Alle" => "Tous",
+                    "All" => "Tous",
+                    "Page" => "Page",
+                    "Prev" => "Précédent",
+                    "Next" => "Suivant",
+                    _ => key
+                };
+            }
+
+            // default Dutch fallback — accept English keys too for robustness
+#if DEBUG
+            try { Debug.WriteLine($"BoekenViewModel.Localize: falling back to hard-coded Dutch for key='{key}'"); } catch { }
+#endif
             return key switch
             {
                 "Boeken" => "Boeken",
+                "Books" => "Boeken",
                 "Titel" => "Titel",
+                "Title" => "Titel",
                 "Auteur" => "Auteur",
+                "Author" => "Auteur",
                 "Acties" => "Acties",
                 "Actie" => "Actie",
                 "ZoekPlaceholder" => "Zoek op titel, auteur of ISBN...",
+                "SearchPlaceholder" => "Zoek op titel, auteur of ISBN...",
                 "Zoek" => "Zoek",
+                "Search" => "Zoek",
                 "Categorie" => "Categorie",
+                "Category" => "Categorie",
                 "Nieuw" => "Nieuw",
+                "New" => "Nieuw",
                 "Verwijderen" => "Verwijderen",
+                "BooksOverview" => "Overzicht van boeken — hier kun je details bekijken, boeken bewerken en daarna een nieuw boek toevoegen",
+                "Delete" => "Verwijderen",
                 "Opslaan" => "Opslaan",
+                "Save" => "Opslaan",
                 "ISBN" => "ISBN",
                 "Details" => "Details",
                 "Bewerk" => "Bewerk",
+                "Edit" => "Bewerk",
                 "Alle" => "Alle",
+                "All" => "Alle",
                 "Page" => "Pagina",
-                // headers used in list
-                "ActiesHeader" => "Acties",
-                "TitelHeader" => "Titel",
-                "AuteurHeader" => "Auteur",
+                "Prev" => "Vorige",
+                "Next" => "Volgende",
                 _ => key
             };
         }
 
-        private void UpdateLocalizedStrings()
+        // ensure this public method satisfies ILocalizable; the implementation reuses existing logic
+        // Public method to satisfy ILocalizable — call the core implementation without debug break.
+        public void UpdateLocalizedStrings()
         {
-            PageTitle = Localize("Boeken");
-            HeaderTitle = Localize("Titel");
-            HeaderAuthor = Localize("Auteur");
-            HeaderActions = Localize("Acties");
-            SearchPlaceholder = Localize("ZoekPlaceholder");
-            SearchButtonText = Localize("Zoek");
-            CategoryTitle = Localize("Categorie");
-            NewButtonText = Localize("Nieuw");
-            DeleteButtonText = Localize("Verwijderen");
-            SaveButtonText = Localize("Opslaan");
-            IsbnPlaceholder = Localize("ISBN");
-            DetailsButtonText = Localize("Details");
-            EditButtonText = Localize("Bewerk");
+            UpdateLocalizedStringsCore();
         }
 
-        // Public helper to force updating localized strings from UI thread
+        // Rename the previous UpdateLocalizedStrings implementation to a core method
+        private void UpdateLocalizedStringsCore()
+        {
+            // Use shared resource keys (English) so AppShell and viewmodels use the same keys
+            PageTitle = Localize("Books");
+            HeaderTitle = Localize("Title");
+            HeaderAuthor = Localize("Author");
+            HeaderActions = Localize("Actions");
+            SearchPlaceholder = Localize("SearchPlaceholder");
+            SearchButtonText = Localize("Search");
+            CategoryTitle = Localize("Category");
+            NewButtonText = Localize("New");
+            DeleteButtonText = Localize("Delete");
+            SaveButtonText = Localize("Save");
+            IsbnPlaceholder = Localize("ISBN");
+            DetailsButtonText = Localize("Details");
+            EditButtonText = Localize("Edit");
+            OverviewText = Localize("BooksOverview");
+
+            // Prev/Next paging button labels
+            PrevButtonText = Localize("Prev");
+            NextButtonText = Localize("Next");
+
+            // Ensure computed/display-only properties are refreshed when language changes
+            OnPropertyChanged(nameof(PageDisplay));
+        }
+
+        // update constructor and RefreshLocalizedStrings to call the public UpdateLocalizedStrings
         public void RefreshLocalizedStrings()
         {
             try
@@ -390,11 +599,11 @@ namespace Biblio_App.ViewModels
             Categorien.Clear();
             Categorien.Add(new Categorie { Id = 0, Naam = "Alle" });
             // prefer sync service when available
-            if (_sync != null)
+            if (_sync is IDataSyncService sync)
             {
                 try
                 {
-                    var cats = await _sync.GetCategorieenAsync(true);
+                    var cats = await sync.GetCategorieenAsync(true);
                     foreach (var c in cats) Categorien.Add(c);
                     SelectedFilterCategorie = Categorien.FirstOrDefault();
                     return;
@@ -405,7 +614,7 @@ namespace Biblio_App.ViewModels
             try
             {
                 using var db = _dbFactory.CreateDbContext();
-                var cats = await db.Categorien.Where(c => !c.IsDeleted).OrderBy(c => c.Naam).ToListAsync();
+                var cats = await db.Categorien.AsNoTracking().Where(c => !c.IsDeleted).OrderBy(c => c.Naam).ToListAsync();
                 foreach (var c in cats) Categorien.Add(c);
             }
             catch { }
@@ -422,138 +631,7 @@ namespace Biblio_App.ViewModels
             }
         }
 
-        private async Task ShowAlertAsync(string title, string message)
-        {
-            try
-            {
-                await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    if (Application.Current?.MainPage != null)
-                    {
-                        await Application.Current.MainPage.DisplayAlert(title, message, "OK");
-                    }
-                });
-            }
-            catch
-            {
-                // ignore
-            }
-        }
-
-        private async Task LoadBooksAsync()
-        {
-            // prefer sync service when available
-            if (_sync != null)
-            {
-                try
-                {
-                    var list = await _sync.GetBoekenAsync(true);
-                    Boeken.Clear();
-                    foreach (var b in list) Boeken.Add(b);
-                    return;
-                }
-                catch { /* fallback to local */ }
-            }
-
-            try
-            {
-                using var db = _dbFactory.CreateDbContext();
-                var q = db.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).OrderBy(b => b.Titel).AsQueryable();
-                TotalCount = await q.CountAsync();
-                TotalPages = (int)Math.Ceiling(TotalCount / (double)PageSize);
-                if (Page < 1) Page = 1;
-                if (Page > TotalPages && TotalPages > 0) Page = TotalPages;
-                var list = await q.Skip((Page - 1) * PageSize).Take(PageSize).ToListAsync();
-                Boeken.Clear();
-                foreach (var b in list) Boeken.Add(b);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex);
-            }
-        }
-
-        private async Task LoadBooksFromApiWithFiltersAsync()
-        {
-            // prefer sync service when available
-            if (_sync != null)
-            {
-                try
-                {
-                    var items = await _sync.GetBoekenAsync(true);
-                    if (!string.IsNullOrWhiteSpace(SearchText))
-                    {
-                        var s = SearchText.Trim().ToLowerInvariant();
-                        items = items.Where(b => (b.Titel ?? string.Empty).ToLower().Contains(s) || (b.Auteur ?? string.Empty).ToLower().Contains(s) || (b.Isbn ?? string.Empty).ToLower().Contains(s)).ToList();
-                    }
-                    if (SelectedFilterCategorie != null && SelectedFilterCategorie.Id != 0)
-                    {
-                        items = items.Where(b => b.CategorieID == SelectedFilterCategorie.Id).ToList();
-                    }
-                    Boeken.Clear();
-                    foreach (var b in items) Boeken.Add(b);
-                    return;
-                }
-                catch { /* fallback */ }
-            }
-
-            // local filtering with paging
-            using var db2 = _dbFactory.CreateDbContext();
-            var q = db2.Boeken.Include(b => b.categorie).Where(b => !b.IsDeleted).AsQueryable();
-            if (!string.IsNullOrWhiteSpace(SearchText))
-            {
-                var s = SearchText.Trim().ToLowerInvariant();
-                q = q.Where(b => (b.Titel ?? string.Empty).ToLower().Contains(s) || (b.Auteur ?? string.Empty).ToLower().Contains(s) || (b.Isbn ?? string.Empty).ToLower().Contains(s));
-            }
-            if (SelectedFilterCategorie != null && SelectedFilterCategorie.Id != 0)
-            {
-                q = q.Where(b => b.CategorieID == SelectedFilterCategorie.Id);
-            }
-            TotalCount = await q.CountAsync();
-            TotalPages = (int)Math.Ceiling(TotalCount / (double)PageSize);
-            if (Page < 1) Page = 1;
-            if (Page > TotalPages && TotalPages > 0) Page = TotalPages;
-            var itemsLocal = await q.OrderBy(b => b.Titel).Skip((Page - 1) * PageSize).Take(PageSize).ToListAsync();
-            Boeken.Clear();
-            foreach (var b in itemsLocal) Boeken.Add(b);
-        }
-
-        private async Task ZoekAsync()
-        {
-            await LoadBooksFromApiWithFiltersAsync();
-        }
-
-        private void Nieuw()
-        {
-            SelectedBoek = null;
-            Titel = string.Empty;
-            Auteur = string.Empty;
-            Isbn = string.Empty;
-            CategorieId = 0;
-            SelectedCategory = null;
-            ValidationMessage = string.Empty;
-            ClearErrors();
-            RaiseFieldErrorProperties();
-        }
-
-        private void BuildValidationMessage()
-        {
-            var props = new[] { nameof(Titel), nameof(Auteur), nameof(Isbn) };
-            var messages = new List<string>();
-            var notifier = (System.ComponentModel.INotifyDataErrorInfo)this;
-            foreach (var p in props)
-            {
-                var errors = notifier.GetErrors(p) as IEnumerable;
-                if (errors != null)
-                {
-                    foreach (var e in errors) messages.Add(e?.ToString());
-                }
-            }
-
-            ValidationMessage = string.Join("\n", messages.Where(m => !string.IsNullOrWhiteSpace(m)));
-            RaiseFieldErrorProperties();
-        }
-
+        // Validation helper - mirrors LedenViewModel
         private string GetFirstError(string propertyName)
         {
             var notifier = (System.ComponentModel.INotifyDataErrorInfo)this;
@@ -573,6 +651,154 @@ namespace Biblio_App.ViewModels
             OnPropertyChanged(nameof(HasValidationErrors));
         }
 
+        private async Task LoadCountersAsync()
+        {
+            try
+            {
+                if (_gegevensProvider != null)
+                {
+                    try
+                    {
+                        var t = await _gegevensProvider.GetTellersAsync();
+                        BoekenCount = t.boeken;
+                        LedenCount = t.leden;
+                        OpenUitleningenCount = t.openUitleningen;
+                        return;
+                    }
+                    catch { }
+                }
+
+                using var db = _dbFactory.CreateDbContext();
+                try
+                {
+                    BoekenCount = await db.Boeken.CountAsync(b => !b.IsDeleted);
+                }
+                catch { BoekenCount = 0; }
+
+                try
+                {
+                    LedenCount = await db.Leden.CountAsync();
+                }
+                catch { LedenCount = 0; }
+
+                try
+                {
+                    OpenUitleningenCount = await db.Leningens.CountAsync(l => l.ReturnedAt == null);
+                }
+                catch { OpenUitleningenCount = 0; }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
+
+        private async Task LoadBooksAsync()
+        {
+            try
+            {
+                Debug.WriteLine($"LoadBooksAsync starting: Page={Page}, PageSize={PageSize}, SearchText='{SearchText}', SelectedFilterCategorie={(SelectedFilterCategorie?.Id.ToString() ?? "null")}" );
+
+                // If a sync service is available prefer it (it will attempt API then update local store)
+                if (_sync is IDataSyncService syncSvc)
+                {
+                    try
+                    {
+                        var all = await syncSvc.GetBoekenAsync(true);
+                        Debug.WriteLine($"DataSyncService returned {all?.Count ?? 0} items.");
+
+                        var filtered = (all ?? new List<Boek>()).Where(b => !b.IsDeleted);
+
+                        if (!string.IsNullOrWhiteSpace(SearchText))
+                        {
+                            var s = SearchText.Trim().ToLowerInvariant();
+                            filtered = filtered.Where(b => (b.Titel ?? string.Empty).ToLower().Contains(s)
+                                || (b.Auteur ?? string.Empty).ToLower().Contains(s)
+                                || (b.Isbn ?? string.Empty).ToLower().Contains(s));
+                        }
+
+                        if (SelectedFilterCategorie != null && SelectedFilterCategorie.Id != 0)
+                        {
+                            var catId = SelectedFilterCategorie.Id;
+                            filtered = filtered.Where(b => b.CategorieID == catId);
+                        }
+
+                        var listAll = filtered.OrderBy(b => b.Titel).ToList();
+                        var total = listAll.Count;
+
+                        TotalCount = total;
+                        TotalPages = PageSize > 0 ? (int)Math.Ceiling(total / (double)PageSize) : 1;
+
+                        var pageItems = listAll.Skip((Page - 1) * PageSize).Take(PageSize).ToList();
+
+                        Boeken.Clear();
+                        foreach (var b in pageItems)
+                        {
+                            try { b.CategorieNaam = await ResolveCategoryNameAsync(b.CategorieID); } catch { }
+                            Boeken.Add(b);
+                        }
+
+                        return;
+                    }
+                    catch { /* fallback to local loader below */ }
+                }
+
+                // fallback to local DB
+                using var db = _dbFactory.CreateDbContext();
+                var query = db.Boeken.AsNoTracking().Where(b => !b.IsDeleted).AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(SearchText))
+                {
+                    var s = SearchText.Trim().ToLowerInvariant();
+                    query = query.Where(b => (b.Titel ?? string.Empty).ToLower().Contains(s)
+                        || (b.Auteur ?? string.Empty).ToLower().Contains(s)
+                        || (b.Isbn ?? string.Empty).ToLower().Contains(s));
+                }
+
+                if (SelectedFilterCategorie != null && SelectedFilterCategorie.Id != 0)
+                {
+                    var catId = SelectedFilterCategorie.Id;
+                    query = query.Where(b => b.CategorieID == catId);
+                }
+
+                var totalLocal = await query.CountAsync();
+                TotalCount = totalLocal;
+                TotalPages = PageSize > 0 ? (int)Math.Ceiling(totalLocal / (double)PageSize) : 1;
+
+                var items = await query.OrderBy(b => b.Titel).Skip((Page - 1) * PageSize).Take(PageSize).ToListAsync();
+                Boeken.Clear();
+                foreach (var b in items)
+                {
+                    try { b.CategorieNaam = await ResolveCategoryNameAsync(b.CategorieID); } catch { }
+                    Boeken.Add(b);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        }
+
+        private void Nieuw()
+        {
+            SelectedBoek = null;
+            Titel = string.Empty;
+            Auteur = string.Empty;
+            Isbn = string.Empty;
+            CategorieId = 0;
+            SelectedCategory = null;
+            ValidationMessage = string.Empty;
+            ClearErrors();
+            RaiseFieldErrorProperties();
+        }
+
+        private async Task ZoekAsync()
+        {
+            Page = 1;
+            await LoadBooksAsync();
+        }
+
         private async Task OpslaanAsync()
         {
             ClearErrors();
@@ -580,54 +806,55 @@ namespace Biblio_App.ViewModels
 
             if (HasErrors)
             {
-                BuildValidationMessage();
+                // build validation message
+                var props = new[] { nameof(Titel), nameof(Auteur), nameof(Isbn) };
+                var messages = new List<string>();
+                var notifier = (System.ComponentModel.INotifyDataErrorInfo)this;
+                foreach (var p in props)
+                {
+                    var errors = notifier.GetErrors(p) as IEnumerable;
+                    if (errors != null)
+                    {
+                        foreach (var e in errors) messages.Add(e?.ToString());
+                    }
+                }
+
+                ValidationMessage = string.Join("\n", messages.Where(m => !string.IsNullOrWhiteSpace(m)));
+                RaiseFieldErrorProperties();
                 await ShowAlertAsync("Validatie", ValidationMessage);
                 return;
             }
 
             try
             {
-                if (_sync != null)
+                using var db = _dbFactory.CreateDbContext();
+                var query = db.Boeken.AsNoTracking().Where(b => !b.IsDeleted).AsQueryable();
+                if (SelectedBoek == null)
                 {
-                    if (SelectedBoek == null)
+                    var nieuw = new Boek
                     {
-                        var nieuw = new Boek { Titel = Titel, Auteur = Auteur, Isbn = Isbn, CategorieID = CategorieId };
-                        var created = await _sync.CreateBoekAsync(nieuw);
-                        if (created != null) await LoadBooksAsync();
-                    }
-                    else
-                    {
-                        SelectedBoek.Titel = Titel;
-                        SelectedBoek.Auteur = Auteur;
-                        SelectedBoek.Isbn = Isbn;
-                        SelectedBoek.CategorieID = CategorieId;
-                        await _sync.UpdateBoekAsync(SelectedBoek);
-                        await LoadBooksAsync();
-                    }
+                        Titel = Titel,
+                        Auteur = Auteur,
+                        Isbn = Isbn,
+                        CategorieID = CategorieId
+                    };
+                    db.Boeken.Add(nieuw);
                 }
                 else
                 {
-                    using var db = _dbFactory.CreateDbContext();
-                    if (SelectedBoek == null)
+                    var existing = await db.Boeken.FindAsync(SelectedBoek.Id);
+                    if (existing != null)
                     {
-                        var nieuw = new Boek { Titel = Titel, Auteur = Auteur, Isbn = Isbn, CategorieID = CategorieId };
-                        db.Boeken.Add(nieuw);
+                        existing.Titel = Titel;
+                        existing.Auteur = Auteur;
+                        existing.Isbn = Isbn;
+                        existing.CategorieID = CategorieId;
+                        db.Boeken.Update(existing);
                     }
-                    else
-                    {
-                        var existing = await db.Boeken.FindAsync(SelectedBoek.Id);
-                        if (existing != null)
-                        {
-                            existing.Titel = Titel;
-                            existing.Auteur = Auteur;
-                            existing.Isbn = Isbn;
-                            existing.CategorieID = CategorieId;
-                            db.Boeken.Update(existing);
-                        }
-                    }
-                    await db.SaveChangesAsync();
-                    await LoadBooksAsync();
                 }
+
+                await db.SaveChangesAsync();
+                await LoadBooksAsync();
 
                 SelectedBoek = null;
                 ValidationMessage = string.Empty;
@@ -635,8 +862,8 @@ namespace Biblio_App.ViewModels
             }
             catch (Exception ex)
             {
-                ValidationMessage = "Fout bij opslaan.";
-                System.Diagnostics.Debug.WriteLine(ex);
+                ValidationMessage = "Onverwachte fout bij opslaan.";
+                Debug.WriteLine(ex);
                 await ShowAlertAsync("Fout", ValidationMessage);
             }
         }
@@ -645,35 +872,46 @@ namespace Biblio_App.ViewModels
         {
             ValidationMessage = string.Empty;
             if (SelectedBoek == null) return;
+
             try
             {
-                if (_sync != null)
+                using var db = _dbFactory.CreateDbContext();
+                var existing = await db.Boeken.FindAsync(SelectedBoek.Id);
+                if (existing != null)
                 {
-                    await _sync.DeleteBoekAsync(SelectedBoek.Id);
-                    await LoadBooksAsync();
-                }
-                else
-                {
-                    using var db = _dbFactory.CreateDbContext();
-                    var existing = await db.Boeken.FindAsync(SelectedBoek.Id);
-                    if (existing != null)
-                    {
-                        existing.IsDeleted = true;
-                        db.Boeken.Update(existing);
-                        await db.SaveChangesAsync();
-                    }
-                    await LoadBooksAsync();
+                    db.Boeken.Remove(existing);
+                    await db.SaveChangesAsync();
                 }
 
+                await LoadBooksAsync();
                 SelectedBoek = null;
-                ValidationMessage = string.Empty;
                 await ShowAlertAsync("Gereed", "Boek verwijderd.");
             }
             catch (Exception ex)
             {
-                ValidationMessage = "Fout bij verwijderen.";
-                System.Diagnostics.Debug.WriteLine(ex);
+                ValidationMessage = "Onverwachte fout bij verwijderen.";
+                Debug.WriteLine(ex);
                 await ShowAlertAsync("Fout", ValidationMessage);
+            }
+        }
+
+        private async Task DeleteItemAsync(Boek? item)
+        {
+            if (item == null) return;
+            try
+            {
+                using var db = _dbFactory.CreateDbContext();
+                var existing = await db.Boeken.FindAsync(item.Id);
+                if (existing != null)
+                {
+                    db.Boeken.Remove(existing);
+                    await db.SaveChangesAsync();
+                }
+                await LoadBooksAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
             }
         }
 
@@ -682,12 +920,11 @@ namespace Biblio_App.ViewModels
             if (b == null) return;
             try
             {
-                Debug.WriteLine($"NavigateToDetailsAsync called for Boek Id={b.Id}");
                 await Shell.Current.GoToAsync($"{nameof(Pages.BoekDetailsPage)}?boekId={b.Id}");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(ex);
+                Debug.WriteLine(ex);
                 await ShowAlertAsync("Fout", "Kan detailspagina niet openen.");
             }
         }
@@ -697,59 +934,167 @@ namespace Biblio_App.ViewModels
             if (b == null) return;
             try
             {
-                Debug.WriteLine($"NavigateToEditAsync called for Boek Id={b.Id}");
-                // Navigate to the BoekCreatePage and pass the id so the page/viewmodel can load the book for editing
-                await Shell.Current.GoToAsync($"{nameof(Pages.Boek.BoekCreatePage)}?boekId={b.Id}");
+                await Shell.Current.GoToAsync($"{nameof(Pages.BoekDetailsPage)}?boekId={b.Id}&edit=true");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(ex);
+                Debug.WriteLine(ex);
                 await ShowAlertAsync("Fout", "Kan bewerkpagina niet openen.");
             }
         }
 
-        private async Task DeleteItemAsync(Boek? b)
+        private async Task ShowAlertAsync(string title, string message)
+        {
+            try
+            {
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    if (Application.Current?.MainPage != null)
+                    {
+                        await Application.Current.MainPage.DisplayAlert(title, message, "OK");
+                    }
+                });
+            }
+            catch { }
+        }
+
+        private async Task ShowDetailsAsync(Boek? b)
         {
             if (b == null) return;
             try
             {
-                Debug.WriteLine($"DeleteItemAsync called for Boek Id={b.Id}");
-                if (_sync != null)
+                var isbnLabel = Localize("ISBN");
+                var categoryLabel = Localize("Category");
+                var title = Localize("Details");
+
+                // try to resolve category name from loaded categories
+                string categoryName = string.Empty;
+                try
                 {
-                    await _sync.DeleteBoekAsync(b.Id);
-                    await LoadBooksAsync();
-                    await ShowAlertAsync("Gereed", "Boek verwijderd.");
-                    return;
+                    var cat = Categorien?.FirstOrDefault(c => c.Id == b.CategorieID);
+                    if (cat != null && !string.IsNullOrWhiteSpace(cat.Naam))
+                    {
+                        categoryName = cat.Naam;
+                      }
+                }
+                catch { }
+
+                // if not found in-memory, attempt a DB lookup
+                if (string.IsNullOrWhiteSpace(categoryName) && b.CategorieID != 0)
+                {
+                    try
+                    {
+                        using var db = _dbFactory.CreateDbContext();
+                        var dbCat = await db.Categorien.AsNoTracking().FirstOrDefaultAsync(c => c.Id == b.CategorieID);
+                        if (dbCat != null && !string.IsNullOrWhiteSpace(dbCat.Naam)) categoryName = dbCat.Naam;
+                    }
+                    catch { }
                 }
 
-                using var db = _dbFactory.CreateDbContext();
-                var existing = await db.Boeken.FindAsync(b.Id);
-                if (existing != null)
-                {
-                    existing.IsDeleted = true;
-                    db.Boeken.Update(existing);
-                    await db.SaveChangesAsync();
-                }
+                if (string.IsNullOrWhiteSpace(categoryName)) categoryName = b.CategorieID != 0 ? b.CategorieID.ToString() : Localize("Alle");
 
-                await LoadBooksAsync();
-                await ShowAlertAsync("Gereed", "Boek verwijderd.");
+                var body = $"{b.Titel}\n{b.Auteur}\n{isbnLabel}: {b.Isbn}\n{categoryLabel}: {categoryName}";
+                await ShowAlertAsync(title, body);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(ex);
-                await ShowAlertAsync("Fout", "Fout bij verwijderen boek.");
+                Debug.WriteLine(ex);
             }
         }
 
-        // Generated property change partials from CommunityToolkit will call these when Page or TotalPages change.
-        partial void OnPageChanged(int value)
+        private async Task<string> ResolveCategoryNameAsync(int categoryId)
         {
-            OnPropertyChanged(nameof(PageDisplay));
+            try
+            {
+                if (categoryId == 0) return Localize("Alle");
+
+                var inMem = Categorien?.FirstOrDefault(c => c.Id == categoryId);
+                if (inMem != null && !string.IsNullOrWhiteSpace(inMem.Naam)) return inMem.Naam;
+
+                try
+                {
+                    using var db = _dbFactory.CreateDbContext();
+                    var dbCat = await db.Categorien.AsNoTracking().FirstOrDefaultAsync(c => c.Id == categoryId);
+                    if (dbCat != null && !string.IsNullOrWhiteSpace(dbCat.Naam)) return dbCat.Naam;
+                }
+                catch { }
+
+                return categoryId.ToString();
+            }
+            catch { return categoryId.ToString(); }
         }
 
-        partial void OnTotalPagesChanged(int value)
+        // Diagnostic helper: list assemblies' embedded resources and test GetString on common resource base names
+        private void LogResourceDiagnostics()
         {
-            OnPropertyChanged(nameof(PageDisplay));
+            try
+            {
+                Debug.WriteLine("--- Resource diagnostics start ---");
+                var assembliesToCheck = new[] { "Biblio_App", "Biblio_Web", "Biblio_Models" };
+                foreach (var asmName in assembliesToCheck)
+                {
+                    try
+                    {
+                        var asm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, asmName, StringComparison.OrdinalIgnoreCase));
+                        if (asm == null)
+                        {
+                            try { asm = Assembly.Load(asmName); } catch { asm = null; }
+                        }
+
+                        if (asm == null)
+                        {
+                            Debug.WriteLine($"Assembly not loaded: {asmName}");
+                            continue;
+                        }
+
+                        Debug.WriteLine($"Assembly '{asm.GetName().Name}' loaded. Manifest resources: {string.Join(", ", asm.GetManifestResourceNames())}");
+
+                        var candidateBases = new[] {
+                            $"{asm.GetName().Name}.Resources.Vertalingen.SharedResource",
+                            $"{asm.GetName().Name}.Resources.SharedResource",
+                            $"{asm.GetName().Name}.SharedResource"
+                        };
+
+                        foreach (var baseName in candidateBases)
+                        {
+                            try
+                            {
+                                var rm = new ResourceManager(baseName, asm);
+                                var val = rm.GetString("BooksOverview", CultureInfo.CurrentUICulture);
+                                Debug.WriteLine($"ResourceManager lookup (base='{baseName}') -> BooksOverview='{val ?? "<null>"}'");
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"ResourceManager creation/lookup failed for base '{baseName}': {ex.Message}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error inspecting assembly {asmName}: {ex}");
+                    }
+                }
+
+                // Also test AppShell translation helper if available
+                try
+                {
+                    var shell = AppShell.Instance;
+                    if (shell != null)
+                    {
+                        var t = shell.Translate("BooksOverview");
+                        Debug.WriteLine($"AppShell.Translate('BooksOverview') -> '{t}'");
+                    }
+                }
+                catch (Exception ex) { Debug.WriteLine($"AppShell.Translate check failed: {ex}"); }
+
+                // Finally log current Culture
+                Debug.WriteLine($"CurrentUICulture: {CultureInfo.CurrentUICulture.Name}, CurrentCulture: {CultureInfo.CurrentCulture.Name}");
+                Debug.WriteLine("--- Resource diagnostics end ---");
+            }
+            catch (Exception ex)
+            {
+                try { Debug.WriteLine($"LogResourceDiagnostics error: {ex}"); } catch { }
+            }
         }
     }
 }
