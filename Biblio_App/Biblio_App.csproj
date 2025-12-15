@@ -1,6 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Enable XAML compiled binding with Source compilation to reduce XAML binding warnings -->
+    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
     <!-- Include Windows TFM so Live Preview (WinUI) is available regardless of host OS -->
     <TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst;net9.0-windows10.0.19041.0</TargetFrameworks>
 
@@ -38,6 +40,7 @@
     <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 
     <!-- Images -->
+    <MauiImage Include="Resources\Images\**" />
 
     <!-- Custom Fonts -->
     <MauiFont Include="Resources\Fonts\*" />
@@ -160,9 +163,19 @@
     <ApplicationId>com.example.biblioapp</ApplicationId>
   </PropertyGroup>
 
+  <!-- Disable Windows App SDK automatic DeploymentManager initialization for Windows build to avoid COM registration errors when the runtime isn't installed -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-windows10.0.19041.0'">
+    <DefineConstants>$(DefineConstants);MICROSOFT_WINDOWSAPPSDK_DEPLOYMENTMANAGER_AUTO_INITIALIZE_OPTIONS_NONE</DefineConstants>
+  </PropertyGroup>
+
   <!-- Ensure any transitive Microsoft.AspNetCore.App FrameworkReference is removed for MAUI project builds -->
   <ItemGroup>
     <FrameworkReference Remove="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!-- Exclude invalid/empty resx file to avoid build XML parsing errors. Replace or remove the file later with a valid .resx. -->
+  <ItemGroup>
+    <EmbeddedResource Remove="Resources\Vertalingen\SharedResource.resx" />
   </ItemGroup>
 
 </Project>
