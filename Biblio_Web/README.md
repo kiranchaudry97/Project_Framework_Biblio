@@ -57,87 +57,84 @@ Voor dit webproject (belangrijkste mappen/bestanden):
 
 ```
 Biblio_Web/
-├── Biblio_Web.csproj
-├── Program.cs
-├── appsettings.json
-├── appsettings.Development.json
-├── README.md
-├── Controllers/
-│   ├── AccountController.cs
-│   ├── AdminController.cs
-│   ├── BoekenController.cs
-│   ├── CategorieenController.cs
-│   ├── CultureController.cs
-│   ├── HomeController.cs
-│   ├── LedenController.cs
-│   ├── ProfileController.cs
-│   ├── TalenController.cs
-│   ├── UitleningController.cs
-│   └── Api/
-│       ├── AuthController.cs
-│       ├── BoekenApiController.cs
-│       ├── CategorieenApiController.cs
-│       ├── DiagnosticsController.cs
-│       ├── LedenApiController.cs
-│       └── UitleningenApiController.cs
-├── Areas/
-│   └── Identity/
-│       ├── Pages/Account/ (Login/Register/ForgotPassword etc.)
-│       └── Data/ (folder)
-├── Views/
-│   ├── Shared/ (_Layout, Error, Components/...)
-│   ├── Admin/ (Users, Create, Delete, EditRoles, EditRolesIndex)
-│   ├── Account/ (ChangePassword)
-│   ├── Boeken/ (Index, Details, Create, Edit, Delete)
-│   ├── Categorieen/ (Index, Details, Create, Edit, Delete)
-│   ├── Leden/ (Index, Details, Create, Edit, Delete)
-│   ├── Uitlening/ (Index, Create, Edit, Details, Delete, _LateUitleningenPartial)
-│   ├── Profile/ (Index, Edit, Delete)
-│   └── Talen/ (Index, Create, Edit, Delete)
-├── Models/
-│   ├── AdminCreateUserViewModel.cs
-│   ├── AdminDeleteUserViewModel.cs
-│   ├── AdminEditRolesViewModel.cs
-│   ├── ChangePasswordViewModel.cs
-│   ├── ErrorViewModel.cs
-│   ├── LoginViewModel.cs
-│   ├── PagedResult.cs
-│   ├── ProfileViewModel.cs
-│   ├── RegisterViewModel.cs
-│   ├── UserRolesViewModel.cs
-│   └── UserViewModel.cs
-├── Mapping/
-│   └── MappingProfile.cs
-├── Middleware/
-│   └── CookiePolicyOptionsProvider.cs
-├── ViewComponents/
-│   └── LoginStatusViewComponent.cs
-├── Resources/
-│   ├── SharedResource.cs
-│   └── Vertalingen/
-│       ├── SharedResource.nl.resx
-│       ├── SharedResource.en.resx
-│       └── SharedResource.fr.resx
-├── wwwroot/
-│   ├── css/ (site.css, bootstrap libs)
-│   ├── js/ (site.js)
-│   ├── lib/ (bootstrap, jquery, jquery-validation, ...)
-│   └── images/
-│       ├── login-illustration.svg
-│       ├── books-illustration.svg
-│       ├── categorie-illustration.svg
-│       ├── leden-illustration.svg
-│       ├── user-plus-illustration.svg
-│       ├── plus-illustration.svg
-│       ├── edit-illustration.svg
-│       └── details-illustration.svg
-└── docs/
-    ├── postman-collection.json
-    └── postman-quickstart.md
-
++-- Biblio_Web.csproj
++-- Program.cs
++-- appsettings.json
++-- appsettings.Development.json
++-- README.md
++-- Controllers/
+¦   +-- AccountController.cs
+¦   +-- AdminController.cs
+¦   +-- BoekenController.cs
+¦   +-- CategorieenController.cs
+¦   +-- CultureController.cs
+¦   +-- HomeController.cs
+¦   +-- LedenController.cs
+¦   +-- ProfileController.cs
+¦   +-- TalenController.cs
+¦   +-- UitleningController.cs
+¦   +-- Api/                    # namespaced API controllers (return JSON)
+¦       +-- AuthController.cs
+¦       +-- BoekenApiController.cs
+¦       +-- CategorieenApiController.cs
+¦       +-- DiagnosticsController.cs
+¦       +-- LedenApiController.cs
+¦       +-- MobileDataController.cs
+¦       +-- UitleningenApiController.cs
++-- Areas/
+¦   +-- Identity/               # ASP.NET Core Identity UI + pages
+¦       +-- Pages/Account/
+¦           +-- Login.cshtml.cs
+¦           +-- Register.cshtml.cs
+¦           +-- ForgotPassword.cshtml.cs
+¦       +-- Data/
++-- Views/                      # Razor views and shared layout/components
+¦   +-- Shared/                 # _Layout.cshtml, Error, ViewComponents, Partials
+¦   +-- Admin/
+¦   +-- Account/
+¦   +-- Boeken/
+¦   +-- Categorieen/
+¦   +-- Leden/
+¦   +-- Uitlening/
+¦   +-- Profile/
+¦   +-- Talen/
++-- Models/                     # ViewModels / DTOs used by controllers and views
+¦   +-- AdminCreateUserViewModel.cs
+¦   +-- AdminDeleteUserViewModel.cs
+¦   +-- AdminEditRolesViewModel.cs
+¦   +-- ChangePasswordViewModel.cs
+¦   +-- ErrorViewModel.cs
+¦   +-- LoginViewModel.cs
+¦   +-- PagedResult.cs
+¦   +-- ProfileViewModel.cs
+¦   +-- RegisterViewModel.cs
+¦   +-- UserRolesViewModel.cs
+¦   +-- UserViewModel.cs
++-- Mapping/
+¦   +-- MappingProfile.cs
++-- Middleware/
+¦   +-- CookiePolicyOptionsProvider.cs
++-- ViewComponents/
+¦   +-- LoginStatusViewComponent.cs
++-- Resources/
+¦   +-- SharedResource.cs
+¦   +-- SharedResource.nl.resx
+¦   +-- SharedResource.en.resx
+¦   +-- Vertalingen/
+¦       +-- SharedResource.nl.resx
+¦       +-- SharedResource.en.resx
+¦       +-- SharedResource.fr.resx
++-- wwwroot/                    # static files (css, js, lib, images)
+¦   +-- css/
+¦   +-- js/
+¦   +-- lib/
+¦   +-- images/
++-- docs/
+    +-- postman-collection.json
+    +-- postman-quickstart.md
 ```
 
-Daarnaast zijn er gerelateerde projecten in de solution:
+Naast dit project in de solution:
 - `Biblio_Models/` (entiteiten, DbContext, seed)
 - `Biblio_App/` (MAUI client)
 - `Biblio_WPF/` (WPF client)
