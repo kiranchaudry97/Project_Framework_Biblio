@@ -1,8 +1,28 @@
-﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <?xaml-comp compile="true" ?>
 <ResourceDictionary 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Bootstrap-like primary color for web-consistent buttons (moved up so StaticResource resolves) -->
+    <Color x:Key="BootstrapPrimary">#0d6efd</Color>
+    <SolidColorBrush x:Key="BootstrapPrimaryBrush" Color="{StaticResource BootstrapPrimary}" />
+
+    <!-- Link-like label for inline actions (Details/Bewerk) -->
+    <Style x:Key="LinkLabel" TargetType="Label">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BootstrapPrimary}, Dark={StaticResource White}}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextDecorations" Value="Underline" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="MinimumHeightRequest" Value="32" />
+        <Setter Property="HorizontalOptions" Value="End" />
+    </Style>
+
+    <Style x:Key="DeleteLinkLabel" TargetType="Label" BasedOn="{StaticResource LinkLabel}">
+        <Setter Property="TextColor" Value="Crimson" />
+    </Style>
 
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
@@ -157,8 +177,8 @@
     </Style>
 
     <Style TargetType="Label">
-        <!-- Force label text to white so headers are visible on dark background (applies globally) -->
-        <Setter Property="TextColor" Value="{StaticResource White}" />
+        <!-- Use theme-aware colors so labels are readable on white cards in Light theme -->
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="FontFamily" Value="OpenSansRegular" />
         <Setter Property="FontSize" Value="14" />
@@ -445,10 +465,6 @@
         <Setter Property="SelectedTabColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray200}}" />
     </Style>
 
-    <!-- Bootstrap-like primary color for web-consistent buttons -->
-    <Color x:Key="BootstrapPrimary">#0d6efd</Color>
-    <SolidColorBrush x:Key="BootstrapPrimaryBrush" Color="{StaticResource BootstrapPrimary}" />
-
     <!-- Welcome card/frame style (match web card) -->
     <Style x:Key="WelcomeCardStyle" TargetType="Frame">
         <Setter Property="BackgroundColor" Value="White" />
@@ -457,8 +473,7 @@
         <Setter Property="Padding" Value="20" />
         <Setter Property="Margin" Value="8" />
         <Setter Property="VerticalOptions" Value="Start" />
-        <Setter Property="HorizontalOptions" Value="Center" />
-        <Setter Property="WidthRequest" Value="360" />
+        <Setter Property="HorizontalOptions" Value="FillAndExpand" />
     </Style>
 
     <!-- Primary button style matching screenshot (blue rounded) -->
@@ -474,7 +489,7 @@
     <Style x:Key="OutlineActionButton" TargetType="Button">
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="TextColor" Value="{StaticResource BootstrapPrimary}" />
-        <Setter Property="BorderColor" Value="{StaticResource Gray200}" />
+        <Setter Property="BorderColor" Value="{StaticResource Gray100}" />
         <Setter Property="BorderWidth" Value="1" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="10" />
@@ -484,11 +499,12 @@
     <Style x:Key="InlineActionButton" TargetType="Button" BasedOn="{StaticResource Button}">
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource BootstrapPrimary}, Dark={StaticResource White}}" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="Padding" Value="6,0" />
-        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="MinimumWidthRequest" Value="0" />
-        <Setter Property="MinimumHeightRequest" Value="0" />
+        <Setter Property="MinimumHeightRequest" Value="32" />
+        <Setter Property="BorderWidth" Value="0" />
     </Style>
 
     <!-- Inline delete button (compact, red link) -->
