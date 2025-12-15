@@ -90,5 +90,42 @@ namespace Biblio_Web.Controllers
 
             return LocalRedirect(returnUrl);
         }
+
+        // New: clear the culture cookie so the site falls back to Accept-Language or default behavior
+        [HttpGet]
+        public IActionResult ResetLanguage(string? returnUrl)
+        {
+            try
+            {
+                // Remove the culture cookie by setting an expired cookie
+                var options = new CookieOptions
+                {
+                    Path = "/",
+                    Expires = DateTimeOffset.UtcNow.AddYears(-1),
+                    IsEssential = true,
+                    SameSite = Request.IsHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                    Secure = Request.IsHttps,
+                    HttpOnly = false
+                };
+
+                Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName, string.Empty, options);
+                _logger.LogInformation("ResetLanguage called. Cleared culture cookie. returnUrl={returnUrl}", returnUrl);
+
+                // Indicate reset so layout can optionally show a toast
+                TempData["LanguageReset"] = "1";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "ResetLanguage failed");
+            }
+
+            if (string.IsNullOrEmpty(returnUrl)) returnUrl = Url.Content("~/");
+            if (!Url.IsLocalUrl(returnUrl) || !(returnUrl.StartsWith("/") || returnUrl.StartsWith("~/")))
+            {
+                returnUrl = Url.Content("~/");
+            }
+
+            return LocalRedirect(returnUrl);
+        }
     }
 }
