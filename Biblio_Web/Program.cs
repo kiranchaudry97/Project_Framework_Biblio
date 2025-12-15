@@ -1,4 +1,4 @@
-﻿// Program.cs
+// Program.cs
 // Doel: bootstrap en configuratie van de webapplicatie (services, middleware en routing).
 // Gebruik: registreert services (DB, Identity, localization, AutoMapper, controllers, Swagger),
 //         voert database migratie en seeding uit bij startup en bouwt RequestLocalizationOptions
@@ -22,14 +22,17 @@ using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
 using Biblio_Models.Seed;
 using Biblio_Web.Middleware; // added for cookie provider
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Resolve connection string
 const string ConnKey = "BibliobContextConnection";
+var publicConnection = builder.Configuration["PublicConnection"];
 var connectionString = builder.Configuration.GetConnectionString(ConnKey)
     ?? builder.Configuration.GetConnectionString("DefaultConnection")
     ?? builder.Configuration["ConnectionStrings:DefaultConnection"]
+    // use PublicConnection only when explicitly configured (non-empty)
+    ?? (!string.IsNullOrWhiteSpace(publicConnection) ? publicConnection : null)
     ?? "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
 
 // Localisatie - gebruik de map Vertalingen (bevat de volledige SharedResource.*.resx bestanden)
@@ -54,12 +57,18 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 6;
     options.User.RequireUniqueEmail = true;
+    // Require confirmed email before allowing sign-in
+    options.SignIn.RequireConfirmedAccount = true;
 })
     .AddEntityFrameworkStores<BiblioDbContext>()
     .AddDefaultTokenProviders()
     .AddDefaultUI();
 
-// Register Razor Pages en eis autorisatie voor de Manage-folder van Identity
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddTransient<IEmailSender, Biblio_Web.Services.DevEmailSender>();
+}
+
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
@@ -216,5 +225,28 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+try
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        try
+        {
+            // Run the shared seed initializer (creates roles, admin user and data)
+            SeedData.InitializeAsync(services).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            var logger = services.GetService<ILoggerFactory>()?.CreateLogger("Program");
+            logger?.LogError(ex, "Database seeding failed at startup.");
+            // Swallow to allow the app to start but errors are logged
+        }
+    }
+}
+catch (Exception)
+{
+    // don't prevent app from starting if seeding fails; errors already logged
+}
 
 app.Run();
