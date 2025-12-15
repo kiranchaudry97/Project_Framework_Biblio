@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Shell
     x:Class="Biblio_App.AppShell"
+    x:Name="This"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:pages="clr-namespace:Biblio_App.Pages"
     xmlns:local="clr-namespace:Biblio_App"
-    Title="Biblio">
+    Title="Biblio"
+    Shell.TabBarIsVisible="False">
 
     <Shell.Resources>
         <!-- Make flyout item text orange for better contrast per request -->
@@ -14,52 +16,43 @@
         <SolidColorBrush x:Key="ShellForegroundBrush" Color="#FFA500" />
     </Shell.Resources>
 
-    <!-- Flyout header with title, theme toggle and language picker -->
+    <!-- Flyout header with title and theme toggle (language picker removed - use Settings page) -->
     <Shell.FlyoutHeader>
         <Grid Padding="12" BackgroundColor="{StaticResource Primary}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Label Text="Biblio" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" TextColor="{StaticResource White}" />
+            <Label Text="{Binding BiblioTitle, Source={x:Reference This}}" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" TextColor="{StaticResource White}" />
 
-            <Button x:Name="ThemeToggleButton" Grid.Column="1" WidthRequest="40" HeightRequest="36" Margin="8,0" Clicked="OnThemeToggleClicked" BackgroundColor="Transparent" />
+            <!-- Theme toggle placed at the right -->
+            <Button x:Name="ThemeToggleButton" Grid.Column="1" WidthRequest="52" HeightRequest="44" Margin="8,0" Clicked="OnThemeToggleClicked" BackgroundColor="Transparent" />
 
-            <Picker x:Name="LanguagePicker" Grid.Column="2" WidthRequest="90" SelectedIndexChanged="OnLanguageChanged" Title="Taal"
-                    TextColor="{StaticResource White}" HorizontalOptions="Center" VerticalOptions="Center" HorizontalTextAlignment="Center">
-                <Picker.Items>
-                    <x:String>NL</x:String>
-                    <x:String>EN</x:String>
-                    <x:String>FR</x:String>
-                </Picker.Items>
-            </Picker>
         </Grid>
     </Shell.FlyoutHeader>
 
     <!-- Use emoji prefixes as lightweight icons so no extra image files are required -->
-    <FlyoutItem Title="Menu" FlyoutDisplayOptions="AsMultipleItems">
-        <ShellContent x:Name="BooksShell" Title="📚 Boeken" ContentTemplate="{DataTemplate pages:BoekenPagina}" />
-        <ShellContent x:Name="MembersShell" Title="👥 Leden" ContentTemplate="{DataTemplate pages:LedenPagina}" />
-        <ShellContent x:Name="LoansShell" Title="🧾 Uitleningen" ContentTemplate="{DataTemplate pages:UitleningenPagina}" />
-        <ShellContent x:Name="CategoriesShell" Title="🏷️ Categorieën" ContentTemplate="{DataTemplate pages:CategorieenPagina}" />
-        <ShellContent x:Name="SettingsShell" Title="⚙️ Instellingen" ContentTemplate="{DataTemplate pages:InstellingenPagina}" />
+    <FlyoutItem Title="{Binding MenuTitle, Source={x:Reference This}}" FlyoutDisplayOptions="AsMultipleItems">
+        <ShellContent x:Name="BooksShell" Title="{Binding BooksShellTitle, Source={x:Reference This}}" ContentTemplate="{DataTemplate pages:BoekenPagina}" />
+        <ShellContent x:Name="MembersShell" Title="{Binding MembersShellTitle, Source={x:Reference This}}" ContentTemplate="{DataTemplate pages:LedenPagina}" />
+        <ShellContent x:Name="LoansShell" Title="{Binding LoansShellTitle, Source={x:Reference This}}" ContentTemplate="{DataTemplate pages:UitleningenPagina}" />
+        <ShellContent x:Name="CategoriesShell" Title="{Binding CategoriesShellTitle, Source={x:Reference This}}" ContentTemplate="{DataTemplate pages:CategorieenPagina}" />
+        <ShellContent x:Name="SettingsShell" Title="{Binding SettingsShellTitle, Source={x:Reference This}}" ContentTemplate="{DataTemplate pages:InstellingenPagina}" />
     </FlyoutItem>
 
     <!-- Profile / account menu items -->
-    <MenuItem x:Name="SettingsMenuItem" Text="Instellingen" Command="{Binding Source={x:Static local:AppShell.Instance}, Path=OpenSettingsCommand}" />
-    <MenuItem x:Name="ProfileMenuItem" Text="👤 Profiel" Clicked="OnProfileClicked" />
-    <MenuItem x:Name="LogoutMenuItem" Text="🔒 Logout" Clicked="OnLogoutClicked" />
+    <MenuItem x:Name="ProfileMenuItem" Text="{Binding ProfileMenuText, Source={x:Reference This}}" Clicked="OnProfileClicked" />
+    <MenuItem x:Name="LogoutMenuItem" Text="{Binding LogoutMenuText, Source={x:Reference This}}" Clicked="OnLogoutClicked" />
 
     <!-- Quick actions in the flyout footer -->
     <Shell.FlyoutFooter>
         <VerticalStackLayout Padding="12" Spacing="8" BackgroundColor="{StaticResource Primary}">
-            <Label x:Name="QuickLabel" Text="Snelkoppelingen" FontSize="14" TextColor="{StaticResource White}" />
-            <Button Text="+ Nieuw boek" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Clicked="QuickNewBook_Clicked" x:Name="QuickNewBookButton" />
-            <Button Text="+ Nieuw lid" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Clicked="QuickNewMember_Clicked" x:Name="QuickNewMemberButton" />
-            <!-- Quick link to settings -->
-            <Button x:Name="FooterSettingsButton" Text="Instellingen" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Command="{Binding Source={x:Static local:AppShell.Instance}, Path=OpenSettingsCommand}" />
+            <Label x:Name="QuickLabel" Text="{Binding QuickLabelText, Source={x:Reference This}}" FontSize="14" TextColor="{StaticResource White}" />
+            <Button Text="{Binding QuickNewBookButtonText, Source={x:Reference This}}" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Clicked="QuickNewBook_Clicked" x:Name="QuickNewBookButton" />
+            <Button Text="{Binding QuickNewMemberButtonText, Source={x:Reference This}}" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Clicked="QuickNewMember_Clicked" x:Name="QuickNewMemberButton" />
+            <!-- Quick link to settings kept in footer as convenience (can be removed if undesired) -->
+            <Button x:Name="FooterSettingsButton" Text="{Binding FooterSettingsText, Source={x:Reference This}}" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Command="{Binding Source={x:Static local:AppShell.Instance}, Path=OpenSettingsCommand}" />
         </VerticalStackLayout>
     </Shell.FlyoutFooter>
 
