@@ -29,6 +29,10 @@ namespace Biblio_App.Services
 
                         // informeer ook de gedeelde modelresources
                         try { SharedModelResource.Culture = culture; } catch { }
+
+#if DEBUG
+                        try { System.Diagnostics.Debug.WriteLine($"LanguageService ctor: applied saved culture {culture.Name}"); } catch { }
+#endif
                     }
                 }
             }
@@ -40,6 +44,11 @@ namespace Biblio_App.Services
             if (string.IsNullOrWhiteSpace(code)) return;
             try
             {
+#if DEBUG
+                try { System.Diagnostics.Debug.WriteLine($"LanguageService.SetLanguage called with code='{code}'"); } catch { }
+                try { if (System.Diagnostics.Debugger.IsAttached) 
+                        System.Diagnostics.Debugger.Break(); } catch { }
+#endif
                 var culture = new CultureInfo(code);
                 CurrentCulture = culture;
                 CultureInfo.DefaultThreadCurrentCulture = culture;
@@ -51,6 +60,10 @@ namespace Biblio_App.Services
 
                 LanguageChanged?.Invoke(this, culture);
 
+#if DEBUG
+                try { System.Diagnostics.Debug.WriteLine($"LanguageService.SetLanguage: invoked LanguageChanged for {culture.Name}"); } catch { }
+#endif
+
                 // Do NOT recreate the main page here. AppShell (and other subscribers) will handle UI refresh after the LanguageChanged event.
                 // Recreating Application.Current.MainPage from here can cause re-entrant construction and platform handler/PlatformView null exceptions on some platforms.
             }
@@ -58,6 +71,28 @@ namespace Biblio_App.Services
             {
                 // negeren bij fout
             }
+        }
+
+        // New: reset saved preference and switch to device culture, notify subscribers
+        public void ResetLanguage()
+        {
+            try
+            {
+                try { Preferences.Default.Remove("biblio-culture"); } catch { }
+
+                var deviceCulture = CultureInfo.CurrentCulture ?? CultureInfo.CurrentUICulture ?? new CultureInfo("en");
+                CurrentCulture = deviceCulture;
+                CultureInfo.DefaultThreadCurrentCulture = deviceCulture;
+                CultureInfo.DefaultThreadCurrentUICulture = deviceCulture;
+                try { SharedModelResource.Culture = deviceCulture; } catch { }
+
+                LanguageChanged?.Invoke(this, deviceCulture);
+
+#if DEBUG
+                try { System.Diagnostics.Debug.WriteLine($"LanguageService.ResetLanguage: reset to device culture {deviceCulture.Name}"); } catch { }
+#endif
+            }
+            catch { }
         }
     }
 }

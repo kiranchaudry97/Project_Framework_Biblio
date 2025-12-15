@@ -8,5 +8,6 @@ namespace Biblio_App.Services
         Task<AuthResult> LoginAsync(string email, string password);
         void Logout();
         string? GetToken();
+        Task<AuthResult> RefreshTokenAsync(string refreshToken);
     }
 }

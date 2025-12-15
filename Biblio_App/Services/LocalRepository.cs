@@ -20,7 +20,7 @@ namespace Biblio_App.Services
         public async Task<List<Boek>> GetBoekenAsync()
         {
             using var db = _dbFactory.CreateDbContext();
-            return await db.Boeken.AsNoTracking().Include(b => b.categorie).Where(b => !b.IsDeleted).ToListAsync();
+            return await db.Boeken.AsNoTracking().Include(b => b.categorie).Where(b => b.IsDeleted == false).ToListAsync();
         }
 
         public async Task SaveBoekAsync(Boek boek)
@@ -94,7 +94,7 @@ namespace Biblio_App.Services
         public async Task<List<Categorie>> GetCategorieenAsync()
         {
             using var db = _dbFactory.CreateDbContext();
-            return await db.Categorien.AsNoTracking().Where(c => !c.IsDeleted).OrderBy(c => c.Naam).ToListAsync();
+            return await db.Categorien.AsNoTracking().Where(c => c.IsDeleted == false).OrderBy(c => c.Naam).ToListAsync();
         }
 
         public async Task SaveCategorieAsync(Categorie categorie)

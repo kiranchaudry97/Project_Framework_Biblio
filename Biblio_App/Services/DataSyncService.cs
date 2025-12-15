@@ -9,8 +9,8 @@ using System.Collections.Generic;
 using Biblio_Models.Entiteiten;
 using Biblio_App.Models.Pagination;
 using Biblio_Models.Entiteiten;
-using System.Net.Http.Json;
-using System.Collections.Generic;
+using System.IO;
+using Microsoft.Maui.Storage;
 
 namespace Biblio_App.Services
 {
@@ -54,34 +54,21 @@ namespace Biblio_App.Services
             _local = local ?? throw new ArgumentNullException(nameof(local));
         }
 
+        private void LogMarker(string message)
+        {
+            try
+            {
+                var marker = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
+                File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] {message}\n");
+            }
+            catch { }
+        }
+
         public async Task SyncAllAsync()
         {
             var client = _httpFactory.CreateClient("ApiWithToken");
 
-            // Try combined endpoint first (/api/mobiledata) to reduce requests
-            try
-            {
-                var combined = await client.GetFromJsonAsync<MobileDataDto>("api/mobiledata");
-                if (combined != null)
-                {
-                    if (combined.books != null && combined.books.Any()) await _local.SaveBoekenAsync(combined.books);
-                    if (combined.members != null)
-                    {
-                        foreach (var l in combined.members) await _local.SaveLidAsync(l);
-                    }
-                    if (combined.loans != null)
-                    {
-                        foreach (var u in combined.loans) await _local.SaveUitleningAsync(u);
-                    }
-                    if (combined.categories != null) await _local.SaveCategorieenAsync(combined.categories);
-
-                    // done
-                    return;
-                }
-            }
-            catch { /* fallback to separate endpoints below */ }
-
-            // fallback to separate endpoints
+            // Try to fetch books
             try
             {
                 var remoteBoeken = await client.GetFromJsonAsync<PagedResult<Boek>>("api/boeken?page=1&pageSize=1000");
@@ -90,8 +77,9 @@ namespace Biblio_App.Services
                     await _local.SaveBoekenAsync(remoteBoeken.Items);
                 }
             }
-            catch { }
+            catch (Exception ex) { LogMarker($"SyncAll boeken error: {ex}"); }
 
+            // Leden
             try
             {
                 var remoteLeden = await client.GetFromJsonAsync<PagedResult<Lid>>("api/leden?page=1&pageSize=1000");
@@ -100,8 +88,9 @@ namespace Biblio_App.Services
                     foreach (var l in remoteLeden.Items) await _local.SaveLidAsync(l);
                 }
             }
-            catch { }
+            catch (Exception ex) { LogMarker($"SyncAll leden error: {ex}"); }
 
+            // Uitleningen
             try
             {
                 var remoteUit = await client.GetFromJsonAsync<PagedResult<Lenen>>("api/uitleningen?page=1&pageSize=1000");
@@ -110,8 +99,9 @@ namespace Biblio_App.Services
                     foreach (var u in remoteUit.Items) await _local.SaveUitleningAsync(u);
                 }
             }
-            catch { }
+            catch (Exception ex) { LogMarker($"SyncAll uitleningen error: {ex}"); }
 
+            // Categorieen
             try
             {
                 var remoteCat = await client.GetFromJsonAsync<List<Categorie>>("api/categorieen");
@@ -120,7 +110,9 @@ namespace Biblio_App.Services
                     await _local.SaveCategorieenAsync(remoteCat);
                 }
             }
-            catch { }
+            catch (Exception ex) { LogMarker($"SyncAll categorieen error: {ex}"); }
+
+            LogMarker("SyncAll completed.");
         }
 
         // Boeken
@@ -347,7 +339,7 @@ namespace Biblio_App.Services
             return true;
         }
 
-        // Categorieën
+        // Categoriën
         public async Task<List<Categorie>> GetCategorieenAsync(bool preferApi = true)
         {
             if (preferApi)
@@ -360,7 +352,10 @@ namespace Biblio_App.Services
                     if (items.Any()) await _local.SaveCategorieenAsync(items);
                     return items;
                 }
-                catch { }
+                catch
+                {
+                    // fallback
+                }
             }
             return await _local.GetCategorieenAsync();
         }
@@ -419,14 +414,5 @@ namespace Biblio_App.Services
             await _local.DeleteCategorieAsync(id);
             return true;
         }
-    }
-
-    // DTO for combined mobile data endpoint
-    public class MobileDataDto
-    {
-        public List<Categorie>? categories { get; set; }
-        public List<Boek>? books { get; set; }
-        public List<Lid>? members { get; set; }
-        public List<Lenen>? loans { get; set; }
     }
 }
