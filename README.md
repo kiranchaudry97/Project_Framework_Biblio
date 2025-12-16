@@ -8,9 +8,10 @@ Deze repository bevat een set samenwerkende projecten voor bibliotheekbeheer: ge
 
 Snelkoppelingen
 ---------------
-- `Biblio_App` — .NET MAUI client (mobile/desktop) — `Biblio_App/README.md`
-- `Biblio_Web` — ASP.NET Core webfrontend en API — `Biblio_Web/README.md`
-- `Biblio_Models` — gedeelde domeinmodellen, DbContext en seeding — `Biblio_Models/README.md`
+- [Biblio_Models — gedeelde domeinmodellen, DbContext en seeding](Biblio_Models/README.md)
+- [Biblio_Web — Webfrontend + API (ASP.NET Core)](Biblio_Web/README.md)
+- [Biblio_WPF — Desktop client (WPF)](Biblio_WPF/README.md)
+- [Biblio_App — Mobile / desktop client (.NET MAUI)](Biblio_App/README.md)
 
 Inhoud (snelkoppelingen)
 ------------------------
