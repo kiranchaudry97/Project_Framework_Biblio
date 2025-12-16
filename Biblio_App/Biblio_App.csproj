@@ -178,4 +178,14 @@
     <EmbeddedResource Remove="Resources\Vertalingen\SharedResource.resx" />
   </ItemGroup>
 
+  <!-- Exclude Roslyn/Roslyn-based satellite resource DLLs from Android packaging to avoid XA0129 deployment errors -->
+  <ItemGroup>
+    <!-- Remove any Microsoft.CodeAnalysis.*.resources.dll from build inputs so they are not copied into the Android package -->
+    <None Remove="**\Microsoft.CodeAnalysis.*\*.resources.dll" />
+    <EmbeddedResource Remove="**\Microsoft.CodeAnalysis.*\*.resources.dll" />
+    <Content Remove="**\Microsoft.CodeAnalysis.*\*.resources.dll" />
+    <MauiAsset Remove="**\Microsoft.CodeAnalysis.*\*.resources.dll" />
+    <AndroidAsset Remove="**\Microsoft.CodeAnalysis.*\*.resources.dll" />
+  </ItemGroup>
+
 </Project>

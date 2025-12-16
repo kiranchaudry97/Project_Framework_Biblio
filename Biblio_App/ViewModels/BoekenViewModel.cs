@@ -65,6 +65,34 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string searchText = string.Empty;
 
+        // Debounce search to avoid triggering LoadBooksAsync on every keystroke
+        partial void OnSearchTextChanged(string value)
+        {
+            try
+            {
+                _searchCts?.Cancel();
+                _searchCts = new CancellationTokenSource();
+                var token = _searchCts.Token;
+
+                // Fire-and-forget background task that waits a short debounce interval
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Task.Delay(400, token);
+                        if (token.IsCancellationRequested) return;
+
+                        // reset to first page and reload
+                        Page = 1;
+                        await LoadBooksAsync();
+                    }
+                    catch (TaskCanceledException) { }
+                    catch (Exception ex) { Debug.WriteLine(ex); }
+                });
+            }
+            catch { }
+        }
+
         [ObservableProperty]
         private int page = 1;
 
@@ -596,16 +624,24 @@ namespace Biblio_App.ViewModels
 
         private async Task LoadCategoriesAsync()
         {
-            Categorien.Clear();
-            Categorien.Add(new Categorie { Id = 0, Naam = "Alle" });
+            var localList = new List<Categorie>();
+            localList.Add(new Categorie { Id = 0, Naam = "Alle" });
             // prefer sync service when available
             if (_sync is IDataSyncService sync)
             {
                 try
                 {
                     var cats = await sync.GetCategorieenAsync(true);
-                    foreach (var c in cats) Categorien.Add(c);
-                    SelectedFilterCategorie = Categorien.FirstOrDefault();
+                    foreach (var c in cats) localList.Add(c);
+
+                    // update collection on main thread
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        Categorien.Clear();
+                        foreach (var c in localList) Categorien.Add(c);
+                        SelectedFilterCategorie = Categorien.FirstOrDefault();
+                    });
+
                     return;
                 }
                 catch { /* fallback to local */ }
@@ -615,11 +651,17 @@ namespace Biblio_App.ViewModels
             {
                 using var db = _dbFactory.CreateDbContext();
                 var cats = await db.Categorien.AsNoTracking().Where(c => !c.IsDeleted).OrderBy(c => c.Naam).ToListAsync();
-                foreach (var c in cats) Categorien.Add(c);
+                foreach (var c in cats) localList.Add(c);
             }
             catch { }
 
-            SelectedFilterCategorie = Categorien.FirstOrDefault();
+            // finalize update on main thread
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                Categorien.Clear();
+                foreach (var c in localList) Categorien.Add(c);
+                SelectedFilterCategorie = Categorien.FirstOrDefault();
+            });
         }
 
         // Ensure categories are loaded (used by pages when navigated with query params)
@@ -655,14 +697,26 @@ namespace Biblio_App.ViewModels
         {
             try
             {
+                int boekenCountLocal = 0;
+                int ledenCountLocal = 0;
+                int openUitleningenLocal = 0;
+
                 if (_gegevensProvider != null)
                 {
                     try
                     {
                         var t = await _gegevensProvider.GetTellersAsync();
-                        BoekenCount = t.boeken;
-                        LedenCount = t.leden;
-                        OpenUitleningenCount = t.openUitleningen;
+                        boekenCountLocal = t.boeken;
+                        ledenCountLocal = t.leden;
+                        openUitleningenLocal = t.openUitleningen;
+
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            BoekenCount = boekenCountLocal;
+                            LedenCount = ledenCountLocal;
+                            OpenUitleningenCount = openUitleningenLocal;
+                        });
+
                         return;
                     }
                     catch { }
@@ -671,21 +725,28 @@ namespace Biblio_App.ViewModels
                 using var db = _dbFactory.CreateDbContext();
                 try
                 {
-                    BoekenCount = await db.Boeken.CountAsync(b => !b.IsDeleted);
+                    boekenCountLocal = await db.Boeken.CountAsync(b => !b.IsDeleted);
                 }
-                catch { BoekenCount = 0; }
+                catch { boekenCountLocal = 0; }
 
                 try
                 {
-                    LedenCount = await db.Leden.CountAsync();
+                    ledenCountLocal = await db.Leden.CountAsync();
                 }
-                catch { LedenCount = 0; }
+                catch { ledenCountLocal = 0; }
 
                 try
                 {
-                    OpenUitleningenCount = await db.Leningens.CountAsync(l => l.ReturnedAt == null);
+                    openUitleningenLocal = await db.Leningens.CountAsync(l => l.ReturnedAt == null);
                 }
-                catch { OpenUitleningenCount = 0; }
+                catch { openUitleningenLocal = 0; }
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    BoekenCount = boekenCountLocal;
+                    LedenCount = ledenCountLocal;
+                    OpenUitleningenCount = openUitleningenLocal;
+                });
             }
             catch (Exception ex)
             {
@@ -726,17 +787,23 @@ namespace Biblio_App.ViewModels
                         var listAll = filtered.OrderBy(b => b.Titel).ToList();
                         var total = listAll.Count;
 
-                        TotalCount = total;
-                        TotalPages = PageSize > 0 ? (int)Math.Ceiling(total / (double)PageSize) : 1;
-
                         var pageItems = listAll.Skip((Page - 1) * PageSize).Take(PageSize).ToList();
 
-                        Boeken.Clear();
+                        // Resolve category names on background thread first
                         foreach (var b in pageItems)
                         {
                             try { b.CategorieNaam = await ResolveCategoryNameAsync(b.CategorieID); } catch { }
-                            Boeken.Add(b);
                         }
+
+                        // Update UI-bound properties and collection on main thread
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            TotalCount = total;
+                            TotalPages = PageSize > 0 ? (int)Math.Ceiling(total / (double)PageSize) : 1;
+
+                            Boeken.Clear();
+                            foreach (var b in pageItems) Boeken.Add(b);
+                        });
 
                         return;
                     }
@@ -762,16 +829,22 @@ namespace Biblio_App.ViewModels
                 }
 
                 var totalLocal = await query.CountAsync();
-                TotalCount = totalLocal;
-                TotalPages = PageSize > 0 ? (int)Math.Ceiling(totalLocal / (double)PageSize) : 1;
-
                 var items = await query.OrderBy(b => b.Titel).Skip((Page - 1) * PageSize).Take(PageSize).ToListAsync();
-                Boeken.Clear();
+
+                // Resolve category names before touching UI collection
                 foreach (var b in items)
                 {
                     try { b.CategorieNaam = await ResolveCategoryNameAsync(b.CategorieID); } catch { }
-                    Boeken.Add(b);
                 }
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    TotalCount = totalLocal;
+                    TotalPages = PageSize > 0 ? (int)Math.Ceiling(totalLocal / (double)PageSize) : 1;
+
+                    Boeken.Clear();
+                    foreach (var b in items) Boeken.Add(b);
+                });
 
             }
             catch (Exception ex)
