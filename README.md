@@ -26,7 +26,10 @@ Inhoud (snelkoppelingen)
 - [Foutafhandeling & logging](#foutafhandeling--logging)
 - [Screenshots (placeholder)](#screenshots-placeholder)
 - [Licenties](#licenties)
--  [AI-hulpmiddelen & ontwikkelworkflow](#ai-hulpmiddelen--ontwikkelworkflow)
+- [AI-hulpmiddelen & ontwikkelworkflow](#ai-hulpmiddelen--ontwikkelworkflow)
+
+- [Biblio_App (MAUI client) README](Biblio_App/README.md)
+- [Biblio_Web (ASP.NET Core) README](Biblio_Web/README.md)
 
 ---
 
