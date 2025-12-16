@@ -1,10 +1,19 @@
-# "Biblio" Bibliotheekbeheer in WPF (.NET 9)
+﻿# "Biblio" Bibliotheekbeheer in WPF (.NET 9)
 
 **Initiatiefnemer:** Chaud-Ry Kiran Jamil
 
 Korte omschrijving
 ------------------
 Biblio is een WPF-desktopapplicatie (.NET 9) voor het beheren van boeken, leden en uitleningen. Gebouwd met EF Core (SQL Server / LocalDB) en ASP.NET Core Identity.
+
+Snelkoppelingen
+---------------
+- `Biblio_App` — .NET MAUI client (mobile/desktop)
+  - Zie: `Biblio_App/README.md`
+- `Biblio_Web` — ASP.NET Core webfrontend en API
+  - Zie: `Biblio_Web/README.md`
+- `Biblio_Models` — gedeelde domeinmodellen, DbContext en seeding
+  - Projectmap: `Biblio_Models/`
 
 Inhoud (snelkoppelingen)
 ------------------------

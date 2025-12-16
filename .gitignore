@@ -366,3 +366,4 @@ FodyWeavers.xsd
 # Ignore generated Razor temp files
 *.tmp.cshtml
 *.tmp.cs
+/scripts/resx-report.csv
