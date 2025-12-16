@@ -1,351 +1,173 @@
-﻿# "Biblio" Bibliotheekbeheer in WPF (.NET 9)
+﻿# Project Framework — Biblio (overzicht)
 
 **Initiatiefnemer:** Chaud-Ry Kiran Jamil
 
 Korte omschrijving
 ------------------
-Biblio is een WPF-desktopapplicatie (.NET 9) voor het beheren van boeken, leden en uitleningen. Gebouwd met EF Core (SQL Server / LocalDB) en ASP.NET Core Identity.
+Deze repository bevat een set samenwerkende projecten voor bibliotheekbeheer: gedeelde modellen (`Biblio_Models`), een ASP.NET Core webfrontend/API (`Biblio_Web`), een WPF desktopclient (`Biblio_WPF`) en een cross‑platform .NET MAUI client (`Biblio_App`).
 
 Snelkoppelingen
 ---------------
-- `Biblio_App` — .NET MAUI client (mobile/desktop)
-  - Zie: `Biblio_App/README.md`
-- `Biblio_Web` — ASP.NET Core webfrontend en API
-  - Zie: `Biblio_Web/README.md`
 - `Biblio_Models` — gedeelde domeinmodellen, DbContext en seeding
-  - Projectmap: `Biblio_Models/`
+  - Zie: `Biblio_Models/README.md`
+- `Biblio_Web` — Webfrontend + API (ASP.NET Core)
+  - Zie: `Biblio_Web/README.md`
+- `Biblio_WPF` — Desktop client (WPF)
+  - Zie: `Biblio_WPF/README.md`
+- `Biblio_App` — Mobile / desktop client (.NET MAUI)
+  - Zie: `Biblio_App/README.md`
 
 Inhoud (snelkoppelingen)
 ------------------------
 - [Doel & motivatie](#doel--motivatie)
-- [Technische samenvatting & vereisten](#technische-samenvatting--vereisten)
-- [Datamodel (tabellen & relaties)](#datamodel-tabellen--relaties)
-- [Project- en mappenstructuur](#project--en-mappenstructuur)
-- [Lokaal uitvoeren](#lokaal-uitvoeren)
-- [Identity, seeding & security](#identity-seeding--security)
-- [Foutafhandeling & logging](#foutafhandeling--logging)
-- [Screenshots (placeholder)](#screenshots-placeholder)
-- [Licenties](#licenties)
+- [Vereisten (kort)](#vereisten-kort)
+- Projectspecifieke korte omschrijvingen, snelkoppelingen en mappenstructuren
+- [Technische implementaties](#technische-implementaties)
 - [AI-hulpmiddelen & ontwikkelworkflow](#ai-hulpmiddelen--ontwikkelworkflow)
-
-- [Biblio_App (MAUI client) README](Biblio_App/README.md)
-- [Biblio_Web (ASP.NET Core) README](Biblio_Web/README.md)
-- [Biblio_Models (Shared models) README](Biblio_Models/README.md)
+- [Problemen die ik voorkwam](#problemen-die-ik-voorkwam)
 
 ---
 
 ## Doel & motivatie
-- Doel: eenvoudig en efficiënt beheer van bibliotheekinventaris en uitleningen.
-- Motivatie: leerrijk project voor MVVM/WPF, EF Core en Identity;.
 
-## Technische samenvatting & vereisten
-- .NET 9, WPF UI
-- EF Core + SQL Server / LocalDB
-- ASP.NET Core Identity voor gebruikers en rollen
-- DI via Microsoft.Extensions.DependencyInjection
-- Logging via Microsoft.Extensions.Logging
+Doel: een consistente, herbruikbare set applicaties en libraries leveren waarmee bibliotheekdata kan worden beheerd en geraadpleegd via web, desktop en mobiele clients.
 
-Vereisten: .NET 9 SDK en (Lokaal) SQL Server. Optionele env var: `BIBLIO_CONNECTION`.
+Motivatie: scheiden van concerns — domeinmodellen en database‑logica in één project, platform‑specifieke UI logica in aparte clients.
 
-Belangrijke NuGet-pakketten:
-- Microsoft.EntityFrameworkCore
-- Microsoft.EntityFrameworkCore.SqlServer
-- Microsoft.EntityFrameworkCore.Design
-- Microsoft.AspNetCore.Identity.EntityFrameworkCore
+## Vereisten (kort)
 
-## Datamodel tabellen & relaties
-- Boeken
-  - Velden: BoekId (PK), Titel, Auteur, ISBN, CategorieID (FK), IsDeleted
-  - Relatie: 1 Boek ? N Uitleningen
+- .NET 9 SDK
+- Voor MAUI: MAUI workloads geïnstalleerd (`dotnet workload install maui`)
+- Database: SQL Server / LocalDB (of andere EF Core provider indien geconfigureerd)
+- Visual Studio met MAUI/WPF workloads of gebruik dotnet CLI en geschikte emulators/devices
 
-- Leden
-  - Velden: LidId (PK), Voornaam, AchterNaam, Telefoon, Email, Adres, IsDeleted
-  - Relatie: 1 Lid ? N Uitleningen
+---
 
-- Uitleningen
-  - Velden: UitleningId (PK), BoekId (FK), LidId (FK), StartDate, DueDate, ReturnedAt (nullable), IsDeleted, IsClosed
+Projectoverzicht (kort)
+-----------------------
 
-- CategorieÃ«n
-  - Velden: CategorieId (PK), Naam, Omschrijving
-
-Opmerking: soft-delete via `IsDeleted`; global query filters in `BiblioDbContext`.
-
-## Project- en mappenstructuur
-Hieronder een gedetailleerd voorbeeld van de mappenstructuur in de repository. Pas aan indien nodig.
-
+Biblio_Models
+- Korte omschrijving: gedeelde entiteiten, `DbContext`, migraties en seeding.
+- Snelkoppeling: `Biblio_Models/README.md`
+- Belangrijkste onderdelen: `Entiteiten/`, `Data/BiblioDbContext.cs`, `Seed/`.
+- Mappenstructuur (kort):
 ```
-Project_Framework_Biblio/
-├── Biblio_Models/
-│   ├── Entiteiten/
-│   │   ├── Boek.cs
-│   │   ├── Lid.cs
-│   │   ├── Lenen.cs
-│   │   ├── Categorie.cs
-│   │   ├── AppUser.cs
-│   │   └── BaseEntiteit.cs
-│   ├── Data/
-│   │   ├── BiblioDbContext.cs
-│   │   └── Migrations/           (EF Core migratiebestanden)
-│   ├── Seed/
-│   │   ├── SeedData.cs
-│   │   └── SeedOptions.cs
-│   └── Biblio_Models.csproj
-│
-├── Biblio_WPF/
-│   ├── Window/
-│   │   ├── BoekWindow.xaml / BoekWindow.xaml.cs
-│   │   ├── LidWindow.xaml / LidWindow.xaml.cs
-│   │   ├── UitleningWindow.xaml / UitleningWindow.xaml.cs
-│   │   ├── AdminUserWindow.xaml / AdminUserWindow.xaml.cs
-│   │   ├── LoginWindow.xaml / LoginWindow.xaml.cs
-│   │   ├── RegisterWindow.xaml / RegisterWindow.xaml.cs
-│   │   ├── ProfileWindow.xaml / ProfileWindow.xaml.cs
-│   │   ├── CategoriesWindow.xaml / CategoriesWindow.xaml.cs
-│   │   └── Overige dialogen/Windows/
-│   │       ├── SimpleBoekWindow.xaml / SimpleBoekWindow.xaml.cs
-│   │       ├── SimpleLidWindow.xaml / SimpleLidWindow.xaml.cs
-│   │       └── ResetWindow.xaml / ResetWindow.xaml.cs
-│   ├── Controls/
-│   │   └── LabeledTextBox.xaml / LabeledTextBox.xaml.cs
-│   ├── ViewModels/
-│   │   └── SecurityViewModel.cs
-│   ├── Styles/
-│   │   ├── Theme.Light.xaml
-│   │   ├── Theme.Dark.xaml
-│   │   └── Themes.xaml (+ code-behind)
-│   ├── App.xaml / App.xaml.cs
-│   ├── MainWindow.xaml / MainWindow.xaml.cs
-│   └── Biblio_WPF.csproj
-│
-├── SEED_USER_SECRETS.md
-├── docs/
-│   └── screenshots/
-├── README.md
-└── .gitignore
-
-
+Biblio_Models/
++-- Entiteiten/
++-- Data/
++-- Seed/
++-- Migrations/
 ```
 
-Kort overzicht van belangrijke onderdelen:
-- `Biblio_Models/Entiteiten` bevat de domeinmodellen.
-- `Biblio_Models/Data` bevat de DbContext en EF Core-migraties.
-- `Biblio_WPF/Window` bevat de UI-pagina's/vensters (code-behind).
-- `Biblio_WPF/ViewModels` bevat viewmodels en security logic.
-
-## Lokaal uitvoeren (kopieer/plak)
-1) Clone & open
-
-```bash
-# Klonen van de officiële repository
-git clone https://github.com/kiranchaudry97/Project_Framework_Biblio.git
-cd Project_Framework_Biblio
+Biblio_Web
+- Korte omschrijving: ASP.NET Core MVC / API voor beheer en mobiele clients.
+- Snelkoppeling: `Biblio_Web/README.md`
+- Belangrijkste onderdelen: `Controllers/`, `Areas/Identity/`, `Views/`, `Resources/`.
+- Mappenstructuur (kort):
 ```
-2) Restore & build
-
-```bash
-dotnet restore
-dotnet build
+Biblio_Web/
++-- Controllers/
++-- Areas/Identity/
++-- Views/
++-- Resources/
++-- wwwroot/
 ```
 
-3) Database migraties
-
-- Controleer connection string of zet env var:
-  - `BIBLIO_CONNECTION` = `Server=...;Database=...;Trusted_Connection=True;`
-
-```bash
-cd Biblio_Models
-# optioneel: verwijder lege of foutieve migratie en maak nieuwe aan
-# dotnet ef migrations remove
-# dotnet ef migrations add <Naam>
-dotnet ef database update
+Biblio_WPF
+- Korte omschrijving: Windows desktop client (WPF, MVVM).
+- Snelkoppeling: `Biblio_WPF/README.md`
+- Belangrijkste onderdelen: `Window/`, `ViewModels/`, `Styles/`, `Controls/`.
+- Mappenstructuur (kort):
+```
+Biblio_WPF/
++-- Window/
++-- ViewModels/
++-- Controls/
++-- Styles/
 ```
 
-4) Start de WPF-app (Windows)
-
-```bash
-cd ../Biblio_WPF
-dotnet run
+Biblio_App
+- Korte omschrijving: .NET MAUI cross‑platform client (Android/iOS/macCatalyst/Windows).
+- Snelkoppeling: `Biblio_App/README.md`
+- Belangrijkste onderdelen: `Pages/`, `ViewModels/`, `Services/`, `Resources/`.
+- Mappenstructuur (kort):
+```
+Biblio_App/
++-- Pages/
++-- ViewModels/
++-- Services/
++-- Resources/
 ```
 
-> Opmerking: WPF vereist Windows met GUI-ondersteuning.
-
-## Identity, seeding & security
-- `AppUser` breidt IdentityUser uit (FullName, IsBlocked).
-- `SeedData.InitializeAsync` maakt rollen (`Admin`, `Medewerker`), admin-account en voorbeelddata.
-- Beveiligingstips: wachtwoordbeleid in config, bewaar secrets niet in repo, valideer `IsBlocked` in login-flow.
-
-Voorbeeld seed (admin):
-```csharp
-var admin = new AppUser { Email = adminEmail, UserName = adminEmail, EmailConfirmed = true };
-await userMgr.CreateAsync(admin, desiredPwd);
-await userMgr.AddToRoleAsync(admin, "Admin");
-```
-
-## Seed: User Secrets (aanbevolen)
-
-Gebruik User Secrets om dev/test-credentials voor `SeedOptions` veilig lokaal te bewaren en niet in de repository op te nemen. Er is een voorbeeldbestand `Biblio_WPF/SEED_USER_SECRETS.md` met JSON en stappen.
-
-Korte stappen (voer uit in `Biblio_WPF` map):
-
-1. Initialiseer user-secrets éénmalig voor het project:
-
-```
-cd Biblio_WPF
-dotnet user-secrets init
-```
-
-2. Stel de seedwaarden in (voorbeeld):
-
-```
-dotnet user-secrets set "Seed:CreateTestAccounts" "true"
-dotnet user-secrets set "Seed:AdminEmail" "admin@biblio.local"
-dotnet user-secrets set "Seed:AdminPassword" "Vb1234?"
-# zet ook StaffEmail/StaffPassword en BlockedEmail/BlockedPassword indien gewenst
-```
-
-Opmerking: zet `Seed:CreateTestAccounts` op `false` voor productie en bewaar geen echte wachtwoorden in de repository. Zie `Biblio_WPF/SEED_USER_SECRETS.md` voor uitgebreidere instructies.
-
-## Foutafhandeling & logging
-- Gebruik `try/catch` rond persistente acties en log fouten met `ILogger`.
-- UI: toon gebruikersvriendelijke meldingen via `MessageBox`.
-- Overweeg Serilog of file-logging voor productie.
-
-Voorbeeld:
-```csharp
-_logger.LogError(ex, "Fout bij opslaan gebruiker {Email}", email);
-MessageBox.Show($"Fout: {ex.Message}");
-```
-
-### Screenshots
-
-
-### Loginvenster:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/771b4a63f08b055434323d72d7372fd853fbe2df/Screenshot/loginwindow.png)
-[*Login: Kunnen aanmelden ,registeren , wachtwoord tonen en indien vergeten*]
-
-
-
-### Darkmode:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/b8b038f87a4285dc7b44623e7d0e5afe6f048d0b/Screenshot/darkmode.png)
-[*darkmode]
-
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/mainwindow.png)
-
-
-### Openen:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/openen.png)
-[*Openen: boeken, leden, uitleningen, categorieën*]
-
-
-
-
-
-### Beheer:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/beheer.png)
-[*Beheer :Gebruikers | rollen kunnen zien aan rechten kunnen geven als admin of medewerker *]
-
-
-### Gebruiken & Rollen:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7f28cf8cb386e7a73314e2c78969d4a5051b6a10/Screenshot/gebruiker_rollen.png)
-[* Gebruikers rollen kunnen zien aan rechten kunnen geven als admin of medewerker *]
-
-
-
-### Bestanden:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/bestand.png)
-[*bestand : soort nav voor inloggen, profiel, wachtwoord kunnen wijzigen, afmelden en afsluiten *]
-
-
-
-
-### Profiel:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0089393fa95562fff3b577f0e167e28b00f9e6e6/Screenshot/profile.png)
-[*profiel : profiel kunnenn bekijken en opslaan of wijzigen van wachtwoord *]
-
-
-
-
-
-
-### wachtwoord wijzigen:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0089393fa95562fff3b577f0e167e28b00f9e6e6/Screenshot/wachtwoord.png)
-[*Wachtwoord wijzigen *]
-
-
-
-
-
-### categorie:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/categorie.png)
-[*categorie : categorie kunnen toevoegen en verwijderen *]
-
-
-
-### Uitleningen:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/uitleningen.png)
-[*uitleningen : Boeken kunnen uitlenen , datum selecteren , vermelden wanneer de boeken teruggebracht zijn *]
-
-
-
-### Leden:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/0bd4fc2df85c362e634ec9dc3cef3a912818f483/Screenshot/leden.png)
-[*leden : kunnen toevoegen van hun persoonlijke gegevens , opslaan en verwijderen en opzoeken*]
-
-
-### Leden:
-![image](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/55695f5e70c8e93bda9cda7a91a95144a5d3cf84/Screenshot/database_biblio.png)
-[*database; categorien, leden, uitleningen , boeken *]
-
-
-
-
-
-## Licenties
-
-De belangrijkste components/pakketten:
-
-- .NET / ASP.NET Core / Entity Framework Core (Microsoft) 
-- `Microsoft.EntityFrameworkCore` (EF Core) — MIT
-- `Microsoft.EntityFrameworkCore.SqlServer` — MIT
-- `Microsoft.EntityFrameworkCore.Design` — MIT
-- `Microsoft.AspNetCore.Identity.EntityFrameworkCore` — MIT
-
-
-
-## NuGet-installatieproblemen & AI-assistentie
-Tijdens ontwikkeling bij manueel werkte de installatie niet en werd vermeld dat dit niet geinstalleerd terwijl ik dit toch heb gedaan en geselecteerd,
-moest ik AI -assistentie inschakelen om de problemen op te lossen.
-
-AI‑assistentie is gebruikt om:
-- foutmeldingen te analyseren en mogelijke oorzaken te identificeren,
-- concrete `dotnet` commando's en `csproj`-aanpassingen voor te stellen,
-- te adviseren over het wissen van caches en het verifiëren van TFM/versiecompatibiliteit.
-
-
+---
+
+## Technische implementaties
+
+Hier een kort overzicht van concrete technische keuzes en implementaties per component:
+
+Biblio_Models
+- EF Core `DbContext` met global query filters voor soft‑delete (`IsDeleted`).
+- Separatie van entiteiten (`Entiteiten/`) en seed logic (`Seed/SeedData.cs`).
+- Migraties beheerd via EF Core CLI en toegepast met het juiste startup‑project.
+- Resourcebestand `SharedModelResource.resx` voor gedeelde vertalingen.
+
+Biblio_Web
+- ASP.NET Core MVC + API controllers (REST) en Identity voor gebruikersbeheer.
+- JWT / Bearer setup voor API authenticatie en Swagger in development.
+- Localization via `Resources/` en resource managers; views en API gebruiken dezelfde modellen uit `Biblio_Models`.
+- DI in `Program.cs`, logging met `ILogger<T>` en optionele e‑mail dev sender service.
+
+Biblio_WPF
+- MVVM patroon: views in `Window/`, viewmodels in `ViewModels/`.
+- Gebruikt `Biblio_Models` als projectreferentie voor entiteiten en context (indien lokaal DB gebruikt).
+- Resource dictionaries en thema's (`Styles/Theme.*.xaml`) voor styling en darkmode.
+- Local run via Visual Studio; migraties uit `Biblio_Models` toepassen met `--startup-project` op `Biblio_WPF` wanneer nodig.
+
+Biblio_App
+- .NET MAUI Shell‑navigatie (`AppShell.xaml`) en MVVM met `ViewModels/`.
+- Services: `AuthService`, `TokenHandler`, `LanguageService` worden via DI geregistreerd in `MauiProgram.cs`.
+- Lokalisatie: runtime taalwijziging ondersteund via `LanguageService` en ResourceManager fallback logic (NL/EN/FR).
+- Image/resources in `Resources/Images/` en platform‑specifieke assets via MAUI resource system.
+- MainThread invocations voor UI updates (MainThread.BeginInvokeOnMainThread).
+
+Cross‑cutting
+- Dependency Injection (Microsoft.Extensions.DependencyInjection) gebruikt in Web en MAUI projecten.
+- Logging via `ILogger<T>` door de hele stack.
+- Authenticatie en autorisatie: Identity (web) + JWT voor API; clients houden access/refresh tokens en gebruiken `TokenHandler`/`AuthService`.
+- CI/CD: er zijn GitHub workflow(s) in `.github/workflows/` voor provisioning/automation.
+
+---
 
 ## AI-hulpmiddelen & ontwikkelworkflow
+
 Deze repository gebruikt AI‑geassisteerde workflows (bijv. GitHub Copilot of vergelijkbare tools) ter ondersteuning van ontwikkeltaken. Typische AI‑taken die in dit project zijn toegepast of kunnen helpen:
 
 - Debuggen en verbeteren van foutmeldingen (error list): analyseren van compile/runtime errors en suggesties voor fixes.
-- Aanmaken van EF Core migraties: genereren of voorbereiden van migratiebestanden en SQL-scripts.
-- Automatisch aanmaken of verbeteren van documentatie, zoals README-bestanden.
+- Aanmaken van EF Core migraties: genereren of voorbereiden van migratiebestanden en SQL‑scripts.
+- Automatisch aanmaken of verbeteren van documentatie, zoals README‑bestanden.
 - Refactorings en kleine codewijzigingen (XAML/C#) om UX of toegankelijkheid te verbeteren.
 
-
-
+---
 
 ## Problemen die ik voorkwam
 
 Kort overzicht van concrete problemen die tijdens ontwikkeling zijn opgespoord en verholpen:
 
-- Bestanden die wel op schijf stonden maar niet in Visual Studio Solution Explorer verschenen (ontbrekende project-includes).
+- Bestanden die wel op schijf stonden maar niet in Visual Studio Solution Explorer verschenen (ontbrekende project‑includes).
 - Dubbele of gedupliceerde bestanden in het project / op schijf die verwarring en build‑issues veroorzaakten.
-- Tijdelijke of IDE-specifieke bestanden die per ongeluk in de repository konden verschijnen (bv. `.vs/`, temp READMEs).
-- Problemen met NuGet-installatie (package restore, cache- of netwerkfouten) waardoor builds faalden.
-- TargetFramework / package‑versie mismatch die tot compile- of runtime‑fouten leidde.
-- Onzichtbare UI-elementen door thema- of resource-issues (bv. foreground/background brushes niet geladen).
-- Migratieproblemen of onvolledige EF Core migratiebestanden die database-updates blokkeerden.
-- Foutmeldingen in de error list die voortkwamen uit niet-gesynchroniseerde bronnen of ontbrekende referenties.
+- Tijdelijke of IDE‑specifieke bestanden die per ongeluk in de repository konden verschijnen (bv. `.vs/`, temp READMEs).
+- Problemen met NuGet‑installatie (package restore, cache‑ of netwerkfouten) waardoor builds faalden.
+- TargetFramework / package‑versie mismatch die tot compile‑ of runtime‑fouten leidde.
+- Onzichtbare UI‑elementen door thema‑ of resource‑issues (bv. foreground/background brushes niet geladen).
+- Migratieproblemen of onvolledige EF Core migratiebestanden die database‑updates blokkeerden.
+- Foutmeldingen in de error list die voortkwamen uit niet‑gesynchroniseerde bronnen of ontbrekende referenties.
+
+---
+
+Licentie
+
+Controleer `LICENSE` in de repository root (indien aanwezig) voor licentievoorwaarden.
+
 
 
 
