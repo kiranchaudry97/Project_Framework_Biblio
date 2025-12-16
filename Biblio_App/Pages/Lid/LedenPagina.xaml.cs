@@ -252,10 +252,10 @@ namespace Biblio_App.Pages
                     catch { }
 
                     // fallback: show details alert if VM not available
-                    var title = AppShell.Instance?.Translate("Details") ?? "Details";
-                    var ok = AppShell.Instance?.Translate("OK") ?? "OK";
-                    var emailLabel = AppShell.Instance?.Translate("Email") ?? "Email";
-                    var phoneLabel = AppShell.Instance?.Translate("Phone") ?? "Phone";
+                    var title = Localize("Details");
+                    var ok = Localize("OK");
+                    var emailLabel = Localize("Email");
+                    var phoneLabel = Localize("Phone");
 
                     var body = $"{lid.Voornaam} {lid.AchterNaam}\n{emailLabel}: {lid.Email}\n{phoneLabel}: {lid.Telefoon}";
                     await DisplayAlert(title, body, ok);

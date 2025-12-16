@@ -108,6 +108,7 @@ namespace Biblio_App.Pages
                     if (!string.IsNullOrEmpty(val)) return val;
                 }
 
+                // simple fallback for common keys
                 var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
                 if (code == "en")
                 {
@@ -129,6 +130,9 @@ namespace Biblio_App.Pages
                         "New" => "New",
                         "Save" => "Save",
                         "Delete" => "Delete",
+                        "Copied" => "Copied",
+                        "NoPath" => "No path loaded",
+                        "OK" => "OK",
                         _ => key
                     };
                 }
@@ -151,6 +155,9 @@ namespace Biblio_App.Pages
                     "New" => "Nieuw",
                     "Save" => "Opslaan",
                     "Delete" => "Verwijder",
+                    "Copied" => "Gekopieerd",
+                    "NoPath" => "Er is geen pad geladen.",
+                    "OK" => "OK",
                     _ => key
                 };
             }
@@ -240,11 +247,11 @@ namespace Biblio_App.Pages
                 if (!string.IsNullOrEmpty(text))
                 {
                     await Clipboard.SetTextAsync(text);
-                    try { await DisplayAlert("Gekopieerd", "Database-pad is gekopieerd naar klembord.", "OK"); } catch { }
+                    try { await DisplayAlert(Localize("Copied"), Localize("DbPath"), Localize("OK")); } catch { }
                 }
                 else
                 {
-                    try { await DisplayAlert("Leeg", "Er is geen pad geladen.", "OK"); } catch { }
+                    try { await DisplayAlert(Localize("NoPath"), Localize("NoPath"), Localize("OK")); } catch { }
                 }
             }
             catch { }
@@ -288,7 +295,7 @@ namespace Biblio_App.Pages
                     var lid = (lenen.Lid?.Voornaam ?? "") + " " + (lenen.Lid?.AchterNaam ?? "");
                     var start = lenen.StartDate.ToString("dd-MM-yyyy");
                     var due = lenen.DueDate.ToString("dd-MM-yyyy");
-                    await DisplayAlert(Localize("View"), $"{lid}\n{boek}\n{start} - {due}", "OK");
+                    await DisplayAlert(Localize("View"), $"{lid}\n{boek}\n{start} - {due}", Localize("OK"));
                 }
             }
             catch { }

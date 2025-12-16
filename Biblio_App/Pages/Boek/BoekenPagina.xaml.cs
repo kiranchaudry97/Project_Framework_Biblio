@@ -7,6 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Biblio_App.Services;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.ApplicationModel;
+using System.Resources;
+using System.Globalization;
+using Biblio_Models.Resources;
 
 namespace Biblio_App.Pages
 {
@@ -14,6 +17,7 @@ namespace Biblio_App.Pages
     {
         private BoekenViewModel VM => BindingContext as BoekenViewModel;
         private ILanguageService? _languageService;
+        private ResourceManager? _sharedResourceManager;
 
         public BoekenPagina(BoekenViewModel vm)
         {
@@ -26,8 +30,106 @@ namespace Biblio_App.Pages
             try
             {
                 _languageService = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>();
+                InitializeSharedResourceManager();
             }
             catch { }
+        }
+
+        private void InitializeSharedResourceManager()
+        {
+            try
+            {
+                var webAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
+                if (webAsm != null)
+                {
+                    foreach (var name in new[] { "Biblio_Web.Resources.Vertalingen.SharedResource", "Biblio_Web.Resources.SharedResource", "Biblio_Web.SharedResource" })
+                    {
+                        try
+                        {
+                            var rm = new ResourceManager(name, webAsm);
+                            var test = rm.GetString("Details", CultureInfo.CurrentUICulture);
+                            if (!string.IsNullOrEmpty(test))
+                            {
+                                _sharedResourceManager = rm;
+                                return;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+
+                var modelType = typeof(SharedModelResource);
+                if (modelType != null)
+                {
+                    _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", modelType.Assembly);
+                }
+            }
+            catch { }
+        }
+
+        private string Localize(string key)
+        {
+            try
+            {
+                var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+                // prefer AppShell translation when available
+                try
+                {
+                    var shell = AppShell.Instance;
+                    if (shell != null)
+                    {
+                        var val = shell.Translate(key);
+                        if (!string.IsNullOrEmpty(val)) return val;
+                    }
+                }
+                catch { }
+
+                if (_sharedResourceManager != null)
+                {
+                    try
+                    {
+                        var val = _sharedResourceManager.GetString(key, culture);
+                        if (!string.IsNullOrEmpty(val)) return val;
+                    }
+                    catch { }
+                }
+
+                var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
+                if (code == "en")
+                {
+                    return key switch
+                    {
+                        "Details" => "Details",
+                        "OK" => "OK",
+                        "ISBN" => "ISBN",
+                        "Category" => "Category",
+                        _ => key
+                    };
+                }
+
+                if (code == "fr")
+                {
+                    return key switch
+                    {
+                        "Details" => "Détails",
+                        "OK" => "OK",
+                        "ISBN" => "ISBN",
+                        "Category" => "Catégorie",
+                        _ => key
+                    };
+                }
+
+                // default nl
+                return key switch
+                {
+                    "Details" => "Details",
+                    "OK" => "OK",
+                    "ISBN" => "ISBN",
+                    "Category" => "Categorie",
+                    _ => key
+                };
+            }
+            catch { return key; }
         }
 
         protected override async void OnAppearing()
@@ -130,9 +232,9 @@ namespace Biblio_App.Pages
                     catch { }
 
                     // fallback: navigeer naar de detailpagina of toon een melding met basisinformatie
-                    var title = AppShell.Instance?.Translate("Details") ?? "Details";
-                    var okText = AppShell.Instance?.Translate("OK") ?? "OK";
-                    var isbnLabel = AppShell.Instance?.Translate("ISBN") ?? "ISBN";
+                    var title = Localize("Details");
+                    var okText = Localize("OK");
+                    var isbnLabel = Localize("ISBN");
                     var body = $"{boek.Titel}\n{boek.Auteur}\n{isbnLabel}: {boek.Isbn}";
                     await DisplayAlert(title, body, okText);
                 }
@@ -182,15 +284,15 @@ namespace Biblio_App.Pages
                     {
                         // bepaal welke eigenschap is aangeraakt op basis van de kolom (gebruik index van parent grid children)
                         // fallback: toon titel + auteur + isbn
-                        var isbnLabel = AppShell.Instance?.Translate("ISBN") ?? "ISBN";
-                        var categoryLabel = AppShell.Instance?.Translate("Category") ?? "Category";
+                        var isbnLabel = Localize("ISBN");
+                        var categoryLabel = Localize("Category");
                         text = $"{boek.Titel}\n{boek.Auteur}\n{isbnLabel}: {boek.Isbn}\n{categoryLabel}: {boek.CategorieID}";
                     }
 
                     if (!string.IsNullOrWhiteSpace(text))
                     {
-                        var title = AppShell.Instance?.Translate("Details") ?? "Details";
-                        var okText = AppShell.Instance?.Translate("OK") ?? "OK";
+                        var title = Localize("Details");
+                        var okText = Localize("OK");
                         await DisplayAlert(title, text, okText);
                     }
                 }
@@ -239,7 +341,8 @@ namespace Biblio_App.Pages
                 System.Diagnostics.Debug.WriteLine("BoekenPagina.UpdateLocalizedStrings called");
                 if (System.Diagnostics.Debugger.IsAttached)
                 {
-                    System.Diagnostics.Debugger.Break();
+                  
+                        System.Diagnostics.Debugger.Break();
                 }
             }
             catch { }

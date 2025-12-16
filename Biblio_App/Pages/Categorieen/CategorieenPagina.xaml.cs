@@ -186,6 +186,8 @@ namespace Biblio_App.Pages
             try { RefreshTitleFromViewModel(); } catch { }
         }
 
+        // If there are any popup messages in this page later, use Localize(key) to get translations
+
         protected override async void OnAppearing()
         {
             base.OnAppearing();
