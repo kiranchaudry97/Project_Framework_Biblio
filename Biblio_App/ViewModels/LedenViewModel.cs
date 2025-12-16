@@ -65,7 +65,7 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string searchText = string.Empty;
 
-        // Per-field error properties
+        // Foutmeldingen per veld
         public string VoornaamError => GetFirstError(nameof(Voornaam));
         public string AchternaamError => GetFirstError(nameof(Achternaam));
         public string EmailError => GetFirstError(nameof(Email));
@@ -77,14 +77,14 @@ namespace Biblio_App.ViewModels
         public IAsyncRelayCommand OpslaanCommand { get; }
         public IAsyncRelayCommand VerwijderCommand { get; }
 
-        // item-level commands
+        // Commands op item-niveau
         public IRelayCommand<Lid> ItemDetailsCommand { get; }
         public IRelayCommand<Lid> ItemEditCommand { get; }
         public IAsyncRelayCommand<Lid> ItemDeleteCommand { get; }
 
         public IRelayCommand ZoekCommand { get; }
 
-        // localized UI strings
+        // Gelokaliseerde UI-strings
         [ObservableProperty]
         private string pageTitle = string.Empty;
         [ObservableProperty]
@@ -101,6 +101,10 @@ namespace Biblio_App.ViewModels
         private string deleteButtonText = string.Empty;
         [ObservableProperty]
         private string saveButtonText = string.Empty;
+
+        [ObservableProperty]
+        private string overviewText = string.Empty;
+
         [ObservableProperty]
         private string firstNamePlaceholder = string.Empty;
         [ObservableProperty]
@@ -114,7 +118,7 @@ namespace Biblio_App.ViewModels
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _gegevensProvider = gegevensProvider;
-            _languageService = languageService;
+            _language_service = languageService;
 
             NieuwCommand = new RelayCommand(Nieuw);
             OpslaanCommand = new AsyncRelayCommand(OpslaanAsync);
@@ -126,24 +130,24 @@ namespace Biblio_App.ViewModels
 
             ZoekCommand = new RelayCommand(async () => await LoadLedenAsync());
 
-            // initialize localized strings
+            // Initialiseer gelokaliseerde strings
             UpdateLocalizedStrings();
             try
             {
-                if (_languageService != null)
+                if (_language_service != null)
                 {
-                    _languageService.LanguageChanged += (s, c) => Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => UpdateLocalizedStrings());
+                    _language_service.LanguageChanged += (s, c) => Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => UpdateLocalizedStrings());
                 }
             }
             catch { }
 
-            // Do NOT trigger data loading directly in constructor; this can cause startup/UI thread blocking and ANRs.
-            // Call InitializeAsync from the page's OnAppearing so loading occurs after page construction and on the UI-friendly async path.
+            // LAAD GEEN data direct in de constructor; dit kan leiden tot blokkering van de UI-start en ANR's.
+            // Roep InitializeAsync aan vanuit de pagina's OnAppearing zodat laden na constructie en asynchroon op de UI-thread plaatsvindt.
         }
 
         private bool _initialized = false;
 
-        // Public initializer to be called from the page (OnAppearing) so we avoid blocking startup/UI thread
+        // Publieke initializer die vanaf de pagina (OnAppearing) moet worden aangeroepen om UI-blokkering te voorkomen
         public async Task InitializeAsync()
         {
             if (_initialized) return;
@@ -160,8 +164,8 @@ namespace Biblio_App.ViewModels
 
         private void EnsureResourceManagerInitialized()
         {
-            if (_resourceManagerInitialized) return;
-            _resourceManagerInitialized = true;
+            if (_resource_managerInitialized) return;
+            _resource_managerInitialized = true;
             try
             {
                 var asm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
@@ -178,7 +182,7 @@ namespace Biblio_App.ViewModels
                         {
                             var rm = new ResourceManager(baseName, asm);
                             var test = rm.GetString("Members", CultureInfo.CurrentUICulture);
-                            if (!string.IsNullOrEmpty(test)) { _sharedResourceManager = rm; return; }
+                            if (!string.IsNullOrEmpty(test)) { _shared_resourceManager = rm; return; }
                         }
                         catch { }
                     }
@@ -189,14 +193,14 @@ namespace Biblio_App.ViewModels
             try
             {
                 var modelType = typeof(SharedModelResource);
-                _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", modelType.Assembly);
+                _shared_resourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", modelType.Assembly);
             }
             catch { }
         }
 
         private string Localize(string key)
         {
-            // Prefer AppShell localization when available so Shell and pages use same resource lookups
+            // Geef de voorkeur aan AppShell-lokalisatie wanneer beschikbaar zodat Shell en pagina's dezelfde resource-lookup gebruiken
             try
             {
                 var shell = AppShell.Instance;
@@ -213,12 +217,12 @@ namespace Biblio_App.ViewModels
             catch { }
 
             EnsureResourceManagerInitialized();
-            var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
-            if (_sharedResourceManager != null)
+            var culture = _language_service?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+            if (_shared_resourceManager != null)
             {
                 try
                 {
-                    var val = _sharedResourceManager.GetString(key, culture);
+                    var val = _shared_resource_manager.GetString(key, culture);
                     if (!string.IsNullOrEmpty(val)) return val;
                 }
                 catch { }
@@ -293,7 +297,6 @@ namespace Biblio_App.ViewModels
             };
         }
 
-        // expose public UpdateLocalizedStrings to satisfy ILocalizable; keep core logic in a separate method
         public void UpdateLocalizedStrings()
         {
             UpdateLocalizedStringsCore();
@@ -304,18 +307,19 @@ namespace Biblio_App.ViewModels
             PageTitle = Localize("Members");
             SearchPlaceholder = Localize("SearchPlaceholder");
             SearchButtonText = Localize("Search");
-            // localized label for the New button
+            // Gelokaliseerde tekst voor de Nieuw-knop
             NewButtonText = Localize("New");
             DetailsButtonText = Localize("Details");
             EditButtonText = Localize("Edit");
             DeleteButtonText = Localize("Delete");
             SaveButtonText = Localize("Save");
+            OverviewText = Localize("Overview");
             FirstNamePlaceholder = Localize("FirstName");
             LastNamePlaceholder = Localize("LastName");
             EmailPlaceholder = Localize("Email");
             PhonePlaceholder = Localize("Phone");
 
-            // refresh computed properties
+            // Vernieuw afgeleide eigenschappen
             OnPropertyChanged(nameof(PageTitle));
         }
 
@@ -351,7 +355,7 @@ namespace Biblio_App.ViewModels
 
         partial void OnSelectedLidChanged(Lid? value)
         {
-            // When selection changes, populate editable fields
+            // Wanneer selectie verandert, vul dan de bewerkvelden
             if (value != null)
             {
                 Voornaam = value.Voornaam;
@@ -448,7 +452,7 @@ namespace Biblio_App.ViewModels
         private async Task OpslaanAsync()
         {
             Debug.WriteLine("OpslaanAsync called for LedenViewModel");
-            // validate properties using DataAnnotations on VM
+            // Valideer eigenschappen met DataAnnotations op het viewmodel
             ClearErrors();
             ValidateAllProperties();
 
@@ -490,7 +494,7 @@ namespace Biblio_App.ViewModels
                 await db.SaveChangesAsync();
                 await LoadLedenAsync();
 
-                // notify other pages/viewmodels that members changed
+                // Informeer andere pagina's/viewmodels dat leden zijn gewijzigd
                 try { Microsoft.Maui.Controls.MessagingCenter.Send(this, "MembersChanged"); } catch { }
 
                 SelectedLid = null;
@@ -522,7 +526,7 @@ namespace Biblio_App.ViewModels
 
                 await LoadLedenAsync();
 
-                // notify other pages/viewmodels that members changed
+                // Informeer andere pagina's/viewmodels dat leden zijn gewijzigd
                 try { Microsoft.Maui.Controls.MessagingCenter.Send(this, "MembersChanged"); } catch { }
 
                 SelectedLid = null;
@@ -553,7 +557,7 @@ namespace Biblio_App.ViewModels
 
                 await LoadLedenAsync();
 
-                // notify other pages/viewmodels that members changed
+                // Informeer andere pagina's/viewmodels dat leden zijn gewijzigd
                 try { Microsoft.Maui.Controls.MessagingCenter.Send(this, "MembersChanged"); } catch { }
 
                 await ShowAlertAsync(Localize("Ready"), Localize("DeletedMember"));
@@ -579,7 +583,7 @@ namespace Biblio_App.ViewModels
             }
             catch
             {
-                // ignore
+                // negeren
             }
         }
     }
