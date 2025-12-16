@@ -1,4 +1,4 @@
-ï»¿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Biblio_App.Services;
 using Biblio_App.Pages;
@@ -13,6 +13,7 @@ using Biblio_App.Models;
 using Microsoft.Extensions.Configuration; // configuratie-extensies
 using System.IO;
 using System.Globalization;
+using Microsoft.Maui.Devices;
 
 namespace Biblio_App
 {
@@ -21,6 +22,24 @@ namespace Biblio_App
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
+
+            // Apply saved language preference if available, otherwise use device/system culture
+            try
+            {
+                const string prefKey = "biblio-culture";
+                if (Preferences.Default.ContainsKey(prefKey))
+                {
+                    var code = Preferences.Default.Get(prefKey, string.Empty);
+                    if (!string.IsNullOrWhiteSpace(code))
+                    {
+                        var culture = new CultureInfo(code);
+                        CultureInfo.DefaultThreadCurrentCulture = culture;
+                        CultureInfo.DefaultThreadCurrentUICulture = culture;
+                        try { Biblio_Models.Resources.SharedModelResource.Culture = culture; } catch { }
+                    }
+                }
+            }
+            catch { }
 
             // Laad optionele appsettings.json zodat het API-basisadres of de connectiestring zonder codewijzigingen geconfigureerd kan worden
             builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
@@ -39,6 +58,24 @@ namespace Biblio_App
             // Bepaal API-basisadres uit configuratie (ondersteunt 'ApiBaseAddress' of 'Api:BaseAddress')
             var apiBase = builder.Configuration["ApiBaseAddress"] ?? builder.Configuration.GetSection("Api")["BaseAddress"] ?? "https://localhost:5001/";
 
+            // When running on the Android emulator, 'localhost' refers to the emulator itself.
+            // Use the special host 10.0.2.2 to reach the host machine's localhost from the emulator.
+            try
+            {
+                if (DeviceInfo.Platform == DevicePlatform.Android && !string.IsNullOrEmpty(apiBase) && apiBase.Contains("localhost", StringComparison.OrdinalIgnoreCase))
+                {
+                    apiBase = apiBase.Replace("localhost", "10.0.2.2", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            catch { }
+
+            // Log the resolved API base for debugging (visible in Debug output / logcat)
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"[MauiProgram] Resolved ApiBase = '{apiBase}'");
+            }
+            catch { }
+
             // Registreer pagina's
             builder.Services.AddTransient<MainPage>();
 
@@ -53,54 +90,39 @@ namespace Biblio_App
             builder.Services.AddTransient<ViewModels.UsersViewModel>();
 
             // Configureer DbContextFactory:
-            // - Als een DefaultConnection is geconfigureerd EN de app op Windows draait, geef dan de voorkeur aan SQL Server (verbindt met dezelfde DB als de webapp).
-            // - Anders (niet-Windows of geen DefaultConnection) gebruik lokaal SQLite zodat mobiele/emulator/device-scenario's werken.
-            var sqlConn = builder.Configuration.GetConnectionString("DefaultConnection");
-            var isWindows = OperatingSystem.IsWindows();
-            if (!string.IsNullOrWhiteSpace(sqlConn) && isWindows)
-            {
-                // Gebruik SQL Server op Windows
-                builder.Services.AddDbContextFactory<BiblioDbContext>(options =>
-                    options.UseSqlServer(sqlConn));
+            // Use local SQLite file for all platforms (ensure MAUI app uses biblio.db)
+            string dbPath = System.IO.Path.Combine(FileSystem.AppDataDirectory, "biblio.db");
+            builder.Services.AddDbContextFactory<BiblioDbContext>(options =>
+                options.UseSqlite($"Data Source={dbPath}"));
 
-                // Registreer ook DbContext voor directe injectie in MAUI-pagina's/services indien nodig
-                builder.Services.AddDbContext<BiblioDbContext>(options =>
-                    options.UseSqlServer(sqlConn));
-            }
-            else
-            {
-                // Gebruik lokaal SQLite op niet-Windows of wanneer geen DefaultConnection is opgegeven
-                string dbPath = System.IO.Path.Combine(FileSystem.AppDataDirectory, "biblio.db");
-                builder.Services.AddDbContextFactory<BiblioDbContext>(options =>
-                    options.UseSqlite($"Data Source={dbPath}"));
+            // Also register DbContext for direct injection in MAUI pages/services if needed
+            builder.Services.AddDbContext<BiblioDbContext>(options =>
+                options.UseSqlite($"Data Source={dbPath}"));
 
-                // Registreer ook DbContext voor directe injectie
-                builder.Services.AddDbContext<BiblioDbContext>(options =>
-                    options.UseSqlite($"Data Source={dbPath}"));
+            // Register also LocalDbContext (shared models project) for local MAUI operations
+            builder.Services.AddDbContextFactory<Biblio_Models.Data.LocalDbContext>(options =>
+                options.UseSqlite($"Data Source={dbPath}"));
+
+            builder.Services.AddDbContext<Biblio_Models.Data.LocalDbContext>(options =>
+                options.UseSqlite($"Data Source={dbPath}"));
                 
-                // Registreer ook een lichte LocalDbContext (uit het gedeelde models-project) voor lokale MAUI-bewerkingen
-                builder.Services.AddDbContextFactory<Biblio_Models.Data.LocalDbContext>(options =>
-                    options.UseSqlite($"Data Source={dbPath}"));
-
-                builder.Services.AddDbContext<Biblio_Models.Data.LocalDbContext>(options =>
-                    options.UseSqlite($"Data Source={dbPath}"));
-            }
-
             // Registreer EF-gebaseerde gegevensprovider (factory-gebaseerd)
             builder.Services.AddScoped<EfGegevensProvider>();
             builder.Services.AddScoped<IGegevensProvider>(sp => sp.GetRequiredService<EfGegevensProvider>());
 
-            // Registreer TokenHandler en API-auth-client
-            builder.Services.AddTransient<TokenHandler>();
+            // Registreer TokenHandler and provide IAuthService for injection
+            builder.Services.AddTransient<TokenHandler>(sp => ActivatorUtilities.CreateInstance<TokenHandler>(sp));
             builder.Services.AddHttpClient<IAuthService, AuthService>(c =>
             {
                 c.BaseAddress = new Uri(apiBase);
+                c.Timeout = TimeSpan.FromSeconds(5);
             }).AddHttpMessageHandler<TokenHandler>();
 
-            // Genoemde client gebruikt voor andere API-aanroepen (voegt token toe) - houd de genoemde client zodat DataSyncService deze kan gebruiken via HttpClientFactory
+            // Ensure TokenHandler has access to IAuthService for refresh; register plain HttpClient for ApiWithToken then add handler
             builder.Services.AddHttpClient("ApiWithToken", c =>
             {
                 c.BaseAddress = new Uri(apiBase);
+                c.Timeout = TimeSpan.FromSeconds(5);
             }).AddHttpMessageHandler<TokenHandler>();
 
             builder.Services.AddScoped<IDataSyncService, DataSyncService>();
@@ -185,7 +207,7 @@ namespace Biblio_App
                 try { Infrastructure.ErrorLogger.Log(ex); } catch { }
             }
 
-            // Fire-and-forget initiÃ«le synchronisatie op de achtergrond om het opstarten niet te blokkeren
+            // Fire-and-forget initiële synchronisatie op de achtergrond om het opstarten niet te blokkeren
             try
             {
                 Task.Run(async () =>
@@ -231,7 +253,7 @@ namespace Biblio_App
                     var provider = db.Database.ProviderName ?? string.Empty;
                     if (provider.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
                     {
-                        // SQLite op device/emulator: migraties die voor SQL Server zijn gegenereerd kunnen falen â€” maak de DB vanuit het model aan
+                        // SQLite op device/emulator: migraties die voor SQL Server zijn tegengekomen kunnen falen — maak de DB vanuit het model aan
                         await db.Database.EnsureCreatedAsync();
                         try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] EnsureCreatedAsync gebruikt voor provider: {provider}\n"); } catch { }
                     }
@@ -241,7 +263,7 @@ namespace Biblio_App
                         try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] MigrateAsync gebruikt voor provider: {provider}\n"); } catch { }
                     }
 
-                    // minimale seed (categorieÃ«n, boeken, leden) â€” veilig zonder Identity-afhankelijkheden
+                    // minimale seed (categorieën, boeken, leden) — veilig zonder Identity-afhankelijkheden
                     if (!await db.Categorien.AnyAsync())
                     {
                         db.Categorien.AddRange(
