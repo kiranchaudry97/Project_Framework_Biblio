@@ -58,8 +58,6 @@ namespace Biblio_App
             // Bepaal API-basisadres uit configuratie (ondersteunt 'ApiBaseAddress' of 'Api:BaseAddress')
             var apiBase = builder.Configuration["ApiBaseAddress"] ?? builder.Configuration.GetSection("Api")["BaseAddress"] ?? "https://localhost:5001/";
 
-            // When running on the Android emulator, 'localhost' refers to the emulator itself.
-            // Use the special host 10.0.2.2 to reach the host machine's localhost from the emulator.
             try
             {
                 if (DeviceInfo.Platform == DevicePlatform.Android && !string.IsNullOrEmpty(apiBase) && apiBase.Contains("localhost", StringComparison.OrdinalIgnoreCase))
