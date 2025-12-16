@@ -167,7 +167,6 @@ namespace Biblio_App.Pages
 
         public void UpdateLocalizedStrings()
         {
-            // ensure viewmodel-localized strings are updated first
             try
             {
                 if (VM is Biblio_App.Services.ILocalizable locVm)
@@ -186,7 +185,6 @@ namespace Biblio_App.Pages
             try { RefreshTitleFromViewModel(); } catch { }
         }
 
-        // If there are any popup messages in this page later, use Localize(key) to get translations
 
         protected override async void OnAppearing()
         {
