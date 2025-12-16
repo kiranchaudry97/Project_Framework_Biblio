@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Privacy" xml:space="preserve">
+    <value>Privacy</value>
+  </data>
+  <data name="Books" xml:space="preserve">
+    <value>Boeken</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>Leden</value>
+  </data>
+  <data name="Loans" xml:space="preserve">
+    <value>Uitleningen</value>
+  </data>
+  <data name="Admin" xml:space="preserve">
+    <value>Beheer</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Inloggen</value>
+  </data>
+  <data name="Register" xml:space="preserve">
+    <value>Registreren</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Uitloggen</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>Gebruiker</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+</root>

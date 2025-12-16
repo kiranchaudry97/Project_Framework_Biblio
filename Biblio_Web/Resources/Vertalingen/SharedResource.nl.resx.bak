@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="Required" xml:space="preserve"><value>Het veld {0} is verplicht.</value></data>
+  <data name="StringLength" xml:space="preserve"><value>{0} moet tussen {2} en {1} tekens bevatten.</value></data>
+  <data name="EmailAddress" xml:space="preserve"><value>Ongeldig e-mailadres.</value></data>
+
+  <!-- Common UI keys used by the app -->
+  <data name="Overview" xml:space="preserve"><value>Overzicht</value></data>
+  <data name="Details" xml:space="preserve"><value>Details</value></data>
+  <data name="Edit" xml:space="preserve"><value>Bewerk</value></data>
+  <data name="Delete" xml:space="preserve"><value>Verwijder</value></data>
+  <data name="New" xml:space="preserve"><value>Nieuw</value></data>
+  <data name="Save" xml:space="preserve"><value>Opslaan</value></data>
+  <data name="Categories" xml:space="preserve"><value>Categorieén</value></data>
+  <data name="NamePlaceholder" xml:space="preserve"><value>Voeg categorie toe</value></data>
+  <data name="BooksOverview" xml:space="preserve"><value>Overzicht van boeken é hier kun je details bekijken, boeken bewerken en daarna een nieuw boek toevoegen</value></data>
+
+</root>

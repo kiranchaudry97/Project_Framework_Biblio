@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -200,6 +200,9 @@
   </data>
   <data name="Delete" xml:space="preserve">
     <value>Supprimer</value>
+  </data>
+  <data name="Overview" xml:space="preserve">
+    <value>Aperçu</value>
   </data>
   <data name="DeleteConfirm" xml:space="preserve">
     <value>êtes-vous sur de vouloir supprimer cet élément ?</value>
@@ -594,5 +597,9 @@
   <data name="UserAndRoles" xml:space="preserve">
     <value>Utilisateurs et réles</value>
   </data>
-	
+	<data name="NamePlaceholder" xml:space="preserve"><value>Ajouter une catégorie</value></data>
+	<data name="New" xml:space="preserve"><value>Nouveau</value></data>
+	<data name="Delete" xml:space="preserve"><value>Supprimer</value></data>
+	<data name="Save" xml:space="preserve"><value>Enregistrer</value></data>
+	<data name="Categories" xml:space="preserve"><value>Catégories</value></data>
 </root>
