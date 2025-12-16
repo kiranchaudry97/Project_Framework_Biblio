@@ -30,6 +30,7 @@ Inhoud (snelkoppelingen)
 
 - [Biblio_App (MAUI client) README](Biblio_App/README.md)
 - [Biblio_Web (ASP.NET Core) README](Biblio_Web/README.md)
+- [Biblio_Models (Shared models) README](Biblio_Models/README.md)
 
 ---
 
