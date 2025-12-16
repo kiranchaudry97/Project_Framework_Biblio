@@ -118,7 +118,7 @@ namespace Biblio_App.ViewModels
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _gegevensProvider = gegevensProvider;
-            _language_service = languageService;
+            _languageService = languageService;
 
             NieuwCommand = new RelayCommand(Nieuw);
             OpslaanCommand = new AsyncRelayCommand(OpslaanAsync);
@@ -134,9 +134,9 @@ namespace Biblio_App.ViewModels
             UpdateLocalizedStrings();
             try
             {
-                if (_language_service != null)
+                if (_languageService != null)
                 {
-                    _language_service.LanguageChanged += (s, c) => Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => UpdateLocalizedStrings());
+                    _languageService.LanguageChanged += (s, c) => Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => UpdateLocalizedStrings());
                 }
             }
             catch { }
@@ -164,8 +164,8 @@ namespace Biblio_App.ViewModels
 
         private void EnsureResourceManagerInitialized()
         {
-            if (_resource_managerInitialized) return;
-            _resource_managerInitialized = true;
+            if (_resourceManagerInitialized) return;
+            _resourceManagerInitialized = true;
             try
             {
                 var asm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
@@ -182,7 +182,7 @@ namespace Biblio_App.ViewModels
                         {
                             var rm = new ResourceManager(baseName, asm);
                             var test = rm.GetString("Members", CultureInfo.CurrentUICulture);
-                            if (!string.IsNullOrEmpty(test)) { _shared_resourceManager = rm; return; }
+                            if (!string.IsNullOrEmpty(test)) { _sharedResourceManager = rm; return; }
                         }
                         catch { }
                     }
@@ -193,7 +193,7 @@ namespace Biblio_App.ViewModels
             try
             {
                 var modelType = typeof(SharedModelResource);
-                _shared_resourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", modelType.Assembly);
+                _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", modelType.Assembly);
             }
             catch { }
         }
@@ -217,12 +217,12 @@ namespace Biblio_App.ViewModels
             catch { }
 
             EnsureResourceManagerInitialized();
-            var culture = _language_service?.CurrentCulture ?? CultureInfo.CurrentUICulture;
-            if (_shared_resourceManager != null)
+            var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+            if (_sharedResourceManager != null)
             {
                 try
                 {
-                    var val = _shared_resource_manager.GetString(key, culture);
+                    var val = _sharedResourceManager.GetString(key, culture);
                     if (!string.IsNullOrEmpty(val)) return val;
                 }
                 catch { }
