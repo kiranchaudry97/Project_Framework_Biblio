@@ -4,10 +4,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:viewmodel="clr-namespace:Biblio_App.ViewModels"
              xmlns:models="clr-namespace:Biblio_Models.Entiteiten;assembly=Biblio_Models"
+             xmlns:converters="clr-namespace:Biblio_App.Converters"
              x:Class="Biblio_App.Pages.UitleningenPagina"
              x:Name="PageRoot"
              x:DataType="viewmodel:UitleningenViewModel"
              Title="{Binding PageHeaderText}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:DateToReturnIconConverter x:Key="DateToReturnIconConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Shell.TitleView>
         <Grid ColumnDefinitions="*,Auto" Padding="0,0,8,0" VerticalOptions="Center">
@@ -74,13 +81,25 @@
                                             <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center" Spacing="6">
                                                 <!-- Replace textual delete with icon button for consistent UI -->
                                                 <HorizontalStackLayout Spacing="6" HorizontalOptions="End">
-                                                    <ImageButton Source="checklist_ok_illustration.svg"
-                                                                  WidthRequest="24"
-                                                                  HeightRequest="24"
-                                                                  BackgroundColor="Transparent"
-                                                                  Command="{Binding Path=BindingContext.ReturnCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
-                                                                  CommandParameter="{Binding .}"
-                                                                  AutomationProperties.Name="{Binding Path=BindingContext.ReturnButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}" />
+                                                    <!-- Details icon -->
+                                                    <ImageButton Source="details_illustration.svg"
+                                                                 WidthRequest="24"
+                                                                 HeightRequest="24"
+                                                                 BackgroundColor="Transparent"
+                                                                 Clicked="OnViewLoanClicked"
+                                                                 BindingContext="{Binding .}"
+                                                                 AutomationProperties.Name="{Binding Path=BindingContext.ViewButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}" />
+
+                                                    <!-- Return icon; change icon when ReturnedAt is set using converter -->
+                                                    <ImageButton WidthRequest="24"
+                                                                 HeightRequest="24"
+                                                                 BackgroundColor="Transparent"
+                                                                 Command="{Binding Path=BindingContext.ReturnCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                                 CommandParameter="{Binding .}"
+                                                                 AutomationProperties.Name="{Binding Path=BindingContext.ReturnButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                                 Source="{Binding ., Converter={StaticResource DateToReturnIconConverter}}" />
+
+                                                    <!-- Delete icon -->
                                                     <ImageButton Source="delete_illustration.svg"
                                                                  WidthRequest="24"
                                                                  HeightRequest="24"

@@ -194,6 +194,7 @@ namespace Biblio_App.ViewModels
         }
 
         private bool _initialized = false;
+        private bool _dbPathResolved = false;
 
         // Public initializer to be called from the page (OnAppearing)
         public async Task InitializeAsync()
@@ -203,6 +204,33 @@ namespace Biblio_App.ViewModels
             try
             {
                 await EnsureDataLoadedAsync();
+
+                // After data has been loaded, try to resolve the actual DB file path
+                try
+                {
+                    var appDir = FileSystem.AppDataDirectory;
+                    var candidate1 = Path.Combine(appDir, "biblio.db");
+                    var candidate2 = Path.Combine(appDir, "BiblioApp.db");
+                    string? existing = null;
+                    if (File.Exists(candidate1)) existing = candidate1;
+                    else if (File.Exists(candidate2)) existing = candidate2;
+
+                    if (!string.IsNullOrEmpty(existing))
+                    {
+                        DbPathNotLoadedText = existing;
+                        _dbPathResolved = true;
+                    }
+                    else
+                    {
+                        // keep localized fallback when no file exists yet
+                        DbPathNotLoadedText = Localize("DbPathNotLoaded");
+                    }
+
+                    OnPropertyChanged(nameof(DbPathNotLoadedText));
+                    OnPropertyChanged(nameof(DebugInfo));
+                }
+                catch { }
+
             }
             catch (Exception ex)
             {
@@ -572,7 +600,11 @@ namespace Biblio_App.ViewModels
             StartLabel = Localize("StartLabel");
             DueLabel = Localize("DueLabel");
             ReturnedLabel = Localize("ReturnedLabel");
-            DbPathNotLoadedText = Localize("DbPathNotLoaded");
+            // Only set the DbPathNotLoadedText fallback if we haven't resolved a real DB path yet
+            if (!_dbPathResolved)
+            {
+                DbPathNotLoadedText = Localize("DbPathNotLoaded");
+            }
 
             // notify computed/derived properties
             OnPropertyChanged(nameof(PageHeaderText));

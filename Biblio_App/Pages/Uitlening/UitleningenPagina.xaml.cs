@@ -289,13 +289,16 @@ namespace Biblio_App.Pages
         {
             try
             {
-                if (sender is Button btn && btn.BindingContext is Biblio_Models.Entiteiten.Lenen lenen)
+                if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Lenen lenen)
                 {
                     var boek = lenen.Boek?.Titel ?? "-";
                     var lid = (lenen.Lid?.Voornaam ?? "") + " " + (lenen.Lid?.AchterNaam ?? "");
                     var start = lenen.StartDate.ToString("dd-MM-yyyy");
                     var due = lenen.DueDate.ToString("dd-MM-yyyy");
-                    await DisplayAlert(Localize("View"), $"{lid}\n{boek}\n{start} - {due}", Localize("OK"));
+                    var returned = lenen.ReturnedAt.HasValue ? lenen.ReturnedAt.Value.ToString("dd-MM-yyyy") : Localize("NoPath");
+
+                    var body = $"{lid}\n{boek}\n{Localize("StartLabel")} {start} - {Localize("DueLabel")} {due}\n{Localize("ReturnedLabel")} {returned}";
+                    await DisplayAlert(Localize("View"), body, Localize("OK"));
                 }
             }
             catch { }
