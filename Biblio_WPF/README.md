@@ -55,42 +55,42 @@ Screenshots / afbeeldingen
 Voorbeelden van UI‑beelden (in repository):
 
 - Login / aanmelden
-  ![Login voorbeeld](Screenshot/loginwindow.png)
+  ![Login voorbeeld](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/loginwindow.png)
 
 - Dark mode
-  ![Darkmode voorbeeld](Screenshot/darkmode.png)
+  ![Darkmode voorbeeld](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/darkmode.png)
 
 - Hoofdscherm
-  ![Hoofdscherm voorbeeld](Screenshot/mainwindow.png)
+  ![Hoofdscherm voorbeeld](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/mainwindow.png)
 
 - Openen (navigatie)
-  ![Openen voorbeeld](Screenshot/openen.png)
+  ![Openen voorbeeld](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/openen.png)
 
 - Beheer (gebruikers/rollen)
-  ![Beheer voorbeeld](Screenshot/beheer.png)
+  ![Beheer voorbeeld](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/beheer.png)
 
 - Gebruiker & rollen
-  ![Gebruiker rollen](Screenshot/gebruiker_rollen.png)
+  ![Gebruiker rollen](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/gebruiker_rollen.png)
 
 - Bestandsmenu / acties
-  ![Bestanden](Screenshot/bestand.png)
+  ![Bestanden](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/bestand.png)
 
 - Profiel
-  ![Profiel](Screenshot/profile.png)
+  ![Profiel](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/profile.png)
 
 - Wachtwoord wijzigen
-  ![Wachtwoord wijzigen](Screenshot/wachtwoord.png)
+  ![Wachtwoord wijzigen](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/wachtwoord.png)
 
 - Categorieën
-  ![Categorieën](Screenshot/categorie.png)
+  ![Categorieën](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/categorie.png)
 
 - Uitleningen
-  ![Uitleningen](Screenshot/uitleningen.png)
+  ![Uitleningen](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/uitleningen.png)
 
 - Leden
-  ![Leden](Screenshot/leden.png)
+  ![Leden](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/leden.png)
 
 - Database overzicht
-  ![Database voorbeeld](Screenshot/database_biblio.png)
+  ![Database voorbeeld](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/962442033372dee0e49d742543eea1cc5b68183e/Screenshot/database_biblio.png)
 
 Meer details, ontwikkelinstructies en migratie‑opmerkingen staan in de root README en in `Biblio_Models/README.md`.
