@@ -175,6 +175,55 @@ await userMgr.AddToRoleAsync(admin, "Admin");
 - Voor productie: overweeg Serilog met file/seq sink.
 
 ## Screenshots (placeholder)
+Screenshots / afbeeldingen
+--------------------------
+Voorbeelden van UI‑beelden :
+
+- Login
+  ![Login](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Login_Pagina.png)
+
+
+- Profiel
+  ![Profiel](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Profiel.png)
+
+
+- Taalkeuze
+  ![taalkeuze](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Taalkeuze.png)
+
+  - Thema Toggle
+  ![thema](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Toggle_Mode.png)
+
+
+- Dashboard
+  ![Dashboard](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Dashboard.png)
+
+- Boeken
+  ![Boeken](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Boeken_Pagina.png)
+
+
+  
+- Categorie
+  ![Categorie](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Categorie_Pagina.png)
+
+
+  
+- Leden
+  ![Leden](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Leden_Pagina.png)
+
+
+  
+- Uitleningen
+  ![Uitleningen](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Uitleningen_Pagina.png)
+
+ 
+ - Delete
+  ![delete](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Delete.png)
+
+- Edit
+  ![edit](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Edit.png)
+
+ - Details
+ ![details](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/7dd05783a3db26053aa67e39b1c1efbd0e6b3e28/Biblio_Web/Biblio_Web_Sceenshots/Details.png)
 
 
 ## Licenties
