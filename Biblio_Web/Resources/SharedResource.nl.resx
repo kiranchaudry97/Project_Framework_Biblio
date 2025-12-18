@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+ï»¿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <data name="Required" xml:space="preserve"><value>Het veld {0} is verplicht.</value></data>
   <data name="StringLength" xml:space="preserve"><value>{0} moet tussen {2} en {1} tekens bevatten.</value></data>
@@ -7,7 +7,7 @@
 	<data name="New" xml:space="preserve"><value>Nieuw</value></data>
 	<data name="Delete" xml:space="preserve"><value>Verwijder</value></data>
 	<data name="Save" xml:space="preserve"><value>Opslaan</value></data>
-	<data name="Categories" xml:space="preserve"><value>Categorieén</value></data>
+	<data name="Categories" xml:space="preserve"><value>Categorieï¿½n</value></data>
 	<data name="Details" xml:space="preserve"><value>Details</value></data>
 	<data name="OK" xml:space="preserve"><value>OK</value></data>
 	<data name="ISBN" xml:space="preserve"><value>ISBN</value></data>
@@ -16,4 +16,8 @@
 	<data name="View" xml:space="preserve"><value>Inzien</value></data>
 	<data name="Copied" xml:space="preserve"><value>Gekopieerd</value></data>
 	<data name="NoPath" xml:space="preserve"><value>Er is geen pad geladen.</value></data>
+  <data name="Return" xml:space="preserve"><value>Inleveren</value></data>
+  <data name="ReturnedLabel" xml:space="preserve"><value>Lever status</value></data>
+  <data name="ReturnedOption" xml:space="preserve"><value>Geleverd</value></data>
+  <data name="Late" xml:space="preserve"><value>Te laat</value></data>
 </root>

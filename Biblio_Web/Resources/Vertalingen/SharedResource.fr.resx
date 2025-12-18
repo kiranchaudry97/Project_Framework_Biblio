@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -121,7 +121,7 @@
     <value>Le champ {0} est requis.</value>
   </data>
   <data name="StringLength" xml:space="preserve">
-    <value>{0} doit contenir entre {2} et {1} caractères.</value>
+    <value>{0} doit contenir entre {2} et {1} caracteres.</value>
   </data>
   <data name="EmailAddress" xml:space="preserve">
     <value>Adresse e-mail invalide.</value>
@@ -130,7 +130,7 @@
     <value>Accueil</value>
   </data>
   <data name="Privacy" xml:space="preserve">
-    <value>Confidentialité</value>
+    <value>Confidentialite</value>
   </data>
   <data name="Books" xml:space="preserve">
     <value>Livres</value>
@@ -139,10 +139,10 @@
     <value>Membres</value>
   </data>
   <data name="Loans" xml:space="preserve">
-    <value>Prêts</value>
+    <value>Prets</value>
   </data>
   <data name="Categories" xml:space="preserve">
-    <value>Catégories</value>
+    <value>Categories</value>
   </data>
   <data name="Menu" xml:space="preserve">
     <value>Menu</value>
@@ -160,7 +160,7 @@
     <value>Admin</value>
   </data>
   <data name="ToggleTheme" xml:space="preserve">
-    <value>Changer le thème</value>
+    <value>Changer le theme</value>
   </data>
   <data name="Login" xml:space="preserve">
     <value>Connexion</value>
@@ -169,7 +169,7 @@
     <value>S'inscrire</value>
   </data>
   <data name="Logout" xml:space="preserve">
-    <value>Déconnexion</value>
+    <value>Deconnexion</value>
   </data>
   <data name="Profile" xml:space="preserve">
     <value>Profil</value>
@@ -177,11 +177,8 @@
   <data name="Welcome" xml:space="preserve">
     <value>Bienvenue</value>
   </data>
-  <data name="New" xml:space="preserve">
-    <value>Nouveau</value>
-  </data>
   <data name="Create" xml:space="preserve">
-    <value>Créer</value>
+    <value>Creer</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Enregistrer</value>
@@ -196,25 +193,25 @@
     <value>Modifier</value>
   </data>
   <data name="Details" xml:space="preserve">
-    <value>Détails</value>
+    <value>Details</value>
   </data>
   <data name="Delete" xml:space="preserve">
     <value>Supprimer</value>
   </data>
   <data name="Overview" xml:space="preserve">
-    <value>Aperçu</value>
+    <value>Apercu</value>
   </data>
   <data name="DeleteConfirm" xml:space="preserve">
-    <value>êtes-vous sur de vouloir supprimer cet élément ?</value>
+    <value>etes-vous sur de vouloir supprimer cet element ?</value>
   </data>
   <data name="Confirm" xml:space="preserve">
     <value>etes-vous sur ?</value>
   </data>
   <data name="WelcomeTitle" xml:space="preserve">
-    <value>Bienvenue chez Biblio — Gestion de la bibliothèque</value>
+    <value>Bienvenue chez Biblio - Gestion de la bibliotheque</value>
   </data>
   <data name="WelcomeSubtitlePart1" xml:space="preserve">
-    <value>Gérez les livres, les membres et les prêts depuis ce tableau de bord.</value>
+    <value>Gerez les livres, les membres et les prets depuis ce tableau de bord.</value>
   </data>
   <data name="WelcomeBiblio" xml:space="preserve">
     <value>Bienvenue chez Biblio</value>
@@ -223,19 +220,19 @@
     <value>Bonjour, {0} !</value>
   </data>
   <data name="NotLoggedIn" xml:space="preserve">
-    <value>Vous n'êtes pas connecté.</value>
+    <value>Vous n'etes pas connecte.</value>
   </data>
   <data name="DashboardTitle" xml:space="preserve">
-    <value>Bienvenue sur Biblio — Gestion de bibliothèque</value>
+    <value>Bienvenue sur Biblio - Gestion de bibliotheque</value>
   </data>
   <data name="DashboardDescription" xml:space="preserve">
-    <value>Gérez les livres et les prêts depuis ce tableau de bord. Utilisez le menu pour commencer.</value>
+    <value>Gerez les livres et les prets depuis ce tableau de bord. Utilisez le menu pour commencer.</value>
   </data>
   <data name="ManageBooks" xml:space="preserve">
-    <value>Gérer les livres</value>
+    <value>Gerer les livres</value>
   </data>
   <data name="ManageMembers" xml:space="preserve">
-    <value>Gérer les membres</value>
+    <value>Gerer les membres</value>
   </data>
   <data name="EditProfileTitle" xml:space="preserve">
     <value>Modifier le profil</value>
@@ -271,34 +268,34 @@
     <value>ISBN</value>
   </data>
   <data name="ColumnCategory" xml:space="preserve">
-    <value>Categorié</value>
+    <value>Categorie</value>
   </data>
   <data name="ChooseCategory" xml:space="preserve">
-    <value>-- Choisissez une catégorie --</value>
+    <value>-- Choisissez une categorie --</value>
   </data>
   <data name="BooksTitle" xml:space="preserve">
     <value>Livres</value>
   </data>
   <data name="BookTitle" xml:space="preserve">
-    <value>Livrés</value>
+    <value>Livres</value>
   </data>
   <data name="CategoriesTitle" xml:space="preserve">
-    <value> Catégories Titre</value>
+    <value>Categories Titre</value>
   </data>
   <data name="CategoryTitle" xml:space="preserve">
-    <value>Categorié Titre</value>
+    <value>Categorie Titre</value>
   </data>
   <data name="Content" xml:space="preserve">
     <value>Content</value>
   </data>
   <data name="Category" xml:space="preserve">
-    <value>Catégorie</value>
+    <value>Categorie</value>
   </data>
   <data name="Filter" xml:space="preserve">
     <value>Filtrer</value>
   </data>
   <data name="ColumnFirstName" xml:space="preserve">
-    <value>Prénom</value>
+    <value>Prenom</value>
   </data>
   <data name="ColumnLastName" xml:space="preserve">
     <value>Nom</value>
@@ -319,13 +316,28 @@
     <value>Livre</value>
   </data>
   <data name="Return" xml:space="preserve">
-    <value>Retour</value>
+    <value>Retourner</value>
+  </data>
+  <data name="ReturnedLabel" xml:space="preserve">
+    <value>Statut de livraison</value>
+  </data>
+  <data name="ReturnedOption" xml:space="preserve">
+    <value>Rendu</value>
+  </data>
+  <data name="Late" xml:space="preserve">
+    <value>En retard</value>
+  </data>
+  <data name="StartLabel" xml:space="preserve">
+    <value>Debut:</value>
+  </data>
+  <data name="DueLabel" xml:space="preserve">
+    <value>Echeance:</value>
   </data>
   <data name="SignIn" xml:space="preserve">
     <value>Se connecter</value>
   </data>
   <data name="Books_Index_Title" xml:space="preserve">
-    <value>Livrés</value>
+    <value>Livres</value>
   </data>
   <data name="Books_Index_SearchPlaceholder" xml:space="preserve">
     <value>Recherche par titre, auteur ou ISBN</value>
@@ -343,13 +355,13 @@
     <value>ISBN</value>
   </data>
   <data name="Books_Index_ColumnCategory" xml:space="preserve">
-    <value>Categorié</value>
+    <value>Categorie</value>
   </data>
   <data name="Books_Index_Edit" xml:space="preserve">
-    <value>Changement</value>
+    <value>Modifier</value>
   </data>
   <data name="Books_Index_Details" xml:space="preserve">
-    <value>Détail</value>
+    <value>Detail</value>
   </data>
   <data name="Books_Index_Delete" xml:space="preserve">
     <value>Supprimer</value>
@@ -358,10 +370,10 @@
     <value>Nouveau Livre</value>
   </data>
   <data name="Books_Create_Save" xml:space="preserve">
-    <value>sauvegarder</value>
+    <value>Sauvegarder</value>
   </data>
   <data name="Books_Create_Cancel" xml:space="preserve">
-    <value>Annulér</value>
+    <value>Annuler</value>
   </data>
   <data name="Next" xml:space="preserve">
     <value>Suivant</value>
@@ -370,13 +382,13 @@
     <value>Action</value>
   </data>
   <data name="AllRoles" xml:space="preserve">
-    <value>Tous les réles</value>
+    <value>Tous les roles</value>
   </data>
   <data name="Block" xml:space="preserve">
     <value>Bloquer</value>
   </data>
   <data name="Blocked" xml:space="preserve">
-    <value>Bloqué</value>
+    <value>Bloque</value>
   </data>
   <data name="Code" xml:space="preserve">
     <value>Code</value>
@@ -391,13 +403,13 @@
     <value>Par defaut</value>
   </data>
   <data name="EditRoles" xml:space="preserve">
-    <value>Modifier les rôles</value>
+    <value>Modifier les roles</value>
   </data>
   <data name="Forgot Password Link" xml:space="preserve">
     <value>Mot de passe oublie</value>
   </data>
   <data name="Medewerker" xml:space="preserve">
-    <value>Employé</value>
+    <value>Employe</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Nom</value>
@@ -412,10 +424,10 @@
     <value>Non</value>
   </data>
   <data name="NoBooksLoaded" xml:space="preserve">
-    <value>Aucun livre chargé</value>
+    <value>Aucun livre charge</value>
   </data>
   <data name="NoMembersLoaded" xml:space="preserve">
-    <value>Aucun membre chargé</value>
+    <value>Aucun membre charge</value>
   </data>
   <data name="NoRoles" xml:space="preserve">
     <value>Aucun role</value>
@@ -436,7 +448,7 @@
     <value>Afficher le mot de passe</value>
   </data>
   <data name="Unblock" xml:space="preserve">
-    <value>Débloquer</value>
+    <value>Debloquer</value>
   </data>
   <data name="User" xml:space="preserve">
     <value>Utilisateur</value>
@@ -457,7 +469,7 @@
     <value>Oui</value>
   </data>
   <data name="EditRolesFor" xml:space="preserve">
-    <value>Modifier les rôles de {0}</value>
+    <value>Modifier les roles de {0}</value>
   </data>
   <data name="NoRolesFound" xml:space="preserve">
     <value>Aucun role modifiable trouve.</value>
@@ -466,43 +478,43 @@
     <value>Roles de {0}</value>
   </data>
   <data name="UserAndResponsibilities" xml:space="preserve">
-    <value>Utilisateurs et responsabilités</value>
+    <value>Utilisateurs et responsibilities</value>
   </data>
   <data name="Member" xml:space="preserve">
     <value>Membre</value>
   </data>
   <data name="StartDate" xml:space="preserve">
-    <value>Date de début</value>
+    <value>Date de debut</value>
   </data>
   <data name="DueDate" xml:space="preserve">
-    <value>Date d'échéance</value>
+    <value>Date d'echeance</value>
   </data>
   <data name="IngeleverdOp" xml:space="preserve">
-    <value>Restitué le</value>
+    <value>Restitue le</value>
   </data>
   <data name="DaysLate" xml:space="preserve">
     <value>Jours de retard</value>
   </data>
   <data name="NoLateLoans" xml:space="preserve">
-    <value>Aucun prét en retard</value>
+    <value>Aucun pret en retard</value>
   </data>
   <data name="Naam" xml:space="preserve">
     <value>Nom</value>
   </data>
   <data name="Created" xml:space="preserve">
-    <value>Crée</value>
+    <value>Creer</value>
   </data>
   <data name="LoanCount" xml:space="preserve">
-    <value>Nombre de préts</value>
+    <value>Nombre de prets</value>
   </data>
   <data name="NewCategory" xml:space="preserve">
-    <value>Nouvelle catégorie</value>
+    <value>Nouvelle categorie</value>
   </data>
   <data name="ColumnName" xml:space="preserve">
     <value>Nom</value>
   </data>
   <data name="ForgotPasswordTitle" xml:space="preserve">
-    <value>Mot de passe oublié ?</value>
+    <value>Mot de passe oublie ?</value>
   </data>
   <data name="ForgotPasswordSubtitle" xml:space="preserve">
     <value>Saisissez votre adresse e-mail.</value>
@@ -532,13 +544,13 @@
     <value>ISBN</value>
   </data>
   <data name="Categorie" xml:space="preserve">
-    <value>Catégorie</value>
+    <value>Categorie</value>
   </data>
   <data name="Voornaam" xml:space="preserve">
-    <value>Prénom</value>
+    <value>Prenom</value>
   </data>
   <data name="Telefoon" xml:space="preserve">
-    <value>Téléphone</value>
+    <value>Telephone</value>
   </data>
   <data name="Adres" xml:space="preserve">
     <value>Adresse</value>
@@ -547,40 +559,40 @@
     <value>Supprimer le compte</value>
   </data>
   <data name="DeleteAccountConfirm" xml:space="preserve">
-    <value>êtes-vous sur de vouloir supprimer votre compte ?</value>
+    <value>etes-vous sur de vouloir supprimer votre compte ?</value>
   </data>
   <data name="LanguageChanged" xml:space="preserve">
-    <value>Langue modifiée</value>
+    <value>Langue modifiee</value>
   </data>
   <data name="Languages" xml:space="preserve">
     <value>Langues</value>
   </data>
   <data name="LanguageSetTo" xml:space="preserve">
-    <value>Langue définie sur {0}</value>
+    <value>Langue definie sur {0}</value>
   </data>
   <data name="Achternaam" xml:space="preserve">
     <value>Nom de famille</value>
   </data>
   <data name="NoResults" xml:space="preserve">
-    <value>Aucun résultat trouvé</value>
+    <value>Aucun resultat trouve</value>
   </data>
   <data name="CookieNoticeTitle" xml:space="preserve">
     <value>Notification de cookie</value>
   </data>
   <data name="CookieNoticeText" xml:space="preserve">
-    <value>Nous utilisons des cookies pour améliorer votre expérience. En acceptant, vous consentez  l'utilisation de cookies non essentiels.</value>
+    <value>Nous utilisons des cookies pour ameliorer votre experience. En acceptant, vous consentez  l'utilisation de cookies non essentiels.</value>
   </data>
   <data name="Cookie" xml:space="preserve">
     <value>Accepter les cookies</value>
   </data>
   <data name="CookieSettings" xml:space="preserve">
-    <value>Paramétres des cookies</value>
+    <value>Parametres des cookies</value>
   </data>
   <data name="LanguageChangedTitle" xml:space="preserve">
-    <value>Langue modifiée</value>
+    <value>Langue modifiee</value>
   </data>
   <data name="LanguageChangedBody" xml:space="preserve">
-    <value>Langue définie sur : {0}. L’interface a été mise à jour.</value>
+    <value>Langue definie sur : {0}. L'interface a ete mise a jour.</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
@@ -595,11 +607,11 @@
     <value>Voir</value>
   </data>
   <data name="UserAndRoles" xml:space="preserve">
-    <value>Utilisateurs et réles</value>
+    <value>Utilisateurs et roles</value>
   </data>
-	<data name="NamePlaceholder" xml:space="preserve"><value>Ajouter une catégorie</value></data>
+	<data name="NamePlaceholder" xml:space="preserve"><value>Ajouter une categorie</value></data>
 	<data name="New" xml:space="preserve"><value>Nouveau</value></data>
 	<data name="Delete" xml:space="preserve"><value>Supprimer</value></data>
 	<data name="Save" xml:space="preserve"><value>Enregistrer</value></data>
-	<data name="Categories" xml:space="preserve"><value>Catégories</value></data>
+	<data name="Categories" xml:space="preserve"><value>Categories</value></data>
 </root>
