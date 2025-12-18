@@ -27,13 +27,26 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 const string ConnKey = "BibliobContextConnection";
+// Prefer an explicitly configured Azure public connection, then generic PublicConnection
+var publicConnectionAzure = builder.Configuration["PublicConnection_Azure"];
 var publicConnection = builder.Configuration["PublicConnection"];
 var connectionString = builder.Configuration.GetConnectionString(ConnKey)
     ?? builder.Configuration.GetConnectionString("DefaultConnection")
     ?? builder.Configuration["ConnectionStrings:DefaultConnection"]
-    // use PublicConnection only when explicitly configured (non-empty)
-    ?? (!string.IsNullOrWhiteSpace(publicConnection) ? publicConnection : null)
+    // prefer Azure-specific public connection when provided
+    ?? (!string.IsNullOrWhiteSpace(publicConnectionAzure) ? publicConnectionAzure :
+        (!string.IsNullOrWhiteSpace(publicConnection) ? publicConnection : null))
     ?? "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+
+// Log resolved connection source for diagnostics
+try
+{
+    var logger = LoggerFactory.Create(l => l.AddConsole()).CreateLogger("Program.Connection");
+    if (!string.IsNullOrWhiteSpace(publicConnectionAzure)) logger.LogInformation("Using PublicConnection_Azure for DB: {cs}", publicConnectionAzure);
+    else if (!string.IsNullOrWhiteSpace(publicConnection)) logger.LogInformation("Using PublicConnection for DB: {cs}", publicConnection);
+    else logger.LogInformation("Using ConnectionString from config or localdb fallback.");
+}
+catch { }
 
 // Localisatie - gebruik de map Vertalingen (bevat de volledige SharedResource.*.resx bestanden)
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources/Vertalingen");

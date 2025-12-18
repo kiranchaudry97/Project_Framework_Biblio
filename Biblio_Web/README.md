@@ -12,9 +12,9 @@ Inhoud (snelkoppelingen)
 - [Technische samenvatting & vereisten](#technische-samenvatting--vereisten)
 - [Datamodel (kort)](#datamodel-kort)
 - [Project- en mappenstructuur](#project--en-mappenstructuur)
-- [Lokaal uitvoeren](#lokaal-uitvoeren)
+- [Installatie & Lokaal uitvoeren](#installatie--lokaal-uitvoeren)
 - [Identity, seeding & security](#identity-seeding--security)
-- [Foutafhandeling & logging](#foutafhandeling--logging)
+- [Foutafhandling & logging](#foutafhandling--logging)
 - [Screenshots (placeholder)](#screenshots-placeholder)
 - [Licenties](#licenties)
 - [AI‑hulpmiddelen & ontwikkelworkflow](#ai-hulpmiddelen--ontwikkelworkflow)
@@ -62,6 +62,8 @@ Biblio_Web/
 +-- appsettings.json
 +-- appsettings.Development.json
 +-- README.md
++-- SECURE_DB_SETUP.md            # security instructions for DB secrets
++-- set-user-secrets.ps1         # interactive helper to set dotnet user-secrets
 +-- Controllers/
 ¦   +-- AccountController.cs
 ¦   +-- AdminController.cs
@@ -134,40 +136,65 @@ Biblio_Web/
     +-- postman-quickstart.md
 ```
 
-Naast dit project in de solution:
-- `Biblio_Models/` (entiteiten, DbContext, seed)
-- `Biblio_App/` (MAUI client)
-- `Biblio_WPF/` (WPF client)
+Aangepaste / toegevoegde bestanden
+- `SECURE_DB_SETUP.md` — instructies en aanbevelingen voor veilige DB-configuratie.
+- `set-user-secrets.ps1` — interactief PowerShell-script dat user-secrets zet (no hardcoded passwords).
+- `appsettings.json` / `appsettings.Development.json` — placeholders bijgewerkt om geen plaintext wachtwoorden te bevatten; gebruik user-secrets voor gevoelige waarden.
 
-## Lokaal uitvoeren
-1. Pas connection string aan in `Biblio_Web/appsettings.json` of gebruik environment variable.
-2. (Optioneel) Voer migraties uit en update database:
+## Installatie & Lokaal uitvoeren
+Volg deze stappen om de webapp lokaal te starten (veilig, development):
+
+1) Clone repository en open een terminal in de solution root:
+
+```bash
+git clone <repo-url>
+cd Project_Framework_Biblio
+```
+
+2) Configureer de database connection veilig (aanbevolen: user-secrets)
+
+- Gebruik het meegeleverde PowerShell-script (lokale machine):
+
+```powershell
+# vanuit solution root
+powershell -ExecutionPolicy Bypass -File .\Biblio_Web\set-user-secrets.ps1 -DbUser 'Admin@biblio.local@biblio-sql-server' -DbPassword '<your-db-password>'
+```
+
+- Opmerking: het script is interactief wanneer je geen parameters meegeeft; het vraagt om DB-server, DB-naam, DB-user en zal het wachtwoord veilig (verborgen) vragen. Het schrijft secrets met `dotnet user-secrets` in de `Biblio_Web` projectcontext.
+
+- Of stel handmatig user-secrets in (wanneer je in `Biblio_Web` map staat):
+
+```bash
+dotnet user-secrets set "PublicConnection_Azure" "Server=tcp:<your-server>.database.windows.net,1433;Initial Catalog=<your-db>;User ID=<user>;Password=<pwd>;Encrypt=True;TrustServerCertificate=False;"
+dotnet user-secrets set "Seed:AdminPassword" "<admin-password>"
+```
+
+3) Zorg dat Azure SQL firewall je IP toestaat (of gebruik App Service settings in productie).
+
+4) Voer migraties uit (indien je de database wilt bijwerken):
 
 ```bash
 cd Biblio_Models
 dotnet ef database update --startup-project ../Biblio_Web
+cd ..
 ```
 
-3. Run de webapp (vanuit solution root):
+5) Run de webapp in Development:
 
-```bash
-dotnet run --project Biblio_Web
+```powershell
+# optioneel: forceer Development environment
+$env:ASPNETCORE_ENVIRONMENT = 'Development'
+# start de app
+dotnet run --project .\Biblio_Web
 ```
 
-4. Open browser: `https://localhost:{PORT}` (controleer `launchSettings.json` of console output).
+6) Open browser: https://localhost:{port} (console toont welke poort gebruikt wordt)
 
+7) Verifieer: kijk in logs of `Using PublicConnection_Azure` verschijnt en controleer of seed-data aanwezig is (admin account `admin@biblio.local`).
 ## Identity, seeding & security
-- Seed logic staat in `Biblio_Models.Seed.SeedData` en maakt rollen (`Admin`, `Medewerker`), admin‑account en voorbeelddata in development.
+- Seed logic staat in `Biblio_Models.Seed.SeedData` en maakt rollen (`Admin`, `Medewerker`), admin-account en voorbeelddata in development.
 - Gebruik User Secrets om seed‑wachtwoorden en andere gevoelige dev‑waarden op te slaan (zie `UserSecretsId` in csproj).
 - JWT instellingen vind je in `appsettings.json` (sectie `Jwt`). Vervang development keys voor productie.
-
-Voorbeeld seed (admin):
-
-```csharp
-var admin = new AppUser { Email = adminEmail, UserName = adminEmail, EmailConfirmed = true };
-await userMgr.CreateAsync(admin, desiredPwd);
-await userMgr.AddToRoleAsync(admin, "Admin");
-```
 
 ## Foutafhandling & logging
 - Gebruik `ILogger<T>` en log exceptions bij DB/Identity operaties.
