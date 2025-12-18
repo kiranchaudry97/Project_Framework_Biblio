@@ -177,7 +177,7 @@ dotnet workload install maui
 2) Clone repository
 
 ```
-git clone <repo-url>
+git clone https://github.com/kiranchaudry97/Project_Framework_Biblio.git
 cd Project_Framework_Biblio
 ```
 
