@@ -25,8 +25,61 @@ namespace Biblio_Models.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                var connectionString = Environment.GetEnvironmentVariable("BIBLIO_CONNECTION")
-                    ?? "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+                // Try several environment/config keys so both user-secrets, env vars and CI pipelines are supported
+                string? connectionString = null;
+
+                // 1. Explicit environment variable used by some deployments/scripts
+                connectionString = Environment.GetEnvironmentVariable("BIBLIO_CONNECTION");
+                if (!string.IsNullOrWhiteSpace(connectionString))
+                {
+                    try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Using connection from BIBLIO_CONNECTION"); } catch { }
+                }
+
+                // 2. Typical ASP.NET Core environment variable format for ConnectionStrings:DefaultConnection
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+                    if (!string.IsNullOrWhiteSpace(connectionString))
+                    {
+                        try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Using connection from ConnectionStrings__DefaultConnection (env)"); } catch { }
+                    }
+                }
+
+                // 3. Legacy/public keys used by this solution
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    connectionString = Environment.GetEnvironmentVariable("PublicConnection");
+                    if (!string.IsNullOrWhiteSpace(connectionString))
+                    {
+                        try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Using connection from PublicConnection (env)"); } catch { }
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    connectionString = Environment.GetEnvironmentVariable("PublicConnection_Azure");
+                    if (!string.IsNullOrWhiteSpace(connectionString))
+                    {
+                        try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Using connection from PublicConnection_Azure (env)"); } catch { }
+                    }
+                }
+
+                // 4. Azure style named connection (used for managed identity scenarios)
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    connectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTIONSTRING");
+                    if (!string.IsNullOrWhiteSpace(connectionString))
+                    {
+                        try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Using connection from AZURE_SQL_CONNECTIONSTRING (env)"); } catch { }
+                    }
+                }
+
+                // 5. Fallback to LocalDB (development)
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    connectionString = "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+                    try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Falling back to LocalDB connection"); } catch { }
+                }
 
                 optionsBuilder.UseSqlServer(connectionString);
             }
