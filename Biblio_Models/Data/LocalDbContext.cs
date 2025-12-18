@@ -4,7 +4,6 @@ using System;
 
 namespace Biblio_Models.Data
 {
-    // Lightweight local DbContext used by MAUI for SQLite scenarios
     public class LocalDbContext : DbContext
     {
         public LocalDbContext(DbContextOptions<LocalDbContext> options) : base(options)
