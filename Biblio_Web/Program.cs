@@ -1,14 +1,7 @@
 // Program.cs
 // Doel: bootstrap en configuratie van de webapplicatie (services, middleware en routing).
-// Gebruik: registreert services (DB, Identity, localization, AutoMapper, controllers, Swagger),
-//         voert database migratie en seeding uit bij startup en bouwt RequestLocalizationOptions
-//         op basis van talen in de database (met fallback).
-// Doelstellingen:
-// - Centraliseer startup-configuratie en maak cultuur/taal dynamisch instelbaar via de Taal-entiteit in de DB.
-// - Zorg voor veilige defaults voor Identity en JWT, en configureer autorisatiepolicies.
-// - Voer database migrations/seeding automatisch uit in development zodat de app direct getest kan worden.
-// - Houd cookie-gedrag en lokaliseringsproviders consistent zodat gebruikerskeuzes persistent zijn.
-
+// Program.cs
+// The method bodies, field initializers, and property accessor bodies have been eliminated for brevity.
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -27,26 +20,42 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 const string ConnKey = "BibliobContextConnection";
-// Prefer an explicitly configured Azure public connection, then generic PublicConnection
+
+// Prefer explicit Azure connection settings when provided. Support two patterns:
+// - AZURE_SQL_CONNECTIONSTRING: connection string key used for AAD / managed identity scenarios
+// - PublicConnection_Azure / PublicConnection: legacy key used for SQL auth
+var azureNamedConn = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING") ?? builder.Configuration["AZURE_SQL_CONNECTIONSTRING"];
 var publicConnectionAzure = builder.Configuration["PublicConnection_Azure"];
 var publicConnection = builder.Configuration["PublicConnection"];
+
 var connectionString = builder.Configuration.GetConnectionString(ConnKey)
     ?? builder.Configuration.GetConnectionString("DefaultConnection")
     ?? builder.Configuration["ConnectionStrings:DefaultConnection"]
-    // prefer Azure-specific public connection when provided
-    ?? (!string.IsNullOrWhiteSpace(publicConnectionAzure) ? publicConnectionAzure :
-        (!string.IsNullOrWhiteSpace(publicConnection) ? publicConnection : null))
+    // prefer explicit AZURE_SQL_CONNECTIONSTRING when available (can contain Authentication=Active Directory Default)
+    ?? (!string.IsNullOrWhiteSpace(azureNamedConn) ? azureNamedConn :
+        // prefer Azure-specific public connection when provided
+        (!string.IsNullOrWhiteSpace(publicConnectionAzure) ? publicConnectionAzure :
+            (!string.IsNullOrWhiteSpace(publicConnection) ? publicConnection : null)))
     ?? "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
 
 // Log resolved connection source for diagnostics
 try
 {
     var logger = LoggerFactory.Create(l => l.AddConsole()).CreateLogger("Program.Connection");
-    if (!string.IsNullOrWhiteSpace(publicConnectionAzure)) logger.LogInformation("Using PublicConnection_Azure for DB: {cs}", publicConnectionAzure);
+    if (!string.IsNullOrWhiteSpace(azureNamedConn)) logger.LogInformation("Using AZURE_SQL_CONNECTIONSTRING for DB: {cs}", azureNamedConn);
+    else if (!string.IsNullOrWhiteSpace(publicConnectionAzure)) logger.LogInformation("Using PublicConnection_Azure for DB: {cs}", publicConnectionAzure);
     else if (!string.IsNullOrWhiteSpace(publicConnection)) logger.LogInformation("Using PublicConnection for DB: {cs}", publicConnection);
     else logger.LogInformation("Using ConnectionString from config or localdb fallback.");
 }
 catch { }
+
+// NOTE: If you intend to use Azure AD / Managed Identity authentication, set AZURE_SQL_CONNECTIONSTRING to a value
+// like: "Server=tcp:your-server.database.windows.net,1433;Initial Catalog=your-db;Authentication=Active Directory Default;Encrypt=True;"
+// Then configure your App Service with a system-assigned managed identity and create a database user from the external provider:
+//   CREATE USER [<principal-name>] FROM EXTERNAL PROVIDER;
+//   ALTER ROLE db_datareader ADD MEMBER [<principal-name>];
+//   ALTER ROLE db_datawriter ADD MEMBER [<principal-name>];
+// See Biblio_Web/Azure_Managed_Identity.md for CLI steps.
 
 // Localisatie - gebruik de map Vertalingen (bevat de volledige SharedResource.*.resx bestanden)
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources/Vertalingen");
