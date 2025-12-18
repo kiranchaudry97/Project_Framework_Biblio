@@ -61,7 +61,7 @@
                     <div class="mt-2">
                         <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="fillTest('admin')">Autofill admin</button>
                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="fillTest('medewerker')">Autofill medewerker</button>
-                        <small class="d-block text-muted mt-2">Admin: <code>admin@biblio.local</code> — Medewerker: <code>medewerk@biblio.local</code></small>
+                        <small class="d-block text-muted mt-2">Admin: <code>admin@biblio.local</code> — Medewerker: <code>medewerker@biblio.local</code></small>
 
                         <div class="mt-2">
                             <small class="text-muted">Set development passwords with user-secrets (do not commit):</small>
@@ -73,7 +73,7 @@ dotnet user-secrets set "Seed:MedewerkerPassword" "&lt;your-medewerker-password&
                             <small class="text-dark">Voor testdoeleinden (development only):</small>
                             <div class="small mt-1">
                                 <code>Admin — email: admin@biblio.local | wachtwoord: Admin1234?</code><br />
-                                <code>Medewerker — email: medewerk@biblio.local | wachtwoord: test1234?</code>
+                                <code>Medewerker — email: medewerker@biblio.local | wachtwoord: test1234?</code>
                             </div>
                         </div>
                     </div>
@@ -111,10 +111,10 @@ dotnet user-secrets set "Seed:MedewerkerPassword" "&lt;your-medewerker-password&
 
                 if (kind === 'admin') {
                     email.value = 'admin@biblio.local';
-                    pw.value = '';
+                    pw.value = 'Admin1234?';
                 } else if (kind === 'medewerker') {
-                    email.value = 'medewerk@biblio.local';
-                    pw.value = '';
+                    email.value = 'medewerker@biblio.local';
+                    pw.value = 'test1234?';
                 }
             } catch (e) {
                 console.warn('fillTest error', e);
