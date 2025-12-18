@@ -6,6 +6,17 @@ Korte omschrijving
 ------------------
 `Biblio_WPF` is de Windows‑desktopclient van het Biblio‑project. Het is een WPF‑toepassing gebouwd met MVVM en gebruikt `Biblio_Models` voor domeinmodellen.
 
+Installed NuGet packages (selectie)
+-----------------------------------
+Deze projectreferenties zijn gedefinieerd in `Biblio_WPF.csproj`:
+
+- `Microsoft.AspNetCore.Identity.EntityFrameworkCore` 9.0.10
+- `CommunityToolkit.Mvvm` 8.4.0
+- `Microsoft.Extensions.Hosting` 9.0.0
+- `Microsoft.Extensions.Configuration.Json` 9.0.0
+- `Microsoft.Extensions.Configuration.UserSecrets` 9.0.0
+- `Microsoft.Extensions.Logging.Debug` 9.0.8
+
 Snelkoppelingen
 ---------------
 - `Biblio_App` — .NET MAUI client (mobile/desktop) — `Biblio_App/README.md`

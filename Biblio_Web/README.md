@@ -6,6 +6,25 @@ Korte omschrijving
 ------------------
 Biblio_Web is de webfrontend (ASP.NET Core MVC / Razor) van het Biblio-project. De webapp biedt gebruikersauthenticatie (Identity), een UI voor beheer van boeken, leden, categorieën en uitleningen, plus REST‑API endpoints voor externe clients (o.a. een MAUI client).
 
+Installed NuGet packages (selectie)
+-----------------------------------
+Deze projectreferenties zijn gedefinieerd in `Biblio_Web.csproj`:
+
+- `Azure.Core` 1.50.0
+- `Microsoft.AspNetCore.Identity.UI` 9.0.0
+- `Microsoft.EntityFrameworkCore` 9.0.10
+- `Microsoft.EntityFrameworkCore.SqlServer` 9.0.10
+- `Microsoft.AspNetCore.Identity.EntityFrameworkCore` 9.0.10
+- `Microsoft.Extensions.Localization` 9.0.0
+- `Microsoft.VisualStudio.Web.CodeGeneration.Design` 9.0.0
+- `Swashbuckle.AspNetCore` 6.5.0
+- `Microsoft.AspNetCore.Authentication.JwtBearer` 9.0.10
+- `AutoMapper.Extensions.Microsoft.DependencyInjection` 12.0.1
+- `Microsoft.Extensions.Configuration.Json` 9.0.0
+- `Microsoft.Extensions.Configuration.UserSecrets` 9.0.0
+- `Microsoft.Extensions.Logging.Debug` 9.0.8
+- `Microsoft.AspNetCore.OpenApi` 9.0.0
+
 Inhoud (snelkoppelingen)
 ------------------------
 - [Doel & motivatie](#doel--motivatie)

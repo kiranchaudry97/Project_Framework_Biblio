@@ -6,6 +6,17 @@ Korte omschrijving
 ------------------
 `Biblio_Models` bevat de gedeelde domeinmodellen, DbContext, migraties en seeding‑logica die door de verschillende clients en de web API in dit repository worden gebruikt. Dit project is bedoeld als single source of truth voor entiteiten zoals `Boek`, `Lid`, `Lenen`, `Categorie`, `AppUser`, `RefreshToken` en `Taal`.
 
+Installed NuGet packages (selectie)
+-----------------------------------
+Deze projectreferenties zijn gedefinieerd in `Biblio_Models.csproj`:
+
+- `Microsoft.AspNetCore.Identity.EntityFrameworkCore` 9.0.10
+- `Microsoft.EntityFrameworkCore.Design` 9.0.10
+- `Microsoft.EntityFrameworkCore.Tools` 9.0.10
+- `Microsoft.EntityFrameworkCore.SqlServer` 9.0.10
+- `Microsoft.EntityFrameworkCore.Sqlite` 9.0.10
+- `Microsoft.Extensions.Hosting` 9.0.0
+
 Inhoud (snelkoppelingen)
 ------------------------
 - [Doel & motivatie](#doel--motivatie)
