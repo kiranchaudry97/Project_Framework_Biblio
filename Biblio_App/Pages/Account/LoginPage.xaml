@@ -10,6 +10,27 @@
             <Image Source="login_illustration.svg" HorizontalOptions="Center" WidthRequest="120" />
             <Entry x:Name="EmailEntry" Placeholder="E-mail" Keyboard="Email" />
             <Entry x:Name="PasswordEntry" Placeholder="Wachtwoord" IsPassword="True" />
+            
+            <!-- Development-only test accounts panel -->
+            <Frame x:Name="DevPanel" Padding="10" Margin="0" IsVisible="False" BackgroundColor="#F6F6F6" HasShadow="False">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Test accounts (development only):" FontAttributes="Bold" FontSize="Small" />
+                    <HorizontalStackLayout Spacing="8">
+                        <Button Text="Autofill admin" Clicked="OnAutofillAdminClicked" FontSize="Small" />
+                        <Button Text="Autofill medewerker" Clicked="OnAutofillMedewerkerClicked" FontSize="Small" />
+                    </HorizontalStackLayout>
+                    <Label FontSize="Micro" TextColor="#333333">
+                        Admin — email: admin@biblio.local | wachtwoord: Admin1234?
+                    </Label>
+                    <Label FontSize="Micro" TextColor="#333333">
+                        Medewerker — email: medewerk@biblio.local | wachtwoord: test1234?
+                    </Label>
+                    <Label FontSize="Micro" TextColor="#666666">
+                        Zet development wachtwoorden met user-secrets; deel deze waarden niet in versiebeheer.
+                    </Label>
+                </VerticalStackLayout>
+            </Frame>
+
             <Button Text="Login" Clicked="OnLoginClicked" />
         </VerticalStackLayout>
     </ContentPage.Content>
