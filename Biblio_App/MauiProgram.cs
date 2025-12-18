@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration; // configuratie-extensies
 using System.IO;
 using System.Globalization;
 using Microsoft.Maui.Devices;
+using CommunityToolkit.Maui;
 
 namespace Biblio_App
 {
@@ -49,6 +50,7 @@ namespace Biblio_App
 
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

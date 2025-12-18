@@ -123,8 +123,8 @@
                                                                  WidthRequest="24"
                                                                  HeightRequest="24"
                                                                  BackgroundColor="Transparent"
-                                                                 Command="{Binding Path=BindingContext.DeleteCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
-                                                                 CommandParameter="{Binding .}"
+                                                                 Clicked="OnDeleteLoanClicked"
+                                                                 BindingContext="{Binding .}"
                                                                  AutomationProperties.Name="{Binding Path=BindingContext.DeleteButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}" />
                                                 </HorizontalStackLayout>
                                              </VerticalStackLayout>
@@ -158,9 +158,10 @@
                                          SelectedItem="{Binding SelectedReturnStatus, Mode=TwoWay}"
                                          Title="{Binding ReturnedLabel}"
                                          WidthRequest="160"
-                                         SelectedIndexChanged="OnReturnStatusChanged" />
+                                         SelectedIndexChanged="OnReturnStatusIndexChanged"
+                                         Unfocused="OnReturnStatusUnfocused" />
                                 <!-- Show chosen status as a transparent button so tapping opens the picker -->
-                                <Button Text="{Binding SelectedReturnStatus}"
+                                <Button x:Name="ReturnStatusLabelButton" Text="{Binding SelectedReturnStatus}"
                                         Clicked="OnSelectedReturnStatusLabelTapped"
                                         BackgroundColor="Transparent"
                                         Padding="0"

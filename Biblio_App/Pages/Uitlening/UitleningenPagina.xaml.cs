@@ -18,6 +18,9 @@ namespace Biblio_App.Pages
         private ILanguageService? _language_service;
         private ResourceManager? _sharedResourceManager;
 
+        private DateTime _lastReturnStatusChange = DateTime.MinValue;
+        private readonly TimeSpan _returnStatusDebounce = TimeSpan.FromMilliseconds(300);
+
         public static readonly BindableProperty PageHeaderTextProperty = BindableProperty.Create(nameof(PageHeaderText), typeof(string), typeof(UitleningenPagina), default(string));
         public static readonly BindableProperty MembersLabelProperty = BindableProperty.Create(nameof(MembersLabel), typeof(string), typeof(UitleningenPagina), default(string));
         public static readonly BindableProperty LoansLabelProperty = BindableProperty.Create(nameof(LoansLabel), typeof(string), typeof(UitleningenPagina), default(string));
@@ -402,8 +405,9 @@ namespace Biblio_App.Pages
                         var vm = VM;
                         if (vm != null && vm.SelectedUitlening != null)
                         {
-                            // update VM selection value (this triggers VM.OnSelectedReturnStatusChanged which persists)
                             vm.SelectedReturnStatus = sel;
+
+                            try { vm.RefreshSelectedLoanUI(); } catch { }
 
                             // determine localized option strings (not used for persistence here, VM handles mapping)
                             var optDelivered = Localize("ReturnedOption");
@@ -415,14 +419,47 @@ namespace Biblio_App.Pages
                             {
                                 var item = vm.SelectedUitlening;
                                 var list = vm.Uitleningen;
-                                var idx = list.IndexOf(item);
-                                if (idx >= 0)
+                                if (item != null)
                                 {
-                                    // replace to trigger CollectionChanged (UI refresh)
-                                    list[idx] = item;
+                                    var idx = list.ToList().FindIndex(u => u.Id == item.Id);
+                                    if (idx >= 0)
+                                    {
+                                        try
+                                        {
+                                            var copy = new Biblio_Models.Entiteiten.Lenen
+                                            {
+                                                Id = item.Id,
+                                                BoekId = item.BoekId,
+                                                Boek = item.Boek,
+                                                LidId = item.LidId,
+                                                Lid = item.Lid,
+                                                StartDate = item.StartDate,
+                                                DueDate = item.DueDate,
+                                                ReturnedAt = item.ReturnedAt,
+                                                ForceLate = item.ForceLate,
+                                                ForceNotLate = item.ForceNotLate,
+                                                IsClosed = item.IsClosed
+                                            };
+
+                                            Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                                            {
+                                                try
+                                                {
+                                                    list[idx] = copy;
+                                                    // keep SelectedUitlening pointing to the new instance so the form stays in sync
+                                                    vm.SelectedUitlening = copy;
+                                                }
+                                                catch { }
+                                            });
+                                        }
+                                        catch { }
+                                    }
+                                    else
+                                    {
+                                        Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => { try { list.Insert(0, item); } catch { } });
+                                    }
                                 }
 
-                                // ensure VM notifies debug/derived properties: call protected OnPropertyChanged via reflection
                                 try
                                 {
                                     var onProp = vm.GetType().GetMethod("OnPropertyChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
@@ -430,9 +467,60 @@ namespace Biblio_App.Pages
                                     {
                                         var args = new System.ComponentModel.PropertyChangedEventArgs(nameof(vm.DebugInfo));
                                         onProp.Invoke(vm, new object[] { args });
-                                      }
+                                    }
+                                }
+                                catch { }
+                            }
+                            catch { }
+
+                            try
+                            {
+                                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                                {
+                                    try
+                                    {
+                                        // Prefer setting SelectedIndex from the ViewModel options so picker displays the exact item instance
+                                        try
+                                        {
+                                            var options = vm.ReturnStatusOptions;
+                                            if (options != null)
+                                            {
+                                                var find = options.ToList().FindIndex(s => string.Equals(s, sel, StringComparison.OrdinalIgnoreCase));
+                                                if (find >= 0)
+                                                {
+                                                    picker.SelectedIndex = find;
+                                                }
+                                                else
+                                                {
+                                                    picker.SelectedItem = sel;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                picker.SelectedItem = sel;
+                                            }
+                                        }
+                                        catch
+                                        {
+                                            try { picker.SelectedItem = sel; } catch { }
+                                        }
                                     }
                                     catch { }
+
+                                    try
+                                    {
+                                        var lblBtn = this.FindByName<Button>("ReturnStatusLabelButton");
+                                        if (lblBtn != null) lblBtn.Text = sel;
+                                    }
+                                    catch { }
+                                });
+                            }
+                            catch { }
+
+                            // Persist the selection and show toast; wait for DB save to complete
+                            try
+                            {
+                                await vm.SaveSelectedReturnStatusAsync();
                             }
                             catch { }
                         }
@@ -454,5 +542,236 @@ namespace Biblio_App.Pages
             catch { }
         }
 
+        private async void OnDeleteLoanClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Lenen item)
+                {
+                    var confirm = false;
+                    try
+                    {
+                        confirm = await DisplayAlert(Localize("Delete"), Localize("DeleteConfirmation"), Localize("OK"), Localize("Cancel"));
+                    }
+                    catch { }
+
+                    if (!confirm) return;
+
+                    try
+                    {
+                        var vm = VM;
+                        if (vm != null)
+                        {
+                            // Use ViewModel command if available
+                            try
+                            {
+                                if (vm.DeleteCommand != null && vm.DeleteCommand.CanExecute(item))
+                                {
+                                    await vm.DeleteCommand.ExecuteAsync(item);
+                                    // reload data to ensure UI (icons/labels) consistent
+                                    try { await vm.EnsureDataLoadedAsync(); } catch { }
+                                    return;
+                                }
+                            }
+                            catch { }
+
+                            // fallback: call DeleteAsync via reflection
+                            try
+                            {
+                                var del = vm.GetType().GetMethod("DeleteAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
+                                if (del != null)
+                                {
+                                    var task = del.Invoke(vm, new object[] { item }) as System.Threading.Tasks.Task;
+                                    if (task != null) await task;
+                                    try { await vm.EnsureDataLoadedAsync(); } catch { }
+                                    return;
+                                }
+                            }
+                            catch { }
+
+                            // ultimate fallback: remove via DB and reload
+                            try
+                            {
+                                var dbFactoryField = vm.GetType().GetField("_dbFactory", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                                var dbFactory = dbFactoryField?.GetValue(vm) as Microsoft.EntityFrameworkCore.IDbContextFactory<Biblio_Models.Data.BiblioDbContext>;
+                                if (dbFactory != null)
+                                {
+                                    using var ctx = dbFactory.CreateDbContext();
+                                    var existing = await ctx.Leningens.FindAsync(item.Id);
+                                    if (existing != null)
+                                    {
+                                        ctx.Leningens.Remove(existing);
+                                        await ctx.SaveChangesAsync();
+                                    }
+                                }
+
+                                try { await vm.EnsureDataLoadedAsync(); } catch { }
+                            }
+                            catch { }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        private async void OnReturnStatusUnfocused(object sender, FocusEventArgs e)
+        {
+            try
+            {
+                if (sender is Picker picker)
+                {
+                    var sel = picker.SelectedItem as string;
+                    if (string.IsNullOrWhiteSpace(sel)) return;
+
+                    // debounce rapid open/close events
+                    var now = DateTime.UtcNow;
+                    if (now - _lastReturnStatusChange < _returnStatusDebounce)
+                    {
+                        _lastReturnStatusChange = now;
+                        return;
+                    }
+
+                    _lastReturnStatusChange = now;
+
+                    var vm = VM;
+                    if (vm == null || vm.SelectedUitlening == null) return;
+
+                    try
+                    {
+                        vm.SelectedReturnStatus = sel;
+                        try { vm.RefreshSelectedLoanUI(); } catch { }
+
+                        // show highlight on the button/picker to indicate selection applied
+                        try
+                        {
+                            var orange = Microsoft.Maui.Graphics.Color.FromArgb("#80FFA500"); // semi-transparent orange
+                            var brush = new Microsoft.Maui.Controls.SolidColorBrush(orange);
+                            Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                try { ReturnStatusLabelButton.Background = brush; } catch { }
+                                try { ReturnStatusPicker.Background = brush; } catch { }
+                            });
+                        }
+                        catch { }
+
+                        // restore picker selection/button text on main thread
+                        Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            try { picker.SelectedItem = sel; } catch { }
+                            try
+                            {
+                                var lblBtn = this.FindByName<Button>("ReturnStatusLabelButton");
+                                if (lblBtn != null) lblBtn.Text = sel;
+                            }
+                            catch { }
+                        });
+
+                        // Persist and wait for DB save, show toast via VM helper
+                        try
+                        {
+                            await vm.SaveSelectedReturnStatusAsync();
+                        }
+                        catch { }
+                    }
+                    catch { }
+                }
+                else if (sender is Button btn)
+                {
+                    // If unfocused invoked from the label button, ensure VM is in sync with picker
+                    try
+                    {
+                        var statusPicker = this.FindByName<Picker>("ReturnStatusPicker");
+                        if (statusPicker != null)
+                        {
+                            var sel = statusPicker.SelectedItem as string;
+                            if (!string.IsNullOrWhiteSpace(sel))
+                            {
+                                var vm = VM;
+                                if (vm != null && vm.SelectedUitlening != null)
+                                {
+                                    vm.SelectedReturnStatus = sel;
+                                    try { vm.RefreshSelectedLoanUI(); } catch { }
+
+                                    // show highlight
+                                    try
+                                    {
+                                        var orange = Microsoft.Maui.Graphics.Color.FromArgb("#80FFA500");
+                                        var brush = new Microsoft.Maui.Controls.SolidColorBrush(orange);
+                                        Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                                        {
+                                            try { ReturnStatusLabelButton.Background = brush; } catch { }
+                                            try { ReturnStatusPicker.Background = brush; } catch { }
+                                        });
+                                    }
+                                    catch { }
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        private async void OnReturnStatusIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (sender is Picker picker && picker.SelectedItem is string sel)
+                {
+                    // treat same as unfocused: update VM and refresh UI
+                    var now = DateTime.UtcNow;
+                    if (now - _lastReturnStatusChange < _returnStatusDebounce)
+                    {
+                        _lastReturnStatusChange = now;
+                        return;
+                    }
+
+                    _lastReturnStatusChange = now;
+
+                    var vm = VM;
+                    if (vm == null || vm.SelectedUitlening == null) return;
+
+                    try
+                    {
+                        vm.SelectedReturnStatus = sel;
+                        try { vm.RefreshSelectedLoanUI(); } catch { }
+
+                        // update label button text and highlight
+                        Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            try { picker.SelectedItem = sel; } catch { }
+                            try
+                            {
+                                var lblBtn = this.FindByName<Button>("ReturnStatusLabelButton");
+                                if (lblBtn != null) lblBtn.Text = sel;
+                            }
+                            catch { }
+
+                            try
+                            {
+                                var orange = Microsoft.Maui.Graphics.Color.FromArgb("#80FFA500");
+                                var brush = new Microsoft.Maui.Controls.SolidColorBrush(orange);
+                                try { ReturnStatusLabelButton.Background = brush; } catch { }
+                                try { ReturnStatusPicker.Background = brush; } catch { }
+                            }
+                            catch { }
+                        });
+
+                        // Persist change and wait for DB save
+                        try
+                        {
+                            await vm.SaveSelectedReturnStatusAsync();
+                        }
+                        catch { }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
     }
  }
