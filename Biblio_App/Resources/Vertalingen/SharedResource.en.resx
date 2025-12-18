@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -232,10 +232,10 @@
     <value>Are you Sure?</value>
   </data>
   <data name="WelcomeTitle" xml:space="preserve">
-    <value>Bienvenue chez Biblio en Gestion de la bibliothéque</value>
+    <value>Bienvenue chez Biblio en Gestion de la bibliotheque</value>
   </data>
   <data name="WelcomeSubtitlePart1" xml:space="preserve">
-    <value>Gérez les livres, les membres et les prêts depuis ce tableau de bord.</value>
+    <value>Gerez les livres, les membres et les prets depuis ce tableau de bord.</value>
   </data>
   <data name="WelcomeBiblio" xml:space="preserve">
     <value>Welcome to the Library</value>
@@ -595,7 +595,7 @@
     <value>Due:</value>
   </data>
   <data name="ReturnedLabel" xml:space="preserve">
-    <value>Returned:</value>
+    <value>Return Status</value>
   </data>
   <data name="DbPathNotLoaded" xml:space="preserve">
     <value>(not loaded)</value>
@@ -639,7 +639,16 @@
   <data name="LoadDbInfo" xml:space="preserve">
     <value>Load the database information</value>
   </data>
-	<data name="BooksOverview" xml:space="preserve"> 
-		<value>Overview of books — here you can view details, edit books and then add a new book</value> 
-	</data>
+  <data name="BooksOverview" xml:space="preserve">
+    <value>Overview of books - here you can view details, edit books and then add a new book</value>
+  </data>
+  <data name="ResetLocalDb" xml:space="preserve">
+    <value>Reset Local Db</value>
+  </data>
+  <data name="Late" xml:space="preserve">
+    <value>Late</value>
+  </data>
+  <data name="ReturnedOption" xml:space="preserve">
+    <value>Returned</value>
+  </data>
 </root>

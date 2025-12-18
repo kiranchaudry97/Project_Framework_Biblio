@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+	</resheader>
+	<!-- Minimal keys gebruikt door de app -->
+	<data name="ReturnedLabel" xml:space="preserve"><value>Lever status</value></data>
+	<data name="ReturnedOption" xml:space="preserve"><value>Geleverd</value></data>
+	<data name="Late" xml:space="preserve"><value>Te laat</value></data>
+	<data name="Return" xml:space="preserve"><value>Inleveren</value></data>
+	<data name="StartLabel" xml:space="preserve"><value>Start:</value></data>
+	<data name="DueLabel" xml:space="preserve"><value>Tot:</value></data>
+	<data name="OK" xml:space="preserve"><value>OK</value></data>
+</root>

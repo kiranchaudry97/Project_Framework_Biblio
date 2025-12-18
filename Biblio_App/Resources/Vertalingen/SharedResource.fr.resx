@@ -124,7 +124,7 @@
     <value>Membres</value>
   </data>
   <data name="Loans" xml:space="preserve">
-    <value>Prêts</value>
+    <value>Prets</value>
   </data>
   <data name="DbPath" xml:space="preserve">
     <value>DB path:</value>
@@ -163,7 +163,7 @@
     <value>Le champ {0} est requis.</value>
   </data>
   <data name="StringLength" xml:space="preserve">
-    <value>{0} doit contenir entre {2} et {1} caractères.</value>
+    <value>{0} doit contenir entre {2} et {1} caracteres.</value>
   </data>
   <data name="EmailAddress" xml:space="preserve">
     <value>Adresse e-mail invalide.</value>
@@ -172,10 +172,10 @@
     <value>Accueil</value>
   </data>
   <data name="Privacy" xml:space="preserve">
-    <value>Confidentialité</value>
+    <value>Confidentialite</value>
   </data>
   <data name="Categories" xml:space="preserve">
-    <value>Catégories</value>
+    <value>Categories</value>
   </data>
   <data name="Menu" xml:space="preserve">
     <value>Menu</value>
@@ -193,7 +193,7 @@
     <value>Admin</value>
   </data>
   <data name="ToggleTheme" xml:space="preserve">
-    <value>Changer le théme</value>
+    <value>Changer le theme</value>
   </data>
   <data name="Login" xml:space="preserve">
     <value>Connexion</value>
@@ -202,7 +202,7 @@
     <value>S'inscrire</value>
   </data>
   <data name="Logout" xml:space="preserve">
-    <value>Déconnexion</value>
+    <value>Deconnexion</value>
   </data>
   <data name="Profile" xml:space="preserve">
     <value>Profil</value>
@@ -211,7 +211,7 @@
     <value>Bienvenue</value>
   </data>
   <data name="Create" xml:space="preserve">
-    <value>Créer</value>
+    <value>Creer</value>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Annuler</value>
@@ -223,19 +223,19 @@
     <value>Modifier</value>
   </data>
   <data name="Details" xml:space="preserve">
-    <value>Détails</value>
+    <value>Details</value>
   </data>
   <data name="DeleteConfirm" xml:space="preserve">
-    <value>êtes-vous sûr de vouloir supprimer cet élément ?</value>
+    <value>etes-vous sur de vouloir supprimer cet element ?</value>
   </data>
   <data name="Confirm" xml:space="preserve">
-    <value>êtes-vous sûr ?</value>
+    <value>etes-vous sur ?</value>
   </data>
   <data name="WelcomeTitle" xml:space="preserve">
-    <value>Bienvenue chez Biblio – Gestion de la bibliothèque</value>
+    <value>Bienvenue chez Biblio - Gestion de la bibliotheque</value>
   </data>
   <data name="WelcomeSubtitlePart1" xml:space="preserve">
-    <value>Gérez les livres, les membres et les préts depuis ce tableau de bord.</value>
+    <value>Gerez les livres, les membres et les prets depuis ce tableau de bord.</value>
   </data>
   <data name="WelcomeBiblio" xml:space="preserve">
     <value>Bienvenue chez Biblio</value>
@@ -244,19 +244,19 @@
     <value>Bonjour, {0} !</value>
   </data>
   <data name="NotLoggedIn" xml:space="preserve">
-    <value>Vous n'êtes pas connecté.</value>
+    <value>Vous n'etes pas connecte.</value>
   </data>
   <data name="DashboardTitle" xml:space="preserve">
-    <value>Bienvenue sur Biblio – Gestion de bibliothèque</value>
+    <value>Bienvenue sur Biblio - Gestion de bibliotheque</value>
   </data>
   <data name="DashboardDescription" xml:space="preserve">
-    <value>Gérez les livres et les préts depuis ce tableau de bord. Utilisez le menu pour commencer.</value>
+    <value>Gerez les livres et les prets depuis ce tableau de bord. Utilisez le menu pour commencer.</value>
   </data>
   <data name="ManageBooks" xml:space="preserve">
-    <value>Gérer les livres</value>
+    <value>Gerer les livres</value>
   </data>
   <data name="ManageMembers" xml:space="preserve">
-    <value>Gérer les membres</value>
+    <value>Gerer les membres</value>
   </data>
   <data name="EditProfileTitle" xml:space="preserve">
     <value>Modifier le profil</value>
@@ -289,10 +289,10 @@
     <value>ISBN</value>
   </data>
   <data name="ColumnCategory" xml:space="preserve">
-    <value>Catégorie</value>
+    <value>Categorie</value>
   </data>
   <data name="ChooseCategory" xml:space="preserve">
-    <value>-- Choisissez une catégorie --</value>
+    <value>-- Choisissez une categorie --</value>
   </data>
   <data name="BooksTitle" xml:space="preserve">
     <value>Livres</value>
@@ -301,19 +301,19 @@
     <value>Livre</value>
   </data>
   <data name="CategoriesTitle" xml:space="preserve">
-    <value> Catégories Titre</value>
+    <value> Categories Titre</value>
   </data>
   <data name="CategoryTitle" xml:space="preserve">
-    <value>Catégorie Titre</value>
+    <value>Categorie Titre</value>
   </data>
   <data name="Content" xml:space="preserve">
     <value>Content</value>
   </data>
   <data name="Category" xml:space="preserve">
-    <value>Catégorie</value>
+    <value>Categorie</value>
   </data>
   <data name="ColumnFirstName" xml:space="preserve">
-    <value>Prénom</value>
+    <value>Prenom</value>
   </data>
   <data name="ColumnLastName" xml:space="preserve">
     <value>Nom</value>
@@ -327,8 +327,29 @@
   <data name="AllBooks" xml:space="preserve">
     <value>Tous les livres</value>
   </data>
+  <data name="OnlyOpen" xml:space="preserve">
+    <value>Ouvert uniquement</value>
+  </data>
   <data name="Book" xml:space="preserve">
-    <value>Livres</value>
+    <value>Livre</value>
+  </data>
+  <data name="Return" xml:space="preserve">
+    <value>Retourner</value>
+  </data>
+  <data name="ReturnedLabel" xml:space="preserve">
+    <value>Statut de livraison</value>
+  </data>
+  <data name="ReturnedOption" xml:space="preserve">
+    <value>Rendu</value>
+  </data>
+  <data name="Late" xml:space="preserve">
+    <value>En retard</value>
+  </data>
+  <data name="StartLabel" xml:space="preserve">
+    <value>Debut:</value>
+  </data>
+  <data name="DueLabel" xml:space="preserve">
+    <value>Echeance:</value>
   </data>
   <data name="SignIn" xml:space="preserve">
     <value>Se connecter</value>
@@ -352,13 +373,13 @@
     <value>ISBN</value>
   </data>
   <data name="Books_Index_ColumnCategory" xml:space="preserve">
-    <value>Catégorie</value>
+    <value>Categorie</value>
   </data>
   <data name="Books_Index_Edit" xml:space="preserve">
-    <value>Modifier</value>
+    <value>Changer</value>
   </data>
   <data name="Books_Index_Details" xml:space="preserve">
-    <value>Détail</value>
+    <value>Detail</value>
   </data>
   <data name="Books_Index_Delete" xml:space="preserve">
     <value>Supprimer</value>
@@ -367,7 +388,7 @@
     <value>Nouveau Livre</value>
   </data>
   <data name="Books_Create_Save" xml:space="preserve">
-    <value>Sauvegarder</value>
+    <value>sauvegarder</value>
   </data>
   <data name="Books_Create_Cancel" xml:space="preserve">
     <value>Annuler</value>
@@ -379,34 +400,34 @@
     <value>Action</value>
   </data>
   <data name="AllRoles" xml:space="preserve">
-    <value>Tout Roles</value>
+    <value>Tous les roles</value>
   </data>
   <data name="Block" xml:space="preserve">
-    <value>Block</value>
+    <value>Bloquer</value>
   </data>
   <data name="Blocked" xml:space="preserve">
-    <value>Blocquer</value>
+    <value>Bloque</value>
   </data>
   <data name="Code" xml:space="preserve">
     <value>Code</value>
   </data>
   <data name="ConfirmPassword" xml:space="preserve">
-    <value>Configurer</value>
+    <value>Confirmer le mot de passe</value>
   </data>
   <data name="CurrentPassword" xml:space="preserve">
     <value>Mot de passe actuel</value>
   </data>
   <data name="Default" xml:space="preserve">
-    <value>Par défaut</value>
+    <value>Par defaut</value>
   </data>
   <data name="EditRoles" xml:space="preserve">
-    <value>Modifier le profil</value>
+    <value>Modifier les roles</value>
   </data>
   <data name="Forgot Password Link" xml:space="preserve">
-    <value>Mot de passe oublié</value>
+    <value>Mot de passe oublie</value>
   </data>
   <data name="Medewerker" xml:space="preserve">
-    <value>Employé</value>
+    <value>Employe</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Nom</value>
@@ -418,25 +439,25 @@
     <value>Nouvel utilisateur</value>
   </data>
   <data name="No" xml:space="preserve">
-    <value>No</value>
+    <value>Non</value>
   </data>
   <data name="NoBooksLoaded" xml:space="preserve">
-    <value>Aucun livre chargé</value>
+    <value>Aucun livre charge</value>
   </data>
   <data name="NoMembersLoaded" xml:space="preserve">
-    <value>Aucun membre en charge</value>
+    <value>Aucun membre charge</value>
   </data>
   <data name="NoRoles" xml:space="preserve">
-    <value>Aucun rôle</value>
+    <value>Aucun role</value>
   </data>
   <data name="Password" xml:space="preserve">
     <value>Mot de passe</value>
   </data>
   <data name="Register Link" xml:space="preserve">
-    <value>Lien d'inscription</value>
+    <value>S'inscrire</value>
   </data>
   <data name="Remember Me" xml:space="preserve">
-    <value>Souviens-toi de moi</value>
+    <value>Se souvenir de moi</value>
   </data>
   <data name="Roles" xml:space="preserve">
     <value>Roles</value>
@@ -445,16 +466,16 @@
     <value>Afficher le mot de passe</value>
   </data>
   <data name="Unblock" xml:space="preserve">
-    <value>Débloquer</value>
+    <value>Debloquer</value>
   </data>
   <data name="User" xml:space="preserve">
-    <value>Utilisateurs</value>
+    <value>Utilisateur</value>
   </data>
   <data name="UserManagement" xml:space="preserve">
     <value>Gestion des utilisateurs</value>
   </data>
   <data name="UserRoles" xml:space="preserve">
-    <value>Rôles des utilisateurs</value>
+    <value>Roles d'utilisateur</value>
   </data>
   <data name="Users" xml:space="preserve">
     <value>Utilisateurs</value>
@@ -463,142 +484,130 @@
     <value>Bienvenue sur biblio !</value>
   </data>
   <data name="Yes" xml:space="preserve">
-    <value>oui </value>
+    <value>Oui</value>
   </data>
   <data name="EditRolesFor" xml:space="preserve">
-    <value>Modifier les rôles de</value>
+    <value>Modifier les roles de {0}</value>
   </data>
   <data name="NoRolesFound" xml:space="preserve">
-    <value>Aucun rôle modifiable trouvé.</value>
+    <value>Aucun role modifiable trouve.</value>
   </data>
   <data name="UserRolesFor" xml:space="preserve">
-    <value>Rôles des utilisateurs pour</value>
+    <value>Roles de {0}</value>
   </data>
-  <data name="UserAndRoles" xml:space="preserve">
-    <value>Utilisateur et rôles</value>
+  <data name="UserAndResponsibilities" xml:space="preserve">
+    <value>Utilisateurs et responsibilities</value>
   </data>
   <data name="Member" xml:space="preserve">
     <value>Membre</value>
   </data>
   <data name="StartDate" xml:space="preserve">
-    <value>Date de début</value>
+    <value>Date de debut</value>
   </data>
   <data name="DueDate" xml:space="preserve">
-    <value>Date d'expiration</value>
+    <value>Date d'echeance</value>
   </data>
   <data name="IngeleverdOp" xml:space="preserve">
-    <value>Retour</value>
+    <value>Restitue le</value>
   </data>
   <data name="DaysLate" xml:space="preserve">
     <value>Jours de retard</value>
   </data>
   <data name="NoLateLoans" xml:space="preserve">
-    <value>Aucun prêt n'est en retard.</value>
-  </data>
-  <data name="Naam" xml:space="preserve">
-    <value>Nom</value>
+    <value>Aucun pret en retard</value>
   </data>
   <data name="Created" xml:space="preserve">
-    <value>Créer</value>
+    <value>Creer</value>
   </data>
   <data name="LoanCount" xml:space="preserve">
-    <value>Nombre de prêts</value>
+    <value>Nombre de prets</value>
   </data>
   <data name="NewCategory" xml:space="preserve">
-    <value>Nouvelle catégorie</value>
+    <value>Nouvelle categorie</value>
   </data>
   <data name="ColumnName" xml:space="preserve">
     <value>Nom</value>
   </data>
   <data name="ForgotPasswordTitle" xml:space="preserve">
-    <value>Mot de passe oublié</value>
+    <value>Mot de passe oublie ?</value>
   </data>
   <data name="ForgotPasswordSubtitle" xml:space="preserve">
-    <value>Entrez votre adresse e-mail.</value>
+    <value>Saisissez votre adresse e-mail.</value>
   </data>
   <data name="EmailPlaceholder" xml:space="preserve">
-    <value>Nomexample.com</value>
+    <value>nom@exemple.com</value>
   </data>
   <data name="ResetButton" xml:space="preserve">
-    <value>Bouton Réinitialiser</value>
+    <value>Reinitialiser le mot de passe</value>
   </data>
   <data name="LoginStatus_HelloUser" xml:space="preserve">
-    <value>Bonjour</value>
+    <value>Bonjour {0}</value>
   </data>
   <data name="Search" xml:space="preserve">
     <value>Rechercher</value>
   </data>
   <data name="NewItem" xml:space="preserve">
-    <value>Nouvel article</value>
+    <value>Nouveau</value>
   </data>
   <data name="Titel" xml:space="preserve">
     <value>Titre</value>
   </data>
   <data name="Auteur" xml:space="preserve">
-    <value>Author</value>
+    <value>Auteur</value>
   </data>
   <data name="ISBN" xml:space="preserve">
     <value>ISBN</value>
   </data>
   <data name="Categorie" xml:space="preserve">
-    <value>Categorié</value>
+    <value>Categorie</value>
   </data>
   <data name="Voornaam" xml:space="preserve">
-    <value>Prénom</value>
+    <value>Prenom</value>
   </data>
   <data name="Telefoon" xml:space="preserve">
-    <value>Telephoné</value>
+    <value>Telephone</value>
+  </data>
+  <data name="Adres" xml:space="preserve">
+    <value>Adresse</value>
   </data>
   <data name="DeleteAccount" xml:space="preserve">
     <value>Supprimer le compte</value>
   </data>
   <data name="DeleteAccountConfirm" xml:space="preserve">
-    <value>Êtes-vous sûr de vouloir supprimer votre compte ?</value>
+    <value>etes-vous sur de vouloir supprimer votre compte ?</value>
   </data>
   <data name="LanguageChanged" xml:space="preserve">
-    <value>Langue changée</value>
+    <value>Langue modifiee</value>
   </data>
   <data name="Languages" xml:space="preserve">
     <value>Langues</value>
   </data>
   <data name="LanguageSetTo" xml:space="preserve">
-    <value>Langue définie sur {0}</value>
-  </data>
-  <data name="zie " xml:space="preserve">
-    <value>nom complet</value>
+    <value>Langue definie sur {0}</value>
   </data>
   <data name="NoResults" xml:space="preserve">
-    <value>Aucun résultat trouvé</value>
+    <value>Aucun resultat trouve</value>
   </data>
   <data name="CookieNoticeTitle" xml:space="preserve">
     <value>Notification de cookie</value>
   </data>
   <data name="CookieNoticeText" xml:space="preserve">
-    <value>Nous utilisons des cookies pour améliorer votre expérience</value>
+    <value>Nous utilisons des cookies pour ameliorer votre experience. En acceptant, vous consentez l'utilisation de cookies non essentiels.</value>
   </data>
   <data name="Cookie" xml:space="preserve">
-    <value>Accepter Cookie</value>
+    <value>Accepter les cookies</value>
   </data>
   <data name="CookieSettings" xml:space="preserve">
-    <value>Appliquer le cookie</value>
+    <value>Parametres des cookies</value>
   </data>
   <data name="LanguageChangedTitle" xml:space="preserve">
-    <value>Langue changée</value>
+    <value>Langue modifiee</value>
   </data>
   <data name="LanguageChangedBody" xml:space="preserve">
-    <value>Langue définie sur : {0}. L'interface a été mise à jour.</value>
-  </data>
-  <data name="StartLabel" xml:space="preserve">
-    <value>Start:</value>
-  </data>
-  <data name="DueLabel" xml:space="preserve">
-    <value>Échéance :</value>
-  </data>
-  <data name="ReturnedLabel" xml:space="preserve">
-    <value>Retourné</value>
+    <value>Langue definie sur : {0}. L'interface a ete mise a jour.</value>
   </data>
   <data name="DbPathNotLoaded" xml:space="preserve">
-    <value>(non chargé)</value>
+    <value>(non charge)</value>
   </data>
   <data name="Validation_BookRequired" xml:space="preserve">
     <value>Le livre est requis.</value>
@@ -607,22 +616,22 @@
     <value>Le membre est requis.</value>
   </data>
   <data name="SavedLoan" xml:space="preserve">
-    <value>Prêt enregistré.</value>
+    <value>Pret enregistre.</value>
   </data>
   <data name="DeletedLoan" xml:space="preserve">
-    <value>Prêt supprimé.</value>
+    <value>Pret supprime.</value>
   </data>
   <data name="BookMarkedReturned" xml:space="preserve">
-    <value>Livre marqué comme rendu.</value>
+    <value>Livre marque comme rendu.</value>
   </data>
   <data name="ErrorSavingLoan" xml:space="preserve">
-    <value>Erreur lors de l'enregistrement du prêt.</value>
+    <value>Erreur lors de l'enregistrement du pret.</value>
   </data>
   <data name="ErrorDeletingLoan" xml:space="preserve">
-    <value>Erreur lors de la suppression du prêt.</value>
+    <value>Erreur lors de la suppression du pret.</value>
   </data>
   <data name="ErrorUpdatingLoan" xml:space="preserve">
-    <value>Erreur lors de la mise à jour du prêt.</value>
+    <value>Erreur lors de la mise a jour du pret.</value>
   </data>
   <data name="Sync" xml:space="preserve">
     <value>Synchronisation</value>
@@ -631,17 +640,24 @@
     <value>Synchroniser maintenant</value>
   </data>
   <data name="CheckApi" xml:space="preserve">
-    <value>Vérifier l'API</value>
+    <value>Verifier l'API</value>
   </data>
   <data name="Database" xml:space="preserve">
-    <value>Base de données</value>
+    <value>Base de donnees</value>
   </data>
   <data name="LoadDbInfo" xml:space="preserve">
     <value>Charger les informations de la base</value>
   </data>
-  <data name="ResetLocalDb" xml:space="preserve">
-    <value>Réinitialiser la base locale</value>
+  <data name="BooksOverview" xml:space="preserve">
+    <value>Apercu des livres - ici, vous pouvez voir les details, modifier les livres et ensuite ajouter un nouveau livre</value>
   </data>
-	<data name="BooksOverview" xml:space="preserve"> <value>Aperçu des livres — ici, vous pouvez voir les détails, modifier les livres et ensuite ajouter un nouveau livre</value>
-	</data>
+  <data name="ResetLocalDb" xml:space="preserve">
+    <value>Reinitialiser la base locale</value>
+  </data>
+  <data name="Late" xml:space="preserve">
+    <value>En Retard</value>
+  </data>
+  <data name="ReturnedOption" xml:space="preserve">
+    <value>Rendu</value>
+  </data>
 </root>

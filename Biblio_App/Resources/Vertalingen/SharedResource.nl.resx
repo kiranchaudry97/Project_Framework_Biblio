@@ -595,7 +595,7 @@
     <value>Tot:</value>
   </data>
   <data name="ReturnedLabel" xml:space="preserve">
-    <value>Ingeleverd:</value>
+    <value>Lever Status</value>
   </data>
   <data name="DbPathNotLoaded" xml:space="preserve">
     <value>(niet geladen)</value>
@@ -639,10 +639,16 @@
   <data name="LoadDbInfo" xml:space="preserve">
     <value>Informatie uit de database laden</value>
   </data>
+  <data name="BooksOverview" xml:space="preserve">
+    <value>Overzicht van boeken - hier kun je details bekijken, boeken bewerken en daarna een nieuw boek toevoegen</value>
+  </data>
   <data name="ResetLocalDb" xml:space="preserve">
     <value>De lokale database opnieuw instellen</value>
   </data>
- <data name="BooksOverview" xml:space="preserve">
-	 <value>Overzicht van boeken — hier kun je details bekijken, boeken bewerken en daarna een nieuw boek toevoegen</value>
- </data>
+  <data name="Late" xml:space="preserve">
+    <value>Te laat</value>
+  </data>
+  <data name="ReturnedOption" xml:space="preserve">
+    <value>Geleverd</value>
+  </data>
 </root>
