@@ -1,4 +1,4 @@
-﻿// 1) //LINQ - used when querying Leden collection (Where, AnyAsync)
+// 1) //LINQ - used when querying Leden collection (Where, AnyAsync)
 // 2) //lambda expression - used in LINQ predicates
 // 3) //CRUD - this entity participates in create/read/update/delete operations via DbContext
 
@@ -38,9 +38,11 @@ namespace Biblio_Models.Entiteiten
 
         public ICollection<Lenen> Leningens { get; set; } = new List<Lenen>();
 
+        [NotMapped]
+        public string FullName => (Voornaam + " " + AchterNaam).Trim();
+
     }
 
-    // Local variant used on device: separate entity (no inheritance) to avoid EF key/type conflicts
     [Table("LocalLeden")]
     public class LocalLid
     {
@@ -61,6 +63,9 @@ namespace Biblio_Models.Entiteiten
 
         [Phone]
         public string? Telefoon { get; set; }
+
+        [NotMapped]
+        public string FullName => (Voornaam + " " + AchterNaam).Trim();
 
         public bool IsDeleted { get; set; }
         public DateTime? DeletedAt { get; set; }

@@ -1,4 +1,4 @@
-﻿// 1) //LINQ - Lenen wordt gebruikt in queries to filter loans by user/book/date
+// 1) //LINQ - Lenen wordt gebruikt in queries to filter loans by user/book/date
 // 2) //lambda expression - predicates over loans (Where(...=>...))
 // 3) //CRUD - Lenen participates in create/read/update/delete operations via DbContext
 // - Entiteit voor uitlening met relaties naar Book en Member
@@ -31,7 +31,12 @@ namespace Biblio_Models.Entiteiten
         public DateTime DueDate { get; set; }
         public DateTime? ReturnedAt { get; set; }
 
-        // Hulpstatus (optioneel) — gebruik IsDeleted/ReturnedAt voor logica
+        // Hulpstatus (optioneel) � gebruik IsDeleted/ReturnedAt voor logica
+
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public bool ForceLate { get; set; }
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public bool ForceNotLate { get; set; }
 
         public bool IsClosed { get; set; }
 
