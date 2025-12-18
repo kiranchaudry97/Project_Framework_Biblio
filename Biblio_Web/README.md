@@ -163,6 +163,8 @@ Aangepaste / toegevoegde bestanden
 ## Installatie & Lokaal uitvoeren
 Volg deze stappen om de webapp lokaal te starten (veilig, development):
 
+> Belangrijk: zie `SECURE_DB_SETUP.md` voor aanbevolen, veilige manieren om database connection strings en credentials te beheren (user‑secrets, env vars, Key Vault). Gebruik nooit plaintext credentials in Git.
+
 1) Clone repository en open een terminal in de solution root:
 
 ```bash

@@ -21,6 +21,7 @@ Inhoud (snelkoppelingen)
 - [Technische implementaties](#technische-implementaties)
 - [AI-hulpmiddelen & ontwikkelworkflow](#ai-hulpmiddelen--ontwikkelworkflow)
 - [Problemen die ik voorkwam](#problemen-die-ik-voorkwam)
+- [Installatie / snelstart (development)](#installatie--snelstart-development)
 
 ---
 
@@ -143,8 +144,6 @@ Deze repository gebruikt AI‑geassisteerde workflows (bijv. GitHub Copilot of v
 - Automatisch aanmaken of verbeteren van documentatie, zoals README‑bestanden.
 - Refactorings en kleine codewijzigingen (XAML/C#) om UX of toegankelijkheid te verbeteren.
 
----
-
 ## Problemen die ik voorkwam
 
 Kort overzicht van concrete problemen die tijdens ontwikkeling zijn opgespoord en verholpen:
@@ -160,9 +159,101 @@ Kort overzicht van concrete problemen die tijdens ontwikkeling zijn opgespoord e
 
 ---
 
-Licentie
+## Installatie / snelstart (development)
 
-Controleer `LICENSE` in de repository root (indien aanwezig) voor licentievoorwaarden.
+Volg deze stappen om de repository lokaal op te zetten en te runnen voor ontwikkeling. De instructies zijn gericht op development; bewaar geen secrets in Git.
+
+1) Vereisten
+
+- .NET 9 SDK geïnstalleerd (dotnet --version toont 9.x).
+- Voor MAUI: installeer MAUI workloads:
+
+```
+dotnet workload install maui
+```
+
+- Visual Studio met MAUI/WPF workloads aanbevolen voor debug op emulators/devices.
+
+2) Clone repository
+
+```
+git clone <repo-url>
+cd Project_Framework_Biblio
+```
+
+3) Configureer secrets (development)
+
+- Ga naar het webproject en initialiseert user-secrets (indien nog niet gedaan):
+
+```
+cd Biblio_Web
+dotnet user-secrets init
+```
+
+- Zet je daadwerkelijke connectionstring (voor development) als user-secret. Voorbeeld (NIET in Git):
+
+```
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=<host>;Database=<db>;User Id=<user>;Password=<pwd>;TrustServerCertificate=True;"
+```
+
+- Stel eventuele seed-wachtwoorden in:
+
+```
+dotnet user-secrets set "Seed:AdminPassword" "<your-admin-pw>"
+```
+
+4) Migrations en database
+
+- Voeg/migraties toepassen vanuit solution root met `Biblio_Web` als startup project (gebruik EF tools):
+
+```
+# vanuit solution root
+cd Biblio_Models
+dotnet ef database update --startup-project ../Biblio_Web
+```
+
+Als je LocalDB of een andere DB gebruikt, pas de connectionstring aan via user-secrets of environment variables.
+
+5) Run de web API / frontend
+
+```
+# vanuit solution root
+dotnet run --project Biblio_Web
+```
+
+Open vervolgens de browser op https://localhost:{port} (console toont poort).
+
+6) Run de MAUI client (Biblio_App)
+
+- Gebruik Visual Studio (aanbevolen) en kies target (Android emulator / Windows) en start Debug.
+- Of bouw via CLI (beperkt):
+
+```
+dotnet build Biblio_App
+```
+
+Opmerking: MAUI apps worden meestal gestart vanuit Visual Studio voor emulator/device ondersteuning.
+
+7) Run de WPF client
+
+- Open `Biblio_WPF` in Visual Studio en start de app (Debug/Release) op Windows.
+
+8) Security & productie
+
+- Zet production connectionstrings nooit in Git. Gebruik environment variables of een secret store (Azure Key Vault) voor productie.
+- In Azure App Service kun je connection strings configureren in Configuration → Connection strings.
+
+9) Veelvoorkomende commando's
+
+- User-secrets lijst: `dotnet user-secrets list` (in projectmap)
+- EF add migration (voorbeeld):
+  `dotnet ef migrations add NameHere --project Biblio_Models --startup-project ../Biblio_Web`
+- EF update database: zie stap 4
+
+
+---
+
+Voor meer details per project, zie de README in elke projectmap (`Biblio_Web/README.md`, `Biblio_App/README.md`, `Biblio_Models/README.md`, `Biblio_WPF/README.md`).
 
 
 

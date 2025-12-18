@@ -6,6 +6,23 @@ Korte omschrijving
 ------------------
 `Biblio_App` is de .NET MAUI client‑applicatie voor het Biblio‑project. De app biedt een mobiele/desktop UI voor browsen, zoeken, aanmaken en bewerken van boeken, leden, categorieën en uitleningen. De client communiceert met de backend API (`Biblio_Web`) en deelt domeinmodellen met `Biblio_Models`.
 
+Installed NuGet packages (selectie)
+-----------------------------------
+Deze projectreferenties zijn gedefinieerd in `Biblio_App.csproj`:
+
+- `CommunityToolkit.Mvvm` 8.4.0
+- `CommunityToolkit.Maui` 8.4.0
+- `Microsoft.Maui.Controls` (versie: correspondend met `$(MauiVersion)`)
+- `Microsoft.Extensions.Logging.Debug` 9.0.8
+- `Microsoft.Extensions.Http` 9.0.0
+- `Microsoft.EntityFrameworkCore.Sqlite` 9.0.10
+- `Microsoft.Extensions.Configuration.Json` 9.0.0
+- `Microsoft.Extensions.Configuration.UserSecrets` 9.0.0
+- `Microsoft.EntityFrameworkCore.Design` 9.0.10 (PrivateAssets)
+- `Microsoft.EntityFrameworkCore` 9.0.10
+- `Microsoft.EntityFrameworkCore.SqlServer` 9.0.10 (alleen voor Windows TFM)
+
+
 Inhoud (snelkoppelingen)
 ------------------------
 - [Doel & motivatie](#doel--motivatie)
