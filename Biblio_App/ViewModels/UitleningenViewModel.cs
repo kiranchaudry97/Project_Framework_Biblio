@@ -89,6 +89,11 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string dbPathNotLoadedText = string.Empty;
 
+        // Return status selection (UI picker)
+        public System.Collections.ObjectModel.ObservableCollection<string> ReturnStatusOptions { get; } = new System.Collections.ObjectModel.ObservableCollection<string>();
+        [ObservableProperty]
+        private string selectedReturnStatus = string.Empty;
+
         // existing properties remain
         [ObservableProperty]
         private Boek? selectedBoek;
@@ -452,12 +457,13 @@ namespace Biblio_App.ViewModels
                     "OnlyOpen" => "Only open",
                     "View" => "View",
                     "Return" => "Return",
+                    "ReturnedOption" => "Returned",
+                    "ReturnedLabel" => "Return status",
                     "New" => "New",
                     "Save" => "Save",
                     "Delete" => "Delete",
                     "StartLabel" => "Start:",
                     "DueLabel" => "Due:",
-                    "ReturnedLabel" => "Returned:",
                     "DbPathNotLoaded" => "(not loaded)",
                     "Validation" => "Validation",
                     "Ready" => "Ready",
@@ -492,12 +498,13 @@ namespace Biblio_App.ViewModels
                     "OnlyOpen" => "Seulement ouverts",
                     "View" => "Voir",
                     "Return" => "Retourner",
+                    "ReturnedOption" => "Rendu",
+                    "ReturnedLabel" => "Statut de livraison",
                     "New" => "Nouveau",
                     "Save" => "Enregistrer",
                     "Delete" => "Supprimer",
                     "StartLabel" => "Début:",
                     "DueLabel" => "Échéance:",
-                    "ReturnedLabel" => "Rendu:",
                     "DbPathNotLoaded" => "(non chargé)",
                     "Validation" => "Validation",
                     "Ready" => "Terminé",
@@ -530,12 +537,13 @@ namespace Biblio_App.ViewModels
                 "OnlyOpen" => "Alleen open",
                 "View" => "Inzien",
                 "Return" => "Inleveren",
+                "ReturnedOption" => "Geleverd",
+                "ReturnedLabel" => "Lever status",
                 "New" => "Nieuw",
                 "Save" => "Opslaan",
                 "Delete" => "Verwijder",
                 "StartLabel" => "Start:",
                 "DueLabel" => "Tot:",
-                "ReturnedLabel" => "Ingeleverd:",
                 "DbPathNotLoaded" => "(niet geladen)",
                 "Validation" => "Validatie",
                 "Ready" => "Gereed",
@@ -549,6 +557,7 @@ namespace Biblio_App.ViewModels
                 "ErrorDeletingLoan" => "Kan uitlening niet verwijderen; mogelijk gekoppeld.",
                 "ErrorUpdatingLoan" => "Kan uitlening niet updaten.",
                 "OK" => "OK",
+                "Late" => "Te laat",
                 _ => key
             };
         }
@@ -600,11 +609,62 @@ namespace Biblio_App.ViewModels
             StartLabel = Localize("StartLabel");
             DueLabel = Localize("DueLabel");
             ReturnedLabel = Localize("ReturnedLabel");
-            // Only set the DbPathNotLoadedText fallback if we haven't resolved a real DB path yet
+            // If localization failed (returned key or empty), provide explicit per-culture fallback
+            if (string.IsNullOrWhiteSpace(ReturnedLabel) || string.Equals(ReturnedLabel, "ReturnedLabel", StringComparison.OrdinalIgnoreCase))
+            {
+                var code = _languageService?.CurrentCulture?.TwoLetterISOLanguageName ?? CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+                ReturnedLabel = (code ?? "nl").ToLowerInvariant() switch
+                {
+                    "en" => "Return status",
+                    "fr" => "Statut de livraison",
+                    _ => "Lever status",
+                };
+            }
+
             if (!_dbPathResolved)
             {
                 DbPathNotLoadedText = Localize("DbPathNotLoaded");
             }
+
+            try
+            {
+                ReturnStatusOptions.Clear();
+                var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+
+                var optReturn = Localize("Return");
+                var optDelivered = Localize("ReturnedOption");
+                var optLate = Localize("Late");
+
+                // If localization returned the key name (fallback failed) or an unexpected value, provide explicit fallbacks per culture
+                if (string.IsNullOrWhiteSpace(optDelivered) || string.Equals(optDelivered, "ReturnedOption", StringComparison.OrdinalIgnoreCase) || optDelivered.IndexOf("ReturnedOption", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
+                    optDelivered = code switch
+                    {
+                        "fr" => "Rendu",
+                        "en" => "Returned",
+                        _ => "Geleverd"
+                    };
+                }
+
+                if (string.IsNullOrWhiteSpace(optLate) || string.Equals(optLate, "Late", StringComparison.OrdinalIgnoreCase) || optLate.IndexOf("Late", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
+                    optLate = code switch
+                    {
+                        "fr" => "En retard",
+                        "en" => "Late",
+                        _ => "Te laat"
+                    };
+                }
+
+                ReturnStatusOptions.Add(optReturn); // not returned (Inleveren)
+                ReturnStatusOptions.Add(optDelivered); // delivered/ingeleverd
+                ReturnStatusOptions.Add(optLate); // late
+
+                if (string.IsNullOrWhiteSpace(SelectedReturnStatus)) SelectedReturnStatus = ReturnStatusOptions.FirstOrDefault();
+            }
+            catch { }
 
             // notify computed/derived properties
             OnPropertyChanged(nameof(PageHeaderText));
@@ -631,7 +691,15 @@ namespace Biblio_App.ViewModels
                 using var db = _dbFactory.CreateDbContext();
                 var uit = await db.Leningens.Include(l => l.Boek).Include(l => l.Lid).AsNoTracking().OrderByDescending(l => l.StartDate).ToListAsync();
                 Uitleningen.Clear();
-                foreach (var u in uit) Uitleningen.Add(u);
+                foreach (var u in uit)
+                {
+                    Uitleningen.Add(u);
+                    try
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[LoadDataAsync] Loan {u.Id}: BoekId={u.BoekId} LidId={u.LidId} ReturnedAt={u.ReturnedAt} LidFull={(u.Lid == null ? "NULL" : u.Lid.FullName)}");
+                    }
+                    catch { }
+                }
 
                 var boeken = await db.Boeken.AsNoTracking().Where(b => !b.IsDeleted).OrderBy(b => b.Titel).ToListAsync();
                 BoekenList.Clear();
@@ -774,7 +842,23 @@ namespace Biblio_App.ViewModels
 
             try
             {
+                try
+                {
+                    if (string.Equals(SelectedReturnStatus, Localize("ReturnedOption"), StringComparison.OrdinalIgnoreCase))
+                    {
+                        ReturnedAt = DateTime.Now;
+                    }
+                    else
+                    {
+                        ReturnedAt = null;
+                    }
+                }
+                catch { }
+
                 using var db = _dbFactory.CreateDbContext();
+
+                Lenen? savedEntity = null;
+
                 if (SelectedUitlening == null)
                 {
                     var nieuw = new Lenen
@@ -785,7 +869,19 @@ namespace Biblio_App.ViewModels
                         DueDate = DueDate,
                         ReturnedAt = ReturnedAt
                     };
+
                     db.Leningens.Add(nieuw);
+                    await db.SaveChangesAsync();
+
+                    try
+                    {
+                        savedEntity = await db.Leningens
+                            .Include(l => l.Boek)
+                            .Include(l => l.Lid)
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(l => l.Id == nieuw.Id);
+                    }
+                    catch { }
                 }
                 else
                 {
@@ -798,13 +894,51 @@ namespace Biblio_App.ViewModels
                         existing.DueDate = DueDate;
                         existing.ReturnedAt = ReturnedAt;
                         db.Leningens.Update(existing);
+                        await db.SaveChangesAsync();
+
+                        try
+                        {
+                            savedEntity = await db.Leningens
+                                .Include(l => l.Boek)
+                                .Include(l => l.Lid)
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(l => l.Id == existing.Id);
+                        }
+                        catch { }
                     }
                 }
 
-                await db.SaveChangesAsync();
+                // Update the in-memory collection so the UI updates immediately (icons/labels reflect change)
+                try
+                {
+                    if (savedEntity != null)
+                    {
+                        // Ensure UI-only flags reflect the currently selected return status so converters show correct icon/label
+                        try
+                        {
+                            var isLate = string.Equals(SelectedReturnStatus, Localize("Late"), StringComparison.OrdinalIgnoreCase);
+                            var isReturn = string.Equals(SelectedReturnStatus, Localize("Return"), StringComparison.OrdinalIgnoreCase);
+                            savedEntity.ForceLate = isLate && !savedEntity.ReturnedAt.HasValue;
+                            savedEntity.ForceNotLate = isReturn && !savedEntity.ReturnedAt.HasValue;
+                        }
+                        catch { }
 
-                await LoadDataAsync();
-                SelectedUitlening = null;
+                        var existingIndex = Uitleningen.ToList().FindIndex(u => u.Id == savedEntity.Id);
+                        if (existingIndex >= 0)
+                        {
+                            Uitleningen[existingIndex] = savedEntity;
+                        }
+                        else
+                        {
+                            Uitleningen.Insert(0, savedEntity);
+                        }
+
+                        RaiseCountProperties();
+                    }
+                }
+                catch { }
+
+                SelectedUitlening = savedEntity;
                 ValidationMessage = string.Empty;
                 await ShowAlertAsync(Localize("Ready"), Localize("SavedLoan"));
             }
@@ -885,12 +1019,76 @@ namespace Biblio_App.ViewModels
             }
         }
 
+        private IEnumerable<string> GetRolesFromToken()
+        {
+            try
+            {
+                var auth = App.Current?.Handler?.MauiContext?.Services?.GetService<Biblio_App.Services.IAuthService>();
+                var token = auth?.GetToken();
+                if (string.IsNullOrWhiteSpace(token)) return Enumerable.Empty<string>();
+
+                var parts = token.Split('.');
+                if (parts.Length < 2) return Enumerable.Empty<string>();
+                var payload = parts[1];
+                // pad base64
+                payload = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
+                var bytes = Convert.FromBase64String(payload.Replace('-', '+').Replace('_', '/'));
+                var json = System.Text.Encoding.UTF8.GetString(bytes);
+                var doc = System.Text.Json.JsonDocument.Parse(json);
+                var roles = new List<string>();
+                if (doc.RootElement.TryGetProperty("role", out var r))
+                {
+                    if (r.ValueKind == System.Text.Json.JsonValueKind.String)
+                        roles.Add(r.GetString() ?? string.Empty);
+                    else if (r.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        foreach (var el in r.EnumerateArray()) roles.Add(el.GetString() ?? string.Empty);
+                    }
+                }
+                // some tokens use 'roles' claim
+                if (doc.RootElement.TryGetProperty("roles", out var rr))
+                {
+                    if (rr.ValueKind == System.Text.Json.JsonValueKind.String)
+                        roles.Add(rr.GetString() ?? string.Empty);
+                    else if (rr.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    {
+                        foreach (var el in rr.EnumerateArray()) roles.Add(el.GetString() ?? string.Empty);
+                    }
+                }
+
+                return roles.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()).Distinct(StringComparer.OrdinalIgnoreCase);
+            }
+            catch { }
+            return Enumerable.Empty<string>();
+        }
+
+        private bool UserHasRole(params string[] requiredRoles)
+        {
+            try
+            {
+                var roles = GetRolesFromToken();
+                foreach (var r in requiredRoles)
+                {
+                    if (roles.Any(x => string.Equals(x, r, StringComparison.OrdinalIgnoreCase))) return true;
+                }
+            }
+            catch { }
+            return false;
+        }
+
         private async Task ReturnAsync(Lenen? item)
         {
             if (item == null) return;
 
             try
             {
+                // Only allow admins and medewerkers to perform return
+                if (!UserHasRole("Admin", "Medewerker"))
+                {
+                    await ShowAlertAsync(Localize("Error"), "Niet gemachtigd om in te leveren.");
+                    return;
+                }
+
                 using var db = _dbFactory.CreateDbContext();
                 var existing = await db.Leningens.FindAsync(item.Id);
                 if (existing != null)
@@ -955,6 +1153,162 @@ namespace Biblio_App.ViewModels
             {
                 // ignore
             }
+        }
+
+        partial void OnSelectedUitleningChanged(Lenen? value)
+        {
+            try
+            {
+                if (value == null)
+                {
+                    SelectedReturnStatus = ReturnStatusOptions.FirstOrDefault();
+                    SelectedBoek = null;
+                    SelectedLid = null;
+                    StartDate = DateTime.Now;
+                    DueDate = DateTime.Now.AddDays(14);
+                    ReturnedAt = null;
+                    return;
+                }
+
+                // populate form fields from the selected loan
+                try
+                {
+                    // Map to existing items in the lists (use Id) so Pickers show the correct SelectedItem
+                    if (value.Boek != null)
+                    {
+                        var matchBoek = BoekenList.FirstOrDefault(b => b.Id == value.Boek.Id);
+                        SelectedBoek = matchBoek ?? value.Boek;
+                    }
+                    else
+                    {
+                        SelectedBoek = null;
+                    }
+
+                    if (value.Lid != null)
+                    {
+                        var matchLid = LedenList.FirstOrDefault(l => l.Id == value.Lid.Id);
+                        SelectedLid = matchLid ?? value.Lid;
+                    }
+                    else
+                    {
+                        SelectedLid = null;
+                    }
+
+                    StartDate = value.StartDate;
+                    DueDate = value.DueDate;
+                    ReturnedAt = value.ReturnedAt;
+                }
+                catch { }
+
+                if (value.ReturnedAt.HasValue)
+                {
+                    // map to the picker option for delivered
+                    SelectedReturnStatus = Localize("ReturnedOption");
+                    try { value.ForceLate = false; } catch { }
+                    try { value.ForceNotLate = false; } catch { }
+                }
+                else if (value.DueDate < DateTime.Now.Date)
+                {
+                    SelectedReturnStatus = Localize("Late");
+                    try { value.ForceLate = true; } catch { }
+                    try { value.ForceNotLate = false; } catch { }
+                }
+                else
+                {
+                    SelectedReturnStatus = Localize("Return");
+                    try { value.ForceLate = false; } catch { }
+                    try { value.ForceNotLate = true; } catch { }
+                }
+            }
+            catch { }
+        }
+
+        // When the SelectedReturnStatus in the form changes, update the in-memory loan and refresh the list icons immediately
+        partial void OnSelectedReturnStatusChanged(string value)
+        {
+            try
+            {
+                if (SelectedUitlening == null) return;
+
+                // Map status to ReturnedAt without saving to DB immediately
+                // 'ReturnedOption' => set ReturnedAt; 'Late' or 'Return' => keep ReturnedAt null
+                DateTime? newReturnedAt = null;
+                if (string.Equals(value, Localize("ReturnedOption"), StringComparison.OrdinalIgnoreCase))
+                {
+                    newReturnedAt = DateTime.Now;
+                }
+
+                // Update viewmodel property
+                ReturnedAt = newReturnedAt;
+
+                // Update the selected loan object and force collection replace so UI rebinds and converters update icons/labels
+                try
+                {
+                    SelectedUitlening.ReturnedAt = newReturnedAt;
+                    // set ForceLate/ForceNotLate according to selected value so icons update immediately
+                    try
+                    {
+                        var isLate = string.Equals(value, Localize("Late"), StringComparison.OrdinalIgnoreCase);
+                        var isReturn = string.Equals(value, Localize("Return"), StringComparison.OrdinalIgnoreCase);
+                        SelectedUitlening.ForceLate = isLate && !newReturnedAt.HasValue;
+                        SelectedUitlening.ForceNotLate = isReturn && !newReturnedAt.HasValue;
+                    }
+                    catch { }
+                    var idx = Uitleningen.IndexOf(SelectedUitlening);
+                    if (idx >= 0)
+                    {
+                        // Replace item to raise CollectionChanged (Replace) so DataTemplate re-evaluates bindings/converters
+                        Uitleningen[idx] = SelectedUitlening;
+                    }
+                }
+                catch { }
+
+                // Persist change to database in background so UI updates immediately and DB stays in sync
+                try
+                {
+                    _ = PersistReturnedStatusAsync(SelectedUitlening, newReturnedAt);
+                }
+                catch { }
+            }
+            catch { }
+        }
+
+        private async System.Threading.Tasks.Task PersistReturnedStatusAsync(Lenen item, DateTime? newReturnedAt)
+        {
+            try
+            {
+                if (item == null || item.Id == 0) return;
+
+                using var db = _dbFactory.CreateDbContext();
+                var existing = await db.Leningens.FindAsync(item.Id);
+                if (existing != null)
+                {
+                    existing.ReturnedAt = newReturnedAt;
+                    db.Leningens.Update(existing);
+                    await db.SaveChangesAsync();
+
+                    // reload with includes so navigation props are populated
+                    var saved = await db.Leningens.Include(l => l.Boek).Include(l => l.Lid).AsNoTracking().FirstOrDefaultAsync(l => l.Id == existing.Id);
+                    if (saved != null)
+                    {
+                        try
+                        {
+                            // update collection on main thread
+                            await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(() =>
+                            {
+                                var idx = Uitleningen.ToList().FindIndex(u => u.Id == saved.Id);
+                                if (idx >= 0) Uitleningen[idx] = saved;
+                                else Uitleningen.Insert(0, saved);
+
+                                // keep SelectedUitlening in sync
+                                SelectedUitlening = saved;
+                            });
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
         }
     }
 }

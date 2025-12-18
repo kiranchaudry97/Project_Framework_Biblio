@@ -13,6 +13,7 @@
     <ContentPage.Resources>
         <ResourceDictionary>
             <converters:DateToReturnIconConverter x:Key="DateToReturnIconConverter" />
+            <converters:DateToReturnLabelConverter x:Key="DateToReturnLabelConverter" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -32,7 +33,7 @@
         </Grid>
     </Shell.TitleView>
 
-    <ScrollView>
+    <ScrollView x:Name="MainScroll">
         <VerticalStackLayout Padding="20" Spacing="12">
             <Label Text="{Binding PageHeaderText}" Style="{StaticResource PageHeaderLabel}" />
 
@@ -73,10 +74,23 @@
                                     </Border.StrokeShape>
                                     <Grid Padding="12">
                                         <Grid ColumnDefinitions="*, Auto">
-                                            <StackLayout Grid.Column="0" Spacing="2">
-                                                <Label Text="{Binding Lid.Voornaam}" TextColor="{StaticResource Gray900}" FontAttributes="Bold" />
-                                                <Label Text="{Binding Boek.Titel}" TextColor="{StaticResource Gray700}" />
-                                            </StackLayout>
+                                            <!-- Make header tappable so tapping names shows details -->
+                                            <StackLayout Grid.Column="0" Spacing="2" x:Name="ItemHeader">
+                                                <StackLayout.GestureRecognizers>
+                                                    <TapGestureRecognizer Tapped="OnItemHeaderTapped" />
+                                                </StackLayout.GestureRecognizers>
+                                                <!-- use converter to present full member name consistently -->
+                                                <Label FontAttributes="Bold">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="{Binding Lid.Voornaam}" />
+                                                            <Span Text=" " />
+                                                            <Span Text="{Binding Lid.AchterNaam}" />
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                                 <Label Text="{Binding Boek.Titel}" TextColor="{StaticResource Gray700}" />
+                                             </StackLayout>
 
                                             <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center" Spacing="6">
                                                 <!-- Replace textual delete with icon button for consistent UI -->
@@ -90,14 +104,19 @@
                                                                  BindingContext="{Binding .}"
                                                                  AutomationProperties.Name="{Binding Path=BindingContext.ViewButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}" />
 
-                                                    <!-- Return icon; change icon when ReturnedAt is set using converter -->
-                                                    <ImageButton WidthRequest="24"
-                                                                 HeightRequest="24"
-                                                                 BackgroundColor="Transparent"
-                                                                 Command="{Binding Path=BindingContext.ReturnCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
-                                                                 CommandParameter="{Binding .}"
-                                                                 AutomationProperties.Name="{Binding Path=BindingContext.ReturnButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
-                                                                 Source="{Binding ., Converter={StaticResource DateToReturnIconConverter}}" />
+                                                    <VerticalStackLayout Spacing="2" HorizontalOptions="Center" VerticalOptions="Center">
+                                                        <ImageButton WidthRequest="24"
+                                                                     HeightRequest="24"
+                                                                     BackgroundColor="Transparent"
+                                                                     Command="{Binding Path=BindingContext.ReturnCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                                     CommandParameter="{Binding .}"
+                                                                     AutomationProperties.Name="{Binding Path=BindingContext.ReturnButtonText, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                                                     Source="{Binding ., Converter={StaticResource DateToReturnIconConverter}}" />
+                                                        <Label Text="{Binding ., Converter={StaticResource DateToReturnLabelConverter}}"
+                                                               FontSize="10"
+                                                               TextColor="{StaticResource Gray500}"
+                                                               HorizontalOptions="Center" />
+                                                    </VerticalStackLayout>
 
                                                     <!-- Delete icon -->
                                                     <ImageButton Source="delete_illustration.svg"
@@ -117,12 +136,13 @@
                      </CollectionView>
  
                      <!-- Edit / create form -->
-                     <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="10">
+                     <Border x:Name="EditForm" Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="10">
                          <VerticalStackLayout Spacing="8">
                              <!-- remove external labels for Boek/Lid, keep inline Title on pickers -->
                              <Picker x:Name="BoekPicker" ItemsSource="{Binding BoekenList}" ItemDisplayBinding="{Binding Titel}" SelectedItem="{Binding SelectedBoek}" Title="{Binding BookTitle}" />
  
-                             <Picker x:Name="LidPicker" ItemsSource="{Binding LedenList}" ItemDisplayBinding="{Binding Voornaam}" SelectedItem="{Binding SelectedLid}" Title="{Binding MemberTitle}" />
+                             <!-- show full member name in picker -->
+                             <Picker x:Name="LidPicker" ItemsSource="{Binding LedenList}" ItemDisplayBinding="{Binding FullName}" SelectedItem="{Binding SelectedLid}" Title="{Binding MemberTitle}" />
  
                              <Label Text="{Binding StartLabel}" TextColor="{StaticResource Gray700}" />
                              <DatePicker x:Name="StartDatePicker" Date="{Binding StartDate}" />
@@ -131,10 +151,24 @@
                              <DatePicker x:Name="DueDatePicker" Date="{Binding DueDate}" />
  
                              <HorizontalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="Start">
+                                 <!-- Fixed label text to Dutch 'Lever status' per request -->
                                  <Label Text="{Binding ReturnedLabel}" TextColor="{StaticResource Gray700}" VerticalOptions="Center" />
-                                 <Switch IsToggled="{Binding ReturnedAt, Converter={StaticResource DateToBoolConverter}, Mode=TwoWay}" />
+                                 <Picker x:Name="ReturnStatusPicker"
+                                         ItemsSource="{Binding ReturnStatusOptions}"
+                                         SelectedItem="{Binding SelectedReturnStatus, Mode=TwoWay}"
+                                         Title="{Binding ReturnedLabel}"
+                                         WidthRequest="160"
+                                         SelectedIndexChanged="OnReturnStatusChanged" />
+                                <!-- Show chosen status as a transparent button so tapping opens the picker -->
+                                <Button Text="{Binding SelectedReturnStatus}"
+                                        Clicked="OnSelectedReturnStatusLabelTapped"
+                                        BackgroundColor="Transparent"
+                                        Padding="0"
+                                        Margin="8,0,0,0"
+                                        BorderWidth="0"
+                                        TextColor="{StaticResource Gray700}" />
                              </HorizontalStackLayout>
- 
+
                              <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
                                 <!-- textual delete button for form -->
                                 <Button Text="{Binding DeleteButtonText}" Command="{Binding VerwijderCommand}" Style="{StaticResource DangerButtonSmall}" />

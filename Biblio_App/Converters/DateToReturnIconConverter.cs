@@ -12,22 +12,27 @@ namespace Biblio_App.Converters
         {
             try
             {
-                // If bound to the whole Lenen object
                 if (value is Lenen lening)
                 {
                     if (lening.ReturnedAt.HasValue)
                         return "checklist_ok_illustration.svg"; // ingeleverd
 
-                    // overdue -> show red X
-                    if (lening.DueDate < DateTime.Now.Date)
+                    if (lening.ForceNotLate)
+                        return "dotted3_illustration.svg";
+
+                    if (lening.ForceLate || lening.DueDate.Date < DateTime.Today)
                         return "x_red_illustration.svg";
 
                     return "dotted3_illustration.svg"; // niet ingeleverd (nieuw symbool)
                 }
 
-                // If bound to a DateTime? (fallback)
                 if (value == null || value == DBNull.Value) return "dotted3_illustration.svg"; // niet ingeleverd
-                if (value is DateTime dt) return dt == default ? "dotted3_illustration.svg" : "checklist_ok_illustration.svg";
+                if (value is DateTime dt)
+                {
+                    if (dt == default) return "dotted3_illustration.svg";
+                    if (dt.Date < DateTime.Today) return "x_red_illustration.svg";
+                    return "checklist_ok_illustration.svg";
+                }
 
             }
             catch { }

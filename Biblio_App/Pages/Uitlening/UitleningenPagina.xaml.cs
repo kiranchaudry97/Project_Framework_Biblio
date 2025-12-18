@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace Biblio_App.Pages
 {
-    public partial class UitleningenPagina : ContentPage
+    public partial class UitleningenPagina : ContentPage, ILocalizable
     {
         private UitleningenViewModel VM => BindingContext as UitleningenViewModel;
         private ILanguageService? _language_service;
@@ -102,10 +102,27 @@ namespace Biblio_App.Pages
             try
             {
                 var culture = _language_service?.CurrentCulture ?? CultureInfo.CurrentUICulture;
+
+                // prefer AppShell translation when available
+                try
+                {
+                    var shell = AppShell.Instance;
+                    if (shell != null)
+                    {
+                        var val = shell.Translate(key);
+                        if (!string.IsNullOrEmpty(val)) return val;
+                    }
+                }
+                catch { }
+
                 if (_sharedResourceManager != null)
                 {
-                    var val = _sharedResourceManager.GetString(key, culture);
-                    if (!string.IsNullOrEmpty(val)) return val;
+                    try
+                    {
+                        var val = _sharedResourceManager.GetString(key, culture);
+                        if (!string.IsNullOrEmpty(val)) return val;
+                    }
+                    catch { }
                 }
 
                 // simple fallback for common keys
@@ -127,6 +144,9 @@ namespace Biblio_App.Pages
                         "OnlyOpen" => "Only open",
                         "View" => "View",
                         "Return" => "Return",
+                        "ReturnedLabel" => "Return status",
+                        "ReturnedOption" => "Returned",
+                        "Late" => "Late",
                         "New" => "New",
                         "Save" => "Save",
                         "Delete" => "Delete",
@@ -152,6 +172,9 @@ namespace Biblio_App.Pages
                     "OnlyOpen" => "Alleen open",
                     "View" => "Inzien",
                     "Return" => "Inleveren",
+                    "ReturnedLabel" => "Leverstatus",
+                    "ReturnedOption" => "Geleverd",
+                    "Late" => "Te laat",
                     "New" => "Nieuw",
                     "Save" => "Opslaan",
                     "Delete" => "Verwijder",
@@ -164,7 +187,7 @@ namespace Biblio_App.Pages
             catch { return key; }
         }
 
-        private void UpdateLocalizedStrings()
+        public void UpdateLocalizedStrings()
         {
             PageHeaderText = Localize("Loans");
             MembersLabel = Localize("Members");
@@ -183,6 +206,16 @@ namespace Biblio_App.Pages
             NewButtonText = Localize("New");
             SaveButtonText = Localize("Save");
             DeleteButtonText = Localize("Delete");
+
+            try
+            {
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    try { this.ForceLayout(); this.InvalidateMeasure(); }
+                    catch { }
+                });
+            }
+            catch { }
         }
 
         protected override async void OnAppearing()
@@ -257,13 +290,37 @@ namespace Biblio_App.Pages
             catch { }
         }
 
-        private void OnItemHeaderTapped(object sender, EventArgs e)
+        private async void OnItemHeaderTapped(object sender, EventArgs e)
         {
             try
             {
                 // sender will be the StackLayout (header) inside the DataTemplate
                 if (sender is View header)
                 {
+                    // If header has a BindingContext with the loan, select it in the VM so the form fills
+                    try
+                    {
+                        if (header.BindingContext is Biblio_Models.Entiteiten.Lenen lenen && VM != null)
+                        {
+                            VM.SelectedUitlening = lenen;
+                        }
+                    }
+                    catch { }
+
+                    // Scroll to the edit form so the user sees the populated fields
+                    try
+                    {
+                        // Small delay to let bindings propagate and layout update
+                        await System.Threading.Tasks.Task.Delay(80);
+                        var sv = this.FindByName<ScrollView>("MainScroll");
+                        var form = this.FindByName<VisualElement>("EditForm");
+                        if (sv != null && form != null)
+                        {
+                            await sv.ScrollToAsync(form, ScrollToPosition.MakeVisible, true);
+                        }
+                    }
+                    catch { }
+
                     // Find the Frame/DataTemplate parent by climbing up the visual tree
                     Element current = header;
                     while (current != null && !(current is Frame))
@@ -297,11 +354,105 @@ namespace Biblio_App.Pages
                     var due = lenen.DueDate.ToString("dd-MM-yyyy");
                     var returned = lenen.ReturnedAt.HasValue ? lenen.ReturnedAt.Value.ToString("dd-MM-yyyy") : Localize("NoPath");
 
-                    var body = $"{lid}\n{boek}\n{Localize("StartLabel")} {start} - {Localize("DueLabel")} {due}\n{Localize("ReturnedLabel")} {returned}";
+                    // Use ViewModel-provided localized label when available, fallback to hard-coded Dutch
+                    var returnedLabel = VM?.ReturnedLabel;
+                    if (string.IsNullOrWhiteSpace(returnedLabel) || string.Equals(returnedLabel, "ReturnedLabel", StringComparison.OrdinalIgnoreCase))
+                        returnedLabel = "Lever status";
+
+                    var body = $"{lid}\n{boek}\n{Localize("StartLabel")} {start} - {Localize("DueLabel")} {due}\n{returnedLabel} {returned}";
                     await DisplayAlert(Localize("View"), body, Localize("OK"));
                 }
             }
             catch { }
         }
+
+        // New handler for tapping the header (names) to show same details as details button
+        private async void OnItemTapped(object sender, TappedEventArgs e)
+        {
+            try
+            {
+                // sender is the StackLayout inside DataTemplate; its BindingContext is the Lenen item
+                if (sender is VisualElement el && el.BindingContext is Biblio_Models.Entiteiten.Lenen lenen)
+                {
+                    var boek = lenen.Boek?.Titel ?? "-";
+                    var lid = (lenen.Lid?.Voornaam ?? "") + " " + (lenen.Lid?.AchterNaam ?? "");
+                    var start = lenen.StartDate.ToString("dd-MM-yyyy");
+                    var due = lenen.DueDate.ToString("dd-MM-yyyy");
+                    var returned = lenen.ReturnedAt.HasValue ? lenen.ReturnedAt.Value.ToString("dd-MM-yyyy") : Localize("NoPath");
+
+                    var returnedLabel = VM?.ReturnedLabel;
+                    if (string.IsNullOrWhiteSpace(returnedLabel) || string.Equals(returnedLabel, "ReturnedLabel", StringComparison.OrdinalIgnoreCase))
+                        returnedLabel = "Lever status";
+
+                    var body = $"{lid}\n{boek}\n{Localize("StartLabel")} {start} - {Localize("DueLabel")} {due}\n{returnedLabel} {returned}";
+                    await DisplayAlert(Localize("View"), body, Localize("OK"));
+                }
+            }
+            catch { }
+        }
+
+        private async void OnReturnStatusChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (sender is Picker picker && picker.SelectedItem is string sel)
+                {
+                    try
+                    {
+                        var vm = VM;
+                        if (vm != null && vm.SelectedUitlening != null)
+                        {
+                            // update VM selection value (this triggers VM.OnSelectedReturnStatusChanged which persists)
+                            vm.SelectedReturnStatus = sel;
+
+                            // determine localized option strings (not used for persistence here, VM handles mapping)
+                            var optDelivered = Localize("ReturnedOption");
+                            var optReturn = Localize("Return");
+                            var optLate = Localize("Late");
+
+                            // Update the selected item in the collection so UI updates immediately
+                            try
+                            {
+                                var item = vm.SelectedUitlening;
+                                var list = vm.Uitleningen;
+                                var idx = list.IndexOf(item);
+                                if (idx >= 0)
+                                {
+                                    // replace to trigger CollectionChanged (UI refresh)
+                                    list[idx] = item;
+                                }
+
+                                // ensure VM notifies debug/derived properties: call protected OnPropertyChanged via reflection
+                                try
+                                {
+                                    var onProp = vm.GetType().GetMethod("OnPropertyChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                                    if (onProp != null)
+                                    {
+                                        var args = new System.ComponentModel.PropertyChangedEventArgs(nameof(vm.DebugInfo));
+                                        onProp.Invoke(vm, new object[] { args });
+                                      }
+                                    }
+                                    catch { }
+                            }
+                            catch { }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        // Focus the picker when the selected-status label is tapped
+        private void OnSelectedReturnStatusLabelTapped(object sender, EventArgs e)
+        {
+            try
+            {
+                var picker = this.FindByName<Picker>("ReturnStatusPicker");
+                picker?.Focus();
+            }
+            catch { }
+        }
+
     }
-}
+ }

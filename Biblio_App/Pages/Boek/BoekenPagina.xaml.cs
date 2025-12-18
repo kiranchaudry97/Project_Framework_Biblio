@@ -10,6 +10,7 @@ using Microsoft.Maui.ApplicationModel;
 using System.Resources;
 using System.Globalization;
 using Biblio_Models.Resources;
+using System.Threading.Tasks;
 
 namespace Biblio_App.Pages
 {
@@ -132,20 +133,13 @@ namespace Biblio_App.Pages
             catch { return key; }
         }
 
-        protected override async void OnAppearing()
+        protected override void OnAppearing()
         {
             base.OnAppearing();
 
-            // Zorg dat categorieën en boeken geladen zijn wanneer de pagina verschijnt zodat de categorie-picker alle items toont
             if (VM != null)
             {
-                await VM.EnsureCategoriesLoadedAsync();
-
-                // als er geen geselecteerde filter is, kies de eerste (meestal 'Alle')
-                if (VM.SelectedFilterCategorie == null && VM.Categorien?.Count > 0)
-                {
-                    VM.SelectedFilterCategorie = VM.Categorien.FirstOrDefault();
-                }
+                _ = LoadCategoriesAsync();
             }
 
             try
@@ -156,6 +150,35 @@ namespace Biblio_App.Pages
                 }
             }
             catch { }
+        }
+
+        private async Task LoadCategoriesAsync()
+        {
+            try
+            {
+                // Run the VM load without blocking UI thread; library calls remain awaited but on thread pool
+                var vm = VM;
+                if (vm == null) return;
+
+                // Execute the async load on a thread-pool thread and await it
+                await Task.Run(async () => await vm.EnsureCategoriesLoadedAsync()).ConfigureAwait(false);
+
+                // update UI-bound selection on main thread
+                if (VM != null)
+                {
+                    if (VM.SelectedFilterCategorie == null && VM.Categorien?.Count > 0)
+                    {
+                        Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            try { VM.SelectedFilterCategorie = VM.Categorien.FirstOrDefault(); } catch { }
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
         }
 
         protected override void OnDisappearing()
@@ -186,7 +209,6 @@ namespace Biblio_App.Pages
                 }
             }
 
-            // ensure title label reflects changes to PageTitle property on the ViewModel
             if (e.PropertyName == nameof(BoekenViewModel.PageTitle))
             {
                 RefreshTitleFromViewModel();
@@ -220,7 +242,6 @@ namespace Biblio_App.Pages
             {
                 if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Boek boek)
                 {
-                    // Set the selected item on the VM so form fields are populated
                     try
                     {
                         if (VM != null)
@@ -324,7 +345,6 @@ namespace Biblio_App.Pages
                         try { this.ForceLayout(); this.InvalidateMeasure(); }
                         catch { }
 
-                        // Explicitly refresh page title display after viewmodel updated
                         try { RefreshTitleFromViewModel(); } catch { }
                     }
                     catch { }
@@ -380,10 +400,8 @@ namespace Biblio_App.Pages
                 if (VM == null) return;
                 var title = VM.PageTitle ?? string.Empty;
 
-                // Update the Bindable Title property (so Shell.Title/Backstack reflect it)
                 try { this.Title = title; } catch { }
 
-                // Update the in-TitleView Label explicitly (XAML binding may not refresh in some platforms)
                 try { if (TitleLabel != null) TitleLabel.Text = title; } catch { }
             }
             catch { }
