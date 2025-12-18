@@ -183,6 +183,8 @@ cd Project_Framework_Biblio
 
 3) Configureer secrets (development)
 
+> Belangrijk: voor veilige opslag van database connection strings en andere secrets, zie `Biblio_Web/SECURE_DB_SETUP.md`. Gebruik `dotnet user-secrets` tijdens development of environment variables / Key Vault in productie. Voor een snelle check kun je vanuit `Biblio_Web` ook `dotnet user-secrets list` draaien.
+
 - Ga naar het webproject en initialiseert user-secrets (indien nog niet gedaan):
 
 ```
@@ -254,6 +256,8 @@ Opmerking: MAUI apps worden meestal gestart vanuit Visual Studio voor emulator/d
 ---
 
 Voor meer details per project, zie de README in elke projectmap (`Biblio_Web/README.md`, `Biblio_App/README.md`, `Biblio_Models/README.md`, `Biblio_WPF/README.md`).
+
+
 
 
 
