@@ -20,10 +20,10 @@
                         <Button Text="Autofill medewerker" Clicked="OnAutofillMedewerkerClicked" FontSize="Small" />
                     </HorizontalStackLayout>
                     <Label FontSize="Micro" TextColor="#333333">
-                        Admin — email: admin@biblio.local | wachtwoord: Admin1234?
+                        Admin - email: admin@biblio.local | wachtwoord: Admin1234?
                     </Label>
                     <Label FontSize="Micro" TextColor="#333333">
-                        Medewerker — email: medewerk@biblio.local | wachtwoord: test1234?
+                        Medewerker - email: medewerker@biblio.local | wachtwoord: test1234?
                     </Label>
                     <Label FontSize="Micro" TextColor="#666666">
                         Zet development wachtwoorden met user-secrets; deel deze waarden niet in versiebeheer.

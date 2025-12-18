@@ -53,32 +53,29 @@
                 <label asp-for="Input.RememberMe" class="form-check-label">@Localizer["Remember Me"]</label>
             </div>
 
-            @* Development-only test accounts quick-fill: only autofill emails. Passwords should not be stored in repo; set via user-secrets. *@
-            @if (Env.IsDevelopment())
-            {
-                <div class="alert alert-secondary small mb-3">
-                    <strong>Test accounts:</strong>
+            @* Test accounts panel always visible per request *@
+            <div class="alert alert-secondary small mb-3">
+                <strong>Test accounts:</strong>
+                <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="fillTest('admin')">Autofill admin</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="fillTest('medewerker')">Autofill medewerker</button>
+                    <small class="d-block text-muted mt-2">Admin: <code>admin@biblio.local</code> — Medewerker: <code>medewerker@biblio.local</code></small>
+
                     <div class="mt-2">
-                        <button type="button" class="btn btn-sm btn-outline-primary me-2" onclick="fillTest('admin')">Autofill admin</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="fillTest('medewerker')">Autofill medewerker</button>
-                        <small class="d-block text-muted mt-2">Admin: <code>admin@biblio.local</code> — Medewerker: <code>medewerker@biblio.local</code></small>
-
-                        <div class="mt-2">
-                            <small class="text-muted">Set development passwords with user-secrets (do not commit):</small>
-                            <pre class="small bg-light p-2">dotnet user-secrets set "Seed:AdminPassword" "&lt;your-admin-password&gt;" --project Biblio_Web\Biblio_Web.csproj
+                        <small class="text-muted">Set development passwords with user-secrets (do not commit):</small>
+                        <pre class="small bg-light p-2">dotnet user-secrets set "Seed:AdminPassword" "&lt;your-admin-password&gt;" --project Biblio_Web\Biblio_Web.csproj
 dotnet user-secrets set "Seed:MedewerkerPassword" "&lt;your-medewerker-password&gt;" --project Biblio_Web\Biblio_Web.csproj</pre>
-                        </div>
+                    </div>
 
-                        <div class="mt-2">
-                            <small class="text-dark">Voor testdoeleinden (development only):</small>
-                            <div class="small mt-1">
-                                <code>Admin — email: admin@biblio.local | wachtwoord: Admin1234?</code><br />
-                                <code>Medewerker — email: medewerker@biblio.local | wachtwoord: test1234?</code>
-                            </div>
+                    <div class="mt-2">
+                        <small class="text-dark">Voor testdoeleinden (development only):</small>
+                        <div class="small mt-1">
+                            <code>Admin — email: admin@biblio.local | wachtwoord: Admin1234?</code><br />
+                            <code>Medewerker — email: medewerker@biblio.local | wachtwoord: test1234?</code>
                         </div>
                     </div>
                 </div>
-            }
+            </div>
 
             <button type="submit" class="btn btn-primary btn-sm mx-auto d-block mb-2" style="min-width:140px;">@Localizer["Login"]</button>
 
