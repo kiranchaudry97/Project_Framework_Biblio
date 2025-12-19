@@ -34,7 +34,8 @@
 
     <!-- Use emoji prefixes as lightweight icons so no extra image files are required -->
     <FlyoutItem Title="{Binding MenuTitle, Source={x:Reference This}}" FlyoutDisplayOptions="AsMultipleItems">
-        <ShellContent x:Name="BooksShell" Title="{Binding BooksShellTitle, Source={x:Reference This}}" ContentTemplate="{DataTemplate pages:BoekenPagina}" />
+        <!-- add explicit Route so we can navigate via absolute route to the flyout item -->
+        <ShellContent x:Name="BooksShell" Route="BoekenShell" Title="{Binding BooksShellTitle, Source={x:Reference This}}" ContentTemplate="{DataTemplate pages:BoekenPagina}" />
         <ShellContent x:Name="MembersShell" Title="{Binding MembersShellTitle, Source={x:Reference This}}" ContentTemplate="{DataTemplate pages:LedenPagina}" />
         <ShellContent x:Name="LoansShell" Title="{Binding LoansShellTitle, Source={x:Reference This}}" ContentTemplate="{DataTemplate pages:UitleningenPagina}" />
         <ShellContent x:Name="CategoriesShell" Title="{Binding CategoriesShellTitle, Source={x:Reference This}}" ContentTemplate="{DataTemplate pages:CategorieenPagina}" />

@@ -97,6 +97,32 @@ namespace Biblio_App
                 this.Navigated += OnShellNavigated;
             }
             catch { }
+
+            // Helper: hide flyout on login page so users don't see menu when unauthenticated
+        }
+
+        // Helper: hide flyout on login page so users don't see menu when unauthenticated
+        public void EnsureLoginFlyoutHidden(bool hidden)
+        {
+            try
+            {
+                var shell = this as Shell;
+                if (shell == null) return;
+                try
+                {
+                    if (hidden)
+                    {
+                        // disable the flyout so hamburger/back arrow won't show
+                        shell.FlyoutBehavior = FlyoutBehavior.Disabled;
+                    }
+                    else
+                    {
+                        shell.FlyoutBehavior = FlyoutBehavior.Flyout;
+                    }
+                }
+                catch { }
+            }
+            catch { }
         }
 
         protected override void OnAppearing()
@@ -425,7 +451,7 @@ namespace Biblio_App
             catch { return resourceKey; }
         }
 
-        private void UpdateLocalizedFlyoutTitles()
+        public void UpdateLocalizedFlyoutTitles()
         {
             try
             {
@@ -435,8 +461,14 @@ namespace Biblio_App
                 LoansShellTitle = $"🧾 {Localize("Loans")}";
                 CategoriesShellTitle = $"🏷️ {Localize("Categories")}";
                 SettingsShellTitle = $"⚙️ {Localize("Settings")}";
-                MenuTitle = Localize("Menu");
-                
+                // Only set menu title when user is authenticated, otherwise keep generic app title
+                try
+                {
+                    var email = Preferences.Default.ContainsKey("CurrentEmail") ? Preferences.Default.Get("CurrentEmail", string.Empty) : null;
+                    if (string.IsNullOrEmpty(email)) MenuTitle = BiblioTitle; else MenuTitle = Localize("Menu");
+                }
+                catch { MenuTitle = BiblioTitle; }
+
                 ProfileMenuText = $"👤 {Localize("Profile")}";
                 LogoutMenuText = $"🔒 {Localize("Logout")}";
                 
@@ -842,15 +874,70 @@ namespace Biblio_App
         {
             try
             {
-                Preferences.Default.Remove("CurrentEmail");
-                Preferences.Default.Remove("IsAdmin");
-                Preferences.Default.Remove("IsStaff");
+                // Clear persisted preferences
+                try
+                {
+                    Preferences.Default.Remove("CurrentEmail");
+                    Preferences.Default.Remove("IsAdmin");
+                    Preferences.Default.Remove("IsStaff");
+                }
+                catch { }
 
-                var sec = App.Current?.Handler?.MauiContext?.Services?.GetService<ViewModels.SecurityViewModel>();
-                sec?.Reset();
+                // Reset security VM
+                try
+                {
+                    var sec = App.Current?.Handler?.MauiContext?.Services?.GetService<ViewModels.SecurityViewModel>();
+                    sec?.Reset();
+                }
+                catch { }
 
-                await DisplayAlert("Logout", "Je bent afgemeld.", "OK");
-                await this.GoToAsync("//");
+                // Clear secure storage tokens (best-effort)
+                try { await Microsoft.Maui.Storage.SecureStorage.Default.SetAsync("api_token", string.Empty); } catch { }
+                try { await Microsoft.Maui.Storage.SecureStorage.Default.SetAsync("refresh_token", string.Empty); } catch { }
+
+                // Inform user
+                try { await DisplayAlert("Logout", "Je bent afgemeld.", "OK"); } catch { }
+
+                // Ensure UI reflects logged-out state: hide flyout, update titles and close any open flyout
+                try
+                {
+                    try { EnsureLoginFlyoutHidden(true); } catch { }
+                    try { UpdateLocalizedFlyoutTitles(); } catch { }
+                    try { if (Shell.Current != null) Shell.Current.FlyoutIsPresented = false; } catch { }
+                }
+                catch { }
+
+                 // Do a hard reset of the MainPage on the UI thread to prevent back-navigation into authenticated pages.
+                 try
+                 {
+                     await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(async () =>
+                     {
+                         try
+                         {
+                             // Recreate AppShell as a fresh MainPage instance
+                             var newShell = new AppShell();
+                             Application.Current.MainPage = newShell;
+
+                             // ensure flyout is hidden on the new shell too
+                             try { newShell.EnsureLoginFlyoutHidden(true); } catch { }
+
+                             // Attempt to navigate to LoginPage as the root on the new shell
+                             try
+                             {
+                                 await newShell.GoToAsync($"//{nameof(Pages.Account.LoginPage)}", animate: false);
+                             }
+                             catch { }
+                         }
+                         catch (Exception ex)
+                         {
+                             Debug.WriteLine($"OnLogoutClicked: failed to reset MainPage: {ex}");
+                         }
+                     });
+                 }
+                 catch (Exception ex)
+                 {
+                     Debug.WriteLine($"OnLogoutClicked: MainThread reset failed: {ex}");
+                 }
             }
             catch (System.Exception ex)
             {
@@ -908,7 +995,6 @@ namespace Biblio_App
                 }
             }
 
-            // Valideer dat belangrijke controls door XAML aangemaakt zijn
             var controls = new (string Name, object? Control)[]
             {
                 ("QuickNewBookButton", QuickNewBookButton),
