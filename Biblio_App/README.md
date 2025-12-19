@@ -117,30 +117,32 @@ Voorbeelden van UI‑beelden :
 
 
 - Menu
-  ![menu](Biblio_App/Biblio_App_Screenshots/Menu.png)
+  ![menu](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Menu.png)
 
 - Taal
-  ![taal](Biblio_App/Biblio_App_Screenshots/Taalwijziging.png)
+  ![taal](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Taalwijziging.png)
+
+  
 
 - Thema
-  ![thema](Biblio_App/Biblio_App_Screenshots/Thema.png)
+  ![thema](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Thema.png)
 
 - Boeken Pagina 
-  ![book](Biblio_App/Biblio_App_Screenshots/Boeken_Pagina.png)
+  ![book](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Boeken_Pagina.png)
 
 - Leden
-  ![lid](Biblio_App/Biblio_App_Screenshots/Leden_Pagina.png)
+  ![lid](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Leden_Pagina.png)
 
 
 - Uitleningen
-  ![uitleningen]()
+  ![uitleningen](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/39be40696bfc3022841c840ce7867034b47e5cf8/Biblio_App/Biblio_App_Screenshots/Uitleningen_Pagina.png)
 
 
 - Categorieën 
-  ![category](Biblio_App/Biblio_App_Screenshots/Categorie_Pagina.png)
+  ![category](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Categorie_Pagina.png)
 
 - Instellingen
-  ![Instellingen](Biblio_App/Biblio_App_Screenshots/Instelllingen.png)
+  ![Instellingen](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Instelllingen.png)
 
 
 ## Lokaal uitvoeren (ontwikkeling)
