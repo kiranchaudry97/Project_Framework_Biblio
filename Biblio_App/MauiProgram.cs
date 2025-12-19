@@ -168,11 +168,44 @@ namespace Biblio_App
             // Registreer ProfilePageViewModel als transient
             builder.Services.AddTransient<ViewModels.ProfilePageViewModel>();
 
+            // Registreer Synchronizer als singleton en maak LocalDbContext via factory
+            builder.Services.AddSingleton<Synchronizer>(sp =>
+            {
+                var dbFactory = sp.GetService<IDbContextFactory<Biblio_Models.Data.LocalDbContext>>();
+                Biblio_Models.Data.LocalDbContext? ctx = null;
+                try { ctx = dbFactory?.CreateDbContext(); } catch { ctx = null; }
+                var cfg = sp.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
+                var apiBase = cfg?["ApiBaseAddress"] ?? cfg?.GetSection("Api")?["BaseAddress"];
+                return new Synchronizer(ctx ?? throw new InvalidOperationException("LocalDbContext factory not available"), apiBase);
+            });
+
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
 
             var app = builder.Build();
+
+            // Start background initialization/synchronization (fire-and-forget)
+            try
+            {
+                var sync = app.Services.GetService<Synchronizer>();
+                if (sync != null)
+                {
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await sync.InitializeDb();
+                            await sync.SynchronizeAll();
+                        }
+                        catch (Exception ex)
+                        {
+                            try { System.Diagnostics.Debug.WriteLine($"Synchronizer background task error: {ex}"); } catch { }
+                        }
+                    });
+                }
+            }
+            catch { }
 
             // Zorg dat de database is aangemaakt, migraties toegepast en minimale seed-data ingevoegd bij eerste start.
             // Draai dit op de achtergrond om te voorkomen dat de UI-thread geblokkeerd wordt (voorkomt ANR op Android emulators/devices).

@@ -27,7 +27,14 @@ namespace Biblio_App.Pages
             if (vm != null)
                 vm.PropertyChanged += Vm_PropertyChanged;
 
-            // resolve language service if possible
+            try
+            {
+                try { Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false }); } catch { }
+                try { Shell.SetFlyoutBehavior(this, FlyoutBehavior.Flyout); } catch { }
+                try { NavigationPage.SetHasBackButton(this, false); } catch { }
+            }
+            catch { }
+
             try
             {
                 _languageService = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>();
@@ -359,11 +366,6 @@ namespace Biblio_App.Pages
             try
             {
                 System.Diagnostics.Debug.WriteLine("BoekenPagina.UpdateLocalizedStrings called");
-                if (System.Diagnostics.Debugger.IsAttached)
-                {
-                  
-                        System.Diagnostics.Debugger.Break();
-                }
             }
             catch { }
 #endif

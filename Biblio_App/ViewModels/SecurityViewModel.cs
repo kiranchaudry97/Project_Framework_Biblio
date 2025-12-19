@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Diagnostics;
 
 namespace Biblio_App.ViewModels
 {
@@ -41,6 +42,12 @@ namespace Biblio_App.ViewModels
             IsStaff = isStaff;
             FullName = fullName;
             OnPropertyChanged(nameof(IsAuthenticated));
+
+            try
+            {
+                Debug.WriteLine($"SecurityViewModel.SetUser called: Email='{email}', IsAdmin={isAdmin}, IsStaff={isStaff}, FullName='{fullName}'");
+            }
+            catch { }
         }
 
         public void Reset()
@@ -50,6 +57,12 @@ namespace Biblio_App.ViewModels
             IsStaff = false;
             FullName = null;
             OnPropertyChanged(nameof(IsAuthenticated));
+
+            try
+            {
+                Debug.WriteLine("SecurityViewModel.Reset called: cleared authentication state");
+            }
+            catch { }
         }
     }
 }
