@@ -1,4 +1,4 @@
-﻿# Biblio_App — MAUI client ( .NET MAUI, .NET 9 )
+# Biblio_App — MAUI client ( .NET MAUI, .NET 9 )
 
 **Initiatiefnemer:** Chaud-Ry Kiran Jamil
 
@@ -107,6 +107,41 @@ Biblio_App/
 ```
 
 Opmerking: dit project gebruikt `Biblio_Models` (gescheiden project) voor entiteiten en DB‑logica.
+
+Screenshots / afbeeldingen
+--------------------------
+Voorbeelden van UI‑beelden :
+
+- Login
+  ![Login]()
+
+
+- Menu
+  ![menu](Biblio_App/Biblio_App_Screenshots/Menu.png)
+
+- Taal
+  ![taal](Biblio_App/Biblio_App_Screenshots/Taalwijziging.png)
+
+- Thema
+  ![thema](Biblio_App/Biblio_App_Screenshots/Thema.png)
+
+- Boeken Pagina 
+  ![book](Biblio_App/Biblio_App_Screenshots/Boeken_Pagina.png)
+
+- Leden
+  ![lid](Biblio_App/Biblio_App_Screenshots/Leden_Pagina.png)
+
+
+- Uitleningen
+  ![uitleningen]()
+
+
+- Categorieën 
+  ![category](Biblio_App/Biblio_App_Screenshots/Categorie_Pagina.png)
+
+- Instellingen
+  ![Instellingen](Biblio_App/Biblio_App_Screenshots/Instelllingen.png)
+
 
 ## Lokaal uitvoeren (ontwikkeling)
 
