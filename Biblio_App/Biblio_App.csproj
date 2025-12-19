@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <!-- Enable XAML compiled binding with Source compilation to reduce XAML binding warnings -->
@@ -50,25 +50,23 @@
   <!-- Keep Android launcher icon resources so AAPT can find @mipmap/appicon and @mipmap/appicon_round -->
 
   <ItemGroup>
+    <!-- Align toolkit packages with MAUI 9 runtime (use 9.x) -->
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="CommunityToolkit.Maui" Version="8.4.0" />
+    <PackageReference Include="CommunityToolkit.Maui" Version="9.0.0" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.0" />
-    <!-- Design package not needed at runtime; avoid transitive references -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
-    <!-- Include SqlServer only for Windows TFM -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" Condition="'$(TargetFramework)' == 'net9.0-windows10.0.19041.0'" />
+    <!-- Add analyzer package explicitly to avoid restore errors referencing missing analyzers -->
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Biblio_Models\Biblio_Models.csproj" />
   </ItemGroup>
 
+  <!-- Consolidated MauiXaml Update entries (each XAML path listed once) -->
   <ItemGroup>
     <MauiXaml Update="Pages\Account\LoginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -130,33 +128,16 @@
     <MauiXaml Update="Pages\UsersPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Pages\Boek\BoekCreatePage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Pages\Boek\BoekDetailsPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Pages\Boek\BoekenPagina.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Pages\Lid\LedenPagina.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Pages\Lid\LidDetailsPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Pages\Uitlening\UitleningenPagina.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Pages\Categorieen\CategorieenPagina.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
+    <MauiXaml Update="Pages\Boek\BoekCreatePage.xaml" />
+    <MauiXaml Update="Pages\Boek\BoekDetailsPage.xaml" />
+    <MauiXaml Update="Pages\Boek\BoekenPagina.xaml" />
+    <MauiXaml Update="Pages\Lid\LedenPagina.xaml" />
+    <MauiXaml Update="Pages\Lid\LidDetailsPage.xaml" />
+    <MauiXaml Update="Pages\Uitlening\UitleningenPagina.xaml" />
+    <MauiXaml Update="Pages\Categorieen\CategorieenPagina.xaml" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Pages\NewFolder\" />
-  </ItemGroup>
+  <!-- Removed empty/unused folder include for Pages\NewFolder since it's not needed -->
 
   <!-- Ensure a stable package id for Android so multiple installed app icons don't appear -->
   <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-android'">

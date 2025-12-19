@@ -152,12 +152,14 @@
  
                              <HorizontalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="Start">
                                  <!-- Fixed label text to Dutch 'Lever status' per request -->
-                                 <Label Text="{Binding ReturnedLabel}" TextColor="{StaticResource Gray700}" VerticalOptions="Center" />
+                                 <Label Text="{Binding ReturnedLabel}" TextColor="{StaticResource Gray700}" VerticalOptions="Center" Margin="0,0,4,0" />
                                  <Picker x:Name="ReturnStatusPicker"
                                          ItemsSource="{Binding ReturnStatusOptions}"
                                          SelectedItem="{Binding SelectedReturnStatus, Mode=TwoWay}"
                                          Title="{Binding ReturnedLabel}"
-                                         WidthRequest="160"
+                                         WidthRequest="140"
+                                         HeightRequest="36"
+                                         HorizontalOptions="Start"
                                          SelectedIndexChanged="OnReturnStatusIndexChanged"
                                          Unfocused="OnReturnStatusUnfocused" />
                                 <!-- Show chosen status as a transparent button so tapping opens the picker -->
@@ -167,7 +169,8 @@
                                         Padding="0"
                                         Margin="8,0,0,0"
                                         BorderWidth="0"
-                                        TextColor="{StaticResource Gray700}" />
+                                        TextColor="{StaticResource Gray700}"
+                                        VerticalOptions="Center" />
                              </HorizontalStackLayout>
 
                              <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
