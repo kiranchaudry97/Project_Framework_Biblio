@@ -493,8 +493,8 @@
     <!-- Outline action button (border, transparent background) -->
     <Style x:Key="OutlineActionButton" TargetType="Button" BasedOn="{StaticResource Button}">
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="{StaticResource Primary}" />
-        <Setter Property="BorderColor" Value="{StaticResource Gray100}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
+        <Setter Property="BorderColor" Value="{StaticResource Primary}" />
         <Setter Property="BorderWidth" Value="1" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="WidthRequest" Value="120" />
