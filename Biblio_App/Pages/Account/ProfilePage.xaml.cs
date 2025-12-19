@@ -18,6 +18,10 @@ namespace Biblio_App.Pages.Account
         private readonly SecurityViewModel _security;
         private ILanguageService? _languageService;
 
+        public ProfilePage() : this(App.Current?.Handler?.MauiContext?.Services?.GetService<SecurityViewModel>() ?? new SecurityViewModel())
+        {
+        }
+
         public ProfilePage(SecurityViewModel security)
         {
             InitializeComponent();
@@ -33,8 +37,21 @@ namespace Biblio_App.Pages.Account
             Preferences.Default.Remove("CurrentEmail");
             Preferences.Default.Remove("IsAdmin");
             Preferences.Default.Remove("IsStaff");
+            try { await Microsoft.Maui.Storage.SecureStorage.Default.SetAsync("api_token", string.Empty); } catch { }
+            try { await Microsoft.Maui.Storage.SecureStorage.Default.SetAsync("refresh_token", string.Empty); } catch { }
             await Shell.Current.DisplayAlert("Logout", "Je bent afgemeld.", "OK");
-            await Shell.Current.GoToAsync("//Home");
+
+            // Ensure the flyout is closed and navigate to the LoginPage as a new root
+            try { if (Shell.Current != null) Shell.Current.FlyoutIsPresented = false; } catch { }
+            try
+            {
+                await Shell.Current.GoToAsync($"//{nameof(Pages.Account.LoginPage)}", animate: false);
+            }
+            catch
+            {
+                // Fallback: navigate to root if named route fails
+                try { await Shell.Current.GoToAsync("//"); } catch { }
+            }
         }
 
         public void UpdateLocalizedStrings()
@@ -53,6 +70,8 @@ namespace Biblio_App.Pages.Account
             base.OnAppearing();
             try
             {
+                // Keep default flyout behavior so this page shows the same header/hamburger as other pages
+
                 if (_languageService != null)
                 {
                     _languageService.LanguageChanged += LanguageService_LanguageChanged;
@@ -66,6 +85,8 @@ namespace Biblio_App.Pages.Account
             base.OnDisappearing();
             try
             {
+                // Keep default flyout behavior
+
                 if (_languageService != null)
                 {
                     _languageService.LanguageChanged -= LanguageService_LanguageChanged;

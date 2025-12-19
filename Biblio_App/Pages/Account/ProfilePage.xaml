@@ -5,6 +5,15 @@
              x:Class="Biblio_App.Pages.Account.ProfilePage"
              x:Name="Page">
 
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Labels inside white cards should remain dark for readability in both themes -->
+            <Style x:Key="CardLabelStyle" TargetType="Label">
+                <Setter Property="TextColor" Value="{StaticResource Gray900}" />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
     <Shell.TitleView>
         <Grid Padding="0,0,8,0" VerticalOptions="Center">
             <Label x:Name="TitleLabel" Text="Profiel" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" />
@@ -12,23 +21,23 @@
     </Shell.TitleView>
 
     <VerticalStackLayout Padding="20" Spacing="12">
-        <Label x:Name="HeaderLabel" Text="Profiel" FontAttributes="Bold" FontSize="20" />
+        <Label x:Name="HeaderLabel" Text="Profiel" FontAttributes="Bold" FontSize="20" TextColor="{StaticResource White}" />
 
         <Frame Style="{StaticResource WelcomeCardStyle}">
             <VerticalStackLayout Spacing="8">
-                <Label x:Name="EmailLabel" Text="E-mail" FontAttributes="Bold" />
-                <Label Text="{Binding Email}" />
-                <Label x:Name="FullNameLabel" Text="Volledige naam" FontAttributes="Bold" />
+                <Label x:Name="EmailLabel" Text="E-mail" FontAttributes="Bold" Style="{StaticResource CardLabelStyle}" />
+                <Label Text="{Binding Email}" Style="{StaticResource CardLabelStyle}" />
+                <Label x:Name="FullNameLabel" Text="Volledige naam" FontAttributes="Bold" Style="{StaticResource CardLabelStyle}" />
                 <Entry x:Name="FullNameEntry" Text="{Binding FullName}" Placeholder="Voer volledige naam in" />
                 <Label x:Name="FullNameError" TextColor="Red" FontSize="12" />
-                <Label x:Name="RolesLabel" Text="Rollen" FontAttributes="Bold" />
-                <Label Text="{Binding Roles}" />
-                <HorizontalStackLayout Spacing="8" HorizontalOptions="Start">
-                    <Button Text="Opslaan" Clicked="OnSaveProfileClicked" Style="{StaticResource PrimaryButton}" />
-                    <Button Text="Wachtwoord wijzigen" Clicked="OnChangePasswordClicked" Style="{StaticResource SecondaryButton}" />
-                    <Button Text="Logout" Clicked="OnLogoutClicked" Style="{StaticResource PrimaryButton}" />
-                </HorizontalStackLayout>
-                <Label x:Name="StatusLabel" TextColor="Gray" />
+                <Label x:Name="RolesLabel" Text="Rollen" FontAttributes="Bold" Style="{StaticResource CardLabelStyle}" />
+                <Label Text="{Binding Roles}" Style="{StaticResource CardLabelStyle}" />
+                <VerticalStackLayout Spacing="8" HorizontalOptions="FillAndExpand">
+                    <Button Text="Opslaan" Clicked="OnSaveProfileClicked" Style="{StaticResource PrimaryButtonSmall}" HorizontalOptions="FillAndExpand" />
+                    <Button Text="Wachtwoord wijzigen" Clicked="OnChangePasswordClicked" Style="{StaticResource OutlineActionButtonSmall}" HorizontalOptions="FillAndExpand" />
+                    <Button Text="Logout" Clicked="OnLogoutClicked" Style="{StaticResource DangerButtonSmall}" HorizontalOptions="FillAndExpand" />
+                </VerticalStackLayout>
+                <Label x:Name="StatusLabel" TextColor="Gray" Style="{StaticResource CardLabelStyle}" />
             </VerticalStackLayout>
         </Frame>
     </VerticalStackLayout>
