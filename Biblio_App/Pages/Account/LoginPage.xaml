@@ -3,18 +3,36 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Biblio_App.Pages.Account.LoginPage"
-             Title="Login">
+             Title="Login"
+             BackgroundColor="White">
 
     <ContentPage.Content>
         <VerticalStackLayout Padding="20" Spacing="12">
             <Image Source="login_illustration.svg" HorizontalOptions="Center" WidthRequest="120" />
-            <Entry x:Name="EmailEntry" Placeholder="E-mail" Keyboard="Email" />
-            <Entry x:Name="PasswordEntry" Placeholder="Wachtwoord" IsPassword="True" />
-            
-            <!-- Development-only test accounts panel -->
-            <Frame x:Name="DevPanel" Padding="10" Margin="0" IsVisible="False" BackgroundColor="#F6F6F6" HasShadow="False">
+
+            <!-- Busy indicator shown during login -->
+            <ActivityIndicator x:Name="BusyIndicator" IsVisible="False" IsRunning="False" HorizontalOptions="Center" />
+
+            <Entry x:Name="EmailEntry" Placeholder="E-mail" Keyboard="Email" TextColor="{StaticResource Gray900}" PlaceholderColor="{StaticResource Gray500}" />
+            <Entry x:Name="PasswordEntry" Placeholder="Wachtwoord" IsPassword="True" TextColor="{StaticResource Gray900}" PlaceholderColor="{StaticResource Gray500}" />
+
+            <!-- Options: show password and remember me -->
+            <HorizontalStackLayout Spacing="12" VerticalOptions="Center" HorizontalOptions="Fill">
+                <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                    <Switch x:Name="ShowPasswordSwitch" Toggled="OnShowPasswordToggled" />
+                    <Label Text="Toon wachtwoord" VerticalOptions="Center" TextColor="{StaticResource Gray900}" />
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Spacing="6" VerticalOptions="Center" HorizontalOptions="EndAndExpand">
+                    <CheckBox x:Name="RememberCheck" />
+                    <Label Text="Onthoud mij" VerticalOptions="Center" TextColor="{StaticResource Gray900}" />
+                </HorizontalStackLayout>
+            </HorizontalStackLayout>
+
+            <!-- Development-only test accounts panel (now always visible for convenience) -->
+            <Frame x:Name="DevPanel" Padding="10" Margin="0" IsVisible="True" BackgroundColor="#F6F6F6" HasShadow="False">
                 <VerticalStackLayout Spacing="6">
-                    <Label Text="Test accounts (development only):" FontAttributes="Bold" FontSize="Small" />
+                    <Label Text="Test accounts (development only):" FontAttributes="Bold" FontSize="Small" TextColor="{StaticResource Gray900}" />
                     <HorizontalStackLayout Spacing="8">
                         <Button Text="Autofill admin" Clicked="OnAutofillAdminClicked" FontSize="Small" />
                         <Button Text="Autofill medewerker" Clicked="OnAutofillMedewerkerClicked" FontSize="Small" />
@@ -25,13 +43,11 @@
                     <Label FontSize="Micro" TextColor="#333333">
                         Medewerker - email: medewerker@biblio.local | wachtwoord: test1234?
                     </Label>
-                    <Label FontSize="Micro" TextColor="#666666">
-                        Zet development wachtwoorden met user-secrets; deel deze waarden niet in versiebeheer.
-                    </Label>
+                    
                 </VerticalStackLayout>
             </Frame>
 
-            <Button Text="Login" Clicked="OnLoginClicked" />
+            <Button x:Name="LoginButton" Text="Login" Clicked="OnLoginClicked" TextColor="{StaticResource White}" BackgroundColor="{StaticResource Primary}" />
         </VerticalStackLayout>
     </ContentPage.Content>
 
