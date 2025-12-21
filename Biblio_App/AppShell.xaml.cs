@@ -924,7 +924,8 @@ namespace Biblio_App
                              // Attempt to navigate to LoginPage as the root on the new shell
                              try
                              {
-                                 await newShell.GoToAsync($"//{nameof(Pages.Account.LoginPage)}", animate: false);
+                                // Use the registered route name for the LoginPage; avoid absolute '//' navigation here
+                                await newShell.GoToAsync(nameof(Pages.Account.LoginPage), animate: false);
                              }
                              catch { }
                          }

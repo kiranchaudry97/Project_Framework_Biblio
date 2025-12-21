@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <!-- Enable XAML compiled binding with Source compilation to reduce XAML binding warnings -->
@@ -48,6 +48,8 @@
 
     <!-- Custom Fonts -->
     <MauiFont Include="Resources\Fonts\*" />
+    <!-- Optional FontAwesome file (add the TTF later to Resources/Fonts/fa-solid-900.ttf). Alias 'FA' used in XAML. -->
+    <MauiFont Include="Resources\Fonts\fa-solid-900.ttf" Alias="FA" Condition="Exists('Resources\\Fonts\\fa-solid-900.ttf')" />
     <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
@@ -123,22 +125,12 @@
     <MauiXaml Update="Pages\ProfilePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Pages\UitleningenPagina.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
     <MauiXaml Update="Pages\Uitlening\UitleningenPagina.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Pages\UsersPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Pages\Boek\BoekCreatePage.xaml" />
-    <MauiXaml Update="Pages\Boek\BoekDetailsPage.xaml" />
-    <MauiXaml Update="Pages\Boek\BoekenPagina.xaml" />
-    <MauiXaml Update="Pages\Lid\LedenPagina.xaml" />
-    <MauiXaml Update="Pages\Lid\LidDetailsPage.xaml" />
-    <MauiXaml Update="Pages\Uitlening\UitleningenPagina.xaml" />
-    <MauiXaml Update="Pages\Categorieen\CategorieenPagina.xaml" />
   </ItemGroup>
 
   <!-- Removed empty/unused folder include for Pages\NewFolder since it's not needed -->

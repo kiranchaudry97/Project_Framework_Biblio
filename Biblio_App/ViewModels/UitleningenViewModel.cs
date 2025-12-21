@@ -125,6 +125,47 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private bool onlyOpen;
 
+        // Additional UI filter properties
+        [ObservableProperty]
+        private Lid? filterLid;
+
+        partial void OnFilterLidChanged(Lid? value)
+        {
+            _ = LoadDataWithFiltersAsync();
+        }
+
+        [ObservableProperty]
+        private Boek? filterBoek;
+
+        partial void OnFilterBoekChanged(Boek? value)
+        {
+            _ = LoadDataWithFiltersAsync();
+        }
+
+        [ObservableProperty]
+        private bool showLate;
+
+        partial void OnShowLateChanged(bool value)
+        {
+            _ = LoadDataWithFiltersAsync();
+        }
+
+        // Sorting
+        public ObservableCollection<string> SortOptions { get; } = new ObservableCollection<string>();
+        [ObservableProperty]
+        private string sortOption = "StartDate";
+        partial void OnSortOptionChanged(string value)
+        {
+            _ = LoadDataWithFiltersAsync();
+        }
+
+        [ObservableProperty]
+        private bool sortDescending = true;
+        partial void OnSortDescendingChanged(bool value)
+        {
+            _ = LoadDataWithFiltersAsync();
+        }
+
         [ObservableProperty]
         private string lastError = string.Empty;
 
@@ -193,6 +234,11 @@ namespace Biblio_App.ViewModels
                 }
             }
             catch { }
+
+            SortOptions.Add("StartDate");
+            SortOptions.Add("DueDate");
+            SortOptions.Add("Lid");
+            SortOptions.Add("Boek");
 
             // Do not load data directly from constructor; this can block startup/UI thread on some devices.
             // Pages should call InitializeAsync/EnsureDataLoadedAsync during OnAppearing.
@@ -406,7 +452,7 @@ namespace Biblio_App.ViewModels
             }
         }
 
-        private string Localize(string key)
+        public string Localize(string key)
         {
             try
             {
@@ -735,7 +781,7 @@ namespace Biblio_App.ViewModels
             await LoadDataAsync();
         }
 
-        private async Task LoadDataWithFiltersAsync()
+        public async Task LoadDataWithFiltersAsync()
         {
             try
             {
@@ -772,12 +818,47 @@ namespace Biblio_App.ViewModels
                     query = query.Where(l => l.Boek != null && l.Boek.CategorieID == catId);
                 }
 
+                // Only open filter
                 if (OnlyOpen)
                 {
                     query = query.Where(l => l.ReturnedAt == null);
                 }
 
-                var list = await query.OrderByDescending(l => l.StartDate).ToListAsync();
+                // Filter by selected member/book
+                if (FilterLid != null)
+                {
+                    query = query.Where(l => l.LidId == FilterLid.Id);
+                }
+
+                if (FilterBoek != null)
+                {
+                    query = query.Where(l => l.BoekId == FilterBoek.Id);
+                }
+
+                if (ShowLate)
+                {
+                    var today = DateTime.UtcNow.Date;
+                    query = query.Where(l => l.DueDate < today && l.ReturnedAt == null);
+                }
+
+                // Sorting
+                switch ((SortOption ?? "StartDate").ToLowerInvariant())
+                {
+                    case "lid":
+                        query = SortDescending ? query.OrderByDescending(l => l.Lid.Voornaam).ThenByDescending(l => l.Lid.AchterNaam) : query.OrderBy(l => l.Lid.Voornaam).ThenBy(l => l.Lid.AchterNaam);
+                        break;
+                    case "boek":
+                        query = SortDescending ? query.OrderByDescending(l => l.Boek.Titel) : query.OrderBy(l => l.Boek.Titel);
+                        break;
+                    case "duedate":
+                        query = SortDescending ? query.OrderByDescending(l => l.DueDate) : query.OrderBy(l => l.DueDate);
+                        break;
+                    default:
+                        query = SortDescending ? query.OrderByDescending(l => l.StartDate) : query.OrderBy(l => l.StartDate);
+                        break;
+                }
+
+                var list = await query.ToListAsync();
                 Uitleningen.Clear();
                 foreach (var u in list) Uitleningen.Add(u);
             }
@@ -1027,6 +1108,8 @@ namespace Biblio_App.ViewModels
                 var token = auth?.GetToken();
                 if (string.IsNullOrWhiteSpace(token)) return Enumerable.Empty<string>();
 
+                try { System.Diagnostics.Debug.WriteLine($"[GetRolesFromToken] raw token: {token}"); } catch { }
+
                 var parts = token.Split('.');
                 if (parts.Length < 2) return Enumerable.Empty<string>();
                 var payload = parts[1];
@@ -1036,30 +1119,112 @@ namespace Biblio_App.ViewModels
                 var json = System.Text.Encoding.UTF8.GetString(bytes);
                 var doc = System.Text.Json.JsonDocument.Parse(json);
                 var roles = new List<string>();
-                if (doc.RootElement.TryGetProperty("role", out var r))
+
+                // Helper to add string or array values
+                void AddFromElement(System.Text.Json.JsonElement el)
                 {
-                    if (r.ValueKind == System.Text.Json.JsonValueKind.String)
-                        roles.Add(r.GetString() ?? string.Empty);
-                    else if (r.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    try
                     {
-                        foreach (var el in r.EnumerateArray()) roles.Add(el.GetString() ?? string.Empty);
+                        if (el.ValueKind == System.Text.Json.JsonValueKind.String)
+                        {
+                            var v = el.GetString();
+                            if (!string.IsNullOrWhiteSpace(v)) roles.Add(v);
+                        }
+                        else if (el.ValueKind == System.Text.Json.JsonValueKind.Array)
+                        {
+                            foreach (var item in el.EnumerateArray())
+                            {
+                                if (item.ValueKind == System.Text.Json.JsonValueKind.String)
+                                {
+                                    var v = item.GetString();
+                                    if (!string.IsNullOrWhiteSpace(v)) roles.Add(v);
+                                }
+                            }
+                        }
+                        else if (el.ValueKind == System.Text.Json.JsonValueKind.Object)
+                        {
+                            // try to find nested 'roles' property
+                            foreach (var p in el.EnumerateObject())
+                            {
+                                if (p.Name.IndexOf("role", StringComparison.OrdinalIgnoreCase) >= 0)
+                                {
+                                    AddFromElement(p.Value);
+                                }
+                            }
+                        }
                     }
-                }
-                // some tokens use 'roles' claim
-                if (doc.RootElement.TryGetProperty("roles", out var rr))
-                {
-                    if (rr.ValueKind == System.Text.Json.JsonValueKind.String)
-                        roles.Add(rr.GetString() ?? string.Empty);
-                    else if (rr.ValueKind == System.Text.Json.JsonValueKind.Array)
-                    {
-                        foreach (var el in rr.EnumerateArray()) roles.Add(el.GetString() ?? string.Empty);
-                    }
+                    catch { }
                 }
 
-                return roles.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()).Distinct(StringComparer.OrdinalIgnoreCase);
+                // Direct known properties
+                try
+                {
+                    if (doc.RootElement.TryGetProperty("role", out var r)) AddFromElement(r);
+                    if (doc.RootElement.TryGetProperty("roles", out var rr)) AddFromElement(rr);
+                    if (doc.RootElement.TryGetProperty("http://schemas.microsoft.com/ws/2008/06/identity/claims/role", out var schemaRole)) AddFromElement(schemaRole);
+                }
+                catch { }
+
+                // Enumerate all root properties and pick anything with 'role' in the name
+                try
+                {
+                    foreach (var prop in doc.RootElement.EnumerateObject())
+                    {
+                        if (prop.Name.IndexOf("role", StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            AddFromElement(prop.Value);
+                        }
+                        else if (prop.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
+                        {
+                            // check nested objects for roles (common with Keycloak: realm_access.roles)
+                            foreach (var nested in prop.Value.EnumerateObject())
+                            {
+                                if (nested.Name.IndexOf("role", StringComparison.OrdinalIgnoreCase) >= 0)
+                                {
+                                    AddFromElement(nested.Value);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { }
+
+                // Specific Keycloak-style path
+                try
+                {
+                    if (doc.RootElement.TryGetProperty("realm_access", out var realm) && realm.ValueKind == System.Text.Json.JsonValueKind.Object && realm.TryGetProperty("roles", out var realmRoles))
+                    {
+                        AddFromElement(realmRoles);
+                    }
+                }
+                catch { }
+
+                var result = roles.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                try { System.Diagnostics.Debug.WriteLine($"[GetRolesFromToken] detected roles: {string.Join(",", result)}"); } catch { }
+                return result;
             }
             catch { }
             return Enumerable.Empty<string>();
+        }
+
+        // Fallback: check if the JWT payload contains a substring (case-insensitive).
+        private bool TokenPayloadContains(string substring)
+        {
+            try
+            {
+                var auth = App.Current?.Handler?.MauiContext?.Services?.GetService<Biblio_App.Services.IAuthService>();
+                var token = auth?.GetToken();
+                if (string.IsNullOrWhiteSpace(token)) return false;
+                var parts = token.Split('.');
+                if (parts.Length < 2) return false;
+                var payload = parts[1];
+                payload = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
+                var bytes = Convert.FromBase64String(payload.Replace('-', '+').Replace('_', '/'));
+                var json = System.Text.Encoding.UTF8.GetString(bytes);
+                return json?.IndexOf(substring, StringComparison.OrdinalIgnoreCase) >= 0;
+            }
+            catch { }
+            return false;
         }
 
         private bool UserHasRole(params string[] requiredRoles)
@@ -1085,8 +1250,12 @@ namespace Biblio_App.ViewModels
                 // Only allow admins and medewerkers to perform return
                 if (!UserHasRole("Admin", "Medewerker"))
                 {
-                    await ShowAlertAsync(Localize("Error"), "Niet gemachtigd om in te leveren.");
-                    return;
+                    // fallback: allow if JWT payload contains 'admin' (many tokens put roles in non-standard places)
+                    if (!TokenPayloadContains("admin"))
+                    {
+                        await ShowAlertAsync(Localize("Error"), "Niet gemachtigd om in te leveren.");
+                        return;
+                    }
                 }
 
                 using var db = _dbFactory.CreateDbContext();
@@ -1207,6 +1376,20 @@ namespace Biblio_App.ViewModels
                     try { value.ForceLate = false; } catch { }
                     try { value.ForceNotLate = false; } catch { }
                 }
+                else if (value.ForceLate)
+                {
+                    // preserve explicit UI override for Late
+                    SelectedReturnStatus = Localize("Late");
+                    try { value.ForceLate = true; } catch { }
+                    try { value.ForceNotLate = false; } catch { }
+                }
+                else if (value.ForceNotLate)
+                {
+                    // preserve explicit UI override for Return
+                    SelectedReturnStatus = Localize("Return");
+                    try { value.ForceLate = false; } catch { }
+                    try { value.ForceNotLate = true; } catch { }
+                }
                 else if (value.DueDate < DateTime.Now.Date)
                 {
                     SelectedReturnStatus = Localize("Late");
@@ -1259,7 +1442,7 @@ namespace Biblio_App.ViewModels
                     {
                         // Replace item to raise CollectionChanged (Replace) so DataTemplate re-evaluates bindings/converters
                         Uitleningen[idx] = SelectedUitlening;
-                    }
+                      }
                 }
                 catch { }
 
@@ -1297,6 +1480,17 @@ namespace Biblio_App.ViewModels
                             await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(() =>
                             {
                                 var idx = Uitleningen.ToList().FindIndex(u => u.Id == saved.Id);
+
+                                // Preserve UI override flags (Late/Return) so the picker/labels/icons reflect user's choice
+                                try
+                                {
+                                    var isLate = string.Equals(SelectedReturnStatus, Localize("Late"), StringComparison.OrdinalIgnoreCase);
+                                    var isReturn = string.Equals(SelectedReturnStatus, Localize("Return"), StringComparison.OrdinalIgnoreCase);
+                                    saved.ForceLate = isLate && !saved.ReturnedAt.HasValue;
+                                    saved.ForceNotLate = isReturn && !saved.ReturnedAt.HasValue;
+                                }
+                                catch { }
+
                                 if (idx >= 0) Uitleningen[idx] = saved;
                                 else Uitleningen.Insert(0, saved);
 
