@@ -1,4 +1,4 @@
-﻿# Biblio_App — MAUI client ( .NET MAUI, .NET 9 )
+# Biblio_App — MAUI client ( .NET MAUI, .NET 9 )
 
 **Initiatiefnemer:** Chaud-Ry Kiran Jamil
 
@@ -107,6 +107,43 @@ Biblio_App/
 ```
 
 Opmerking: dit project gebruikt `Biblio_Models` (gescheiden project) voor entiteiten en DB‑logica.
+
+Screenshots / afbeeldingen
+--------------------------
+Voorbeelden van UI‑beelden :
+
+- Login
+  ![Login]()
+
+
+- Menu
+  ![menu](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Menu.png)
+
+- Taal
+  ![taal](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Taalwijziging.png)
+
+  
+
+- Thema
+  ![thema](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Thema.png)
+
+- Boeken Pagina 
+  ![book](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Boeken_Pagina.png)
+
+- Leden
+  ![lid](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Leden_Pagina.png)
+
+
+- Uitleningen
+  ![uitleningen](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/39be40696bfc3022841c840ce7867034b47e5cf8/Biblio_App/Biblio_App_Screenshots/Uitleningen_Pagina.png)
+
+
+- Categorieën 
+  ![category](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Categorie_Pagina.png)
+
+- Instellingen
+  ![Instellingen](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/ec12f90c67444a291a1e573f01d6588e5057731f/Biblio_App/Biblio_App_Screenshots/Instelllingen.png)
+
 
 ## Lokaal uitvoeren (ontwikkeling)
 
