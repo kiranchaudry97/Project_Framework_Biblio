@@ -113,7 +113,7 @@ Screenshots / afbeeldingen
 Voorbeelden van UI‑beelden :
 
 - Login
-  ![Login]()
+  ![Login](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/c89b0b4f9e15b00599ad9d821718ed5d5362cc86/Biblio_App/Biblio_App_Screenshots/login.png)
 
 
 - Menu
@@ -135,7 +135,7 @@ Voorbeelden van UI‑beelden :
 
 
 - Uitleningen
-  ![uitleningen](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/39be40696bfc3022841c840ce7867034b47e5cf8/Biblio_App/Biblio_App_Screenshots/Uitleningen_Pagina.png)
+  ![uitleningen](https://github.com/kiranchaudry97/Project_Framework_Biblio/blob/a751ea925b4996d04ce69cafd37c365b86ef6fcd/Biblio_App/Biblio_App_Screenshots/uitleningen_pagina.png)
 
 
 - Categorieën 
