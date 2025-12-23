@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
+using Biblio_Web.Models.ApiDtos;
 
 namespace Biblio_Web.Controllers.Api
 {
@@ -38,13 +39,24 @@ namespace Biblio_Web.Controllers.Api
             var totalPages = (int)System.Math.Ceiling(total / (double)pageSize);
             var items = await q.OrderBy(b => b.Titel).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
+            // map to DTOs
+            var dtoItems = items.Select(b => new BoekDto
+            {
+                Id = b.Id,
+                Titel = b.Titel,
+                Auteur = b.Auteur,
+                Isbn = b.Isbn,
+                CategorieID = b.CategorieID,
+                CategorieNaam = b.categorie == null ? string.Empty : b.categorie.Naam
+            }).ToList();
+
             var result = new
             {
                 page,
                 pageSize,
                 total,
                 totalPages,
-                items
+                items = dtoItems
             };
 
             return Ok(result);
@@ -52,11 +64,22 @@ namespace Biblio_Web.Controllers.Api
 
         // GET: api/Boeken/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Boek>> Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             var boek = await _db.Boeken.Include(b => b.categorie).FirstOrDefaultAsync(b => b.Id == id && !b.IsDeleted);
             if (boek == null) return NotFound(new ProblemDetails { Title = "Not Found", Detail = "Book not found" });
-            return Ok(boek);
+
+            var dto = new BoekDto
+            {
+                Id = boek.Id,
+                Titel = boek.Titel,
+                Auteur = boek.Auteur,
+                Isbn = boek.Isbn,
+                CategorieID = boek.CategorieID,
+                CategorieNaam = boek.categorie == null ? string.Empty : boek.categorie.Naam
+            };
+
+            return Ok(dto);
         }
 
         // POST: api/Boeken
@@ -76,7 +99,18 @@ namespace Biblio_Web.Controllers.Api
             await _db.SaveChangesAsync();
 
             var saved = await _db.Boeken.Include(b => b.categorie).FirstOrDefaultAsync(b => b.Id == entity.Id);
-            return CreatedAtAction(nameof(Get), new { id = entity.Id }, saved);
+
+            var dto = new BoekDto
+            {
+                Id = saved.Id,
+                Titel = saved.Titel,
+                Auteur = saved.Auteur,
+                Isbn = saved.Isbn,
+                CategorieID = saved.CategorieID,
+                CategorieNaam = saved.categorie == null ? string.Empty : saved.categorie.Naam
+            };
+
+            return CreatedAtAction(nameof(Get), new { id = entity.Id }, dto);
         }
 
         // PUT: api/Boeken/5

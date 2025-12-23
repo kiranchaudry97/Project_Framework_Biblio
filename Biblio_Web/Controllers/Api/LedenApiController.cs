@@ -8,12 +8,14 @@ API endpoints (LedenApiController)
 */
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Biblio_Models.Data;
 using Biblio_Models.Entiteiten;
+using Biblio_Web.Models.ApiDtos;
 
 namespace Biblio_Web.Controllers.Api
 {
@@ -37,13 +39,21 @@ namespace Biblio_Web.Controllers.Api
             var totalPages = (int)System.Math.Ceiling(total / (double)pageSize);
             var items = await q.OrderBy(l => l.Voornaam).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
+            var dtoItems = items.Select(l => new LidDto
+            {
+                Id = l.Id,
+                Voornaam = l.Voornaam,
+                AchterNaam = l.AchterNaam,
+                Email = l.Email
+            }).ToList();
+
             var result = new
             {
                 page,
                 pageSize,
                 total,
                 totalPages,
-                items
+                items = dtoItems
             };
 
             return Ok(result);
@@ -55,7 +65,16 @@ namespace Biblio_Web.Controllers.Api
         {
             var item = await _db.Leden.FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted);
             if (item == null) return NotFound(new ProblemDetails { Title = "Not Found", Detail = "Member not found" });
-            return Ok(item);
+
+            var dto = new LidDto
+            {
+                Id = item.Id,
+                Voornaam = item.Voornaam,
+                AchterNaam = item.AchterNaam,
+                Email = item.Email
+            };
+
+            return Ok(dto);
         }
 
         // POST: api/leden
@@ -72,7 +91,16 @@ namespace Biblio_Web.Controllers.Api
             };
             _db.Leden.Add(entity);
             await _db.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
+
+            var dto = new LidDto
+            {
+                Id = entity.Id,
+                Voornaam = entity.Voornaam,
+                AchterNaam = entity.AchterNaam,
+                Email = entity.Email
+            };
+
+            return CreatedAtAction(nameof(Get), new { id = entity.Id }, dto);
         }
 
         // PUT: api/leden/{id}

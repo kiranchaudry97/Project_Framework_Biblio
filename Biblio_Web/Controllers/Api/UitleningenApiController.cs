@@ -38,13 +38,40 @@ namespace Biblio_Web.Controllers.Api
             var totalPages = (int)System.Math.Ceiling(total / (double)pageSize);
             var items = await q.OrderByDescending(l => l.StartDate).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
+            var dtoItems = items.Select(l => new Biblio_Web.Models.ApiDtos.LenenDto
+            {
+                Id = l.Id,
+                BoekId = l.BoekId,
+                LidId = l.LidId,
+                StartDate = l.StartDate,
+                DueDate = l.DueDate,
+                ReturnedAt = l.ReturnedAt,
+                IsClosed = l.IsClosed,
+                Boek = l.Boek == null ? null : new Biblio_Web.Models.ApiDtos.BoekDto
+                {
+                    Id = l.Boek.Id,
+                    Titel = l.Boek.Titel,
+                    Auteur = l.Boek.Auteur,
+                    Isbn = l.Boek.Isbn,
+                    CategorieID = l.Boek.CategorieID,
+                    CategorieNaam = l.Boek.categorie is null ? string.Empty : l.Boek.categorie.Naam
+                },
+                Lid = l.Lid == null ? null : new Biblio_Web.Models.ApiDtos.LidDto
+                {
+                    Id = l.Lid.Id,
+                    Voornaam = l.Lid.Voornaam,
+                    AchterNaam = l.Lid.AchterNaam,
+                    Email = l.Lid.Email
+                }
+            }).ToList();
+
             var result = new
             {
                 page,
                 pageSize,
                 total,
                 totalPages,
-                items
+                items = dtoItems
             };
 
             return Ok(result);
@@ -53,11 +80,39 @@ namespace Biblio_Web.Controllers.Api
         // GET: api/uitleningen/late
         // GET  /api/uitleningen/late                -> list overdue loans (RequireMember)
         [HttpGet("late")]
-        public async Task<ActionResult<IEnumerable<Lenen>>> GetLate()
+        public async Task<ActionResult<IEnumerable<Biblio_Web.Models.ApiDtos.LenenDto>>> GetLate()
         {
             var today = System.DateTime.Today;
             var list = await _db.Leningens.Include(l => l.Boek).Include(l => l.Lid).Where(l => l.DueDate < today && l.ReturnedAt == null && !l.IsDeleted).ToListAsync();
-            return Ok(list);
+
+            var dto = list.Select(l => new Biblio_Web.Models.ApiDtos.LenenDto
+            {
+                Id = l.Id,
+                BoekId = l.BoekId,
+                LidId = l.LidId,
+                StartDate = l.StartDate,
+                DueDate = l.DueDate,
+                ReturnedAt = l.ReturnedAt,
+                IsClosed = l.IsClosed,
+                Boek = l.Boek == null ? null : new Biblio_Web.Models.ApiDtos.BoekDto
+                {
+                    Id = l.Boek.Id,
+                    Titel = l.Boek.Titel,
+                    Auteur = l.Boek.Auteur,
+                    Isbn = l.Boek.Isbn,
+                    CategorieID = l.Boek.CategorieID,
+                    CategorieNaam = l.Boek.categorie is null ? string.Empty : l.Boek.categorie.Naam
+                },
+                Lid = l.Lid == null ? null : new Biblio_Web.Models.ApiDtos.LidDto
+                {
+                    Id = l.Lid.Id,
+                    Voornaam = l.Lid.Voornaam,
+                    AchterNaam = l.Lid.AchterNaam,
+                    Email = l.Lid.Email
+                }
+            }).ToList();
+
+            return Ok(dto);
         }
 
         // POST: api/uitleningen
@@ -84,7 +139,35 @@ namespace Biblio_Web.Controllers.Api
             await _db.SaveChangesAsync();
 
             var saved = await _db.Leningens.Include(l => l.Boek).Include(l => l.Lid).FirstOrDefaultAsync(l => l.Id == entity.Id);
-            return CreatedAtAction(nameof(Get), new { id = entity.Id }, saved);
+
+            var savedDto = new Biblio_Web.Models.ApiDtos.LenenDto
+            {
+                Id = saved.Id,
+                BoekId = saved.BoekId,
+                LidId = saved.LidId,
+                StartDate = saved.StartDate,
+                DueDate = saved.DueDate,
+                ReturnedAt = saved.ReturnedAt,
+                IsClosed = saved.IsClosed,
+                Boek = saved.Boek == null ? null : new Biblio_Web.Models.ApiDtos.BoekDto
+                {
+                    Id = saved.Boek.Id,
+                    Titel = saved.Boek.Titel,
+                    Auteur = saved.Boek.Auteur,
+                    Isbn = saved.Boek.Isbn,
+                    CategorieID = saved.Boek.CategorieID,
+                    CategorieNaam = saved.Boek.categorie is null ? string.Empty : saved.Boek.categorie.Naam
+                },
+                Lid = saved.Lid == null ? null : new Biblio_Web.Models.ApiDtos.LidDto
+                {
+                    Id = saved.Lid.Id,
+                    Voornaam = saved.Lid.Voornaam,
+                    AchterNaam = saved.Lid.AchterNaam,
+                    Email = saved.Lid.Email
+                }
+            };
+
+            return CreatedAtAction(nameof(Get), new { id = entity.Id }, savedDto);
         }
 
         // PUT: api/uitleningen/{id}/return

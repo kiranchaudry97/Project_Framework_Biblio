@@ -1,79 +1,99 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
 
   <PropertyGroup>
-    <!-- Enable XAML compiled binding with Source compilation to reduce XAML binding warnings -->
-    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
-    <!-- Include Windows TFM so Live Preview (WinUI) is available regardless of host OS -->
-    <TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst;net9.0-windows10.0.19041.0</TargetFrameworks>
-
-    <!-- Prevent transitive framework reference downloads (avoid Microsoft.AspNetCore.App being pulled into MAUI targets) -->
-    <DisableTransitiveFrameworkReferenceDownloads>true</DisableTransitiveFrameworkReferenceDownloads>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
 
     <OutputType>Exe</OutputType>
     <RootNamespace>Biblio_App</RootNamespace>
-    <UseMaui>true</UseMaui>
-    <SingleProject>true</SingleProject>
+
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UserSecretsId>f3b2c9a1-8e4d-4f2d-9c2a-1a2b3c4d5e6f</UserSecretsId>
 
-    <!-- Display name -->
+    <!-- App info -->
     <ApplicationTitle>Biblio_App</ApplicationTitle>
+    <ApplicationId>com.companyname.biblio_app</ApplicationId>
 
-    <!-- Define Maui version to align PackageReferences with installed packages -->
-    <MauiVersion>9.0.111</MauiVersion>
-
-    <!-- Versions -->
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
 
-	  <ApplicationId>com.companyname.Biblio_App</ApplicationId>
+    <MauiVersion>9.0.111</MauiVersion>
 
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+    <WindowsPackageType>None</WindowsPackageType>
   </PropertyGroup>
 
-	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' And '$(TargetFramework)' == 'net9.0-android' And '$(Platform)' == 'AnyCPU' ">
-		<EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>
+      net9.0-android;
+      net9.0-ios;
+      net9.0-maccatalyst;
+      net9.0-windows10.0.19041.0
+    </TargetFrameworks>
+  </PropertyGroup>
 
+  <PropertyGroup>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+      21.0
+    </SupportedOSPlatformVersion>
+
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+      15.0
+    </SupportedOSPlatformVersion>
+
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
+      15.0
+    </SupportedOSPlatformVersion>
+
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+      10.0.17763.0
+    </SupportedOSPlatformVersion>
+
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+      10.0.17763.0
+    </TargetPlatformMinVersion>
+  </PropertyGroup>
+
+ 
   <ItemGroup>
-
-    <!-- Images -->
+    <!-- Afbeeldingen -->
     <MauiImage Include="Resources\Images\**" />
 
-    <!-- Custom Fonts -->
+    <!-- Fonts -->
     <MauiFont Include="Resources\Fonts\*" />
-    <!-- Optional FontAwesome file (add the TTF later to Resources/Fonts/fa-solid-900.ttf). Alias 'FA' used in XAML. -->
-    <MauiFont Include="Resources\Fonts\fa-solid-900.ttf" Alias="FA" Condition="Exists('Resources\\Fonts\\fa-solid-900.ttf')" />
-    <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+    <MauiFont Include="Resources\Fonts\fa-solid-900.ttf"
+              Alias="FA"
+              Condition="Exists('Resources\\Fonts\\fa-solid-900.ttf')" />
+
+    <!-- Raw assets -->
+    <MauiAsset Include="Resources\Raw\**"
+               LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
-  <!-- Keep Android launcher icon resources so AAPT can find @mipmap/appicon and @mipmap/appicon_round -->
 
   <ItemGroup>
-    <!-- Align toolkit packages with MAUI 9 runtime (use 9.x) -->
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="CommunityToolkit.Maui" Version="9.0.0" />
+
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.0" />
-    <!-- Add analyzer package explicitly to avoid restore errors referencing missing analyzers -->
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
+
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers"
+                      Version="3.3.4"
+                      PrivateAssets="all" />
   </ItemGroup>
 
+ 
   <ItemGroup>
     <ProjectReference Include="..\Biblio_Models\Biblio_Models.csproj" />
   </ItemGroup>
 
-  <!-- Consolidated MauiXaml Update entries (each XAML path listed once) -->
-  <ItemGroup>
+ 
+ <ItemGroup>
     <MauiXaml Update="Pages\Account\LoginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -132,38 +152,20 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
   </ItemGroup>
-
-  <!-- Removed empty/unused folder include for Pages\NewFolder since it's not needed -->
-
-  <!-- Ensure a stable package id for Android so multiple installed app icons don't appear -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-android'">
-    <!-- Replace with your preferred reverse-domain identifier -->
-    <ApplicationId>com.example.biblioapp</ApplicationId>
-  </PropertyGroup>
-
-  <!-- Disable Windows App SDK automatic DeploymentManager initialization for Windows build to avoid COM registration errors when the runtime isn't installed -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-windows10.0.19041.0'">
-    <DefineConstants>$(DefineConstants);MICROSOFT_WINDOWSAPPSDK_DEPLOYMENTMANAGER_AUTO_INITIALIZE_OPTIONS_NONE</DefineConstants>
-  </PropertyGroup>
-
-  <!-- Ensure any transitive Microsoft.AspNetCore.App FrameworkReference is removed for MAUI project builds -->
-  <ItemGroup>
-    <FrameworkReference Remove="Microsoft.AspNetCore.App" />
+	
+	<ItemGroup>
+    <None Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
-  <!-- Exclude invalid/empty resx file to avoid build XML parsing errors. Replace or remove the file later with a valid .resx. -->
   <ItemGroup>
     <EmbeddedResource Remove="Resources\Vertalingen\SharedResource.resx" />
   </ItemGroup>
 
-  <!-- Exclude Roslyn/Roslyn-based satellite resource DLLs from Android packaging to avoid XA0129 deployment errors -->
+ 
   <ItemGroup>
-    <!-- Remove any Microsoft.CodeAnalysis.*.resources.dll from build inputs so they are not copied into the Android package -->
-    <None Remove="**\Microsoft.CodeAnalysis.*\*.resources.dll" />
-    <EmbeddedResource Remove="**\Microsoft.CodeAnalysis.*\*.resources.dll" />
-    <Content Remove="**\Microsoft.CodeAnalysis.*\*.resources.dll" />
-    <MauiAsset Remove="**\Microsoft.CodeAnalysis.*\*.resources.dll" />
-    <AndroidAsset Remove="**\Microsoft.CodeAnalysis.*\*.resources.dll" />
+    <FrameworkReference Remove="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>

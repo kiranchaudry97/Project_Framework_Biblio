@@ -44,6 +44,26 @@ namespace Biblio_App
             };
         }
 
+        // New ctor that accepts an HttpClient (e.g. created via IHttpClientFactory.CreateClient("ApiWithToken"))
+        internal Synchronizer(LocalDbContext context, HttpClient httpClient, string? apiBase = null)
+        {
+            _context = context;
+            _apiBase = apiBase;
+
+            client = httpClient ?? new HttpClient();
+            // Ensure BaseAddress when not already set on the provided client
+            if (client.BaseAddress == null && !string.IsNullOrWhiteSpace(_apiBase))
+            {
+                try { client.BaseAddress = new Uri(_apiBase); } catch { }
+            }
+
+            sOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true,
+            };
+        }
+
         // Synchronize books from remote to local (best-effort). Does not remove local-only changes.
         async Task AllBooks()
         {
@@ -54,24 +74,84 @@ namespace Biblio_App
             {
                 try
                 {
-                    var response = await client.GetAsync("api/books");
+                    var response = await client.GetAsync("api/mobiledata");
                     response.EnsureSuccessStatusCode();
                     var responseBody = await response.Content.ReadAsStringAsync();
-                    var books = JsonSerializer.Deserialize<List<Boek>>(responseBody, sOptions);
-                    if (books != null && books.Count > 0)
+                    var data = JsonSerializer.Deserialize<MobileDataDto>(responseBody, sOptions);
+                    if (data != null)
                     {
-                        foreach (var book in books)
+                        // Upsert categories
+                        if (data.Categories != null)
                         {
-                            var existing = await _context.Boeken.FirstOrDefaultAsync(b => b.Id == book.Id);
-                            if (existing != null)
+                            foreach (var c in data.Categories)
                             {
-                                _context.Entry(existing).CurrentValues.SetValues(book);
-                            }
-                            else
-                            {
-                                _context.Boeken.Add(book);
+                                var existingC = await _context.Categorien.FirstOrDefaultAsync(x => x.Id == c.Id);
+                                if (existingC != null)
+                                {
+                                    existingC.Naam = c.Naam ?? existingC.Naam;
+                                    existingC.IsDeleted = false;
+                                }
+                                else
+                                {
+                                    _context.Categorien.Add(new Categorie { Id = c.Id, Naam = c.Naam ?? string.Empty });
+                                }
                             }
                         }
+
+                        // Upsert books
+                        if (data.Books != null)
+                        {
+                            foreach (var b in data.Books)
+                            {
+                                var existing = await _context.Boeken.FirstOrDefaultAsync(x => x.Id == b.Id);
+                                if (existing != null)
+                                {
+                                    existing.Titel = b.Titel ?? existing.Titel;
+                                    existing.Auteur = b.Auteur ?? existing.Auteur;
+                                    existing.Isbn = b.Isbn ?? existing.Isbn;
+                                    existing.CategorieID = b.CategorieId;
+                                    existing.IsDeleted = false;
+                                }
+                                else
+                                {
+                                    _context.Boeken.Add(new Boek
+                                    {
+                                        Id = b.Id,
+                                        Titel = b.Titel ?? string.Empty,
+                                        Auteur = b.Auteur ?? string.Empty,
+                                        Isbn = b.Isbn ?? string.Empty,
+                                        CategorieID = b.CategorieId
+                                    });
+                                }
+                            }
+                        }
+
+                        // Upsert members
+                        if (data.Members != null)
+                        {
+                            foreach (var m in data.Members)
+                            {
+                                var existingM = await _context.Leden.FirstOrDefaultAsync(x => x.Id == m.Id);
+                                if (existingM != null)
+                                {
+                                    existingM.Voornaam = m.Voornaam ?? existingM.Voornaam;
+                                    existingM.AchterNaam = m.AchterNaam ?? existingM.AchterNaam;
+                                    existingM.Email = m.Email ?? existingM.Email;
+                                    existingM.IsDeleted = false;
+                                }
+                                else
+                                {
+                                    _context.Leden.Add(new Lid
+                                    {
+                                        Id = m.Id,
+                                        Voornaam = m.Voornaam ?? string.Empty,
+                                        AchterNaam = m.AchterNaam ?? string.Empty,
+                                        Email = m.Email
+                                    });
+                                }
+                            }
+                        }
+
                         await _context.SaveChangesAsync();
                     }
                 }
@@ -227,6 +307,51 @@ namespace Biblio_App
             public string Password { get; set; } = string.Empty;
             public DateTime ValidTill { get; set; }
             public bool RememberMe { get; set; }
+        }
+
+        // DTO types for mobiledata endpoint
+        private class MobileDataDto
+        {
+            public List<CategoryDto>? Categories { get; set; }
+            public List<BookDto>? Books { get; set; }
+            public List<MemberDto>? Members { get; set; }
+            public List<LoanDto>? Loans { get; set; }
+        }
+
+        private class CategoryDto
+        {
+            public int Id { get; set; }
+            public string? Naam { get; set; }
+        }
+
+        private class BookDto
+        {
+            public int Id { get; set; }
+            public string? Titel { get; set; }
+            public string? Auteur { get; set; }
+            public string? Isbn { get; set; }
+            public int CategorieId { get; set; }
+            public string? CategorieNaam { get; set; }
+        }
+
+        private class MemberDto
+        {
+            public int Id { get; set; }
+            public string? Voornaam { get; set; }
+            public string? AchterNaam { get; set; }
+            public string? Email { get; set; }
+        }
+
+        private class LoanDto
+        {
+            public int Id { get; set; }
+            public int BoekId { get; set; }
+            public string? BoekTitel { get; set; }
+            public int LidId { get; set; }
+            public string? LidNaam { get; set; }
+            public DateTime StartDate { get; set; }
+            public DateTime DueDate { get; set; }
+            public DateTime? ReturnedAt { get; set; }
         }
     }
 }

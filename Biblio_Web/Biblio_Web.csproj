@@ -31,6 +31,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
     <!-- Keep a single, consistent OpenApi package version compatible with .NET 9 SDK -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+	 <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10" />
   </ItemGroup>
 
 </Project>

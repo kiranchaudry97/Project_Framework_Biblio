@@ -16,6 +16,7 @@ using Biblio_Models.Entiteiten;
 using Biblio_Models.Seed;
 using Biblio_Web.Middleware; // added for cookie provider
 using Microsoft.AspNetCore.Identity.UI.Services;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,6 +100,12 @@ builder.Services.AddRazorPages(options =>
 .AddDataAnnotationsLocalization(options =>
 {
     options.DataAnnotationLocalizerProvider = (type, factory) => factory.Create(typeof(Biblio_Web.SharedResource));
+})
+// Ensure JSON options applied for Razor Pages as well
+.AddJsonOptions(opts =>
+{
+    opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    opts.JsonSerializerOptions.MaxDepth = 64;
 });
 
 // JWT Authenticatie (registreer JwtBearer zonder cookie-standaarden te overschrijven)
@@ -151,10 +158,20 @@ builder.Services.AddControllersWithViews(options =>
 {
     // gebruik de SharedResource class voor gevalideerde/localized data annotations
     options.DataAnnotationLocalizerProvider = (type, factory) => factory.Create(typeof(Biblio_Web.SharedResource));
+})
+.AddJsonOptions(opts =>
+{
+    opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    opts.JsonSerializerOptions.MaxDepth = 64;
 });
 
 // Controllers ondersteuning
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+    {
+        opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        opts.JsonSerializerOptions.MaxDepth = 64;
+    });
 
 // Swagger + JWT ondersteuning
 builder.Services.AddEndpointsApiExplorer();

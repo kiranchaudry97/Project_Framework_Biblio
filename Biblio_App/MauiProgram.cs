@@ -15,6 +15,9 @@ using System.IO;
 using System.Globalization;
 using Microsoft.Maui.Devices;
 using CommunityToolkit.Maui;
+using System.Net.Http;
+using System.Net.Security;
+using System.Linq;
 
 namespace Biblio_App
 {
@@ -23,6 +26,17 @@ namespace Biblio_App
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
+
+#if DEBUG
+            try
+            {
+                if (Microsoft.Maui.Devices.DeviceInfo.Platform == Microsoft.Maui.Devices.DevicePlatform.WinUI)
+                {
+                    Biblio_App.Dev.DevHelpers.DeleteLocalDbIfExists();
+                }
+            }
+            catch { }
+#endif
 
             // Apply saved language preference if available, otherwise use device/system culture
             try
@@ -60,16 +74,9 @@ namespace Biblio_App
             // Bepaal API-basisadres uit configuratie (ondersteunt 'ApiBaseAddress' of 'Api:BaseAddress')
             var apiBase = builder.Configuration["ApiBaseAddress"] ?? builder.Configuration.GetSection("Api")["BaseAddress"] ?? "https://localhost:5001/";
 
-            try
-            {
-                if (DeviceInfo.Platform == DevicePlatform.Android && !string.IsNullOrEmpty(apiBase) && apiBase.Contains("localhost", StringComparison.OrdinalIgnoreCase))
-                {
-                    apiBase = apiBase.Replace("localhost", "10.0.2.2", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            catch { }
+            // Normalize ApiBase for emulator/device scenarios (replace localhost for Android emulators etc.)
+            apiBase = ResolveApiBaseForDevice(apiBase);
 
-            // Log the resolved API base for debugging (visible in Debug output / logcat)
             try
             {
                 System.Diagnostics.Debug.WriteLine($"[MauiProgram] Resolved ApiBase = '{apiBase}'");
@@ -92,6 +99,22 @@ namespace Biblio_App
             // Configureer DbContextFactory:
             // Use local SQLite file for all platforms (ensure MAUI app uses biblio.db)
             string dbPath = System.IO.Path.Combine(FileSystem.AppDataDirectory, "biblio.db");
+
+            // Log DB path and AppDataDirectory so it's easy to find on Windows
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"[MauiProgram] DB path: {dbPath}");
+                System.Diagnostics.Debug.WriteLine($"[MauiProgram] AppDataDirectory: {FileSystem.AppDataDirectory}");
+                // Also write a small marker file into the app data directory so you can open it from Explorer
+                try
+                {
+                    var marker = Path.Combine(FileSystem.AppDataDirectory, "biblio_paths.log");
+                    File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] DB: {dbPath}\nApiBase: {apiBase}\n");
+                }
+                catch { }
+            }
+            catch { }
+
             builder.Services.AddDbContextFactory<BiblioDbContext>(options =>
                 options.UseSqlite($"Data Source={dbPath}"));
 
@@ -110,20 +133,67 @@ namespace Biblio_App
             builder.Services.AddScoped<EfGegevensProvider>();
             builder.Services.AddScoped<IGegevensProvider>(sp => sp.GetRequiredService<EfGegevensProvider>());
 
-            // Registreer TokenHandler and provide IAuthService for injection
-            builder.Services.AddTransient<TokenHandler>(sp => ActivatorUtilities.CreateInstance<TokenHandler>(sp));
-            builder.Services.AddHttpClient<IAuthService, AuthService>(c =>
-            {
-                c.BaseAddress = new Uri(apiBase);
-                c.Timeout = TimeSpan.FromSeconds(5);
-            }).AddHttpMessageHandler<TokenHandler>();
+            // Read UseAuth setting (default true)
+            var useAuth = bool.TryParse(builder.Configuration["UseAuth"], out var ua) ? ua : true;
 
-            // Ensure TokenHandler has access to IAuthService for refresh; register plain HttpClient for ApiWithToken then add handler
-            builder.Services.AddHttpClient("ApiWithToken", c =>
+            // Register TokenHandler and HttpClients conditionally based on UseAuth
+            if (useAuth)
             {
-                c.BaseAddress = new Uri(apiBase);
-                c.Timeout = TimeSpan.FromSeconds(5);
-            }).AddHttpMessageHandler<TokenHandler>();
+                // TokenHandler needs IAuthService available to perform refresh calls
+                builder.Services.AddTransient<TokenHandler>(sp => ActivatorUtilities.CreateInstance<TokenHandler>(sp));
+
+                // Auth service client (used by TokenHandler to refresh tokens)
+                builder.Services.AddHttpClient<IAuthService, AuthService>(c =>
+                {
+                    c.BaseAddress = new Uri(apiBase);
+                    c.Timeout = TimeSpan.FromSeconds(5);
+                })
+                .ConfigurePrimaryHttpMessageHandler(() =>
+                    new HttpClientHandler
+                    {
+                        // Development-only: accept self-signed certs for localhost. Remove in production.
+                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                        {
+                            if (message.RequestUri?.Host == "localhost") return true;
+                            return errors == SslPolicyErrors.None;
+                        }
+                    });
+
+                // API client with TokenHandler attached
+                builder.Services.AddHttpClient("ApiWithToken", c =>
+                {
+                    c.BaseAddress = new Uri(apiBase);
+                    c.Timeout = TimeSpan.FromSeconds(10);
+                })
+                .ConfigurePrimaryHttpMessageHandler(() =>
+                    new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                        {
+                            if (message.RequestUri?.Host == "localhost") return true;
+                            return errors == SslPolicyErrors.None;
+                        }
+                    })
+                .AddHttpMessageHandler<TokenHandler>();
+            }
+            else
+            {
+                // Plain API client without token (development or anonymous endpoints)
+                builder.Services.AddHttpClient("ApiWithToken", c =>
+                {
+                    c.BaseAddress = new Uri(apiBase);
+                    c.Timeout = TimeSpan.FromSeconds(10);
+                })
+                .ConfigurePrimaryHttpMessageHandler(() =>
+                    new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                        {
+                            if (message.RequestUri?.Host == "localhost") return true;
+                            return errors == SslPolicyErrors.None;
+                        }
+                    });
+            }
 
             builder.Services.AddScoped<IDataSyncService, DataSyncService>();
             builder.Services.AddScoped<ILocalRepository, LocalRepository>();
@@ -176,7 +246,12 @@ namespace Biblio_App
                 try { ctx = dbFactory?.CreateDbContext(); } catch { ctx = null; }
                 var cfg = sp.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
                 var apiBase = cfg?["ApiBaseAddress"] ?? cfg?.GetSection("Api")?["BaseAddress"];
-                return new Synchronizer(ctx ?? throw new InvalidOperationException("LocalDbContext factory not available"), apiBase);
+
+                // Use IHttpClientFactory to create the named client that has TokenHandler attached
+                var httpFactory = sp.GetRequiredService<IHttpClientFactory>();
+                var client = httpFactory.CreateClient("ApiWithToken");
+
+                return new Synchronizer(ctx ?? throw new InvalidOperationException("LocalDbContext factory not available"), client, apiBase);
             });
 
 #if DEBUG
@@ -270,172 +345,54 @@ namespace Biblio_App
 
         private static async Task InitializeDatabaseAsync(IServiceProvider services)
         {
-            // maak het marker-pad vroeg aan
             var marker = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
 
-            // Gebruik een scope om services te benaderen
             using var scope = services.CreateScope();
 
-            try
+            async Task EnsureForContextAsync<TContext>() where TContext : DbContext
             {
-                // Geef de voorkeur aan de factory als deze geregistreerd is
-                var dbFactory = scope.ServiceProvider.GetService<IDbContextFactory<BiblioDbContext>>();
-                if (dbFactory != null)
+                try
                 {
-                    using var db = dbFactory.CreateDbContext();
-                    var provider = db.Database.ProviderName ?? string.Empty;
+                    var dbFactory = scope.ServiceProvider.GetService<IDbContextFactory<TContext>>();
+                    TContext? ctx = dbFactory != null ? dbFactory.CreateDbContext() : scope.ServiceProvider.GetService<TContext>();
+                    if (ctx == null) return;
+
+                    var db = ctx.Database;
+                    var provider = db.ProviderName ?? string.Empty;
+
+                    try
+                    {
+                        var pending = db.GetPendingMigrations();
+                        if (pending != null && pending.Any())
+                        {
+                            await db.MigrateAsync();
+                            try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] Applied migrations for {typeof(TContext).Name}\n"); } catch { }
+                            return;
+                        }
+                    }
+                    catch { /* if GetPendingMigrations fails, fall back */ }
+
                     if (provider.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
                     {
-                        // SQLite op device/emulator: migraties die voor SQL Server zijn tegengekomen kunnen falen — maak de DB vanuit het model aan
-                        await db.Database.EnsureCreatedAsync();
-                        try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] EnsureCreatedAsync gebruikt voor provider: {provider}\n"); } catch { }
+                        await db.EnsureCreatedAsync();
+                        try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] EnsureCreatedAsync used for {typeof(TContext).Name}\n"); } catch { }
                     }
                     else
                     {
-                        await db.Database.MigrateAsync();
-                        try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] MigrateAsync gebruikt voor provider: {provider}\n"); } catch { }
+                        await db.MigrateAsync();
+                        try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] MigrateAsync used for {typeof(TContext).Name}\n"); } catch { }
                     }
-
-                    // minimale seed (categorieën, boeken, leden) — veilig zonder Identity-afhankelijkheden
-                    if (!await db.Categorien.AnyAsync())
-                    {
-                        db.Categorien.AddRange(
-                            new Biblio_Models.Entiteiten.Categorie { Naam = "Roman" },
-                            new Biblio_Models.Entiteiten.Categorie { Naam = "Jeugd" },
-                            new Biblio_Models.Entiteiten.Categorie { Naam = "Thriller" },
-                            new Biblio_Models.Entiteiten.Categorie { Naam = "Wetenschap" }
-                        );
-                        await db.SaveChangesAsync();
-                    }
-
-                    if (!await db.Boeken.AnyAsync())
-                    {
-                        // Spiegel seed uit Biblio_Models.Seed.SeedData
-                        var roman = await db.Categorien.FirstAsync(c => c.Naam == "Roman");
-                        var jeugd = await db.Categorien.FirstAsync(c => c.Naam == "Jeugd");
-                        var thriller = await db.Categorien.FirstAsync(c => c.Naam == "Thriller");
-                        var wetenschap = await db.Categorien.FirstAsync(c => c.Naam == "Wetenschap");
-
-                        db.Boeken.AddRange(
-                            new Biblio_Models.Entiteiten.Boek { Titel = "1984", Auteur = "George Orwell", Isbn = "9780451524935", CategorieID = roman.Id },
-                            new Biblio_Models.Entiteiten.Boek { Titel = "De Hobbit", Auteur = "J.R.R. Tolkien", Isbn = "9780547928227", CategorieID = roman.Id },
-                            new Biblio_Models.Entiteiten.Boek { Titel = "Pride and Prejudice", Auteur = "Jane Austen", Isbn = "9781503290563", CategorieID = roman.Id },
-                            new Biblio_Models.Entiteiten.Boek { Titel = "To Kill a Mockingbird", Auteur = "Harper Lee", Isbn = "9780061120084", CategorieID = roman.Id },
-                            new Biblio_Models.Entiteiten.Boek { Titel = "Brave New World", Auteur = "Aldous Huxley", Isbn = "9780060850524", CategorieID = roman.Id },
-
-                            new Biblio_Models.Entiteiten.Boek { Titel = "Matilda", Auteur = "Roald Dahl", Isbn = "9780142410370", CategorieID = jeugd.Id },
-                            new Biblio_Models.Entiteiten.Boek { Titel = "Harry Potter en de Steen der Wijzen", Auteur = "J.K. Rowling", Isbn = "9781408855652", CategorieID = jeugd.Id },
-
-                            new Biblio_Models.Entiteiten.Boek { Titel = "The Girl with the Dragon Tattoo", Auteur = "Stieg Larsson", Isbn = "9780307454546", CategorieID = thriller.Id },
-                            new Biblio_Models.Entiteiten.Boek { Titel = "The Da Vinci Code", Auteur = "Dan Brown", Isbn = "9780307474278", CategorieID = thriller.Id },
-
-                            new Biblio_Models.Entiteiten.Boek { Titel = "A Brief History of Time", Auteur = "Stephen Hawking", Isbn = "9780553380163", CategorieID = wetenschap.Id },
-                            new Biblio_Models.Entiteiten.Boek { Titel = "The Selfish Gene", Auteur = "Richard Dawkins", Isbn = "9780192860927", CategorieID = wetenschap.Id }
-                        );
-                        await db.SaveChangesAsync();
-                    }
-
-                    if (!await db.Leden.AnyAsync())
-                    {
-                        db.Leden.AddRange(
-                            new Biblio_Models.Entiteiten.Lid { Voornaam = "Jan", AchterNaam = "Peeters", Email = "jan.peeters@example.com" },
-                            new Biblio_Models.Entiteiten.Lid { Voornaam = "Sara", AchterNaam = "De Smet", Email = "sara.desmet@example.com" }
-                        );
-                        await db.SaveChangesAsync();
-                    }
-
-                    // Seed talen (Talen) gelijk aan web-seed
-                    if (!await db.Set<Biblio_Models.Entiteiten.Taal>().AnyAsync())
-                    {
-                        db.Set<Biblio_Models.Entiteiten.Taal>().AddRange(
-                            new Biblio_Models.Entiteiten.Taal { Code = "nl", Naam = "Nederlands", IsDefault = true },
-                            new Biblio_Models.Entiteiten.Taal { Code = "en", Naam = "English", IsDefault = false }
-                        );
-                        await db.SaveChangesAsync();
-                    }
-
-                    // Seed voorbeeldleningen als er geen bestaan zodat de MAUI-app voorbeeld Uitleningen toont
-                    if (!await db.Leningens.AnyAsync())
-                    {
-                        try
-                        {
-                            var firstBoek = await db.Boeken.AsNoTracking().FirstOrDefaultAsync();
-                            var secondBoek = await db.Boeken.AsNoTracking().Skip(1).FirstOrDefaultAsync();
-                            var jan = await db.Leden.AsNoTracking().FirstOrDefaultAsync(l => l.Voornaam == "Jan");
-                            var sara = await db.Leden.AsNoTracking().FirstOrDefaultAsync(l => l.Voornaam == "Sara");
-
-                            var loans = new List<Biblio_Models.Entiteiten.Lenen>();
-                            if (firstBoek != null && jan != null)
-                            {
-                                loans.Add(new Biblio_Models.Entiteiten.Lenen
-                                {
-                                    BoekId = firstBoek.Id,
-                                    LidId = jan.Id,
-                                    StartDate = DateTime.Now.AddDays(-10),
-                                    DueDate = DateTime.Now.AddDays(4),
-                                    ReturnedAt = null
-                                });
-                            }
-                            if (secondBoek != null && sara != null)
-                            {
-                                loans.Add(new Biblio_Models.Entiteiten.Lenen
-                                {
-                                    BoekId = secondBoek.Id,
-                                    LidId = sara.Id,
-                                    StartDate = DateTime.Now.AddDays(-30),
-                                    DueDate = DateTime.Now.AddDays(-16),
-                                    ReturnedAt = DateTime.Now.AddDays(-15) // geretourneerd
-                                });
-                            }
-
-                            if (loans.Count > 0)
-                            {
-                                db.Leningens.AddRange(loans);
-                                await db.SaveChangesAsync();
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            // negeer seed-fouten maar log naar marker
-                            try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] Seed loans error: {ex}\n"); } catch { }
-                        }
-                    }
-
-                    // schrijf succes-marker
-                    try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] InitializeDatabaseAsync completed successfully.\n"); } catch { }
-
-                    return;
                 }
-
-                // Fallback: probeer BiblioDbContext direct te resolven (als AddDbContext gebruikt is)
-                var dbCtx = scope.ServiceProvider.GetService<BiblioDbContext>();
-                if (dbCtx != null)
+                catch (Exception ex)
                 {
-                    var provider = dbCtx.Database.ProviderName ?? string.Empty;
-                    if (provider.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
-                    {
-                        await dbCtx.Database.EnsureCreatedAsync();
-                        try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] EnsureCreatedAsync used for provider: {provider} (fallback)\n"); } catch { }
-                    }
-                    else
-                    {
-                        await dbCtx.Database.MigrateAsync();
-                        try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] MigrateAsync used for provider: {provider} (fallback)\n"); } catch { }
-                    }
-
-                    // schrijf succes-marker voor fallback-pad
-                    try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] InitializeDatabaseAsync fallback (direct DbContext) completed successfully.\n"); } catch { }
-
-                    return;
+                    try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] InitializeDatabaseAsync ({typeof(TContext).Name}) exception: {ex}\n"); } catch { }
+                    throw;
                 }
+            }
 
-                throw new InvalidOperationException("Geen geschikte DbContext of DbContextFactory gevonden.");
-            }
-            catch (Exception ex)
-            {
-                try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] InitializeDatabaseAsync exception: {ex}\n"); } catch { }
-                throw;
-            }
+            // Apply to primary app DbContext and local/shared LocalDbContext
+            await EnsureForContextAsync<BiblioDbContext>();
+            await EnsureForContextAsync<Biblio_Models.Data.LocalDbContext>();
         }
 
         public static async Task InitializeAdminAsync(IServiceProvider serviceProvider)
@@ -468,6 +425,35 @@ namespace Biblio_App
                 var token = await userManager.GeneratePasswordResetTokenAsync(admin);
                 await userManager.ResetPasswordAsync(admin, token, "Admin123!");
             }
+        }
+
+        private static string ResolveApiBaseForDevice(string apiBase)
+        {
+            if (string.IsNullOrWhiteSpace(apiBase))
+                return apiBase;
+
+            try
+            {
+                // If running on Android emulator, replace localhost with emulator host loopback.
+                // Default Android emulator -> 10.0.2.2, Genymotion -> 10.0.3.2.
+                try
+                {
+                    if (DeviceInfo.Platform == DevicePlatform.Android && apiBase.Contains("localhost", StringComparison.OrdinalIgnoreCase))
+                    {
+                        apiBase = apiBase.Replace("localhost", "10.0.2.2", StringComparison.OrdinalIgnoreCase);
+                    }
+                }
+                catch { /* DeviceInfo may not be available in some contexts; swallow */ }
+
+                // Additional: if someone configured 127.0.0.1 explicitly, treat same as localhost
+                if (apiBase.Contains("127.0.0.1"))
+                {
+                    apiBase = apiBase.Replace("127.0.0.1", "10.0.2.2", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            catch { /* best-effort */ }
+
+            return apiBase;
         }
     }
 }
