@@ -186,7 +186,7 @@ namespace Biblio_App.Pages.Account
                         // Log main page / shell state before navigation
                         try
                         {
-                            System.Diagnostics.Debug.WriteLine($"OnLoginClicked: MainPage={Application.Current?.MainPage?.GetType()?.FullName}, ShellCurrent={(Shell.Current == null ? "null" : Shell.Current.GetType().FullName)}");
+                            System.Diagnostics.Debug.WriteLine($"OnLoginClicked: MainPage={(App.Current?.Windows?.Count > 0 ? App.Current.Windows[0]?.Page?.GetType()?.FullName : "null")}, ShellCurrent={(Shell.Current == null ? "null" : Shell.Current.GetType().FullName)}");
                         }
                         catch { }
 
@@ -225,7 +225,7 @@ namespace Biblio_App.Pages.Account
                                             }
                                         }
                                     }
-                                    else if (Application.Current?.MainPage is AppShell appShell)
+                                    else if (App.Current?.Windows?.Count > 0 && App.Current.Windows[0]?.Page is AppShell appShell)
                                     {
                                         try { await appShell.GoToAsync("//BoekenShell"); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"OnLoginClicked: appshell.GoToAsync failed: {ex}"); }
                                     }
@@ -245,7 +245,7 @@ namespace Biblio_App.Pages.Account
                         catch (Exception ex)
                         {
                             System.Diagnostics.Debug.WriteLine($"OnLoginClicked: navigation failed: {ex}");
-                            try { if (Shell.Current != null) await Shell.Current.GoToAsync("//" + nameof(Pages.MainPage)); } catch (Exception ex2) { System.Diagnostics.Debug.WriteLine($"OnLoginClicked: fallback navigation failed: {ex2}"); }
+                            try { if (App.Current?.Windows?.Count > 0 && App.Current.Windows[0]?.Page != null) await Shell.Current.GoToAsync("//" + nameof(Pages.MainPage)); } catch (Exception ex2) { System.Diagnostics.Debug.WriteLine($"OnLoginClicked: fallback navigation failed: {ex2}"); }
                         }
 
                         return;

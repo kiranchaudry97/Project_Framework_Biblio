@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -13,14 +13,64 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 
-  <!-- Minimal placeholder resources to make the .resx valid -->
+  <!-- Dutch translations for the MAUI app pages (minimal set for Boeken) -->
+  <data name="Books" xml:space="preserve">
+    <value>Boeken</value>
+  </data>
+  <data name="BooksOverview" xml:space="preserve">
+    <value>Overzicht van boeken � hier kun je details bekijken, boeken bewerken en daarna een nieuw boek toevoegen</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Titel</value>
+  </data>
+  <data name="Author" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="ISBN" xml:space="preserve">
+    <value>ISBN</value>
+  </data>
+  <data name="Category" xml:space="preserve">
+    <value>Categorie</value>
+  </data>
+  <data name="SearchPlaceholder" xml:space="preserve">
+    <value>Zoek op titel, auteur of ISBN...</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Zoek</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nieuw</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Verwijder</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Opslaan</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Bewerk</value>
+  </data>
+  <data name="Alle" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="Page" xml:space="preserve">
+    <value>Pagina</value>
+  </data>
+  <data name="Prev" xml:space="preserve">
+    <value>Vorige</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Volgende</value>
+  </data>
+
+  <!-- keep a few existing placeholder/english keys to avoid breaking other lookups -->
   <data name="Members" xml:space="preserve">
     <value>Members</value>
   </data>
   <data name="Loans" xml:space="preserve">
     <value>Loans</value>
-  </data>
-  <data name="Books" xml:space="preserve">
-    <value>Books</value>
   </data>
 </root>

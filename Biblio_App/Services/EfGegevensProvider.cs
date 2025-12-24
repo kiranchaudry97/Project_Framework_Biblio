@@ -8,9 +8,10 @@ namespace Biblio_App.Services
 {
     public class EfGegevensProvider : IGegevensProvider
     {
-        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
+        // Use the LocalDbContext factory in the MAUI app so local SQLite is used
+        private readonly IDbContextFactory<Biblio_Models.Data.LocalDbContext> _dbFactory;
 
-        public EfGegevensProvider(IDbContextFactory<BiblioDbContext> dbFactory)
+        public EfGegevensProvider(IDbContextFactory<Biblio_Models.Data.LocalDbContext> dbFactory)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
         }

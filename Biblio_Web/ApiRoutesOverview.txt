@@ -1,0 +1,45 @@
+﻿Overzicht van alle REST API routes in dit project (Biblio_Web Controllers /api/*)
+
+Format: [HTTP] /route  -> actie beschrijving (autorisatie)
+
+1) AuthController (Route: /api/auth)
+   - [POST] /api/auth/login -> Login endpoint (AllowAnonymous) - body: { Email, Password }
+   - (Op webproject zijn ook endpoints voor token/refresh in sommige clients; server exposeert login hierboven)
+
+2) BoekenApiController (Route: /api/boeken)  [Authorize(Policy = "RequireMember")]
+   - [GET]  /api/boeken?page={page}&pageSize={pageSize}  -> Paged list van boeken (RequireMember)
+   - [GET]  /api/boeken/{id}                           -> Boek detail (RequireMember)
+   - [POST] /api/boeken                                -> Maak nieuw boek (RequireStaff)
+   - [PUT]  /api/boeken/{id}                           -> Update boek (RequireStaff)
+   - [DELETE] /api/boeken/{id}                        -> Soft-delete boek (RequireStaff)
+
+3) LedenApiController (Route: /api/leden)  [Authorize(Policy = "RequireStaff")]
+   - [GET]  /api/leden?page={page}&pageSize={pageSize}  -> Paged list van leden (RequireStaff)
+   - [GET]  /api/leden/{id}                             -> Lid detail (RequireStaff)
+   - [POST] /api/leden                                  -> Maak nieuw lid (RequireStaff)
+   - [PUT]  /api/leden/{id}                             -> Update lid (RequireStaff)
+   - [DELETE] /api/leden/{id}                           -> Soft-delete lid (RequireStaff)
+
+4) CategorieenApiController (Route: /api/categorieen)  [Authorize(Policy = "RequireStaff")]
+   - [GET]  /api/categorieen            -> Lijst categorieën (RequireStaff)
+   - [GET]  /api/categorieen/{id}       -> Categorie detail (RequireStaff)
+   - [POST] /api/categorieen            -> Maak categorie (RequireStaff)
+   - [PUT]  /api/categorieen/{id}       -> Update categorie (RequireStaff)
+   - [DELETE] /api/categorieen/{id}     -> Soft-delete categorie (RequireStaff)
+
+5) UitleningenApiController (Route: /api/uitleningen)  [Authorize(Policy = "RequireMember")]
+   - [GET]  /api/uitleningen?page={page}&pageSize={pageSize} -> Paged list van leningen (RequireMember)
+   - [GET]  /api/uitleningen/late                             -> Lijst te late (overdue) leningen (RequireMember)
+   - [POST] /api/uitleningen                                  -> Maak nieuwe lening (RequireStaff)
+   - [PUT]  /api/uitleningen/{id}/return                       -> Markeer lening als ingeleverd (RequireStaff)
+
+Opmerkingen / extra info
+- Swagger/OpenAPI is geconfigureerd in het web‑project (Program.cs) via AddSwaggerGen en UseSwaggerUI. Tijdens development is de UI beschikbaar op /swagger.
+- Autorisatiepolicies gedefinieerd in Program.cs: RequireAdmin, RequireStaff, RequireMember.
+- Routes zijn verbindt met controllers via app.MapControllers() in Program.cs.
+- MAUI‑client gebruikt deze API routes (bv. AuthService, Synchronizer) met base address ingesteld in Biblio_App/MauiProgram.cs (configurable via appsettings.json). TokenHandler voegt Bearer token toe aan uitgaande requests.
+
+Als je wilt kan ik:
+- een gegenereerde OpenAPI JSON export kopiëren (swagger JSON) of
+- een kort client‑voorbeeldbestand toevoegen met voorbeeld‑curl/HttpClient calls voor de belangrijkste endpoints (login, boeken GET, uitleningen POST/PUT).
+

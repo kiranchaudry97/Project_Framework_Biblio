@@ -83,11 +83,65 @@ namespace Biblio_App
             }
             catch { }
 
+            // Connectivity check (runs on all platforms) — write a small marker so it's easy to debug when running (Windows, Android, iOS...) 
+            try
+            {
+                Task.Run(async () =>
+                {
+                    var platform = DeviceInfo.Platform.ToString();
+                    var marker = Path.Combine(FileSystem.AppDataDirectory, $"api_connectivity_{platform}.log");
+                    try
+                    {
+                        using var handler = new HttpClientHandler
+                        {
+                            ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) =>
+                            {
+                                if (msg.RequestUri?.Host == "localhost") return true;
+                                return errors == SslPolicyErrors.None;
+                            }
+                        };
+
+                        using var client = new HttpClient(handler) { BaseAddress = new Uri(apiBase), Timeout = TimeSpan.FromSeconds(5) };
+                        try
+                        {
+                            var resp = await client.GetAsync("api/boeken?page=1&pageSize=1");
+                            var body = resp.IsSuccessStatusCode ? await resp.Content.ReadAsStringAsync() : resp.ReasonPhrase;
+                            var text = $"[{DateTime.UtcNow:o}] [{platform}] GET {apiBase}api/boeken -> {(int)resp.StatusCode} {resp.ReasonPhrase}\n{body}\n";
+                            try { File.AppendAllText(marker, text); } catch { }
+                            try { System.Diagnostics.Debug.WriteLine("[MauiProgram] API connectivity check: " + text); } catch { }
+                        }
+                        catch (Exception ex)
+                        {
+                            var text = $"[{DateTime.UtcNow:o}] [{platform}] GET {apiBase}api/boeken -> ERROR: {ex.Message}\n";
+                            try { File.AppendAllText(marker, text); } catch { }
+                            try { System.Diagnostics.Debug.WriteLine("[MauiProgram] API connectivity check error: " + ex); } catch { }
+                        }
+                    }
+                    catch { }
+                });
+            }
+            catch { }
+
             // Registreer pagina's
             builder.Services.AddTransient<MainPage>();
 
             // Registreer een singleton SecurityViewModel om de loginstatus in de app te bewaren
             builder.Services.AddSingleton<SecurityViewModel>();
+
+            // If running on Windows Machine and a WindowsFallbackApiBase is specified, force the ApiBase to that value
+            try
+            {
+                if (Microsoft.Maui.Devices.DeviceInfo.Platform == Microsoft.Maui.Devices.DevicePlatform.WinUI)
+                {
+                    var wfb = builder.Configuration["WindowsFallbackApiBase"];
+                    if (!string.IsNullOrWhiteSpace(wfb))
+                    {
+                        apiBase = wfb;
+                        try { System.Diagnostics.Debug.WriteLine($"[MauiProgram] Overriding ApiBase for WinUI -> '{apiBase}'"); } catch { }
+                    }
+                }
+            }
+            catch { }
 
             // Registreer nieuw aangemaakte pagina's
             // De Users-pagina bevindt zich in de Account-namespace
@@ -115,19 +169,16 @@ namespace Biblio_App
             }
             catch { }
 
-            builder.Services.AddDbContextFactory<BiblioDbContext>(options =>
-                options.UseSqlite($"Data Source={dbPath}"));
-
-            // Also register DbContext for direct injection in MAUI pages/services if needed
-            builder.Services.AddDbContext<BiblioDbContext>(options =>
-                options.UseSqlite($"Data Source={dbPath}"));
-
-            // Register also LocalDbContext (shared models project) for local MAUI operations
+            // Register LocalDbContext for local MAUI operations
+            // Use AddDbContextFactory so callers can obtain a factory (IDbContextFactory<T>)
+            // This allows creating short-lived contexts from background threads and services.
             builder.Services.AddDbContextFactory<Biblio_Models.Data.LocalDbContext>(options =>
                 options.UseSqlite($"Data Source={dbPath}"));
 
-            builder.Services.AddDbContext<Biblio_Models.Data.LocalDbContext>(options =>
-                options.UseSqlite($"Data Source={dbPath}"));
+            // Register application BiblioDbContext factory (used by viewmodels/services)
+            // BiblioDbContext has its own OnConfiguring fallback logic so we don't need to
+            // provide provider configuration here.
+            builder.Services.AddDbContextFactory<Biblio_Models.Data.BiblioDbContext>();
                 
             // Registreer EF-gebaseerde gegevensprovider (factory-gebaseerd)
             builder.Services.AddScoped<EfGegevensProvider>();
@@ -242,8 +293,8 @@ namespace Biblio_App
             builder.Services.AddSingleton<Synchronizer>(sp =>
             {
                 var dbFactory = sp.GetService<IDbContextFactory<Biblio_Models.Data.LocalDbContext>>();
-                Biblio_Models.Data.LocalDbContext? ctx = null;
-                try { ctx = dbFactory?.CreateDbContext(); } catch { ctx = null; }
+                if (dbFactory == null) throw new InvalidOperationException("LocalDbContext factory not available");
+
                 var cfg = sp.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
                 var apiBase = cfg?["ApiBaseAddress"] ?? cfg?.GetSection("Api")?["BaseAddress"];
 
@@ -251,7 +302,7 @@ namespace Biblio_App
                 var httpFactory = sp.GetRequiredService<IHttpClientFactory>();
                 var client = httpFactory.CreateClient("ApiWithToken");
 
-                return new Synchronizer(ctx ?? throw new InvalidOperationException("LocalDbContext factory not available"), client, apiBase);
+                return new Synchronizer(dbFactory, client, apiBase);
             });
 
 #if DEBUG
@@ -261,52 +312,30 @@ namespace Biblio_App
             var app = builder.Build();
 
             // Start background initialization/synchronization (fire-and-forget)
-            try
-            {
-                var sync = app.Services.GetService<Synchronizer>();
-                if (sync != null)
-                {
-                    Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await sync.InitializeDb();
-                            await sync.SynchronizeAll();
-                        }
-                        catch (Exception ex)
-                        {
-                            try { System.Diagnostics.Debug.WriteLine($"Synchronizer background task error: {ex}"); } catch { }
-                        }
-                    });
-                }
-            }
-            catch { }
+            // NOTE: this is invoked after database initialization below to ensure local tables exist
 
             // Zorg dat de database is aangemaakt, migraties toegepast en minimale seed-data ingevoegd bij eerste start.
-            // Draai dit op de achtergrond om te voorkomen dat de UI-thread geblokkeerd wordt (voorkomt ANR op Android emulators/devices).
+            // Run synchronously here so local SQLite schema exists before pages/viewmodels attempt queries.
             try
             {
-                Task.Run(async () =>
+                try
                 {
+                    InitializeDatabaseAsync(app.Services).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    var logger = app.Services.GetService<ILoggerFactory>()?.CreateLogger("MauiProgram");
+                    logger?.LogError(ex, "Database initialization failed.");
+                    try { Infrastructure.ErrorLogger.Log(ex); } catch { }
+
+                    // schrijf fout-marker zodat we dit op device/emulator kunnen onderzoeken
                     try
                     {
-                        await InitializeDatabaseAsync(app.Services);
+                        var marker = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
+                        File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] Database initialization failed: {ex}\n");
                     }
-                    catch (Exception ex)
-                    {
-                        var logger = app.Services.GetService<ILoggerFactory>()?.CreateLogger("MauiProgram");
-                        logger?.LogError(ex, "Database initialization failed.");
-                        try { Infrastructure.ErrorLogger.Log(ex); } catch { }
-
-                        // schrijf fout-marker zodat we dit op device/emulator kunnen onderzoeken
-                        try
-                        {
-                            var marker = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
-                            File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] Database initialization failed: {ex}\n");
-                        }
-                        catch { }
-                    }
-                });
+                    catch { }
+                }
             }
             catch (Exception ex)
             {
@@ -391,8 +420,29 @@ namespace Biblio_App
             }
 
             // Apply to primary app DbContext and local/shared LocalDbContext
-            await EnsureForContextAsync<BiblioDbContext>();
+            // On mobile platforms the server DbContext (BiblioDbContext) may be configured
+            // for SQL Server / LocalDB which is not supported on Android/iOS. Skip running
+            // migrations for BiblioDbContext on mobile targets to avoid runtime failures.
+            try
+            {
+                if (DeviceInfo.Platform != DevicePlatform.Android && DeviceInfo.Platform != DevicePlatform.iOS && DeviceInfo.Platform != DevicePlatform.MacCatalyst)
+                {
+                    await EnsureForContextAsync<BiblioDbContext>();
+                }
+            }
+            catch { }
+
             await EnsureForContextAsync<Biblio_Models.Data.LocalDbContext>();
+
+            // Seed local SQLite database with sample data (categories, books, members, languages)
+            try
+            {
+                await Biblio_App.LocalDataSeed.SeedLocalDataAsync(services);
+            }
+            catch (Exception ex)
+            {
+                try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] SeedLocalDataAsync exception: {ex}\n"); } catch { }
+            }
         }
 
         public static async Task InitializeAdminAsync(IServiceProvider serviceProvider)

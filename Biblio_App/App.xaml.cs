@@ -1,4 +1,4 @@
-﻿namespace Biblio_App
+namespace Biblio_App
 {
     public partial class App : Application
     {
@@ -6,8 +6,8 @@
         public App(ViewModels.SecurityViewModel security)
         {
             InitializeComponent();
-            // Start with the Shell as the main page
-            MainPage = new AppShell();
+            // Start with the Shell via CreateWindow (override) to follow .NET 9 single-window pattern
+            // Window will be created by the framework using CreateWindow.
 
             var current = SynchronizationContext.Current;
             // Only wrap an existing SynchronizationContext. Replacing a null context with
@@ -35,7 +35,9 @@
 
         protected override Window CreateWindow(Microsoft.Maui.IActivationState? activationState)
         {
-            return new Window(MainPage);
+            // Create the window with AppShell as root page
+            var shell = new AppShell();
+            return new Window(shell);
         }
     }
 }

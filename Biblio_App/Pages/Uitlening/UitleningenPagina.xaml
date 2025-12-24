@@ -83,7 +83,7 @@
 
                     <!-- List of loans with item card matching screenshot -->
                     <CollectionView ItemsSource="{Binding Uitleningen}" SelectionMode="Single" SelectedItem="{Binding SelectedUitlening, Mode=TwoWay}">
-                        <CollectionView.ItemTemplate>
+                    <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:Lenen">
                                 <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="0" BackgroundColor="White" Margin="0,6">
                                     <Border.StrokeShape>
@@ -112,7 +112,7 @@
                                                 <Label FontSize="11" TextColor="#6E6E6E" HorizontalOptions="Start">
                                                     <Label.FormattedText>
                                                         <FormattedString>
-                                                            <Span Text="{Binding BindingContext.StartLabel, Source={x:Reference PageRoot}}" />
+                                                            <Span Text="{Binding Source={x:Reference PageRoot}, Path=BindingContext.StartLabel}" />
                                                             <Span Text=": " />
                                                             <Span Text="{Binding StartDate, StringFormat='{0:dd-MM-yyyy}'}" />
                                                         </FormattedString>
@@ -121,7 +121,7 @@
                                                 <Label FontSize="11" TextColor="#6E6E6E" HorizontalOptions="Start">
                                                     <Label.FormattedText>
                                                         <FormattedString>
-                                                            <Span Text="{Binding BindingContext.DueLabel, Source={x:Reference PageRoot}}" />
+                                                            <Span Text="{Binding Source={x:Reference PageRoot}, Path=BindingContext.DueLabel}" />
                                                             <Span Text=": " />
                                                             <Span Text="{Binding DueDate, StringFormat='{0:dd-MM-yyyy}'}" />
                                                         </FormattedString>

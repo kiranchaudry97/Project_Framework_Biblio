@@ -18,15 +18,18 @@ namespace Biblio_Models.Data
         public DbSet<Taal> Talen { get; set; } = null!;
         public DbSet<LocalLid> LocalLeden { get; set; } = null!;
 
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
+    
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // Only configure if no provider has been configured by DI.
+        if (!optionsBuilder.IsConfigured)
         {
-            if (!options.IsConfigured)
-            {
-                var folder = Environment.SpecialFolder.LocalApplicationData;
-                var path = Environment.GetFolderPath(folder);
-                var DbPath = System.IO.Path.Join(path, "BiblioApp.db");
-                options.UseSqlite($"Data Source={DbPath}");
-            }
+            var folder = Environment.SpecialFolder.LocalApplicationData;
+            var path = Environment.GetFolderPath(folder);
+            var dbPath = System.IO.Path.Join(path, "BiblioApp.db");
+            optionsBuilder.UseSqlite($"Data Source={dbPath}");
         }
+    }
     }
 }

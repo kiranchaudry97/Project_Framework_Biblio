@@ -29,7 +29,7 @@ namespace Biblio_App.ViewModels
 {
     public partial class UitleningenViewModel : ObservableValidator, Biblio_App.Services.ILocalizable
     {
-        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
+        private readonly IDbContextFactory<LocalDbContext> _dbFactory;
         private readonly ILanguageService? _languageService;
         private ResourceManager? _sharedResourceManager;
         private Dictionary<string, string>? _resxFileStrings; // fallback loaded from web resx on disk
@@ -201,7 +201,7 @@ namespace Biblio_App.ViewModels
 
         public IAsyncRelayCommand SyncCommand => new AsyncRelayCommand(async () => await ExecuteSyncAsync());
 
-        public UitleningenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, ILanguageService? languageService = null)
+        public UitleningenViewModel(IDbContextFactory<LocalDbContext> dbFactory, ILanguageService? languageService = null)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _languageService = languageService;

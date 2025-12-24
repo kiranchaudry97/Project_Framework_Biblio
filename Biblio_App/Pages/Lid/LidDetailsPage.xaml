@@ -19,7 +19,7 @@
                     <Label Text="{Binding Email}" FontSize="14" />
 
                     <HorizontalStackLayout HorizontalOptions="End" Spacing="12">
-                        <Button Style="{StaticResource PrimaryButton}" Text="{Binding EditButtonText, Source={x:Reference Page}}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCommand}" WidthRequest="120" />
+                        <Button Style="{StaticResource PrimaryButton}" Text="{Binding EditButtonText, Source={x:Reference Page}}" Command="{Binding BindingContext.ItemEditCommand, Source={x:Reference Page}}" CommandParameter="{Binding .}" WidthRequest="120" />
                         <Button Style="{StaticResource PrimaryButton}" Text="{Binding BackButtonText, Source={x:Reference Page}}" Clicked="OnBackClicked" WidthRequest="120" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>

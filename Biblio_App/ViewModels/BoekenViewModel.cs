@@ -29,7 +29,7 @@ namespace Biblio_App.ViewModels
     public partial class BoekenViewModel : ObservableValidator, ILocalizable
     {
         private readonly IGegevensProvider? _gegevensProvider;
-        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
+        private readonly IDbContextFactory<LocalDbContext> _dbFactory;
         private readonly IDataSyncService? _sync;
         private readonly ILanguageService? _languageService;
 
@@ -196,7 +196,7 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private int openUitleningenCount;
 
-        public BoekenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, IDataSyncService? sync = null, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
+        public BoekenViewModel(IDbContextFactory<LocalDbContext> dbFactory, IDataSyncService? sync = null, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _sync = sync;
@@ -803,6 +803,11 @@ namespace Biblio_App.ViewModels
 
                             Boeken.Clear();
                             foreach (var b in pageItems) Boeken.Add(b);
+
+#if DEBUG
+                            try { Debug.WriteLine($"LoadBooksAsync (sync): Total={TotalCount}, Page={Page}/{TotalPages}, ItemsOnPage={pageItems.Count}"); } catch { }
+                            if (TotalCount == 0) { try { Debug.WriteLine("LoadBooksAsync: No books found (sync path)"); } catch { } }
+#endif
                         });
 
                         return;
@@ -844,6 +849,11 @@ namespace Biblio_App.ViewModels
 
                     Boeken.Clear();
                     foreach (var b in items) Boeken.Add(b);
+
+#if DEBUG
+                    try { Debug.WriteLine($"LoadBooksAsync (local): Total={TotalCount}, Page={Page}/{TotalPages}, ItemsOnPage={items.Count}"); } catch { }
+                    if (TotalCount == 0) { try { Debug.WriteLine("LoadBooksAsync: No books found (local DB)"); } catch { } }
+#endif
                 });
 
             }

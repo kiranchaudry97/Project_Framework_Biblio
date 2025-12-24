@@ -28,20 +28,47 @@ namespace Biblio_App
         private Dictionary<string, string>? _resxFileStrings; // fallback strings geladen uit resx-bestanden op schijf
 
         // Bindable properties gebruikt door XAML zodat teksten op runtime bijgewerkt kunnen worden zonder controls te recreëren
-        public string BiblioTitle { get; private set; } = "Biblio";
-        public string MenuTitle { get; private set; } = "Menu";
-        public string LanguagePickerTitle { get; private set; } = "Taal";
-        public string BooksShellTitle { get; private set; } = "📚 Boeken";
-        public string MembersShellTitle { get; private set; } = "👥 Leden";
-        public string LoansShellTitle { get; private set; } = "🧾 Uitleningen";
-        public string CategoriesShellTitle { get; private set; } = "🏷️ Categorieën";
-        public string SettingsShellTitle { get; private set; } = "⚙️ Instellingen";
-        public string ProfileMenuText { get; private set; } = "👤 Profiel";
-        public string LogoutMenuText { get; private set; } = "🔒 Logout";
-        public string QuickLabelText { get; private set; } = "Snelkoppelingen";
-        public string QuickNewBookButtonText { get; private set; } = "+ Nieuw boek";
-        public string QuickNewMemberButtonText { get; private set; } = "+ Nieuw lid";
-        public string FooterSettingsText { get; private set; } = "Instellingen";
+        public static readonly BindableProperty BiblioTitleProperty = BindableProperty.Create(nameof(BiblioTitle), typeof(string), typeof(AppShell), "Biblio");
+        public string BiblioTitle { get => (string)GetValue(BiblioTitleProperty); set => SetValue(BiblioTitleProperty, value); }
+
+        public static readonly BindableProperty MenuTitleProperty = BindableProperty.Create(nameof(MenuTitle), typeof(string), typeof(AppShell), "Menu");
+        public string MenuTitle { get => (string)GetValue(MenuTitleProperty); set => SetValue(MenuTitleProperty, value); }
+
+        public static readonly BindableProperty LanguagePickerTitleProperty = BindableProperty.Create(nameof(LanguagePickerTitle), typeof(string), typeof(AppShell), "Taal");
+        public string LanguagePickerTitle { get => (string)GetValue(LanguagePickerTitleProperty); set => SetValue(LanguagePickerTitleProperty, value); }
+
+        public static readonly BindableProperty BooksShellTitleProperty = BindableProperty.Create(nameof(BooksShellTitle), typeof(string), typeof(AppShell), "📚 Boeken");
+        public string BooksShellTitle { get => (string)GetValue(BooksShellTitleProperty); set => SetValue(BooksShellTitleProperty, value); }
+
+        public static readonly BindableProperty MembersShellTitleProperty = BindableProperty.Create(nameof(MembersShellTitle), typeof(string), typeof(AppShell), "👥 Leden");
+        public string MembersShellTitle { get => (string)GetValue(MembersShellTitleProperty); set => SetValue(MembersShellTitleProperty, value); }
+
+        public static readonly BindableProperty LoansShellTitleProperty = BindableProperty.Create(nameof(LoansShellTitle), typeof(string), typeof(AppShell), "🧾 Uitleningen");
+        public string LoansShellTitle { get => (string)GetValue(LoansShellTitleProperty); set => SetValue(LoansShellTitleProperty, value); }
+
+        public static readonly BindableProperty CategoriesShellTitleProperty = BindableProperty.Create(nameof(CategoriesShellTitle), typeof(string), typeof(AppShell), "🏷️ Categorieën");
+        public string CategoriesShellTitle { get => (string)GetValue(CategoriesShellTitleProperty); set => SetValue(CategoriesShellTitleProperty, value); }
+
+        public static readonly BindableProperty SettingsShellTitleProperty = BindableProperty.Create(nameof(SettingsShellTitle), typeof(string), typeof(AppShell), "⚙️ Instellingen");
+        public string SettingsShellTitle { get => (string)GetValue(SettingsShellTitleProperty); set => SetValue(SettingsShellTitleProperty, value); }
+
+        public static readonly BindableProperty ProfileMenuTextProperty = BindableProperty.Create(nameof(ProfileMenuText), typeof(string), typeof(AppShell), "👤 Profiel");
+        public string ProfileMenuText { get => (string)GetValue(ProfileMenuTextProperty); set => SetValue(ProfileMenuTextProperty, value); }
+
+        public static readonly BindableProperty LogoutMenuTextProperty = BindableProperty.Create(nameof(LogoutMenuText), typeof(string), typeof(AppShell), "🔒 Logout");
+        public string LogoutMenuText { get => (string)GetValue(LogoutMenuTextProperty); set => SetValue(LogoutMenuTextProperty, value); }
+
+        public static readonly BindableProperty QuickLabelTextProperty = BindableProperty.Create(nameof(QuickLabelText), typeof(string), typeof(AppShell), "Snelkoppelingen");
+        public string QuickLabelText { get => (string)GetValue(QuickLabelTextProperty); set => SetValue(QuickLabelTextProperty, value); }
+
+        public static readonly BindableProperty QuickNewBookButtonTextProperty = BindableProperty.Create(nameof(QuickNewBookButtonText), typeof(string), typeof(AppShell), "+ Nieuw boek");
+        public string QuickNewBookButtonText { get => (string)GetValue(QuickNewBookButtonTextProperty); set => SetValue(QuickNewBookButtonTextProperty, value); }
+
+        public static readonly BindableProperty QuickNewMemberButtonTextProperty = BindableProperty.Create(nameof(QuickNewMemberButtonText), typeof(string), typeof(AppShell), "+ Nieuw lid");
+        public string QuickNewMemberButtonText { get => (string)GetValue(QuickNewMemberButtonTextProperty); set => SetValue(QuickNewMemberButtonTextProperty, value); }
+
+        public static readonly BindableProperty FooterSettingsTextProperty = BindableProperty.Create(nameof(FooterSettingsText), typeof(string), typeof(AppShell), "Instellingen");
+        public string FooterSettingsText { get => (string)GetValue(FooterSettingsTextProperty); set => SetValue(FooterSettingsTextProperty, value); }
 
         public AppShell()
         {

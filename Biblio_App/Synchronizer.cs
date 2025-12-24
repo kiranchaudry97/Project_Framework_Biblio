@@ -19,16 +19,16 @@ namespace Biblio_App
         JsonSerializerOptions sOptions;
         internal bool dbExists = false;
 
-        readonly LocalDbContext _context;
+        readonly IDbContextFactory<Biblio_Models.Data.LocalDbContext> _dbFactory;
         readonly string? _apiBase;
 
         // Optional current user state kept locally in the synchronizer
         internal AppUser? CurrentUser { get; private set; }
         internal string? CurrentUserId { get; private set; }
 
-        internal Synchronizer(LocalDbContext context, string? apiBase = null)
+        internal Synchronizer(IDbContextFactory<Biblio_Models.Data.LocalDbContext> dbFactory, string? apiBase = null)
         {
-            _context = context;
+            _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _apiBase = apiBase;
 
             client = new HttpClient();
@@ -45,9 +45,9 @@ namespace Biblio_App
         }
 
         // New ctor that accepts an HttpClient (e.g. created via IHttpClientFactory.CreateClient("ApiWithToken"))
-        internal Synchronizer(LocalDbContext context, HttpClient httpClient, string? apiBase = null)
+        internal Synchronizer(IDbContextFactory<Biblio_Models.Data.LocalDbContext> dbFactory, HttpClient httpClient, string? apiBase = null)
         {
-            _context = context;
+            _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _apiBase = apiBase;
 
             client = httpClient ?? new HttpClient();
@@ -80,12 +80,14 @@ namespace Biblio_App
                     var data = JsonSerializer.Deserialize<MobileDataDto>(responseBody, sOptions);
                     if (data != null)
                     {
+                        using var ctx = _dbFactory.CreateDbContext();
+
                         // Upsert categories
                         if (data.Categories != null)
                         {
                             foreach (var c in data.Categories)
                             {
-                                var existingC = await _context.Categorien.FirstOrDefaultAsync(x => x.Id == c.Id);
+                                var existingC = await ctx.Categorien.FirstOrDefaultAsync(x => x.Id == c.Id);
                                 if (existingC != null)
                                 {
                                     existingC.Naam = c.Naam ?? existingC.Naam;
@@ -93,7 +95,7 @@ namespace Biblio_App
                                 }
                                 else
                                 {
-                                    _context.Categorien.Add(new Categorie { Id = c.Id, Naam = c.Naam ?? string.Empty });
+                                    ctx.Categorien.Add(new Categorie { Id = c.Id, Naam = c.Naam ?? string.Empty });
                                 }
                             }
                         }
@@ -103,7 +105,7 @@ namespace Biblio_App
                         {
                             foreach (var b in data.Books)
                             {
-                                var existing = await _context.Boeken.FirstOrDefaultAsync(x => x.Id == b.Id);
+                                var existing = await ctx.Boeken.FirstOrDefaultAsync(x => x.Id == b.Id);
                                 if (existing != null)
                                 {
                                     existing.Titel = b.Titel ?? existing.Titel;
@@ -114,7 +116,7 @@ namespace Biblio_App
                                 }
                                 else
                                 {
-                                    _context.Boeken.Add(new Boek
+                                    ctx.Boeken.Add(new Boek
                                     {
                                         Id = b.Id,
                                         Titel = b.Titel ?? string.Empty,
@@ -131,7 +133,7 @@ namespace Biblio_App
                         {
                             foreach (var m in data.Members)
                             {
-                                var existingM = await _context.Leden.FirstOrDefaultAsync(x => x.Id == m.Id);
+                                var existingM = await ctx.Leden.FirstOrDefaultAsync(x => x.Id == m.Id);
                                 if (existingM != null)
                                 {
                                     existingM.Voornaam = m.Voornaam ?? existingM.Voornaam;
@@ -141,7 +143,7 @@ namespace Biblio_App
                                 }
                                 else
                                 {
-                                    _context.Leden.Add(new Lid
+                                    ctx.Leden.Add(new Lid
                                     {
                                         Id = m.Id,
                                         Voornaam = m.Voornaam ?? string.Empty,
@@ -152,7 +154,7 @@ namespace Biblio_App
                             }
                         }
 
-                        await _context.SaveChangesAsync();
+                        await ctx.SaveChangesAsync();
                     }
                 }
                 catch (Exception)
@@ -195,30 +197,32 @@ namespace Biblio_App
         {
             try
             {
-                await _context.Database.MigrateAsync();
+                using var ctx = _dbFactory.CreateDbContext();
 
-                if (!await _context.Categorien.AnyAsync())
+                await ctx.Database.MigrateAsync();
+
+                if (!await ctx.Categorien.AnyAsync())
                 {
-                    _context.Categorien.AddRange(
+                    ctx.Categorien.AddRange(
                         new Categorie { Naam = "Roman" },
                         new Categorie { Naam = "Jeugd" },
                         new Categorie { Naam = "Thriller" },
                         new Categorie { Naam = "Wetenschap" }
                     );
-                    await _context.SaveChangesAsync();
+                    await ctx.SaveChangesAsync();
                 }
 
-                if (!await _context.Boeken.AnyAsync())
+                if (!await ctx.Boeken.AnyAsync())
                 {
-                    var roman = await _context.Categorien.FirstAsync(c => c.Naam == "Roman");
-                    var jeugd = await _context.Categorien.FirstAsync(c => c.Naam == "Jeugd");
+                    var roman = await ctx.Categorien.FirstAsync(c => c.Naam == "Roman");
+                    var jeugd = await ctx.Categorien.FirstAsync(c => c.Naam == "Jeugd");
 
-                    _context.Boeken.AddRange(
+                    ctx.Boeken.AddRange(
                         new Boek { Titel = "1984", Auteur = "George Orwell", Isbn = "9780451524935", CategorieID = roman.Id },
                         new Boek { Titel = "De Hobbit", Auteur = "J.R.R. Tolkien", Isbn = "9780547928227", CategorieID = roman.Id },
                         new Boek { Titel = "Matilda", Auteur = "Roald Dahl", Isbn = "9780142410370", CategorieID = jeugd.Id }
                     );
-                    await _context.SaveChangesAsync();
+                    await ctx.SaveChangesAsync();
                 }
 
                 dbExists = true;

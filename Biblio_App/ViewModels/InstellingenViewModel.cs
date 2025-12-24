@@ -6,14 +6,10 @@ using System.Windows.Input;
 using Microsoft.Maui.ApplicationModel;
 using Biblio_App.Services;
 using System;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Biblio_Models.Data;
-using System.Data.Common;
 using Microsoft.Maui.Storage;
 using System.IO;
-using Microsoft.Maui.Dispatching;
 using Microsoft.Maui.Controls;
 
 namespace Biblio_App.ViewModels
@@ -176,14 +172,14 @@ namespace Biblio_App.ViewModels
         }
 
         [RelayCommand]
-        public async Task LoadDatabaseInfoAsync()
+        public Task LoadDatabaseInfoAsync()
         {
             try
             {
                 if (_dbFactory == null)
                 {
                     DatabaseInfo = "Geen DbContextFactory geregistreerd.";
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 using var db = _dbFactory.CreateDbContext();
@@ -207,6 +203,8 @@ namespace Biblio_App.ViewModels
             {
                 DatabaseInfo = "Fout bij lezen DB-config: " + ex.Message;
             }
+
+            return Task.CompletedTask;
         }
 
         public async Task<bool> ResetAndSeedLocalDatabaseAsync()

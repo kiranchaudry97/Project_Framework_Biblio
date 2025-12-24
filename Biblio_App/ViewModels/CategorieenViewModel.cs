@@ -19,14 +19,14 @@ namespace Biblio_App.ViewModels
     public class CategorieenViewModel : INotifyPropertyChanged, Biblio_App.Services.ILocalizable
     {
         private readonly IGegevensProvider? _gegevensProvider;
-        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
+        private readonly IDbContextFactory<LocalDbContext> _dbFactory;
         private readonly ILanguageService? _languageService;
         private ResourceManager? _sharedResourceManager;
         private bool _resourceManagerInitialized = false;
 
         public ObservableCollection<Categorie> Categorien { get; } = new ObservableCollection<Categorie>();
 
-        public CategorieenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
+        public CategorieenViewModel(IDbContextFactory<LocalDbContext> dbFactory, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
         {
             _dbFactory = dbFactory ?? throw new System.ArgumentNullException(nameof(dbFactory));
             _gegevensProvider = gegevensProvider;
