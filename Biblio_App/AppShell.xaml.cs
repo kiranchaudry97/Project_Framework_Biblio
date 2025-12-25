@@ -69,6 +69,8 @@ namespace Biblio_App
             catch { /* negeren */ }
 
             // Registreer routes zodat Shell navigatie route strings kan gebruiken
+            Routing.RegisterRoute(nameof(Pages.Account.LoginPage), typeof(Pages.Account.LoginPage));
+            Routing.RegisterRoute("LoginPage", typeof(Pages.Account.LoginPage)); // Absolute route
             Routing.RegisterRoute(nameof(Pages.BoekenPagina), typeof(Pages.BoekenPagina));
             Routing.RegisterRoute(nameof(Pages.LedenPagina), typeof(Pages.LedenPagina));
             Routing.RegisterRoute(nameof(Pages.UitleningenPagina), typeof(Pages.UitleningenPagina));

@@ -327,14 +327,8 @@
   <data name="AllBooks" xml:space="preserve">
     <value>Tous les livres</value>
   </data>
-  <data name="OnlyOpen" xml:space="preserve">
-    <value>Ouvert uniquement</value>
-  </data>
   <data name="Book" xml:space="preserve">
     <value>Livre</value>
-  </data>
-  <data name="Return" xml:space="preserve">
-    <value>Retourner</value>
   </data>
   <data name="ReturnedLabel" xml:space="preserve">
     <value>Statut de livraison</value>
@@ -653,11 +647,5 @@
   </data>
   <data name="ResetLocalDb" xml:space="preserve">
     <value>Reinitialiser la base locale</value>
-  </data>
-  <data name="Late" xml:space="preserve">
-    <value>En Retard</value>
-  </data>
-  <data name="ReturnedOption" xml:space="preserve">
-    <value>Rendu</value>
   </data>
 </root>
