@@ -48,6 +48,14 @@ namespace Biblio_App
             Instance = this;
 
             InitializeComponent();
+            
+            // Force flyout to always show hamburger menu, even on small screens
+            this.FlyoutBehavior = FlyoutBehavior.Flyout;
+            
+            // Ensure flyout icon is always visible on Windows
+#if WINDOWS
+            this.FlyoutIsPresented = false; // Start closed
+#endif
 
             // Resolveer language service uit DI (kan null zijn in design-time)
             try
@@ -555,16 +563,12 @@ namespace Biblio_App
             try
             {
                 var isDark = Application.Current?.UserAppTheme == AppTheme.Dark || Application.Current?.RequestedTheme == AppTheme.Dark;
-                var src = isDark ? "moon.svg" : "sun.svg";
-
-                // Zet de ImageSource direct vanuit de resource naam
+                
+                // Use text symbols for theme toggle - more reliable than images
                 try
                 {
-                    ThemeToggleButton.ImageSource = ImageSource.FromFile(src);
-                    ThemeToggleButton.Text = string.Empty; // zorg dat er geen tekst het icoon verbergt
-
-                    // Verwijder ContentLayout toewijzing om type-resolutieproblemen tussen targets te vermijden
-                    // ThemeToggleButton.ContentLayout = new ButtonContentLayout(ButtonContentLayout.ImagePosition.Left, 0);
+                    ThemeToggleButton.Text = isDark ? "☀" : "🌙";  // Sun for dark mode, Moon for light mode
+                    ThemeToggleButton.ImageSource = null;  // Clear any image source
                 }
                 catch (Exception imgEx)
                 {

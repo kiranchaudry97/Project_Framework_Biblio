@@ -8,9 +8,9 @@ namespace Biblio_App.Services
 {
     public class EfGegevensProvider : IGegevensProvider
     {
-        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
+        private readonly IDbContextFactory<LocalDbContext> _dbFactory;
 
-        public EfGegevensProvider(IDbContextFactory<BiblioDbContext> dbFactory)
+        public EfGegevensProvider(IDbContextFactory<LocalDbContext> dbFactory)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
         }

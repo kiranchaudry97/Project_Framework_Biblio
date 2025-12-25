@@ -19,14 +19,14 @@ namespace Biblio_App.ViewModels
     public class CategorieenViewModel : INotifyPropertyChanged, Biblio_App.Services.ILocalizable
     {
         private readonly IGegevensProvider? _gegevensProvider;
-        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
+        private readonly IDbContextFactory<LocalDbContext> _dbFactory;
         private readonly ILanguageService? _languageService;
         private ResourceManager? _sharedResourceManager;
         private bool _resourceManagerInitialized = false;
 
         public ObservableCollection<Categorie> Categorien { get; } = new ObservableCollection<Categorie>();
 
-        public CategorieenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
+        public CategorieenViewModel(IDbContextFactory<LocalDbContext> dbFactory, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
         {
             _dbFactory = dbFactory ?? throw new System.ArgumentNullException(nameof(dbFactory));
             _gegevensProvider = gegevensProvider;
@@ -43,16 +43,16 @@ namespace Biblio_App.ViewModels
             }
             catch { }
 
-            // initialize localized strings
+            // initialiseer gelokaliseerde strings
             UpdateLocalizedStrings();
 
-            // initialize commands
+            // initialiseer commando's
             NewCommand = new Command(async () => await AddCategoryAsync(), () => !string.IsNullOrWhiteSpace(NewCategoryName));
             DeleteCommand = new Command(async () => await DeleteSelectedAsync(), () => SelectedCategorie != null);
             SaveCommand = new Command(async () => await SaveSelectedAsync(), () => SelectedCategorie != null && !string.IsNullOrWhiteSpace(NewCategoryName));
         }
 
-        // Localized UI properties
+        // Gelokaliseerde UI eigenschappen
         private string _pageHeaderText = string.Empty;
         public string PageHeaderText { get => _pageHeaderText; set { _pageHeaderText = value; OnPropertyChanged(nameof(PageHeaderText)); } }
 
@@ -68,7 +68,7 @@ namespace Biblio_App.ViewModels
         private string _saveButtonText = string.Empty;
         public string SaveButtonText { get => _saveButtonText; set { _saveButtonText = value; OnPropertyChanged(nameof(SaveButtonText)); } }
 
-        // Breadcrumb / overview localized strings
+        // Breadcrumb / overzicht gelokaliseerde strings
         private string _overviewText = string.Empty;
         public string OverviewText { get => _overviewText; set { _overviewText = value; OnPropertyChanged(nameof(OverviewText)); } }
 
@@ -81,7 +81,7 @@ namespace Biblio_App.ViewModels
         private string _deleteLabel = string.Empty;
         public string DeleteLabel { get => _deleteLabel; set { _deleteLabel = value; OnPropertyChanged(nameof(DeleteLabel)); } }
 
-        // New category name entered in Entry
+        // Nieuwe categorie naam ingevoerd in Entry
         private string _newCategoryName = string.Empty;
         public string NewCategoryName
         {
@@ -95,7 +95,7 @@ namespace Biblio_App.ViewModels
             }
         }
 
-        // Currently selected category in the list
+        // Huidige geselecteerde categorie in de lijst
         private Categorie? _selectedCategorie;
         public Categorie? SelectedCategorie
         {

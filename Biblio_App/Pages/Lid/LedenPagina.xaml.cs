@@ -90,7 +90,7 @@ namespace Biblio_App.Pages
                     }
                 }
 
-                // fallback to model resource
+                // fallback naar model resource
                 var modelType = typeof(SharedModelResource);
                 if (modelType != null)
                 {
@@ -111,7 +111,7 @@ namespace Biblio_App.Pages
                     if (!string.IsNullOrEmpty(val)) return val;
                 }
 
-                // simple fallback for common keys
+                // eenvoudige fallback voor veelgebruikte sleutels
                 var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
                 if (code == "en")
                 {
@@ -133,7 +133,7 @@ namespace Biblio_App.Pages
                     };
                 }
 
-                // default nl
+                // standaard nl
                 return key switch
                 {
                     "Members" => "Leden",
@@ -168,7 +168,7 @@ namespace Biblio_App.Pages
             PageEmailPlaceholder = Localize("Email");
             PagePhonePlaceholder = Localize("Phone");
 
-            // explicitly refresh the title label in the title view
+            // vernieuw expliciet het titel label in de titel weergave
             try { RefreshTitleFromViewModel(); } catch { }
         }
 
@@ -178,7 +178,7 @@ namespace Biblio_App.Pages
 
             try
             {
-                // Ensure viewmodel has initialized data (loads members) when the page appears
+                // Zorg ervoor dat viewmodel data heeft geïnitialiseerd (laadt leden) wanneer de pagina verschijnt
                 try
                 {
                     if (VM != null)

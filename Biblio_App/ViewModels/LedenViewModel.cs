@@ -29,7 +29,7 @@ namespace Biblio_App.ViewModels
     public partial class LedenViewModel : ObservableValidator, Biblio_App.Services.ILocalizable
     {
         private readonly IGegevensProvider? _gegevensProvider;
-        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
+        private readonly IDbContextFactory<LocalDbContext> _dbFactory;
         private readonly ILanguageService? _languageService;
         private ResourceManager? _sharedResourceManager;
         private bool _resourceManagerInitialized = false;
@@ -114,7 +114,7 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string phonePlaceholder = string.Empty;
 
-        public LedenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
+        public LedenViewModel(IDbContextFactory<LocalDbContext> dbFactory, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _gegevensProvider = gegevensProvider;

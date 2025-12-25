@@ -29,10 +29,10 @@ namespace Biblio_App.ViewModels
 {
     public partial class UitleningenViewModel : ObservableValidator, Biblio_App.Services.ILocalizable
     {
-        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
+        private readonly IDbContextFactory<LocalDbContext> _dbFactory;
         private readonly ILanguageService? _languageService;
         private ResourceManager? _sharedResourceManager;
-        private Dictionary<string, string>? _resxFileStrings; // fallback loaded from web resx on disk
+        private Dictionary<string, string>? _resxFileStrings; // fallback geladen van web resx op schijf
         private bool _resourceManagerInitialized = false;
 
         public ObservableCollection<Lenen> Uitleningen { get; } = new ObservableCollection<Lenen>();
@@ -43,7 +43,7 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private Lenen? selectedUitlening;
 
-        // localized UI strings
+        // gelokaliseerde UI strings
         [ObservableProperty]
         private string pageHeaderText = string.Empty;
         [ObservableProperty]
@@ -79,7 +79,7 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string deleteButtonText = string.Empty;
 
-        // additional localized labels
+        // extra gelokaliseerde labels
         [ObservableProperty]
         private string startLabel = string.Empty;
         [ObservableProperty]
@@ -89,12 +89,12 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string dbPathNotLoadedText = string.Empty;
 
-        // Return status selection (UI picker)
+        // Inlever status selectie (UI picker)
         public System.Collections.ObjectModel.ObservableCollection<string> ReturnStatusOptions { get; } = new System.Collections.ObjectModel.ObservableCollection<string>();
         [ObservableProperty]
         private string selectedReturnStatus = string.Empty;
 
-        // existing properties remain
+        // bestaande eigenschappen blijven behouden
         [ObservableProperty]
         private Boek? selectedBoek;
 
@@ -115,7 +115,7 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string validationMessage = string.Empty;
 
-        // filter/search
+        // filter/zoeken
         [ObservableProperty]
         private string searchText = string.Empty;
 
@@ -125,7 +125,7 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private bool onlyOpen;
 
-        // Additional UI filter properties
+        // Extra UI filter eigenschappen
         [ObservableProperty]
         private Lid? filterLid;
 
@@ -150,7 +150,7 @@ namespace Biblio_App.ViewModels
             _ = LoadDataWithFiltersAsync();
         }
 
-        // Sorting
+        // Sorteren
         public ObservableCollection<string> SortOptions { get; } = new ObservableCollection<string>();
         [ObservableProperty]
         private string sortOption = "StartDate";
@@ -176,14 +176,14 @@ namespace Biblio_App.ViewModels
         public int UitleningenCount => Uitleningen?.Count ?? 0;
         public int BoekenCount => BoekenList?.Count ?? 0;
 
-        // Path to local sqlite DB used by the app
+        // Pad naar lokale sqlite DB gebruikt door de app
         public string DbPath => Path.Combine(FileSystem.AppDataDirectory, "biblio.db");
 
-        // Combined debug info shown on the UI (counts + db path)
+        // Gecombineerde debug info getoond op de UI (aantallen + db pad)
         public string DebugInfo => $"Leden: {LedenCount}  Uitleningen: {UitleningenCount}  Boeken: {BoekenCount}\nDB: {DbPath}";
 
-        // per-field errors (keep BoekId/LidId errors but also show object-based)
-        public string BoekError => SelectedBoek == null ? "" : string.Empty; // placeholder, main errors via ValidationMessage
+        // per-veld fouten (behoud BoekId/LidId fouten maar toon ook object-gebaseerd)
+        public string BoekError => SelectedBoek == null ? "" : string.Empty; // placeholder, hoofdfouten via ValidationMessage
         public string LidError => SelectedLid == null ? "" : string.Empty;
         public string StartDateError => GetFirstError(nameof(StartDate));
         public string DueDateError => GetFirstError(nameof(DueDate));
@@ -201,7 +201,7 @@ namespace Biblio_App.ViewModels
 
         public IAsyncRelayCommand SyncCommand => new AsyncRelayCommand(async () => await ExecuteSyncAsync());
 
-        public UitleningenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, ILanguageService? languageService = null)
+        public UitleningenViewModel(IDbContextFactory<LocalDbContext> dbFactory, ILanguageService? languageService = null)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _languageService = languageService;
@@ -221,10 +221,10 @@ namespace Biblio_App.ViewModels
                 await LoadDataWithFiltersAsync();
             });
 
-            // listen for members changes to refresh members list
+            // luister naar ledenwijzigingen om ledenlijst te vernieuwen
             try { Microsoft.Maui.Controls.MessagingCenter.Subscribe<LedenViewModel>(this, "MembersChanged", async (vm) => { await LoadMembersAsync(); }); } catch { }
 
-            // initialize localized strings
+            // initialiseer gelokaliseerde strings
             UpdateLocalizedStrings();
             try
             {
@@ -240,14 +240,14 @@ namespace Biblio_App.ViewModels
             SortOptions.Add("Lid");
             SortOptions.Add("Boek");
 
-            // Do not load data directly from constructor; this can block startup/UI thread on some devices.
-            // Pages should call InitializeAsync/EnsureDataLoadedAsync during OnAppearing.
+            // Laad data niet direct vanuit de constructor; dit kan opstarten/UI thread blokkeren op sommige apparaten.
+            // Pagina's moeten InitializeAsync/EnsureDataLoadedAsync aanroepen tijdens OnAppearing.
         }
 
         private bool _initialized = false;
         private bool _dbPathResolved = false;
 
-        // Public initializer to be called from the page (OnAppearing)
+        // Publieke initializer om aan te roepen vanuit de pagina (OnAppearing)
         public async Task InitializeAsync()
         {
             if (_initialized) return;
@@ -256,7 +256,7 @@ namespace Biblio_App.ViewModels
             {
                 await EnsureDataLoadedAsync();
 
-                // After data has been loaded, try to resolve the actual DB file path
+                // Nadat data is geladen, probeer het werkelijke DB bestandspad op te lossen
                 try
                 {
                     var appDir = FileSystem.AppDataDirectory;
@@ -273,7 +273,7 @@ namespace Biblio_App.ViewModels
                     }
                     else
                     {
-                        // keep localized fallback when no file exists yet
+                        // behoud gelokaliseerde fallback wanneer er nog geen bestand bestaat
                         DbPathNotLoadedText = Localize("DbPathNotLoaded");
                     }
 
@@ -313,7 +313,7 @@ namespace Biblio_App.ViewModels
 
             try
             {
-                // Prefer the MAUI app's own resources first
+                // Geef voorkeur aan de MAUI app's eigen resources eerst
                 var appAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_App", StringComparison.OrdinalIgnoreCase));
                 if (appAsm != null)
                 {
@@ -333,7 +333,7 @@ namespace Biblio_App.ViewModels
                     }
                 }
 
-                // Next prefer shared model resource (Biblio_Models)
+                // Geef vervolgens voorkeur aan gedeelde model resource (Biblio_Models)
                 if (_sharedResourceManager == null)
                 {
                     try
@@ -347,7 +347,7 @@ namespace Biblio_App.ViewModels
                     catch { }
                 }
 
-                // Finally try web project's resources as fallback
+                // Probeer tenslotte web project's resources als fallback
                 if (_sharedResourceManager == null)
                 {
                     try
@@ -376,7 +376,7 @@ namespace Biblio_App.ViewModels
             }
             catch { }
 
-            // try loading resx files from repo as fallback (development)
+            // probeer resx bestanden te laden van repo als fallback (ontwikkeling)
             TryLoadResxFromRepo();
         }
 
@@ -608,10 +608,10 @@ namespace Biblio_App.ViewModels
             };
         }
 
-        // public UpdateLocalizedStrings to satisfy ILocalizable
+        // publieke UpdateLocalizedStrings om ILocalizable te voldoen
         public void UpdateLocalizedStrings()
         {
-            // ensure resource manager available
+            // zorg ervoor dat resource manager beschikbaar is
             try { EnsureResourceManagerInitialized(); } catch { }
 
             PageHeaderText = Localize("Loans");
@@ -632,18 +632,18 @@ namespace Biblio_App.ViewModels
             SaveButtonText = Localize("Save");
             DeleteButtonText = Localize("Delete");
 
-            // debug what was resolved so we can see problems in Output window
+            // debug wat er is opgelost zodat we problemen kunnen zien in Output venster
             try
             {
                 System.Diagnostics.Debug.WriteLine($"[UitleningenViewModel] Localized ReturnButtonText='{ReturnButtonText}', DeleteButtonText='{DeleteButtonText}'");
             }
             catch { }
 
-            // ensure visible fallbacks
+            // zorg voor zichtbare fallbacks
             if (string.IsNullOrWhiteSpace(ReturnButtonText)) ReturnButtonText = "Inleveren";
             if (string.IsNullOrWhiteSpace(DeleteButtonText)) DeleteButtonText = "Verwijderen";
 
-            // notify UI that these properties changed
+            // meld UI dat deze eigenschappen zijn gewijzigd
             try
             {
                 OnPropertyChanged(nameof(ReturnButtonText));
@@ -651,11 +651,11 @@ namespace Biblio_App.ViewModels
             }
             catch { }
 
-            // additional labels
+            // extra labels
             StartLabel = Localize("StartLabel");
             DueLabel = Localize("DueLabel");
             ReturnedLabel = Localize("ReturnedLabel");
-            // If localization failed (returned key or empty), provide explicit per-culture fallback
+            // Als lokalisatie mislukt (sleutel of leeg geretourneerd), geef expliciete per-cultuur fallback
             if (string.IsNullOrWhiteSpace(ReturnedLabel) || string.Equals(ReturnedLabel, "ReturnedLabel", StringComparison.OrdinalIgnoreCase))
             {
                 var code = _languageService?.CurrentCulture?.TwoLetterISOLanguageName ?? CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
@@ -681,7 +681,7 @@ namespace Biblio_App.ViewModels
                 var optDelivered = Localize("ReturnedOption");
                 var optLate = Localize("Late");
 
-                // If localization returned the key name (fallback failed) or an unexpected value, provide explicit fallbacks per culture
+                // Als lokalisatie de sleutelnaam heeft geretourneerd (fallback mislukt) of een onverwachte waarde, geef expliciete fallbacks per cultuur
                 if (string.IsNullOrWhiteSpace(optDelivered) || string.Equals(optDelivered, "ReturnedOption", StringComparison.OrdinalIgnoreCase) || optDelivered.IndexOf("ReturnedOption", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     var code = culture.TwoLetterISOLanguageName.ToLowerInvariant();
@@ -704,22 +704,22 @@ namespace Biblio_App.ViewModels
                     };
                 }
 
-                ReturnStatusOptions.Add(optReturn); // not returned (Inleveren)
-                ReturnStatusOptions.Add(optDelivered); // delivered/ingeleverd
-                ReturnStatusOptions.Add(optLate); // late
+                ReturnStatusOptions.Add(optReturn); // niet ingeleverd (Inleveren)
+                ReturnStatusOptions.Add(optDelivered); // geleverd/ingeleverd
+                ReturnStatusOptions.Add(optLate); // te laat
 
                 if (string.IsNullOrWhiteSpace(SelectedReturnStatus)) SelectedReturnStatus = ReturnStatusOptions.FirstOrDefault();
             }
             catch { }
 
-            // notify computed/derived properties
+            // meld berekende/afgeleide eigenschappen
             OnPropertyChanged(nameof(PageHeaderText));
             OnPropertyChanged(nameof(MembersLabel));
             OnPropertyChanged(nameof(LoansLabel));
             OnPropertyChanged(nameof(BooksLabel));
         }
 
-        // keep the rest of the existing methods unchanged
+        // behoud de rest van de bestaande methoden ongewijzigd
         private void Nieuw() => SelectedUitlening = null;
 
         private void RaiseCountProperties()
@@ -762,10 +762,10 @@ namespace Biblio_App.ViewModels
 
                 SelectedCategory = Categorieen.FirstOrDefault();
 
-                // reset last error on successful load
+                // reset laatste fout bij succesvol laden
                 LastError = string.Empty;
 
-                // update counts
+                // update aantallen
                 RaiseCountProperties();
             }
             catch (Exception ex)
@@ -804,7 +804,7 @@ namespace Biblio_App.ViewModels
                     }
                     else
                     {
-                        // Alle (default) - search across both
+                        // Alle (standaard) - zoek in beide
                         query = query.Where(l => (l.Boek != null && (l.Boek.Titel ?? string.Empty).ToLower().Contains(s))
                             || (l.Boek != null && (l.Boek.Auteur ?? string.Empty).ToLower().Contains(s))
                             || (l.Lid != null && (((l.Lid.Voornaam ?? string.Empty) + " " + (l.Lid.AchterNaam ?? string.Empty)).ToLower().Contains(s)))
@@ -818,13 +818,13 @@ namespace Biblio_App.ViewModels
                     query = query.Where(l => l.Boek != null && l.Boek.CategorieID == catId);
                 }
 
-                // Only open filter
+                // Alleen open filter
                 if (OnlyOpen)
                 {
                     query = query.Where(l => l.ReturnedAt == null);
                 }
 
-                // Filter by selected member/book
+                // Filter op geselecteerd lid/boek
                 if (FilterLid != null)
                 {
                     query = query.Where(l => l.LidId == FilterLid.Id);
@@ -841,7 +841,7 @@ namespace Biblio_App.ViewModels
                     query = query.Where(l => l.DueDate < today && l.ReturnedAt == null);
                 }
 
-                // Sorting
+                // Sorteren
                 switch ((SortOption ?? "StartDate").ToLowerInvariant())
                 {
                     case "lid":
@@ -989,12 +989,12 @@ namespace Biblio_App.ViewModels
                     }
                 }
 
-                // Update the in-memory collection so the UI updates immediately (icons/labels reflect change)
+                // Update de in-memory collectie zodat de UI direct wordt bijgewerkt (iconen/labels reflecteren wijziging)
                 try
                 {
                     if (savedEntity != null)
                     {
-                        // Ensure UI-only flags reflect the currently selected return status so converters show correct icon/label
+                        // Zorg ervoor dat UI-only vlaggen de huidige geselecteerde inlever status weerspiegelen zodat converters het juiste icoon/label tonen
                         try
                         {
                             var isLate = string.Equals(SelectedReturnStatus, Localize("Late"), StringComparison.OrdinalIgnoreCase);
@@ -1113,14 +1113,14 @@ namespace Biblio_App.ViewModels
                 var parts = token.Split('.');
                 if (parts.Length < 2) return Enumerable.Empty<string>();
                 var payload = parts[1];
-                // pad base64
+                // vul base64 aan
                 payload = payload.PadRight(payload.Length + (4 - payload.Length % 4) % 4, '=');
                 var bytes = Convert.FromBase64String(payload.Replace('-', '+').Replace('_', '/'));
                 var json = System.Text.Encoding.UTF8.GetString(bytes);
                 var doc = System.Text.Json.JsonDocument.Parse(json);
                 var roles = new List<string>();
 
-                // Helper to add string or array values
+                // Helper om string of array waarden toe te voegen
                 void AddFromElement(System.Text.Json.JsonElement el)
                 {
                     try
@@ -1143,7 +1143,7 @@ namespace Biblio_App.ViewModels
                         }
                         else if (el.ValueKind == System.Text.Json.JsonValueKind.Object)
                         {
-                            // try to find nested 'roles' property
+                            // probeer geneste 'roles' eigenschap te vinden
                             foreach (var p in el.EnumerateObject())
                             {
                                 if (p.Name.IndexOf("role", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -1156,7 +1156,7 @@ namespace Biblio_App.ViewModels
                     catch { }
                 }
 
-                // Direct known properties
+                // Direct bekende eigenschappen
                 try
                 {
                     if (doc.RootElement.TryGetProperty("role", out var r)) AddFromElement(r);
@@ -1165,7 +1165,7 @@ namespace Biblio_App.ViewModels
                 }
                 catch { }
 
-                // Enumerate all root properties and pick anything with 'role' in the name
+                // Doorloop alle root eigenschappen en pak alles met 'role' in de naam
                 try
                 {
                     foreach (var prop in doc.RootElement.EnumerateObject())
@@ -1176,7 +1176,7 @@ namespace Biblio_App.ViewModels
                         }
                         else if (prop.Value.ValueKind == System.Text.Json.JsonValueKind.Object)
                         {
-                            // check nested objects for roles (common with Keycloak: realm_access.roles)
+                            // controleer geneste objecten voor roles (gebruikelijk bij Keycloak: realm_access.roles)
                             foreach (var nested in prop.Value.EnumerateObject())
                             {
                                 if (nested.Name.IndexOf("role", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -1189,7 +1189,7 @@ namespace Biblio_App.ViewModels
                 }
                 catch { }
 
-                // Specific Keycloak-style path
+                // Specifiek Keycloak-stijl pad
                 try
                 {
                     if (doc.RootElement.TryGetProperty("realm_access", out var realm) && realm.ValueKind == System.Text.Json.JsonValueKind.Object && realm.TryGetProperty("roles", out var realmRoles))
@@ -1207,7 +1207,7 @@ namespace Biblio_App.ViewModels
             return Enumerable.Empty<string>();
         }
 
-        // Fallback: check if the JWT payload contains a substring (case-insensitive).
+        // Fallback: controleer of de JWT payload een substring bevat (hoofdletterongevoelig).
         private bool TokenPayloadContains(string substring)
         {
             try
@@ -1247,10 +1247,10 @@ namespace Biblio_App.ViewModels
 
             try
             {
-                // Only allow admins and medewerkers to perform return
+                // Sta alleen admins en medewerkers toe om in te leveren
                 if (!UserHasRole("Admin", "Medewerker"))
                 {
-                    // fallback: allow if JWT payload contains 'admin' (many tokens put roles in non-standard places)
+                    // fallback: sta toe als JWT payload 'admin' bevat (veel tokens plaatsen roles op niet-standaard plaatsen)
                     if (!TokenPayloadContains("admin"))
                     {
                         await ShowAlertAsync(Localize("Error"), "Niet gemachtigd om in te leveren.");
@@ -1288,7 +1288,7 @@ namespace Biblio_App.ViewModels
         {
             try
             {
-                // Resolve IDataSyncService from the current MAUI DI container
+                // Los IDataSyncService op vanuit de huidige MAUI DI container
                 var ds = App.Current?.Handler?.MauiContext?.Services?.GetService<IDataSyncService>();
                 if (ds == null)
                 {
@@ -1297,7 +1297,7 @@ namespace Biblio_App.ViewModels
                 }
 
                 await ds.SyncAllAsync();
-                // reload local data after sync
+                // herlaad lokale data na synchronisatie
                 await LoadDataAsync();
             }
             catch (Exception ex)
@@ -1320,115 +1320,33 @@ namespace Biblio_App.ViewModels
             }
             catch
             {
-                // ignore
+                // negeer
             }
         }
 
-        partial void OnSelectedUitleningChanged(Lenen? value)
-        {
-            try
-            {
-                if (value == null)
-                {
-                    SelectedReturnStatus = ReturnStatusOptions.FirstOrDefault();
-                    SelectedBoek = null;
-                    SelectedLid = null;
-                    StartDate = DateTime.Now;
-                    DueDate = DateTime.Now.AddDays(14);
-                    ReturnedAt = null;
-                    return;
-                }
-
-                // populate form fields from the selected loan
-                try
-                {
-                    // Map to existing items in the lists (use Id) so Pickers show the correct SelectedItem
-                    if (value.Boek != null)
-                    {
-                        var matchBoek = BoekenList.FirstOrDefault(b => b.Id == value.Boek.Id);
-                        SelectedBoek = matchBoek ?? value.Boek;
-                    }
-                    else
-                    {
-                        SelectedBoek = null;
-                    }
-
-                    if (value.Lid != null)
-                    {
-                        var matchLid = LedenList.FirstOrDefault(l => l.Id == value.Lid.Id);
-                        SelectedLid = matchLid ?? value.Lid;
-                    }
-                    else
-                    {
-                        SelectedLid = null;
-                    }
-
-                    StartDate = value.StartDate;
-                    DueDate = value.DueDate;
-                    ReturnedAt = value.ReturnedAt;
-                }
-                catch { }
-
-                if (value.ReturnedAt.HasValue)
-                {
-                    // map to the picker option for delivered
-                    SelectedReturnStatus = Localize("ReturnedOption");
-                    try { value.ForceLate = false; } catch { }
-                    try { value.ForceNotLate = false; } catch { }
-                }
-                else if (value.ForceLate)
-                {
-                    // preserve explicit UI override for Late
-                    SelectedReturnStatus = Localize("Late");
-                    try { value.ForceLate = true; } catch { }
-                    try { value.ForceNotLate = false; } catch { }
-                }
-                else if (value.ForceNotLate)
-                {
-                    // preserve explicit UI override for Return
-                    SelectedReturnStatus = Localize("Return");
-                    try { value.ForceLate = false; } catch { }
-                    try { value.ForceNotLate = true; } catch { }
-                }
-                else if (value.DueDate < DateTime.Now.Date)
-                {
-                    SelectedReturnStatus = Localize("Late");
-                    try { value.ForceLate = true; } catch { }
-                    try { value.ForceNotLate = false; } catch { }
-                }
-                else
-                {
-                    SelectedReturnStatus = Localize("Return");
-                    try { value.ForceLate = false; } catch { }
-                    try { value.ForceNotLate = true; } catch { }
-                }
-            }
-            catch { }
-        }
-
-        // When the SelectedReturnStatus in the form changes, update the in-memory loan and refresh the list icons immediately
+        // Wanneer de SelectedReturnStatus in het formulier wijzigt, update de in-memory uitlening en ververs de lijst iconen direct
         partial void OnSelectedReturnStatusChanged(string value)
         {
             try
             {
                 if (SelectedUitlening == null) return;
 
-                // Map status to ReturnedAt without saving to DB immediately
-                // 'ReturnedOption' => set ReturnedAt; 'Late' or 'Return' => keep ReturnedAt null
+                // Map status naar ReturnedAt zonder direct op te slaan in DB
+                // 'ReturnedOption' => zet ReturnedAt; 'Late' of 'Return' => houd ReturnedAt null
                 DateTime? newReturnedAt = null;
                 if (string.Equals(value, Localize("ReturnedOption"), StringComparison.OrdinalIgnoreCase))
                 {
                     newReturnedAt = DateTime.Now;
                 }
 
-                // Update viewmodel property
+                // Update viewmodel eigenschap
                 ReturnedAt = newReturnedAt;
 
-                // Update the selected loan object and force collection replace so UI rebinds and converters update icons/labels
+                // Update het geselecteerde uitlening object en forceer collectie vervanging zodat UI opnieuw bindt en converters iconen/labels updaten
                 try
                 {
                     SelectedUitlening.ReturnedAt = newReturnedAt;
-                    // set ForceLate/ForceNotLate according to selected value so icons update immediately
+                    // zet ForceLate/ForceNotLate volgens geselecteerde waarde zodat iconen direct updaten
                     try
                     {
                         var isLate = string.Equals(value, Localize("Late"), StringComparison.OrdinalIgnoreCase);
@@ -1440,13 +1358,13 @@ namespace Biblio_App.ViewModels
                     var idx = Uitleningen.IndexOf(SelectedUitlening);
                     if (idx >= 0)
                     {
-                        // Replace item to raise CollectionChanged (Replace) so DataTemplate re-evaluates bindings/converters
+                        // Vervang item om CollectionChanged (Replace) te triggeren zodat DataTemplate bindings/converters opnieuw evalueert
                         Uitleningen[idx] = SelectedUitlening;
                       }
                 }
                 catch { }
 
-                // Persist change to database in background so UI updates immediately and DB stays in sync
+                // Persisteer wijziging naar database op de achtergrond zodat UI direct update en DB gesynchroniseerd blijft
                 try
                 {
                     _ = PersistReturnedStatusAsync(SelectedUitlening, newReturnedAt);
@@ -1470,18 +1388,18 @@ namespace Biblio_App.ViewModels
                     db.Leningens.Update(existing);
                     await db.SaveChangesAsync();
 
-                    // reload with includes so navigation props are populated
+                    // herlaad met includes zodat navigatie eigenschappen zijn gevuld
                     var saved = await db.Leningens.Include(l => l.Boek).Include(l => l.Lid).AsNoTracking().FirstOrDefaultAsync(l => l.Id == existing.Id);
                     if (saved != null)
                     {
                         try
                         {
-                            // update collection on main thread
+                            // update collectie op main thread
                             await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(() =>
                             {
                                 var idx = Uitleningen.ToList().FindIndex(u => u.Id == saved.Id);
 
-                                // Preserve UI override flags (Late/Return) so the picker/labels/icons reflect user's choice
+                                // Behoud UI override vlaggen (Te laat/Inleveren) zodat de picker/labels/iconen de keuze van de gebruiker weerspiegelen
                                 try
                                 {
                                     var isLate = string.Equals(SelectedReturnStatus, Localize("Late"), StringComparison.OrdinalIgnoreCase);
@@ -1494,7 +1412,7 @@ namespace Biblio_App.ViewModels
                                 if (idx >= 0) Uitleningen[idx] = saved;
                                 else Uitleningen.Insert(0, saved);
 
-                                // keep SelectedUitlening in sync
+                                // houd SelectedUitlening gesynchroniseerd
                                 SelectedUitlening = saved;
                             });
                         }

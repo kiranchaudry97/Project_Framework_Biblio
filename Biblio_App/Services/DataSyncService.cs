@@ -68,7 +68,7 @@ namespace Biblio_App.Services
         {
             var client = _httpFactory.CreateClient("ApiWithToken");
 
-            // Try to fetch books
+            // Probeer boeken op te halen
             try
             {
                 var remoteBoeken = await client.GetFromJsonAsync<PagedResult<Boek>>("api/boeken?page=1&pageSize=1000");

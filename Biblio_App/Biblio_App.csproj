@@ -23,6 +23,32 @@
     <WindowsPackageType>None</WindowsPackageType>
   </PropertyGroup>
 
+  <!-- Android-specific optimizations for faster deployment during development -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(TargetFramework)' == 'net9.0-android'">
+    <!-- Fast Deployment: Uses shared runtime instead of bundling everything -->
+    <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
+    
+    <!-- Disable AOT and JIT for faster builds (use interpreter) -->
+    <AndroidUseInterpreter>true</AndroidUseInterpreter>
+    <AndroidEnableProfiler>false</AndroidEnableProfiler>
+    
+    <!-- Disable R8/ProGuard code shrinking for debug builds -->
+    <AndroidLinkMode>None</AndroidLinkMode>
+    <AndroidEnableSGenConcurrent>true</AndroidEnableSGenConcurrent>
+    
+    <!-- Faster MSBuild incremental builds -->
+    <AndroidUseSharedRuntime>true</AndroidUseSharedRuntime>
+    
+    <!-- Skip unnecessary steps during debug deployment -->
+    <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+    
+    <!-- Use the faster DEX compiler -->
+    <AndroidDexTool>d8</AndroidDexTool>
+    
+    <!-- Disable bundling of native libraries when not needed -->
+    <AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
+  </PropertyGroup>
+
   <PropertyGroup>
     <TargetFrameworks>
       net9.0-android;
@@ -85,10 +111,18 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers"
                       Version="3.3.4"
                       PrivateAssets="all" />
+
+    <!-- EF Core packages required by the MAUI app for local SQLite usage -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
   </ItemGroup>
 
- 
-  <ItemGroup>
+	<PropertyGroup>
+		<MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
+	</PropertyGroup>
+
+	<ItemGroup>
     <ProjectReference Include="..\Biblio_Models\Biblio_Models.csproj" />
   </ItemGroup>
 

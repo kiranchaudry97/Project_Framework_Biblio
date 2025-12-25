@@ -80,7 +80,7 @@ namespace Biblio_App.Pages
             try
             {
                 var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
-                // prefer AppShell translation when available
+                // geef voorkeur aan AppShell vertaling wanneer beschikbaar
                 try
                 {
                     var shell = AppShell.Instance;
@@ -127,7 +127,7 @@ namespace Biblio_App.Pages
                     };
                 }
 
-                // default nl
+                // standaard nl
                 return key switch
                 {
                     "Details" => "Details",

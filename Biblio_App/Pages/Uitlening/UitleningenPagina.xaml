@@ -13,16 +13,16 @@
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <!-- Local fallback so StaticResource resolves at compile time -->
+            <!-- Lokale fallback zodat StaticResource resolveert tijdens compilatie -->
             <Color x:Key="Gray700">#5A5A5A</Color>
             <SolidColorBrush x:Key="Gray700Brush" Color="{StaticResource Gray700}" />
         </ResourceDictionary>
     </ContentPage.Resources>
 
     <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto" Padding="0,0,8,0" VerticalOptions="Center">
-            <!-- named TitleLabel so code-behind can force-update the displayed title when language changes -->
-            <Label x:Name="TitleLabel" Text="{Binding PageHeaderText}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="{StaticResource White}" Grid.Column="0" />
+        <Grid ColumnDefinitions="*,Auto" Padding="0,0,8,0" VerticalOptions="Center" BackgroundColor="{StaticResource Primary}">
+            <!-- genaamd TitleLabel zodat code-behind de weergegeven titel geforceerd kan updaten wanneer de taal wijzigt -->
+            <Label x:Name="TitleLabel" Text="{Binding PageHeaderText}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="White" Grid.Column="0" />
             <Label x:Name="PageLanguageLabel"
                    Grid.Column="1"
                    WidthRequest="48"
@@ -35,21 +35,21 @@
         </Grid>
     </Shell.TitleView>
 
-    <ScrollView x:Name="MainScroll">
-        <VerticalStackLayout Padding="20" Spacing="12">
-            <Label Text="{Binding PageHeaderText}" Style="{StaticResource PageHeaderLabel}" />
+    <ScrollView x:Name="MainScroll" BackgroundColor="White">
+        <VerticalStackLayout Padding="20" Spacing="12" BackgroundColor="White">
+            <Label Text="{Binding PageHeaderText}" Style="{StaticResource PageHeaderLabel}" TextColor="#212121" />
 
-            <!-- Status / counts for debugging -->
-            <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
-                <Label Text="{Binding MembersLabel}" TextColor="{StaticResource White}" />
-                <Label Text="{Binding LedenCount}" FontAttributes="Bold" TextColor="{StaticResource White}" />
-                <Label Text="{Binding LoansLabel}" TextColor="{StaticResource White}" />
-                <Label Text="{Binding UitleningenCount}" FontAttributes="Bold" TextColor="{StaticResource White}" />
-                <Label Text="{Binding BooksLabel}" TextColor="{StaticResource White}" />
-                <Label Text="{Binding BoekenCount}" FontAttributes="Bold" TextColor="{StaticResource White}" />
+            <!-- Status / aantallen voor debugging -->
+            <HorizontalStackLayout Spacing="12" HorizontalOptions="Center" BackgroundColor="#F5F5F5" Padding="12,8" >
+                <Label Text="{Binding MembersLabel}" TextColor="#212121" />
+                <Label Text="{Binding LedenCount}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                <Label Text="{Binding LoansLabel}" TextColor="#212121" />
+                <Label Text="{Binding UitleningenCount}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                <Label Text="{Binding BooksLabel}" TextColor="#212121" />
+                <Label Text="{Binding BoekenCount}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
             </HorizontalStackLayout>
 
-            <!-- DB path display and copy button -->
+            <!-- DB pad weergave en kopieer knop -->
             <!--<HorizontalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
                 <Label Text="{Binding DbPathLabelText}" VerticalOptions="Center" TextColor="{StaticResource White}" />
                 <Label x:Name="DbPathLabel" Text="{Binding DbPathNotLoadedText}" LineBreakMode="TailTruncation" HorizontalOptions="FillAndExpand" VerticalOptions="Center" TextColor="{StaticResource White}" />
@@ -58,22 +58,22 @@
 
             <Label Text="{Binding LastError}" TextColor="Crimson" HorizontalOptions="Center" IsVisible="{Binding LastError, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
 
-            <Frame Style="{StaticResource WelcomeCardStyle}">
+            <Frame Style="{StaticResource WelcomeCardStyle}" BackgroundColor="White">
                 <VerticalStackLayout Spacing="12">
-                    <!-- Filters (adapted from web design) - simplified: only search + filter button -->
+                    <!-- Filters (aangepast van web design) - vereenvoudigd: alleen zoeken + filter knop -->
                     <Grid ColumnDefinitions="*, Auto">
-                        <Entry Grid.Column="0" Placeholder="Zoek op titel, auteur of ISBN" Text="{Binding SearchText}" BackgroundColor="Transparent" PlaceholderColor="#6E6E6E" />
+                        <Entry Grid.Column="0" Placeholder="Zoek op titel, auteur of ISBN" Text="{Binding SearchText}" BackgroundColor="#F5F5F5" TextColor="#212121" PlaceholderColor="#6E6E6E" />
                         <Button Grid.Column="1" Text="{Binding FilterButtonText}" Command="{Binding ZoekCommand}" BackgroundColor="{StaticResource Primary}" TextColor="White" CornerRadius="10" WidthRequest="88" HeightRequest="44" Margin="8,0,0,0" />
                     </Grid>
 
                     <VerticalStackLayout Spacing="8">
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
-                            <Picker ItemsSource="{Binding LedenList}" ItemDisplayBinding="{Binding FullName}" SelectedItem="{Binding FilterLid, Mode=TwoWay}" Title="Filter op lid" HorizontalOptions="StartAndExpand" />
-                            <Picker ItemsSource="{Binding BoekenList}" ItemDisplayBinding="{Binding Titel}" SelectedItem="{Binding FilterBoek, Mode=TwoWay}" Title="Filter op boek" HorizontalOptions="StartAndExpand" />
+                            <Picker ItemsSource="{Binding LedenList}" ItemDisplayBinding="{Binding FullName}" SelectedItem="{Binding FilterLid, Mode=TwoWay}" Title="Filter op lid" HorizontalOptions="StartAndExpand" BackgroundColor="#F5F5F5" TextColor="#212121" TitleColor="#6E6E6E" />
+                            <Picker ItemsSource="{Binding BoekenList}" ItemDisplayBinding="{Binding Titel}" SelectedItem="{Binding FilterBoek, Mode=TwoWay}" Title="Filter op boek" HorizontalOptions="StartAndExpand" BackgroundColor="#F5F5F5" TextColor="#212121" TitleColor="#6E6E6E" />
                         </HorizontalStackLayout>
 
                         <HorizontalStackLayout Grid.Column="2" HorizontalOptions="EndAndExpand" Spacing="8" VerticalOptions="Center">
-                            <!-- spacer column; content right-aligned in column 2 -->
+                            <!-- spacer kolom; inhoud rechts uitgelijnd in kolom 2 -->
                         </HorizontalStackLayout>
 
                         <HorizontalStackLayout Grid.Column="3" Spacing="8" VerticalOptions="Center" HorizontalOptions="End">
@@ -81,7 +81,7 @@
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
 
-                    <!-- List of loans with item card matching screenshot -->
+                    <!-- Lijst van uitleningen met item kaart die overeenkomt met screenshot -->
                     <CollectionView ItemsSource="{Binding Uitleningen}" SelectionMode="Single" SelectedItem="{Binding SelectedUitlening, Mode=TwoWay}">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:Lenen">
@@ -89,54 +89,66 @@
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="8" />
                                     </Border.StrokeShape>
-                                    <!-- Simplified layout: left info, right actions -->
+                                    <!-- Vereenvoudigde lay-out: links info, rechts acties -->
                                     <Grid Padding="12" ColumnDefinitions="*,Auto">
-                                        <!-- Left: member and book info -->
-                                        <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="StartAndExpand">
+                                        <!-- Links: lid en boek info -->
+                                        <VerticalStackLayout Grid.Column="0" Spacing="6" HorizontalOptions="StartAndExpand">
                                             <VerticalStackLayout.GestureRecognizers>
                                                 <TapGestureRecognizer Tapped="OnItemHeaderTapped" />
                                             </VerticalStackLayout.GestureRecognizers>
-                                            <Label FontAttributes="Bold" LineBreakMode="WordWrap" FontSize="14">
-                                                <Label.FormattedText>
-                                                    <FormattedString>
-                                                        <Span Text="{Binding Lid.Voornaam}" />
-                                                        <Span Text=" " />
-                                                        <Span Text="{Binding Lid.AchterNaam}" />
-                                                    </FormattedString>
-                                                </Label.FormattedText>
-                                            </Label>
-                                            <Label Text="{Binding Boek.Titel}" TextColor="#5A5A5A" LineBreakMode="TailTruncation" FontSize="12" />
+                                            
+                                            <!-- Book Title - Most prominent -->
+                                            <Label Text="{Binding Boek.Titel}" 
+                                                   FontAttributes="Bold" 
+                                                   FontSize="16" 
+                                                   TextColor="{StaticResource Primary}"
+                                                   LineBreakMode="WordWrap" />
+                                            
+                                            <!-- Lid Naam -->
+                                            <HorizontalStackLayout Spacing="4">
+                                                <Label Text="Lid:" FontSize="12" TextColor="#6E6E6E" FontAttributes="Bold" />
+                                                <Label FontSize="12" TextColor="#212121">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="{Binding Lid.Voornaam}" />
+                                                            <Span Text=" " />
+                                                            <Span Text="{Binding Lid.AchterNaam}" />
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                            </HorizontalStackLayout>
 
-                                            <!-- show Start and Due dates in the item -->
-                                            <VerticalStackLayout Spacing="2" HorizontalOptions="StartAndExpand">
-                                                <Label FontSize="11" TextColor="#6E6E6E" HorizontalOptions="Start">
-                                                    <Label.FormattedText>
-                                                        <FormattedString>
-                                                            <Span Text="{Binding BindingContext.StartLabel, Source={x:Reference PageRoot}}" />
-                                                            <Span Text=": " />
-                                                            <Span Text="{Binding StartDate, StringFormat='{0:dd-MM-yyyy}'}" />
-                                                        </FormattedString>
-                                                    </Label.FormattedText>
-                                                </Label>
-                                                <Label FontSize="11" TextColor="#6E6E6E" HorizontalOptions="Start">
-                                                    <Label.FormattedText>
-                                                        <FormattedString>
-                                                            <Span Text="{Binding BindingContext.DueLabel, Source={x:Reference PageRoot}}" />
-                                                            <Span Text=": " />
-                                                            <Span Text="{Binding DueDate, StringFormat='{0:dd-MM-yyyy}'}" />
-                                                        </FormattedString>
-                                                    </Label.FormattedText>
-                                                </Label>
-                                            </VerticalStackLayout>
+                                            <!-- toon Start en Einddatums in het item -->
+                                            <HorizontalStackLayout Spacing="12">
+                                                <HorizontalStackLayout Spacing="4">
+                                                    <Label Text="Start:" 
+                                                           FontSize="11" 
+                                                           TextColor="#6E6E6E" 
+                                                           FontAttributes="Bold" />
+                                                    <Label Text="{Binding StartDate, StringFormat='{0:dd-MM-yyyy}'}" 
+                                                           FontSize="11" 
+                                                           TextColor="#212121" />
+                                                </HorizontalStackLayout>
+                                                
+                                                <HorizontalStackLayout Spacing="4">
+                                                    <Label Text="Tot:" 
+                                                           FontSize="11" 
+                                                           TextColor="#6E6E6E" 
+                                                           FontAttributes="Bold" />
+                                                    <Label Text="{Binding DueDate, StringFormat='{0:dd-MM-yyyy}'}" 
+                                                           FontSize="11" 
+                                                           TextColor="#212121" />
+                                                </HorizontalStackLayout>
+                                            </HorizontalStackLayout>
                                         </VerticalStackLayout>
 
-                                        <!-- Right: action icons (keep details and delete) -->
+                                        <!-- Rechts: actie iconen (behoud details en verwijder) -->
                                         <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center" WidthRequest="120" Spacing="6">
                                             <HorizontalStackLayout Spacing="6" VerticalOptions="Center" HorizontalOptions="End">
                                                 <ImageButton Source="details_illustration.svg" WidthRequest="24" HeightRequest="24" BackgroundColor="Transparent" Clicked="OnViewLoanClicked" BindingContext="{Binding .}" />
                                                 <ImageButton Source="delete_illustration.svg" WidthRequest="28" HeightRequest="28" BackgroundColor="Transparent" Clicked="OnDeleteLoanClicked" BindingContext="{Binding .}" />
                                             </HorizontalStackLayout>
-                                            <!-- 'Mark returned' button removed as requested -->
+                                            <!-- 'Markeer ingeleverd' knop verwijderd zoals gevraagd -->
                                         </VerticalStackLayout>
                                     </Grid>
                                 </Border>
@@ -144,24 +156,110 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <!-- Edit / create form -->
-                    <Border x:Name="EditForm" Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="10">
-                        <VerticalStackLayout Spacing="8">
-                            <!-- remove return/picker UI, keep simple fields -->
-                            <Picker x:Name="BoekPicker" ItemsSource="{Binding BoekenList}" ItemDisplayBinding="{Binding Titel}" SelectedItem="{Binding SelectedBoek}" Title="{Binding BookTitle}" />
+                    <!-- Bewerk / creëer formulier -->
+                    <Border x:Name="EditForm" Stroke="#E1E1E1" StrokeThickness="1" Padding="10" BackgroundColor="White">
+                        <VerticalStackLayout Spacing="12">
+                            <!-- Boek picker met expliciete styling -->
+                            <Label Text="{Binding BookTitle}" TextColor="#5A5A5A" FontSize="14" FontAttributes="Bold" />
+                            <Picker x:Name="BoekPicker" 
+                                    ItemsSource="{Binding BoekenList}" 
+                                    ItemDisplayBinding="{Binding Titel}" 
+                                    SelectedItem="{Binding SelectedBoek}" 
+                                    Title="Selecteer boek"
+                                    BackgroundColor="#F5F5F5"
+                                    TextColor="#212121"
+                                    TitleColor="#6E6E6E"
+                                    HeightRequest="45"
+                                    FontSize="14" />
+                            
+                            <!-- Weergave geselecteerde boek details -->
+                            <Frame Padding="8" BackgroundColor="#E8F5E9" IsVisible="{Binding SelectedBoek, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Geselecteerd boek:" FontSize="11" TextColor="#2E7D32" FontAttributes="Bold" />
+                                    <Label Text="{Binding SelectedBoek.Titel}" FontSize="13" TextColor="#212121" FontAttributes="Bold" />
+                                    <Label FontSize="11" TextColor="#5A5A5A">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="Auteur: " />
+                                                <Span Text="{Binding SelectedBoek.Auteur}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Label FontSize="11" TextColor="#5A5A5A">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="ISBN: " />
+                                                <Span Text="{Binding SelectedBoek.Isbn}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </VerticalStackLayout>
+                            </Frame>
 
-                            <Picker x:Name="LidPicker" ItemsSource="{Binding LedenList}" ItemDisplayBinding="{Binding FullName}" SelectedItem="{Binding SelectedLid}" Title="{Binding MemberTitle}" />
+                            <!-- Lid picker met expliciete styling -->
+                            <Label Text="{Binding MemberTitle}" TextColor="#5A5A5A" FontSize="14" FontAttributes="Bold" />
+                            <Picker x:Name="LidPicker" 
+                                    ItemsSource="{Binding LedenList}" 
+                                    ItemDisplayBinding="{Binding FullName}" 
+                                    SelectedItem="{Binding SelectedLid}" 
+                                    Title="Selecteer lid"
+                                    BackgroundColor="#F5F5F5"
+                                    TextColor="#212121"
+                                    TitleColor="#6E6E6E"
+                                    HeightRequest="45"
+                                    FontSize="14" />
+                            
+                            <!-- Weergave geselecteerde lid details -->
+                            <Frame Padding="8" BackgroundColor="#E3F2FD" IsVisible="{Binding SelectedLid, Converter={StaticResource IsNotNullConverter}}">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="Geselecteerd lid:" FontSize="11" TextColor="#1565C0" FontAttributes="Bold" />
+                                    <Label FontSize="13" TextColor="#212121" FontAttributes="Bold">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding SelectedLid.Voornaam}" />
+                                                <Span Text=" " />
+                                                <Span Text="{Binding SelectedLid.AchterNaam}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Label Text="{Binding SelectedLid.Email}" FontSize="11" TextColor="#5A5A5A" />
+                                    <Label Text="{Binding SelectedLid.Telefoon}" FontSize="11" TextColor="#5A5A5A" IsVisible="{Binding SelectedLid.Telefoon, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
+                                </VerticalStackLayout>
+                            </Frame>
 
-                            <Label Text="{Binding StartLabel}" TextColor="#5A5A5A" />
-                            <DatePicker x:Name="StartDatePicker" Date="{Binding StartDate}" />
+                            <!-- Start datum met expliciete styling -->
+                            <Label Text="{Binding StartLabel}" TextColor="#5A5A5A" FontSize="14" FontAttributes="Bold" />
+                            <DatePicker x:Name="StartDatePicker" 
+                                        Date="{Binding StartDate}"
+                                        BackgroundColor="#F5F5F5"
+                                        TextColor="#212121"
+                                        HeightRequest="45"
+                                        FontSize="14"
+                                        Format="dd-MM-yyyy" />
 
-                            <Label Text="{Binding DueLabel}" TextColor="#5A5A5A" />
-                            <DatePicker x:Name="DueDatePicker" Date="{Binding DueDate}" />
+                            <!-- Einddatum met expliciete styling -->
+                            <Label Text="{Binding DueLabel}" TextColor="#5A5A5A" FontSize="14" FontAttributes="Bold" />
+                            <DatePicker x:Name="DueDatePicker" 
+                                        Date="{Binding DueDate}"
+                                        BackgroundColor="#F5F5F5"
+                                        TextColor="#212121"
+                                        HeightRequest="45"
+                                        FontSize="14"
+                                        Format="dd-MM-yyyy" />
 
-                            <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
-                                <!-- textual delete button for form -->
-                                <Button Text="{Binding DeleteButtonText}" Command="{Binding VerwijderCommand}" Style="{StaticResource DangerButtonSmall}" />
-                                <Button Text="{Binding SaveButtonText}" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
+                            <!-- Knoppen -->
+                            <HorizontalStackLayout Spacing="12" HorizontalOptions="End" Margin="0,8,0,0">
+                                <Button Text="{Binding DeleteButtonText}" 
+                                        Command="{Binding VerwijderCommand}" 
+                                        BackgroundColor="Crimson" 
+                                        TextColor="White"
+                                        WidthRequest="100"
+                                        HeightRequest="40" />
+                                <Button Text="{Binding SaveButtonText}" 
+                                        Command="{Binding OpslaanCommand}" 
+                                        Style="{StaticResource PrimaryButton}"
+                                        WidthRequest="100"
+                                        HeightRequest="40" />
                              </HorizontalStackLayout>
                          </VerticalStackLayout>
                      </Border>

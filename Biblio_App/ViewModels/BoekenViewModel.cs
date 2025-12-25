@@ -29,7 +29,7 @@ namespace Biblio_App.ViewModels
     public partial class BoekenViewModel : ObservableValidator, ILocalizable
     {
         private readonly IGegevensProvider? _gegevensProvider;
-        private readonly IDbContextFactory<BiblioDbContext> _dbFactory;
+        private readonly IDbContextFactory<LocalDbContext> _dbFactory;
         private readonly IDataSyncService? _sync;
         private readonly ILanguageService? _languageService;
 
@@ -61,11 +61,11 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private int categorieId;
 
-        // Filter/search properties
+        // Filter/zoek eigenschappen
         [ObservableProperty]
         private string searchText = string.Empty;
 
-        // Debounce search to avoid triggering LoadBooksAsync on every keystroke
+        // Debounce zoeken om te voorkomen dat LoadBooksAsync bij elke toetsaanslag wordt getriggerd
         partial void OnSearchTextChanged(string value)
         {
             try
@@ -74,7 +74,7 @@ namespace Biblio_App.ViewModels
                 _searchCts = new CancellationTokenSource();
                 var token = _searchCts.Token;
 
-                // Fire-and-forget background task that waits a short debounce interval
+                // Fire-and-forget achtergrond taak die een korte debounce interval wacht
                 _ = Task.Run(async () =>
                 {
                     try
@@ -82,7 +82,7 @@ namespace Biblio_App.ViewModels
                         await Task.Delay(400, token);
                         if (token.IsCancellationRequested) return;
 
-                        // reset to first page and reload
+                        // reset naar eerste pagina en herlaad
                         Page = 1;
                         await LoadBooksAsync();
                     }
@@ -105,7 +105,7 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private int totalCount;
 
-        // Read-only display for the page indicator (e.g. "Pagina 1 / 5")
+        // Alleen-lezen weergave voor de pagina-indicator (bijv. "Pagina 1 / 5")
         public string PageDisplay => TotalPages > 0 ? $"{Localize("Page")} {Page} / {TotalPages}" : $"{Localize("Page")} {Page}";
 
         [ObservableProperty]
@@ -117,7 +117,7 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string validationMessage = string.Empty;
 
-        // per-field error properties
+        // per-veld fout eigenschappen
         public string TitelError => GetFirstError(nameof(Titel));
         public string AuteurError => GetFirstError(nameof(Auteur));
         public string IsbnError => GetFirstError(nameof(Isbn));
@@ -133,12 +133,12 @@ namespace Biblio_App.ViewModels
         public IAsyncRelayCommand PrevPageCommand { get; }
         public IAsyncRelayCommand<int> GoToPageCommand { get; }
 
-        // item commands
+        // item commando's
         public IAsyncRelayCommand<Boek> ItemDetailsCommand { get; }
         public IAsyncRelayCommand<Boek> ItemEditCommand { get; }
         public IAsyncRelayCommand<Boek> ItemDeleteCommand { get; }
 
-        // localized UI strings
+        // gelokaliseerde UI strings
         [ObservableProperty]
         private string pageTitle = string.Empty;
 
@@ -196,7 +196,7 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private int openUitleningenCount;
 
-        public BoekenViewModel(IDbContextFactory<BiblioDbContext> dbFactory, IDataSyncService? sync = null, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
+        public BoekenViewModel(IDbContextFactory<LocalDbContext> dbFactory, IDataSyncService? sync = null, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _sync = sync;
