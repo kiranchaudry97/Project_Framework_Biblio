@@ -87,13 +87,10 @@
 
     <!-- Fonts -->
     <MauiFont Include="Resources\Fonts\*" />
-    <MauiFont Include="Resources\Fonts\fa-solid-900.ttf"
-              Alias="FA"
-              Condition="Exists('Resources\\Fonts\\fa-solid-900.ttf')" />
+    <MauiFont Include="Resources\Fonts\fa-solid-900.ttf" Alias="FA" Condition="Exists('Resources\\Fonts\\fa-solid-900.ttf')" />
 
     <!-- Raw assets -->
-    <MauiAsset Include="Resources\Raw\**"
-               LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+    <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
 
@@ -108,14 +105,13 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.0" />
 
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers"
-                      Version="3.3.4"
-                      PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
 
     <!-- EF Core packages required by the MAUI app for local SQLite usage -->
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="SkiaSharp.Extended.UI.Maui" Version="3.0.0" />
   </ItemGroup>
 
 	<PropertyGroup>

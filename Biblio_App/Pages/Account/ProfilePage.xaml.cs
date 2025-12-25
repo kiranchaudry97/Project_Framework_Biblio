@@ -186,21 +186,97 @@ namespace Biblio_App.Pages.Account
             try { StatusLabel.Text = "Kon profiel niet opslaan."; StatusLabel.TextColor = Microsoft.Maui.Graphics.Colors.Red; } catch { }
         }
 
-        private void OnChangePasswordClicked(object sender, EventArgs e)
+        private async void OnChangePasswordClicked(object sender, EventArgs e)
         {
-            // Navigate to the change password view — use Shell navigation to the web Identity change page or app page if present
+            // Clear previous status
+            try { PasswordStatusLabel.Text = string.Empty; PasswordStatusLabel.IsVisible = false; } catch { }
+
+            // Validate inputs
+            var currentPwd = CurrentPasswordEntry?.Text?.Trim() ?? string.Empty;
+            var newPwd = NewPasswordEntry?.Text?.Trim() ?? string.Empty;
+            var confirmPwd = ConfirmPasswordEntry?.Text?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(currentPwd))
+            {
+                try { PasswordStatusLabel.Text = "Huidig wachtwoord is verplicht."; PasswordStatusLabel.TextColor = Microsoft.Maui.Graphics.Colors.Crimson; PasswordStatusLabel.IsVisible = true; } catch { }
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(newPwd))
+            {
+                try { PasswordStatusLabel.Text = "Nieuw wachtwoord is verplicht."; PasswordStatusLabel.TextColor = Microsoft.Maui.Graphics.Colors.Crimson; PasswordStatusLabel.IsVisible = true; } catch { }
+                return;
+            }
+
+            if (newPwd.Length < 6)
+            {
+                try { PasswordStatusLabel.Text = "Nieuw wachtwoord moet minimaal 6 tekens zijn."; PasswordStatusLabel.TextColor = Microsoft.Maui.Graphics.Colors.Crimson; PasswordStatusLabel.IsVisible = true; } catch { }
+                return;
+            }
+
+            if (newPwd != confirmPwd)
+            {
+                try { PasswordStatusLabel.Text = "Nieuwe wachtwoorden komen niet overeen."; PasswordStatusLabel.TextColor = Microsoft.Maui.Graphics.Colors.Crimson; PasswordStatusLabel.IsVisible = true; } catch { }
+                return;
+            }
+
+            // Try to change password via UserManager
             try
             {
-                // First try local navigation to ChangePassword page in the app (not present by default)
-                var routes = Shell.Current?.CurrentItem?.Items?.Select(i => i.Route).ToList();
-                // Fallback to opening external web page to change password via the site (if configured)
-                var cfg = App.Current?.Handler?.MauiContext?.Services?.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
-                var webBase = cfg?[("ApiBaseAddress")] ?? cfg?.GetSection("Api")?["BaseAddress"];
-                if (!string.IsNullOrWhiteSpace(webBase))
+                var services = App.Current?.Handler?.MauiContext?.Services;
+                if (services != null)
                 {
-                    var url = webBase.TrimEnd('/') + "/Identity/Account/Manage";
-                    try { Launcher.OpenAsync(url); } catch { }
+                    var userMgr = services.GetService<UserManager<AppUser>>();
+                    if (userMgr != null && !string.IsNullOrWhiteSpace(_security.CurrentEmail))
+                    {
+                        var user = await userMgr.FindByEmailAsync(_security.CurrentEmail);
+                        if (user != null)
+                        {
+                            var res = await userMgr.ChangePasswordAsync(user, currentPwd, newPwd);
+                            if (res.Succeeded)
+                            {
+                                try { PasswordStatusLabel.Text = "Wachtwoord succesvol gewijzigd!"; PasswordStatusLabel.TextColor = Microsoft.Maui.Graphics.Colors.Green; PasswordStatusLabel.IsVisible = true; } catch { }
+                                
+                                // Clear password fields
+                                try { CurrentPasswordEntry.Text = string.Empty; } catch { }
+                                try { NewPasswordEntry.Text = string.Empty; } catch { }
+                                try { ConfirmPasswordEntry.Text = string.Empty; } catch { }
+                                
+                                await DisplayAlert("Succes", "Wachtwoord succesvol gewijzigd!", "OK");
+                                return;
+                            }
+                            else
+                            {
+                                var msgs = string.Join(", ", res.Errors.Select(err => err.Description));
+                                try { PasswordStatusLabel.Text = $"Fout: {msgs}"; PasswordStatusLabel.TextColor = Microsoft.Maui.Graphics.Colors.Crimson; PasswordStatusLabel.IsVisible = true; } catch { }
+                                await DisplayAlert("Fout", msgs, "OK");
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            try { PasswordStatusLabel.Text = "Gebruiker niet gevonden."; PasswordStatusLabel.TextColor = Microsoft.Maui.Graphics.Colors.Crimson; PasswordStatusLabel.IsVisible = true; } catch { }
+                            return;
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                try { PasswordStatusLabel.Text = "Fout bij wijzigen wachtwoord."; PasswordStatusLabel.TextColor = Microsoft.Maui.Graphics.Colors.Crimson; PasswordStatusLabel.IsVisible = true; } catch { }
+                try { System.Diagnostics.Debug.WriteLine($"Password change error: {ex}"); } catch { }
+                await DisplayAlert("Fout", "Kon wachtwoord niet wijzigen. Probeer het opnieuw.", "OK");
+            }
+        }
+
+        private void OnShowPasswordToggled(object sender, ToggledEventArgs e)
+        {
+            try
+            {
+                var showPassword = e.Value;
+                if (CurrentPasswordEntry != null) CurrentPasswordEntry.IsPassword = !showPassword;
+                if (NewPasswordEntry != null) NewPasswordEntry.IsPassword = !showPassword;
+                if (ConfirmPasswordEntry != null) ConfirmPasswordEntry.IsPassword = !showPassword;
             }
             catch { }
         }

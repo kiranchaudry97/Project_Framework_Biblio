@@ -95,33 +95,17 @@
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
 
-                    <!-- Action buttons -->
+                    <!-- Action buttons met styled components -->
                     <HorizontalStackLayout Spacing="12" HorizontalOptions="End" Margin="0,8,0,0">
                         <Button x:Name="SyncNowButton" 
                                 Text="Synchroniseer nu" 
                                 Command="{Binding SyncNowCommand}" 
-                                BackgroundColor="#1e3050"
-                                TextColor="White"
-                                FontSize="14"
-                                FontAttributes="Bold"
-                                CornerRadius="8"
-                                Padding="16,10"
-                                MinimumWidthRequest="140"
-                                HeightRequest="44"
+                                Style="{StaticResource PrimaryButton}"
                                 IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}" />
                         <Button x:Name="CheckApiButton" 
                                 Text="Controleer API" 
                                 Command="{Binding CheckApiCommand}" 
-                                BackgroundColor="Transparent"
-                                TextColor="#1e3050"
-                                BorderColor="#1e3050"
-                                BorderWidth="2"
-                                FontSize="14"
-                                FontAttributes="Bold"
-                                CornerRadius="8"
-                                Padding="16,10"
-                                MinimumWidthRequest="140"
-                                HeightRequest="44" />
+                                Style="{StaticResource OutlineActionButton}" />
                     </HorizontalStackLayout>
 
                     <BoxView HeightRequest="1" Color="#C8C8C8" Margin="0,8" />
@@ -153,32 +137,16 @@
                                LineBreakMode="WordWrap"
                                TextColor="#5A5A5A" />
                         
-                        <!-- Database action buttons -->
+                        <!-- Database action buttons met styled components -->
                         <HorizontalStackLayout Spacing="12" Margin="0,12,0,0">
                             <Button x:Name="LoadDbButton" 
                                     Text="Laad database info" 
                                     Command="{Binding LoadDatabaseInfoCommand}"
-                                    BackgroundColor="Transparent"
-                                    TextColor="#1e3050"
-                                    BorderColor="#1e3050"
-                                    BorderWidth="2"
-                                    FontSize="14"
-                                    FontAttributes="Bold"
-                                    CornerRadius="8"
-                                    Padding="16,10"
-                                    MinimumWidthRequest="160"
-                                    HeightRequest="44" />
+                                    Style="{StaticResource OutlineActionButton}" />
                             <Button x:Name="ResetDbButton" 
                                     Text="Reset lokale DB" 
                                     Clicked="OnResetDbClicked"
-                                    BackgroundColor="#dc3545"
-                                    TextColor="White"
-                                    FontSize="14"
-                                    FontAttributes="Bold"
-                                    CornerRadius="8"
-                                    Padding="16,10"
-                                    MinimumWidthRequest="160"
-                                    HeightRequest="44" />
+                                    Style="{StaticResource DangerButton}" />
                         </HorizontalStackLayout>
                     </VerticalStackLayout>
 

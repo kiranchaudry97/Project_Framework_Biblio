@@ -114,7 +114,7 @@
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light=#5A5A5A, Dark=#ACACAC}" />
         <Setter Property="MinimumHeightRequest" Value="44"/>
         <Setter Property="MinimumWidthRequest" Value="44"/>
         <Setter Property="VisualStateManager.VisualStateGroups">
@@ -136,7 +136,7 @@
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light=#5A5A5A, Dark=#ACACAC}" />
         <Setter Property="MinimumHeightRequest" Value="44"/>
         <Setter Property="MinimumWidthRequest" Value="44"/>
         <Setter Property="VisualStateManager.VisualStateGroups">
@@ -288,8 +288,8 @@
 
     <Style TargetType="SearchBar">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
-        <Setter Property="PlaceholderColor" Value="{StaticResource Gray500}" />
-        <Setter Property="CancelButtonColor" Value="{StaticResource Gray500}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light=#5A5A5A, Dark=#ACACAC}" />
+        <Setter Property="CancelButtonColor" Value="{AppThemeBinding Light=#5A5A5A, Dark=#ACACAC}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="FontFamily" Value="OpenSansRegular" />
         <Setter Property="FontSize" Value="14" />
@@ -312,7 +312,7 @@
 
     <Style TargetType="SearchHandler">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
-        <Setter Property="PlaceholderColor" Value="{StaticResource Gray500}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light=#5A5A5A, Dark=#ACACAC}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="FontFamily" Value="OpenSansRegular" />
         <Setter Property="FontSize" Value="14" />
@@ -450,6 +450,16 @@
         <Setter Property="Shell.TabBarForegroundColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource White}}" />
         <Setter Property="Shell.TabBarTitleColor" Value="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource White}}" />
         <Setter Property="Shell.TabBarUnselectedColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray200}}" />
+        <Setter Property="Shell.FlyoutBackgroundColor" Value="{AppThemeBinding Light=White, Dark=Black}" />
+        <Setter Property="Shell.FlyoutHeaderBehavior" Value="Default" />
+        <Setter Property="Shell.FlyoutVerticalScrollMode" Value="Enabled" />
+    </Style>
+
+    <!-- FlyoutItem style for menu items -->
+    <Style TargetType="FlyoutItem">
+        <Setter Property="Shell.BackgroundColor" Value="{AppThemeBinding Light=White, Dark=Black}" />
+        <Setter Property="Shell.ForegroundColor" Value="{AppThemeBinding Light=#1e3a5f, Dark=White}" />
+        <Setter Property="Shell.TitleColor" Value="{AppThemeBinding Light=#1e3a5f, Dark=White}" />
     </Style>
 
     <Style TargetType="NavigationPage">
@@ -468,52 +478,99 @@
     <!-- Welcome card/frame style (match web card) -->
     <Style x:Key="WelcomeCardStyle" TargetType="Frame">
         <Setter Property="BackgroundColor" Value="White" />
-        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="CornerRadius" Value="12" />
         <Setter Property="HasShadow" Value="True" />
         <Setter Property="Padding" Value="20" />
-        <Setter Property="Margin" Value="8" />
+        <Setter Property="Margin" Value="16" />
         <Setter Property="VerticalOptions" Value="Start" />
+        <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+    </Style>
+
+    <!-- Card style for content sections matching design screenshots -->
+    <Style x:Key="ContentCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="HasShadow" Value="True" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Margin" Value="16,8" />
+        <Setter Property="VerticalOptions" Value="FillAndExpand" />
+        <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+    </Style>
+
+    <!-- Loan card style for Uitleningen list items -->
+    <Style x:Key="LoanCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="BorderColor" Value="Transparent" />
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="Margin" Value="8,4" />
+        <Setter Property="VerticalOptions" Value="Start" />
+        <Setter Property="HorizontalOptions" Value="FillAndExpand" />
+    </Style>
+
+    <!-- Selected loan card with orange border -->
+    <Style x:Key="LoanCardSelected" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="Stroke" Value="#ff8c00" />
+        <Setter Property="StrokeThickness" Value="3" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 8" />
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="Margin" Value="8,4" />
+    </Style>
+
+    <!-- Uitleningen detail view card -->
+    <Style x:Key="LoanDetailCard" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="BorderColor" Value="{StaticResource Gray200}" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Margin" Value="8,0" />
+        <Setter Property="VerticalOptions" Value="FillAndExpand" />
         <Setter Property="HorizontalOptions" Value="FillAndExpand" />
     </Style>
 
     <!-- Primary button style matching screenshot (blue rounded) -->
 
-    <!-- PrimaryButton style (filled) -->
+    <!-- PrimaryButton style (filled) - Navy blue matching design -->
     <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource Button}">
-        <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+        <Setter Property="BackgroundColor" Value="#1e3a5f" />
         <Setter Property="TextColor" Value="{StaticResource White}" />
         <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderWidth" Value="0" />
         <Setter Property="WidthRequest" Value="120" />
         <Setter Property="HeightRequest" Value="44" />
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="Padding" Value="14,6" />
-        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="HorizontalOptions" Value="Center" />
     </Style>
 
-    <!-- Outline action button (border, transparent background) -->
+    <!-- Outline action button (border, transparent background) - Matching design -->
     <Style x:Key="OutlineActionButton" TargetType="Button" BasedOn="{StaticResource Button}">
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
-        <Setter Property="BorderColor" Value="{StaticResource Primary}" />
+        <Setter Property="TextColor" Value="#1e3a5f" />
+        <Setter Property="BorderColor" Value="#1e3a5f" />
         <Setter Property="BorderWidth" Value="1" />
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="WidthRequest" Value="120" />
         <Setter Property="HeightRequest" Value="44" />
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="Padding" Value="14,6" />
-        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="HorizontalOptions" Value="Center" />
     </Style>
 
-    <!-- Danger button for delete actions -->
+    <!-- Danger button for delete actions - Red matching design -->
     <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource Button}">
-        <Setter Property="BackgroundColor" Value="Crimson" />
+        <Setter Property="BackgroundColor" Value="#dc143c" />
         <Setter Property="TextColor" Value="White" />
         <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderWidth" Value="0" />
         <Setter Property="WidthRequest" Value="120" />
         <Setter Property="HeightRequest" Value="44" />
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="Padding" Value="14,6" />
-        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="Padding" Value="14,10" />
+        <Setter Property="HorizontalOptions" Value="Center" />
     </Style>
 
     <!-- small link-style button (outline) for quick actions in flyout footer -->
@@ -537,27 +594,157 @@
 
     <!-- Small variants for action buttons used on member page -->
     <Style x:Key="PrimaryButtonSmall" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-        <Setter Property="WidthRequest" Value="80" />
-        <Setter Property="HeightRequest" Value="32" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="Padding" Value="8,4" />
-        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="WidthRequest" Value="-1" />
+        <Setter Property="HeightRequest" Value="36" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
     </Style>
 
     <Style x:Key="OutlineActionButtonSmall" TargetType="Button" BasedOn="{StaticResource OutlineActionButton}">
-        <Setter Property="WidthRequest" Value="80" />
-        <Setter Property="HeightRequest" Value="32" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="Padding" Value="8,4" />
-        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="WidthRequest" Value="-1" />
+        <Setter Property="HeightRequest" Value="36" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
     </Style>
 
     <Style x:Key="DangerButtonSmall" TargetType="Button" BasedOn="{StaticResource DangerButton}">
+        <Setter Property="WidthRequest" Value="-1" />
+        <Setter Property="HeightRequest" Value="36" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+    </Style>
+
+    <!-- Navigation button style for Pre/Ne (Previous/Next) pagination -->
+    <Style x:Key="NavigationButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+        <Setter Property="WidthRequest" Value="60" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+    </Style>
+
+    <!-- Uitleningen header style with dark navy background -->
+    <Style x:Key="UitleningenHeader" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#2c4a6f" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <!-- Statistics label for Leden/Uitleningen/Boeken counts -->
+    <Style x:Key="StatLabel" TargetType="Label">
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <!-- Filter button style matching design -->
+    <Style x:Key="FilterButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
         <Setter Property="WidthRequest" Value="80" />
+        <Setter Property="HeightRequest" Value="40" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="HorizontalOptions" Value="End" />
+    </Style>
+
+    <!-- Action icon button style (info and delete icons in loan cards) -->
+    <Style x:Key="ActionIconButton" TargetType="ImageButton">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="WidthRequest" Value="32" />
         <Setter Property="HeightRequest" Value="32" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="Padding" Value="8,4" />
-        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="6" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="Aspect" Value="AspectFit" />
+    </Style>
+
+    <!-- Dark action icon (info/details button with dark navy background circle) -->
+    <Style x:Key="DarkActionIcon" TargetType="ImageButton" BasedOn="{StaticResource ActionIconButton}">
+        <Setter Property="BackgroundColor" Value="#1e3a5f" />
+        <Setter Property="WidthRequest" Value="32" />
+        <Setter Property="HeightRequest" Value="32" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="6" />
+    </Style>
+
+    <!-- Danger action icon (delete button with red background circle) -->
+    <Style x:Key="DangerActionIcon" TargetType="ImageButton" BasedOn="{StaticResource ActionIconButton}">
+        <Setter Property="BackgroundColor" Value="#dc143c" />
+        <Setter Property="WidthRequest" Value="32" />
+        <Setter Property="HeightRequest" Value="32" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="6" />
+    </Style>
+
+    <!-- Details/Info icon button - matching screenshot with dark circle -->
+    <Style x:Key="DetailsIconButton" TargetType="ImageButton" BasedOn="{StaticResource DarkActionIcon}">
+        <Setter Property="WidthRequest" Value="28" />
+        <Setter Property="HeightRequest" Value="28" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="5" />
+    </Style>
+
+    <!-- Delete icon button - matching screenshot with red circle -->
+    <Style x:Key="DeleteIconButton" TargetType="ImageButton" BasedOn="{StaticResource DangerActionIcon}">
+        <Setter Property="WidthRequest" Value="28" />
+        <Setter Property="HeightRequest" Value="28" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="5" />
+    </Style>
+
+    <!-- Add/Plus icon button - for Nieuw actions -->
+    <Style x:Key="AddIconButton" TargetType="ImageButton" BasedOn="{StaticResource DarkActionIcon}">
+        <Setter Property="WidthRequest" Value="28" />
+        <Setter Property="HeightRequest" Value="28" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="5" />
+    </Style>
+
+    <!-- Edit icon button - matching details style -->
+    <Style x:Key="EditIconButton" TargetType="ImageButton" BasedOn="{StaticResource DarkActionIcon}">
+        <Setter Property="WidthRequest" Value="28" />
+        <Setter Property="HeightRequest" Value="28" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="5" />
+    </Style>
+
+    <!-- Entry style for search/filter inputs on white background -->
+    <Style x:Key="SearchEntry" TargetType="Entry">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="{StaticResource Gray900}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource Gray400}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="HeightRequest" Value="40" />
+    </Style>
+
+    <!-- Snelkoppelingen (Quick Actions) section style -->
+    <Style x:Key="QuickActionsSection" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="#2c4a6f" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="HasShadow" Value="False" />
+        <Setter Property="Padding" Value="16" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <!-- Quick action button (+ Nieuw boek, + Nieuw lid, etc) -->
+    <Style x:Key="QuickActionButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="HorizontalOptions" Value="Start" />
     </Style>
 
 </ResourceDictionary>

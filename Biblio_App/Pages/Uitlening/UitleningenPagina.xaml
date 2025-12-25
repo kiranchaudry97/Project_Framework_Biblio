@@ -39,15 +39,17 @@
         <VerticalStackLayout Padding="20" Spacing="12" BackgroundColor="White">
             <Label Text="{Binding PageHeaderText}" Style="{StaticResource PageHeaderLabel}" TextColor="#212121" />
 
-            <!-- Status / aantallen voor debugging -->
-            <HorizontalStackLayout Spacing="12" HorizontalOptions="Center" BackgroundColor="#F5F5F5" Padding="12,8" >
-                <Label Text="{Binding MembersLabel}" TextColor="#212121" />
-                <Label Text="{Binding LedenCount}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
-                <Label Text="{Binding LoansLabel}" TextColor="#212121" />
-                <Label Text="{Binding UitleningenCount}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
-                <Label Text="{Binding BooksLabel}" TextColor="#212121" />
-                <Label Text="{Binding BoekenCount}" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
-            </HorizontalStackLayout>
+            <!-- Status / aantallen met navy blue achtergrond zoals design -->
+            <Frame Style="{StaticResource UitleningenHeader}" Padding="12,8">
+                <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
+                    <Label Text="{Binding MembersLabel}" Style="{StaticResource StatLabel}" />
+                    <Label Text="{Binding LedenCount}" FontAttributes="Bold" TextColor="White" FontSize="14" />
+                    <Label Text="{Binding LoansLabel}" Style="{StaticResource StatLabel}" />
+                    <Label Text="{Binding UitleningenCount}" FontAttributes="Bold" TextColor="White" FontSize="14" />
+                    <Label Text="{Binding BooksLabel}" Style="{StaticResource StatLabel}" />
+                    <Label Text="{Binding BoekenCount}" FontAttributes="Bold" TextColor="White" FontSize="14" />
+                </HorizontalStackLayout>
+            </Frame>
 
             <!-- DB pad weergave en kopieer knop -->
             <!--<HorizontalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
@@ -60,10 +62,18 @@
 
             <Frame Style="{StaticResource WelcomeCardStyle}" BackgroundColor="White">
                 <VerticalStackLayout Spacing="12">
-                    <!-- Filters (aangepast van web design) - vereenvoudigd: alleen zoeken + filter knop -->
+                    <!-- Filters met styled components -->
                     <Grid ColumnDefinitions="*, Auto">
-                        <Entry Grid.Column="0" Placeholder="Zoek op titel, auteur of ISBN" Text="{Binding SearchText}" BackgroundColor="#F5F5F5" TextColor="#212121" PlaceholderColor="#6E6E6E" />
-                        <Button Grid.Column="1" Text="{Binding FilterButtonText}" Command="{Binding ZoekCommand}" BackgroundColor="{StaticResource Primary}" TextColor="White" CornerRadius="10" WidthRequest="88" HeightRequest="44" Margin="8,0,0,0" />
+                        <Entry Grid.Column="0" 
+                               Placeholder="Zoek op titel, auteur of ISBN" 
+                               Text="{Binding SearchText}" 
+                               Style="{StaticResource SearchEntry}"
+                               BackgroundColor="#F5F5F5" />
+                        <Button Grid.Column="1" 
+                                Text="{Binding FilterButtonText}" 
+                                Command="{Binding ZoekCommand}" 
+                                Style="{StaticResource FilterButton}"
+                                Margin="8,0,0,0" />
                     </Grid>
 
                     <VerticalStackLayout Spacing="8">
@@ -89,10 +99,10 @@
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="8" />
                                     </Border.StrokeShape>
-                                    <!-- Vereenvoudigde lay-out: links info, rechts acties -->
-                                    <Grid Padding="12" ColumnDefinitions="*,Auto">
-                                        <!-- Links: lid en boek info -->
-                                        <VerticalStackLayout Grid.Column="0" Spacing="6" HorizontalOptions="StartAndExpand">
+                                    <!-- Vereenvoudigde lay-out: alleen info -->
+                                    <Grid Padding="12" ColumnDefinitions="*">
+                                        <!-- Lid en boek info -->
+                                        <VerticalStackLayout Grid.Column="0" Spacing="6" HorizontalOptions="FillAndExpand">
                                             <VerticalStackLayout.GestureRecognizers>
                                                 <TapGestureRecognizer Tapped="OnItemHeaderTapped" />
                                             </VerticalStackLayout.GestureRecognizers>
@@ -140,15 +150,6 @@
                                                            TextColor="#212121" />
                                                 </HorizontalStackLayout>
                                             </HorizontalStackLayout>
-                                        </VerticalStackLayout>
-
-                                        <!-- Rechts: actie iconen (behoud details en verwijder) -->
-                                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="End" VerticalOptions="Center" WidthRequest="120" Spacing="6">
-                                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center" HorizontalOptions="End">
-                                                <ImageButton Source="details_illustration.svg" WidthRequest="24" HeightRequest="24" BackgroundColor="Transparent" Clicked="OnViewLoanClicked" BindingContext="{Binding .}" />
-                                                <ImageButton Source="delete_illustration.svg" WidthRequest="28" HeightRequest="28" BackgroundColor="Transparent" Clicked="OnDeleteLoanClicked" BindingContext="{Binding .}" />
-                                            </HorizontalStackLayout>
-                                            <!-- 'Markeer ingeleverd' knop verwijderd zoals gevraagd -->
                                         </VerticalStackLayout>
                                     </Grid>
                                 </Border>
@@ -247,12 +248,11 @@
                                         FontSize="14"
                                         Format="dd-MM-yyyy" />
 
-                            <!-- Knoppen -->
+                            <!-- Knoppen met proper styles -->
                             <HorizontalStackLayout Spacing="12" HorizontalOptions="End" Margin="0,8,0,0">
                                 <Button Text="{Binding DeleteButtonText}" 
                                         Command="{Binding VerwijderCommand}" 
-                                        BackgroundColor="Crimson" 
-                                        TextColor="White"
+                                        Style="{StaticResource DangerButton}"
                                         WidthRequest="100"
                                         HeightRequest="40" />
                                 <Button Text="{Binding SaveButtonText}" 

@@ -58,10 +58,12 @@ namespace Biblio_App.Pages
             InitializeSharedResourceManager();
             UpdateLocalizedStrings();
 
+            // Initialize ViewModel's localized strings
             try
             {
                 if (vm is Biblio_App.Services.ILocalizable locVm)
                 {
+                    locVm.UpdateLocalizedStrings();
                 }
             }
             catch { }
@@ -121,10 +123,14 @@ namespace Biblio_App.Pages
                         "SearchPlaceholder" => "Search...",
                         "Search" => "Search",
               
+                        "Overview" => "Overview",
                         "Details" => "Details",
                         "Edit" => "Edit",
                         "Delete" => "Delete",
                         "Save" => "Save",
+                        "New" => "New",
+                        "Cancel" => "Cancel",
+                        "OK" => "OK",
                         "FirstName" => "First name",
                         "LastName" => "Last name",
                         "Email" => "Email",
@@ -140,10 +146,14 @@ namespace Biblio_App.Pages
                     "SearchPlaceholder" => "Zoeken...",
                     "Search" => "Zoek",
                  
+                    "Overview" => "Overzicht",
                     "Details" => "Details",
                     "Edit" => "Bewerk",
                     "Delete" => "Verwijder",
                     "Save" => "Opslaan",
+                    "New" => "Nieuw",
+                    "Cancel" => "Annuleren",
+                    "OK" => "OK",
                     "FirstName" => "Voornaam",
                     "LastName" => "Achternaam",
                     "Email" => "Email",
@@ -233,12 +243,32 @@ namespace Biblio_App.Pages
             catch { }
         }
 
-        // New click handler for details ImageButton
+        // Click handler for details Button
         private async void OnDetailsClicked(object? sender, EventArgs e)
         {
             try
             {
-                if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Lid lid)
+                System.Diagnostics.Debug.WriteLine("=== OnDetailsClicked TRIGGERED ===");
+                
+                // Get the Lid from the Button's BindingContext
+                // Visual tree: Frame ? Grid ? HorizontalStackLayout ? Button
+                // So we need to go 3 levels up: Button.Parent.Parent.Parent = Frame
+                var button = sender as Button;
+                System.Diagnostics.Debug.WriteLine($"Button: {button != null}");
+                
+                var horizontalStack = button?.Parent; // HorizontalStackLayout
+                System.Diagnostics.Debug.WriteLine($"HorizontalStackLayout: {horizontalStack?.GetType().Name}");
+                
+                var grid = horizontalStack?.Parent; // Grid
+                System.Diagnostics.Debug.WriteLine($"Grid: {grid?.GetType().Name}");
+                
+                var frame = grid?.Parent as Frame; // Frame
+                System.Diagnostics.Debug.WriteLine($"Frame: {frame != null}");
+                
+                var lid = frame?.BindingContext as Biblio_Models.Entiteiten.Lid;
+                System.Diagnostics.Debug.WriteLine($"Lid: {lid?.Voornaam} {lid?.AchterNaam}");
+                
+                if (lid != null)
                 {
                     // Set the selected item on the VM so the bound form fields are populated
                     try
@@ -264,12 +294,17 @@ namespace Biblio_App.Pages
             catch { }
         }
 
-        // New click handler for edit ImageButton
+        // Click handler for edit Button
         private void OnEditClicked(object? sender, EventArgs e)
         {
             try
             {
-                if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Lid lid)
+                // Visual tree: Frame ? Grid ? HorizontalStackLayout ? Button
+                var button = sender as Button;
+                var frame = button?.Parent?.Parent?.Parent as Frame;
+                var lid = frame?.BindingContext as Biblio_Models.Entiteiten.Lid;
+                
+                if (lid != null)
                 {
                     try
                     {
@@ -281,6 +316,33 @@ namespace Biblio_App.Pages
                         }
                     }
                     catch { }
+                }
+            }
+            catch { }
+        }
+
+        // Click handler for delete Button
+        private async void OnDeleteClicked(object? sender, EventArgs e)
+        {
+            try
+            {
+                // Visual tree: Frame ? Grid ? HorizontalStackLayout ? Button
+                var button = sender as Button;
+                var frame = button?.Parent?.Parent?.Parent as Frame;
+                var lid = frame?.BindingContext as Biblio_Models.Entiteiten.Lid;
+                
+                if (lid != null)
+                {
+                    var deleteText = Localize("Delete");
+                    var cancelText = Localize("Cancel");
+                    var confirmMessage = $"{Localize("Delete")} {lid.Voornaam} {lid.AchterNaam}?";
+                    
+                    bool confirm = await DisplayAlert(deleteText, confirmMessage, deleteText, cancelText);
+                    
+                    if (confirm && VM != null)
+                    {
+                        await VM.ItemDeleteCommand.ExecuteAsync(lid);
+                    }
                 }
             }
             catch { }

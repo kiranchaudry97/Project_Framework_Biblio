@@ -32,15 +32,15 @@
             <!-- Development-only test accounts panel (now always visible for convenience) -->
             <Frame x:Name="DevPanel" Padding="10" Margin="0" IsVisible="True" BackgroundColor="#F6F6F6" HasShadow="False">
                 <VerticalStackLayout Spacing="6">
-                    <Label Text="Test accounts (development only):" FontAttributes="Bold" FontSize="Small" TextColor="{StaticResource Gray900}" />
+                    <Label Text="Test accounts (development only):" FontAttributes="Bold" FontSize="Small" TextColor="#212121" />
                     <HorizontalStackLayout Spacing="8">
-                        <Button Text="Autofill admin" Clicked="OnAutofillAdminClicked" FontSize="Small" />
-                        <Button Text="Autofill medewerker" Clicked="OnAutofillMedewerkerClicked" FontSize="Small" />
+                        <Button Text="Autofill admin" Clicked="OnAutofillAdminClicked" FontSize="Small" TextColor="#212121" />
+                        <Button Text="Autofill medewerker" Clicked="OnAutofillMedewerkerClicked" FontSize="Small" TextColor="#212121" />
                     </HorizontalStackLayout>
-                    <Label FontSize="Micro" TextColor="#333333">
+                    <Label FontSize="Micro" TextColor="#212121">
                         Admin - email: admin@biblio.local | wachtwoord: Admin1234?
                     </Label>
-                    <Label FontSize="Micro" TextColor="#333333">
+                    <Label FontSize="Micro" TextColor="#212121">
                         Medewerker - email: medewerker@biblio.local | wachtwoord: test1234?
                     </Label>
                     

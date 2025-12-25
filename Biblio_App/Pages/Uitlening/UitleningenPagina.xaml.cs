@@ -32,6 +32,7 @@ namespace Biblio_App.Pages
         public static readonly BindableProperty OnlyOpenTextProperty = BindableProperty.Create(nameof(OnlyOpenText), typeof(string), typeof(UitleningenPagina), default(string));
         public static readonly BindableProperty ViewButtonTextProperty = BindableProperty.Create(nameof(ViewButtonText), typeof(string), typeof(UitleningenPagina), default(string));
         public static readonly BindableProperty ReturnButtonTextProperty = BindableProperty.Create(nameof(ReturnButtonText), typeof(string), typeof(UitleningenPagina), default(string));
+        public static readonly BindableProperty DetailsButtonTextProperty = BindableProperty.Create(nameof(DetailsButtonText), typeof(string), typeof(UitleningenPagina), default(string));
         public static readonly BindableProperty NewButtonTextProperty = BindableProperty.Create(nameof(NewButtonText), typeof(string), typeof(UitleningenPagina), default(string));
         public static readonly BindableProperty SaveButtonTextProperty = BindableProperty.Create(nameof(SaveButtonText), typeof(string), typeof(UitleningenPagina), default(string));
         public static readonly BindableProperty DeleteButtonTextProperty = BindableProperty.Create(nameof(DeleteButtonText), typeof(string), typeof(UitleningenPagina), default(string));
@@ -50,6 +51,7 @@ namespace Biblio_App.Pages
         public string OnlyOpenText { get => (string)GetValue(OnlyOpenTextProperty); set => SetValue(OnlyOpenTextProperty, value); }
         public string ViewButtonText { get => (string)GetValue(ViewButtonTextProperty); set => SetValue(ViewButtonTextProperty, value); }
         public string ReturnButtonText { get => (string)GetValue(ReturnButtonTextProperty); set => SetValue(ReturnButtonTextProperty, value); }
+        public string DetailsButtonText { get => (string)GetValue(DetailsButtonTextProperty); set => SetValue(DetailsButtonTextProperty, value); }
         public string NewButtonText { get => (string)GetValue(NewButtonTextProperty); set => SetValue(NewButtonTextProperty, value); }
         public string SaveButtonText { get => (string)GetValue(SaveButtonTextProperty); set => SetValue(SaveButtonTextProperty, value); }
         public string DeleteButtonText { get => (string)GetValue(DeleteButtonTextProperty); set => SetValue(DeleteButtonTextProperty, value); }
@@ -204,6 +206,7 @@ namespace Biblio_App.Pages
                         "Member" => "Member",
                         "Book" => "Book",
                         "OnlyOpen" => "Only open",
+                        "Details" => "Details",
                         "View" => "View",
                         "Return" => "Return",
                         "ReturnedLabel" => "Return status",
@@ -232,6 +235,7 @@ namespace Biblio_App.Pages
                     "Member" => "Lid",
                     "Book" => "Boek",
                     "OnlyOpen" => "Alleen open",
+                    "Details" => "Details",
                     "View" => "Inzien",
                     "Return" => "Inleveren",
                     "ReturnedLabel" => "Leverstatus",
@@ -265,6 +269,7 @@ namespace Biblio_App.Pages
             OnlyOpenText = Localize("OnlyOpen");
             ViewButtonText = Localize("View");
             ReturnButtonText = Localize("Return");
+            DetailsButtonText = Localize("Details");
             NewButtonText = Localize("New");
             SaveButtonText = Localize("Save");
             DeleteButtonText = Localize("Delete");
@@ -405,7 +410,12 @@ namespace Biblio_App.Pages
         {
             try
             {
-                if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Lenen lenen)
+                // Visual tree: Border ? Grid ? VerticalStackLayout ? HorizontalStackLayout ? Button
+                // So we need to go 4 levels up: Button.Parent.Parent.Parent.Parent = Border
+                var button = sender as Button;
+                var lenen = button?.Parent?.Parent?.Parent?.Parent?.BindingContext as Biblio_Models.Entiteiten.Lenen;
+                
+                if (lenen != null)
                 {
                     var boek = lenen.Boek?.Titel ?? "-";
                     var lid = (lenen.Lid?.Voornaam ?? "") + " " + (lenen.Lid?.AchterNaam ?? "");
@@ -493,7 +503,11 @@ namespace Biblio_App.Pages
         {
             try
             {
-                if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Lenen item)
+                // Visual tree: Border ? Grid ? VerticalStackLayout ? HorizontalStackLayout ? Button
+                var button = sender as Button;
+                var item = button?.Parent?.Parent?.Parent?.Parent?.BindingContext as Biblio_Models.Entiteiten.Lenen;
+                
+                if (item != null)
                 {
                     var confirm = false;
                     try

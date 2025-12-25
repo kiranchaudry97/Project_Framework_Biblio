@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration; // configuratie-extensies
 using Microsoft.Extensions.Logging;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 using System;
 using System.Globalization;
 using System.IO;
@@ -65,6 +66,7 @@ try
             builder
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
+                .UseSkiaSharp()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

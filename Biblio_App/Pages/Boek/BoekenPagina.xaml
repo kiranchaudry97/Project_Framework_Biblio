@@ -21,19 +21,29 @@
     <ScrollView>
         <!-- Gebruik Grid layout zodat CollectionView beschikbare ruimte ontvangt en virtualisatie correct werkt -->
         <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto" BackgroundColor="White">
-            <!-- Header / zoek rij -->
+            <!-- Header / zoek rij met styled components -->
             <VerticalStackLayout Grid.Row="0" Spacing="8">
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                    <SearchBar Grid.Column="0" Placeholder="{Binding SearchPlaceholder}" Text="{Binding SearchText}"
-                               BackgroundColor="#F5F5F5" TextColor="#212121" PlaceholderColor="#6E6E6E" />
-                    <Button Grid.Column="1" Text="{Binding SearchButtonText}" Command="{Binding ZoekCommand}" 
-                            BackgroundColor="{StaticResource Primary}" TextColor="White" 
-                            WidthRequest="80" />
+                    <SearchBar Grid.Column="0" 
+                               Placeholder="{Binding SearchPlaceholder}" 
+                               Text="{Binding SearchText}"
+                               Style="{StaticResource SearchEntry}"
+                               BackgroundColor="#F5F5F5" />
+                    <Button Grid.Column="1" 
+                            Text="{Binding SearchButtonText}" 
+                            Command="{Binding ZoekCommand}" 
+                            Style="{StaticResource FilterButton}" />
                 </Grid>
-                <Picker Title="{Binding CategoryTitle}" ItemsSource="{Binding Categorien}" 
-                        ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedFilterCategorie}" 
-                        HorizontalOptions="FillAndExpand" MinimumWidthRequest="150" MaximumWidthRequest="300"
-                        BackgroundColor="#F5F5F5" TextColor="#212121" TitleColor="#6E6E6E" />
+                <Picker Title="{Binding CategoryTitle}" 
+                        ItemsSource="{Binding Categorien}" 
+                        ItemDisplayBinding="{Binding Naam}" 
+                        SelectedItem="{Binding SelectedFilterCategorie}" 
+                        HorizontalOptions="FillAndExpand" 
+                        MinimumWidthRequest="150" 
+                        MaximumWidthRequest="300"
+                        BackgroundColor="#F5F5F5" 
+                        TextColor="#212121" 
+                        TitleColor="#6E6E6E" />
         </VerticalStackLayout>
 
         <!-- Spacer -->
@@ -73,9 +83,12 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
 
-                <!-- Paginering besturing -->
+                <!-- Paginering besturing met styled buttons -->
                 <Grid Grid.Row="2" HorizontalOptions="Center" Margin="8" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="24" BackgroundColor="White">
-                    <Button Grid.Column="0" Text="{Binding PrevButtonText}" Command="{Binding PrevPageCommand}" Style="{StaticResource PrimaryButton}" WidthRequest="56" HeightRequest="40" />
+                    <Button Grid.Column="0" 
+                            Text="{Binding PrevButtonText}" 
+                            Command="{Binding PrevPageCommand}" 
+                            Style="{StaticResource NavigationButton}" />
 
                     <HorizontalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center">
                         <Frame Padding="8,6" HasShadow="False" CornerRadius="10" BackgroundColor="Transparent" HorizontalOptions="Center" VerticalOptions="Center">
@@ -83,7 +96,10 @@
                         </Frame>
                     </HorizontalStackLayout>
 
-                    <Button Grid.Column="2" Text="{Binding NextButtonText}" Command="{Binding NextPageCommand}" Style="{StaticResource PrimaryButton}" WidthRequest="56" HeightRequest="40" />
+                    <Button Grid.Column="2" 
+                            Text="{Binding NextButtonText}" 
+                            Command="{Binding NextPageCommand}" 
+                            Style="{StaticResource NavigationButton}" />
                 </Grid>
 
                 <BoxView Grid.Row="3" HeightRequest="1" Color="#E1E1E1" />
@@ -116,10 +132,15 @@
                     <Picker x:Name="EditCategoriePicker" Title="{Binding CategoryTitle}" ItemsSource="{Binding Categorien}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" HorizontalTextAlignment="Start" BackgroundColor="White" TextColor="{StaticResource Gray900}" />
 
                     <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
-                        <Button Text="{Binding NewButtonText}" Command="{Binding NieuwCommand}" Style="{StaticResource OutlineActionButton}" />
-                        <!-- Re-added Delete button bound to VerwijderCommand -->
-                        <Button Text="{Binding DeleteButtonText}" Command="{Binding VerwijderCommand}" BackgroundColor="Crimson" TextColor="White" />
-                        <Button Text="{Binding SaveButtonText}" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
+                        <Button Text="{Binding NewButtonText}" 
+                                Command="{Binding NieuwCommand}" 
+                                Style="{StaticResource OutlineActionButton}" />
+                        <Button Text="{Binding DeleteButtonText}" 
+                                Command="{Binding VerwijderCommand}" 
+                                Style="{StaticResource DangerButton}" />
+                        <Button Text="{Binding SaveButtonText}" 
+                                Command="{Binding OpslaanCommand}" 
+                                Style="{StaticResource PrimaryButton}" />
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Border>

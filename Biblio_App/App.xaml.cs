@@ -66,33 +66,42 @@
             window.Height = 800;
 #endif
 
-            // Check authentication and navigate to appropriate page after window is fully created
-            window.Created += async (s, e) =>
+            // Perform initial navigation after a delay to ensure Shell is fully initialized
+            // Use Dispatcher instead of window.Created to avoid timing issues
+            Dispatcher.Dispatch(async () =>
             {
-                // Small delay to ensure Shell is fully initialized
-                await Task.Delay(100);
+                // Wait for Shell to be fully loaded
+                await Task.Delay(250);
                 
-                MainThread.BeginInvokeOnMainThread(async () =>
+                try
                 {
+                    if (_security.IsAuthenticated)
+                    {
+                        // User is logged in -> Navigate to Books page
+                        System.Diagnostics.Debug.WriteLine("User is authenticated, navigating to BoekenShell");
+                        await Shell.Current.GoToAsync("//BoekenShell");
+                    }
+                    else
+                    {
+                        // User is NOT logged in -> Navigate to Login page
+                        System.Diagnostics.Debug.WriteLine("User is not authenticated, navigating to LoginPage");
+                        await Shell.Current.GoToAsync("//LoginPage");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Navigation error: {ex.Message}");
+                    // If navigation fails, at least show the default page (BoekenShell)
                     try
                     {
-                        if (_security.IsAuthenticated)
-                        {
-                            // User is logged in -> Navigate to Books page
-                            await Shell.Current.GoToAsync("//BoekenShell");
-                        }
-                        else
-                        {
-                            // User is NOT logged in -> Navigate to Login page
-                            await Shell.Current.GoToAsync("//LoginPage");
-                        }
+                        await Shell.Current.GoToAsync("//BoekenShell");
                     }
-                    catch (Exception ex)
+                    catch (Exception ex2)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Navigation error: {ex.Message}");
+                        System.Diagnostics.Debug.WriteLine($"Fallback navigation also failed: {ex2.Message}");
                     }
-                });
-            };
+                }
+            });
             
             return window;
         }
