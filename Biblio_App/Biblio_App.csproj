@@ -1,11 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <UseMaui>true</UseMaui>
     <SingleProject>true</SingleProject>
+	  <UseWindows>true</UseWindows>
+	  <UseWindowsAppSdk>true</UseWindowsAppSdk>
 
-    <OutputType>Exe</OutputType>
+
+	  <OutputType>Exe</OutputType>
     <RootNamespace>Biblio_App</RootNamespace>
 
     <ImplicitUsings>enable</ImplicitUsings>
@@ -20,17 +22,13 @@
 
     <MauiVersion>9.0.111</MauiVersion>
 
-    <WindowsPackageType>None</WindowsPackageType>
+    
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>
-      net9.0-android;
-      net9.0-ios;
-      net9.0-maccatalyst;
-      net9.0-windows10.0.19041.0
-    </TargetFrameworks>
+    <TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst;net9.0-windows10.0.19041.0</TargetFrameworks>
   </PropertyGroup>
+ 
 
   <!-- Enable XAML compiled binding support for bindings that set Source - improves diagnostics and performance -->
   <PropertyGroup>
@@ -59,7 +57,6 @@
     </TargetPlatformMinVersion>
   </PropertyGroup>
 
- 
   <ItemGroup>
     <!-- Afbeeldingen -->
     <MauiImage Include="Resources\Images\**" />
@@ -72,8 +69,8 @@
     <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
-
   <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="CommunityToolkit.Maui" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
@@ -91,13 +88,11 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
   </ItemGroup>
 
- 
   <ItemGroup>
     <ProjectReference Include="..\Biblio_Models\Biblio_Models.csproj" />
   </ItemGroup>
 
- 
- <ItemGroup>
+  <ItemGroup>
     <MauiXaml Update="Pages\Account\LoginPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
@@ -156,8 +151,8 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
   </ItemGroup>
-	
-	<ItemGroup>
+  
+  <ItemGroup>
     <None Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -167,9 +162,12 @@
     <EmbeddedResource Remove="Resources\Vertalingen\SharedResource.resx" />
   </ItemGroup>
 
- 
   <ItemGroup>
     <FrameworkReference Remove="Microsoft.AspNetCore.App" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+  </PropertyGroup>
 
 </Project>

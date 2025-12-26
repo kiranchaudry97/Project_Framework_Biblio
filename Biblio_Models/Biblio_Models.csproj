@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <!-- Keep the modern Identity package for .NET 9 -->
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
     <!-- Design package required for EF Core migrations tooling -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
