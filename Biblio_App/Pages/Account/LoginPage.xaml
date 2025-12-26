@@ -7,48 +7,81 @@
              BackgroundColor="White">
 
     <ContentPage.Content>
-        <VerticalStackLayout Padding="20" Spacing="12">
-            <Image Source="login_illustration.svg" HorizontalOptions="Center" WidthRequest="120" />
+        <ScrollView>
+            <VerticalStackLayout Padding="16" Spacing="16">
+                <Image Source="login_illustration.svg" HorizontalOptions="Center" WidthRequest="100" HeightRequest="100" Margin="0,20,0,20" />
 
-            <!-- Busy indicator shown during login -->
-            <ActivityIndicator x:Name="BusyIndicator" IsVisible="False" IsRunning="False" HorizontalOptions="Center" />
+                <!-- Busy indicator shown during login -->
+                <ActivityIndicator x:Name="BusyIndicator" IsVisible="False" IsRunning="False" HorizontalOptions="Center" HeightRequest="40" />
 
-            <Entry x:Name="EmailEntry" Placeholder="E-mail" Keyboard="Email" TextColor="{StaticResource Gray900}" PlaceholderColor="{StaticResource Gray500}" />
-            <Entry x:Name="PasswordEntry" Placeholder="Wachtwoord" IsPassword="True" TextColor="{StaticResource Gray900}" PlaceholderColor="{StaticResource Gray500}" />
+                <Entry x:Name="EmailEntry" 
+                       Placeholder="E-mail" 
+                       Keyboard="Email" 
+                       TextColor="{StaticResource Gray900}" 
+                       PlaceholderColor="{StaticResource Gray500}"
+                       HeightRequest="50"
+                       FontSize="16" />
+                <Entry x:Name="PasswordEntry" 
+                       Placeholder="Wachtwoord" 
+                       IsPassword="True" 
+                       TextColor="{StaticResource Gray900}" 
+                       PlaceholderColor="{StaticResource Gray500}"
+                       HeightRequest="50"
+                       FontSize="16" />
 
-            <!-- Options: show password and remember me -->
-            <HorizontalStackLayout Spacing="12" VerticalOptions="Center" HorizontalOptions="Fill">
-                <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
-                    <Switch x:Name="ShowPasswordSwitch" Toggled="OnShowPasswordToggled" />
-                    <Label Text="Toon wachtwoord" VerticalOptions="Center" TextColor="{StaticResource Gray900}" />
-                </HorizontalStackLayout>
-
-                <HorizontalStackLayout Spacing="6" VerticalOptions="Center" HorizontalOptions="EndAndExpand">
-                    <CheckBox x:Name="RememberCheck" />
-                    <Label Text="Onthoud mij" VerticalOptions="Center" TextColor="{StaticResource Gray900}" />
-                </HorizontalStackLayout>
-            </HorizontalStackLayout>
-
-            <!-- Development-only test accounts panel (now always visible for convenience) -->
-            <Frame x:Name="DevPanel" Padding="10" Margin="0" IsVisible="True" BackgroundColor="#F6F6F6" HasShadow="False">
-                <VerticalStackLayout Spacing="6">
-                    <Label Text="Test accounts (development only):" FontAttributes="Bold" FontSize="Small" TextColor="#212121" />
-                    <HorizontalStackLayout Spacing="8">
-                        <Button Text="Autofill admin" Clicked="OnAutofillAdminClicked" FontSize="Small" TextColor="#212121" />
-                        <Button Text="Autofill medewerker" Clicked="OnAutofillMedewerkerClicked" FontSize="Small" TextColor="#212121" />
+                <!-- Options: show password and remember me -->
+                <VerticalStackLayout Spacing="12" Margin="0,8,0,8">
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <Switch x:Name="ShowPasswordSwitch" Toggled="OnShowPasswordToggled" />
+                        <Label Text="Toon wachtwoord" VerticalOptions="Center" TextColor="{StaticResource Gray900}" FontSize="14" />
                     </HorizontalStackLayout>
-                    <Label FontSize="Micro" TextColor="#212121">
-                        Admin - email: admin@biblio.local | wachtwoord: Admin1234?
-                    </Label>
-                    <Label FontSize="Micro" TextColor="#212121">
-                        Medewerker - email: medewerker@biblio.local | wachtwoord: test1234?
-                    </Label>
-                    
-                </VerticalStackLayout>
-            </Frame>
 
-            <Button x:Name="LoginButton" Text="Login" Clicked="OnLoginClicked" TextColor="{StaticResource White}" BackgroundColor="{StaticResource Primary}" />
-        </VerticalStackLayout>
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <CheckBox x:Name="RememberCheck" />
+                        <Label Text="Onthoud mij" VerticalOptions="Center" TextColor="{StaticResource Gray900}" FontSize="14" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Development-only test accounts panel (now always visible for convenience) -->
+                <Frame x:Name="DevPanel" Padding="12" Margin="0,8,0,8" IsVisible="True" BackgroundColor="#F6F6F6" HasShadow="False" CornerRadius="8">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Test accounts (development only):" FontAttributes="Bold" FontSize="14" TextColor="#212121" />
+                        <VerticalStackLayout Spacing="8">
+                            <Button Text="Autofill admin" 
+                                    Clicked="OnAutofillAdminClicked" 
+                                    FontSize="14" 
+                                    TextColor="#212121"
+                                    HeightRequest="45"
+                                    HorizontalOptions="FillAndExpand" />
+                            <Button Text="Autofill medewerker" 
+                                    Clicked="OnAutofillMedewerkerClicked" 
+                                    FontSize="14" 
+                                    TextColor="#212121"
+                                    HeightRequest="45"
+                                    HorizontalOptions="FillAndExpand" />
+                        </VerticalStackLayout>
+                        <Label FontSize="11" TextColor="#212121" LineBreakMode="WordWrap">
+                            Admin - email: admin@biblio.local | wachtwoord: Admin1234?
+                        </Label>
+                        <Label FontSize="11" TextColor="#212121" LineBreakMode="WordWrap">
+                            Medewerker - email: medewerker@biblio.local | wachtwoord: test1234?
+                        </Label>
+                        
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Button x:Name="LoginButton" 
+                        Text="Login" 
+                        Clicked="OnLoginClicked" 
+                        TextColor="{StaticResource White}" 
+                        BackgroundColor="{StaticResource Primary}"
+                        HeightRequest="50"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        CornerRadius="8"
+                        Margin="0,16,0,16" />
+            </VerticalStackLayout>
+        </ScrollView>
     </ContentPage.Content>
 
 </ContentPage>

@@ -82,9 +82,12 @@ namespace Biblio_App.ViewModels
                         await Task.Delay(400, token);
                         if (token.IsCancellationRequested) return;
 
-                        // reset naar eerste pagina en herlaad
-                        Page = 1;
-                        await LoadBooksAsync();
+                        // reset naar eerste pagina en herlaad - ensure on main thread
+                        await MainThread.InvokeOnMainThreadAsync(async () =>
+                        {
+                            Page = 1;
+                            await LoadBooksAsync();
+                        });
                     }
                     catch (TaskCanceledException) { }
                     catch (Exception ex) { Debug.WriteLine(ex); }
@@ -97,7 +100,7 @@ namespace Biblio_App.ViewModels
         private int page = 1;
 
         [ObservableProperty]
-        private int pageSize = 10;
+        private int pageSize = 15;  // Verhoogd van 10 naar 15 voor betere mobile UX
 
         [ObservableProperty]
         private int totalPages;
@@ -208,9 +211,36 @@ namespace Biblio_App.ViewModels
             VerwijderCommand = new AsyncRelayCommand(VerwijderAsync);
             ZoekCommand = new AsyncRelayCommand(ZoekAsync);
 
-            NextPageCommand = new AsyncRelayCommand(async () => { Page++; await LoadBooksAsync(); });
-            PrevPageCommand = new AsyncRelayCommand(async () => { if (Page > 1) { Page--; await LoadBooksAsync(); } });
-            GoToPageCommand = new AsyncRelayCommand<int>(async p => { if (p >= 1) { Page = p; await LoadBooksAsync(); } });
+            NextPageCommand = new AsyncRelayCommand(async () => 
+            { 
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    Page++; 
+                    await LoadBooksAsync(); 
+                });
+            });
+            PrevPageCommand = new AsyncRelayCommand(async () => 
+            { 
+                if (Page > 1) 
+                { 
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        Page--; 
+                        await LoadBooksAsync(); 
+                    });
+                } 
+            });
+            GoToPageCommand = new AsyncRelayCommand<int>(async p => 
+            { 
+                if (p >= 1) 
+                { 
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        Page = p; 
+                        await LoadBooksAsync(); 
+                    });
+                } 
+            });
 
             // Navigate to a dedicated details page instead of showing an in-place popup
             ItemDetailsCommand = new AsyncRelayCommand<Boek>(async b => await NavigateToDetailsAsync(b));
@@ -243,13 +273,21 @@ namespace Biblio_App.ViewModels
             RunSafe(LoadCountersAsync());
         }
 
+
         private void RunSafe(Task task)
         {
             _ = task.ContinueWith(t =>
             {
                 if (t.IsFaulted)
                 {
-                    try { Debug.WriteLine(t.Exception); } catch { }
+                    try 
+                    { 
+                        // Mark exception as observed by accessing it
+                        var ex = t.Exception;
+                        Debug.WriteLine($"[BoekenViewModel RunSafe] Task faulted: {ex?.GetBaseException()?.Message}");
+                        Debug.WriteLine($"StackTrace: {ex?.GetBaseException()?.StackTrace}");
+                    } 
+                    catch { }
                 }
             }, TaskScheduler.Default);
         }
@@ -800,6 +838,7 @@ namespace Biblio_App.ViewModels
                         {
                             TotalCount = total;
                             TotalPages = PageSize > 0 ? (int)Math.Ceiling(total / (double)PageSize) : 1;
+                            OnPropertyChanged(nameof(PageDisplay)); // Explicitly notify on main thread
 
                             Boeken.Clear();
                             foreach (var b in pageItems) Boeken.Add(b);
@@ -841,6 +880,7 @@ namespace Biblio_App.ViewModels
                 {
                     TotalCount = totalLocal;
                     TotalPages = PageSize > 0 ? (int)Math.Ceiling(totalLocal / (double)PageSize) : 1;
+                    OnPropertyChanged(nameof(PageDisplay)); // Explicitly notify on main thread
 
                     Boeken.Clear();
                     foreach (var b in items) Boeken.Add(b);
@@ -868,8 +908,11 @@ namespace Biblio_App.ViewModels
 
         private async Task ZoekAsync()
         {
-            Page = 1;
-            await LoadBooksAsync();
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                Page = 1;
+                await LoadBooksAsync();
+            });
         }
 
         private async Task OpslaanAsync()

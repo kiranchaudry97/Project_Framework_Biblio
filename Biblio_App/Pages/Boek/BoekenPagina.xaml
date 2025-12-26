@@ -10,141 +10,358 @@
              x:Name="Page"
              BackgroundColor="White">
 
-    <Shell.TitleView>
-        <Grid Padding="0,0,8,0" VerticalOptions="Center" BackgroundColor="{StaticResource Primary}">
-            <!-- genaamd TitleLabel zodat code-behind de weergegeven titel geforceerd kan updaten wanneer de taal wijzigt -->
-            <Label x:Name="TitleLabel" Text="{Binding PageTitle}" FontSize="22" FontAttributes="Bold" VerticalOptions="Center" TextColor="White" />
+    <!-- Use standard Title instead of TitleView to avoid Android threading issues -->
+    
+    <!-- Gebruik Grid layout direct zonder ScrollView om CollectionView scrolling te laten werken (Cross-platform layout) -->
+    <Grid BackgroundColor="White">
+        <Grid.Padding>
+            <OnPlatform x:TypeArguments="Thickness">
+                <On Platform="Android" Value="12,12,12,8" />
+                <On Platform="iOS" Value="12,12,12,8" />
+                <On Platform="WinUI" Value="12" />
+            </OnPlatform>
+        </Grid.Padding>
+        <!-- Rijen: 0 = zoek/filter, 1 = lijst (header + CollectionView), 2 = paginering + lijn, 3 = formulier -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <!-- Header / zoek rij met styled components - compacter op mobile -->
+        <VerticalStackLayout Grid.Row="0" Spacing="10">
+            <SearchBar Placeholder="{Binding SearchPlaceholder}" 
+                       Text="{Binding SearchText}"
+                       Style="{StaticResource SearchEntry}"
+                       BackgroundColor="#F5F5F5"
+                       HeightRequest="48"
+                       FontSize="16" />
+            
+            <Button Text="{Binding SearchButtonText}" 
+                    Command="{Binding ZoekCommand}" 
+                    Style="{StaticResource FilterButton}"
+                    HorizontalOptions="FillAndExpand"
+                    HeightRequest="44"
+                    FontSize="16" />
+            
+            <Picker Title="{Binding CategoryTitle}" 
+                    ItemsSource="{Binding Categorien}" 
+                    ItemDisplayBinding="{Binding Naam}" 
+                    SelectedItem="{Binding SelectedFilterCategorie}" 
+                    HorizontalOptions="FillAndExpand"
+                    BackgroundColor="#F5F5F5" 
+                    TextColor="#212121" 
+                    TitleColor="#6E6E6E"
+                    HeightRequest="48"
+                    FontSize="16" />
+        </VerticalStackLayout>
+
+        <!-- CollectionView: simple mobile-first layout -->
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Boeken}" 
+                        SelectionMode="None"
+                        BackgroundColor="White">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Boek">
+                    <SwipeView>
+                        <!-- Swipe-to-delete (links) -->
+                        <SwipeView.LeftItems>
+                            <SwipeItems Mode="Execute">
+                                <SwipeItem Text="Delete"
+                                           BackgroundColor="#D32F2F"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:BoekenViewModel}}, Path=ItemDeleteCommand}"
+                                           CommandParameter="{Binding .}" />
+                            </SwipeItems>
+                        </SwipeView.LeftItems>
+                        
+                        <!-- Main content: tap to edit -->
+                        <Border Stroke="#E0E0E0" 
+                                StrokeThickness="1" 
+                                BackgroundColor="White"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="16,12"
+                                Margin="0,4">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:BoekenViewModel}}, Path=ItemEditCommand}"
+                                                      CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+                            
+                            <VerticalStackLayout Spacing="4">
+                                <!-- Titel (prominent) -->
+                                <Label Text="{Binding Titel}" 
+                                       TextColor="#212121" 
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       LineBreakMode="TailTruncation" 
+                                       MaxLines="2" />
+                                
+                                <!-- Auteur -->
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:BoekenViewModel}}, Path=HeaderAuthor}" 
+                                           TextColor="#757575" 
+                                           FontSize="14" />
+                                    <Label Text="{Binding Auteur}" 
+                                           TextColor="#424242" 
+                                           FontSize="14"
+                                           LineBreakMode="TailTruncation" />
+                                </HorizontalStackLayout>
+                                
+                                <!-- Category -->
+                                <HorizontalStackLayout Spacing="6">
+                                    <Label Text="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:BoekenViewModel}}, Path=CategoryTitle}" 
+                                           TextColor="#757575" 
+                                           FontSize="14" />
+                                    <Label Text="{Binding CategorieNaam}" 
+                                           TextColor="#424242" 
+                                           FontSize="14" />
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Paginering met hardcoded pijltjes -->
+        <Grid Grid.Row="2" HorizontalOptions="Center" ColumnDefinitions="Auto,*,Auto" Padding="0,8,0,8">
+            <Grid.ColumnSpacing>
+                <OnPlatform x:TypeArguments="x:Double">
+                    <On Platform="Android" Value="12" />
+                    <On Platform="iOS" Value="12" />
+                    <On Platform="WinUI" Value="16" />
+                </OnPlatform>
+            </Grid.ColumnSpacing>
+            
+            <!-- PREV knop met < symbool -->
+            <Button Grid.Column="0" 
+                    Text="&lt;" 
+                    Command="{Binding PrevPageCommand}" 
+                    BackgroundColor="#34495e"
+                    TextColor="White"
+                    CornerRadius="8"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    WidthRequest="80"
+                    HeightRequest="40" />
+
+            <!-- Page indicator -->
+            <Label Grid.Column="1"
+                   Text="{Binding PageDisplay}" 
+                   FontAttributes="Bold" 
+                   VerticalOptions="Center" 
+                   HorizontalOptions="Center" 
+                   TextColor="#212121"
+                   FontSize="16"
+                   Padding="16,0"
+                   MinimumWidthRequest="120"
+                   HorizontalTextAlignment="Center" />
+
+            <!-- NEXT knop met > symbool -->
+            <Button Grid.Column="2" 
+                    Text="&gt;" 
+                    Command="{Binding NextPageCommand}" 
+                    BackgroundColor="#34495e"
+                    TextColor="White"
+                    CornerRadius="8"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    WidthRequest="80"
+                    HeightRequest="40" />
         </Grid>
-    </Shell.TitleView>
 
-    <!-- Verpak in ScrollView voor responsiviteit -->
-    <ScrollView>
-        <!-- Gebruik Grid layout zodat CollectionView beschikbare ruimte ontvangt en virtualisatie correct werkt -->
-        <Grid Padding="12" RowDefinitions="Auto,Auto,Auto,Auto" BackgroundColor="White">
-            <!-- Header / zoek rij met styled components -->
-            <VerticalStackLayout Grid.Row="0" Spacing="8">
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                    <SearchBar Grid.Column="0" 
-                               Placeholder="{Binding SearchPlaceholder}" 
-                               Text="{Binding SearchText}"
-                               Style="{StaticResource SearchEntry}"
-                               BackgroundColor="#F5F5F5" />
-                    <Button Grid.Column="1" 
-                            Text="{Binding SearchButtonText}" 
-                            Command="{Binding ZoekCommand}" 
-                            Style="{StaticResource FilterButton}" />
-                </Grid>
-                <Picker Title="{Binding CategoryTitle}" 
-                        ItemsSource="{Binding Categorien}" 
-                        ItemDisplayBinding="{Binding Naam}" 
-                        SelectedItem="{Binding SelectedFilterCategorie}" 
-                        HorizontalOptions="FillAndExpand" 
-                        MinimumWidthRequest="150" 
-                        MaximumWidthRequest="300"
-                        BackgroundColor="#F5F5F5" 
-                        TextColor="#212121" 
-                        TitleColor="#6E6E6E" />
-        </VerticalStackLayout>
+        <!-- Bewerk/toevoeg formulier onder collectie in ScrollView voor mobile -->
+        <ScrollView Grid.Row="3">
+            <VerticalStackLayout Padding="0,8,0,12">
+                <VerticalStackLayout.Spacing>
+                    <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="Android" Value="8" />
+                        <On Platform="iOS" Value="8" />
+                        <On Platform="WinUI" Value="12" />
+                    </OnPlatform>
+                </VerticalStackLayout.Spacing>
+                
+                <!-- actie overzicht tekst boven het formulier -->
+                <Label Text="{Binding OverviewText}" 
+                       HorizontalOptions="Fill" 
+                       HorizontalTextAlignment="Center" 
+                       TextColor="{StaticResource Primary}"
+                       FontAttributes="Bold">
+                    <Label.FontSize>
+                        <OnPlatform x:TypeArguments="x:Double">
+                            <On Platform="Android" Value="13" />
+                            <On Platform="iOS" Value="13" />
+                            <On Platform="WinUI" Value="14" />
+                        </OnPlatform>
+                    </Label.FontSize>
+                    <Label.Margin>
+                        <OnPlatform x:TypeArguments="Thickness">
+                            <On Platform="Android" Value="0,8,0,6" />
+                            <On Platform="iOS" Value="0,8,0,6" />
+                            <On Platform="WinUI" Value="0,12,0,8" />
+                        </OnPlatform>
+                    </Label.Margin>
+                </Label>
 
-        <!-- Spacer -->
-        <BoxView Grid.Row="1" HeightRequest="8" BackgroundColor="Transparent" />
+                <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" StrokeShape="RoundRectangle 8">
+                    <Border.Padding>
+                        <OnPlatform x:TypeArguments="Thickness">
+                            <On Platform="Android" Value="10" />
+                            <On Platform="iOS" Value="10" />
+                            <On Platform="WinUI" Value="12" />
+                        </OnPlatform>
+                    </Border.Padding>
+                    
+                    <VerticalStackLayout>
+                        <VerticalStackLayout.Spacing>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="8" />
+                                <On Platform="iOS" Value="8" />
+                                <On Platform="WinUI" Value="12" />
+                            </OnPlatform>
+                        </VerticalStackLayout.Spacing>
+                        
+                        <Entry x:Name="TitelEntry" 
+                               Placeholder="{Binding HeaderTitle}" 
+                               Text="{Binding Titel, Mode=TwoWay}" 
+                               BackgroundColor="White" 
+                               TextColor="{StaticResource Gray900}" 
+                               PlaceholderColor="{StaticResource Gray500}">
+                            <Entry.HeightRequest>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="42" />
+                                    <On Platform="iOS" Value="42" />
+                                    <On Platform="WinUI" Value="50" />
+                                </OnPlatform>
+                            </Entry.HeightRequest>
+                            <Entry.FontSize>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="14" />
+                                    <On Platform="iOS" Value="14" />
+                                    <On Platform="WinUI" Value="16" />
+                                </OnPlatform>
+                            </Entry.FontSize>
+                        </Entry>
+                        
+                        <Entry x:Name="AuteurEntry" 
+                               Placeholder="{Binding HeaderAuthor}" 
+                               Text="{Binding Auteur, Mode=TwoWay}" 
+                               BackgroundColor="White" 
+                               TextColor="{StaticResource Gray900}" 
+                               PlaceholderColor="{StaticResource Gray500}">
+                            <Entry.HeightRequest>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="42" />
+                                    <On Platform="iOS" Value="42" />
+                                    <On Platform="WinUI" Value="50" />
+                                </OnPlatform>
+                            </Entry.HeightRequest>
+                            <Entry.FontSize>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="14" />
+                                    <On Platform="iOS" Value="14" />
+                                    <On Platform="WinUI" Value="16" />
+                                </OnPlatform>
+                            </Entry.FontSize>
+                        </Entry>
+                        
+                        <Entry x:Name="IsbnEntry" 
+                               Placeholder="{Binding IsbnPlaceholder}" 
+                               Text="{Binding Isbn, Mode=TwoWay}" 
+                               BackgroundColor="White" 
+                               TextColor="{StaticResource Gray900}" 
+                               PlaceholderColor="{StaticResource Gray500}">
+                            <Entry.HeightRequest>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="42" />
+                                    <On Platform="iOS" Value="42" />
+                                    <On Platform="WinUI" Value="50" />
+                                </OnPlatform>
+                            </Entry.HeightRequest>
+                            <Entry.FontSize>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="14" />
+                                    <On Platform="iOS" Value="14" />
+                                    <On Platform="WinUI" Value="16" />
+                                </OnPlatform>
+                            </Entry.FontSize>
+                        </Entry>
 
-        <!-- CollectionView: beperkte hoogte zodat het niet te veel ruimte inneemt op kleine schermen -->
-        <Frame Grid.Row="2" Style="{StaticResource WelcomeCardStyle}" BackgroundColor="White" HeightRequest="400" MaximumHeightRequest="600">
-            <Grid RowDefinitions="Auto,*,Auto,Auto" BackgroundColor="White">
-                <CollectionView ItemsSource="{Binding Boeken}" SelectionMode="Single" SelectedItem="{Binding SelectedBoek, Mode=TwoWay}" Grid.Row="1" BackgroundColor="White">
-                    <CollectionView.Header>
-                        <Grid ColumnDefinitions="2*,2*,Auto" ColumnSpacing="8" Padding="8" BackgroundColor="#F5F5F5">
-                            <Label Text="{Binding HeaderTitle}" Grid.Column="0" FontAttributes="Bold" TextColor="#212121" FontSize="12" />
-                            <Label Text="{Binding HeaderAuthor}" Grid.Column="1" FontAttributes="Bold" TextColor="#212121" FontSize="12" />
-                            <Label Text="{Binding CategoryTitle}" Grid.Column="2" FontAttributes="Bold" TextColor="#212121" HorizontalOptions="End" FontSize="12" />
-                        </Grid>
-                    </CollectionView.Header>
+                        <Picker x:Name="EditCategoriePicker" 
+                                Title="{Binding CategoryTitle}" 
+                                ItemsSource="{Binding Categorien}" 
+                                ItemDisplayBinding="{Binding Naam}" 
+                                SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" 
+                                HorizontalTextAlignment="Start" 
+                                BackgroundColor="White" 
+                                TextColor="{StaticResource Gray900}">
+                            <Picker.HeightRequest>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="42" />
+                                    <On Platform="iOS" Value="42" />
+                                    <On Platform="WinUI" Value="50" />
+                                </OnPlatform>
+                            </Picker.HeightRequest>
+                            <Picker.FontSize>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="14" />
+                                    <On Platform="iOS" Value="14" />
+                                    <On Platform="WinUI" Value="16" />
+                                </OnPlatform>
+                            </Picker.FontSize>
+                        </Picker>
 
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="models:Boek">
-                            <Grid ColumnDefinitions="2*,2*,Auto" ColumnSpacing="8" Padding="6" Margin="0,2" VerticalOptions="Center" BackgroundColor="White">
-                                <Label Text="{Binding Titel}" Grid.Column="0" TextColor="#212121" LineBreakMode="TailTruncation" MaxLines="1" FontSize="12">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnLabelTapped" NumberOfTapsRequired="1" />
-                                    </Label.GestureRecognizers>
-                                </Label>
-
-                                <Label Text="{Binding Auteur}" Grid.Column="1" TextColor="#212121" LineBreakMode="TailTruncation" MaxLines="1" FontSize="12">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnLabelTapped" NumberOfTapsRequired="1" />
-                                    </Label.GestureRecognizers>
-                                </Label>
-
-                                <!-- Toon categorie naam voor het boek -->
-                                <Label Grid.Column="2" Text="{Binding CategorieNaam}" TextColor="#212121" VerticalOptions="Center" HorizontalOptions="End" FontSize="12" />
-                            </Grid>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-
-                <!-- Paginering besturing met styled buttons -->
-                <Grid Grid.Row="2" HorizontalOptions="Center" Margin="8" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="24" BackgroundColor="White">
-                    <Button Grid.Column="0" 
-                            Text="{Binding PrevButtonText}" 
-                            Command="{Binding PrevPageCommand}" 
-                            Style="{StaticResource NavigationButton}" />
-
-                    <HorizontalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center">
-                        <Frame Padding="8,6" HasShadow="False" CornerRadius="10" BackgroundColor="Transparent" HorizontalOptions="Center" VerticalOptions="Center">
-                            <Label Text="{Binding PageDisplay}" FontAttributes="Bold" VerticalOptions="Center" HorizontalOptions="Center" TextColor="#212121" FontSize="18" />
-                        </Frame>
-                    </HorizontalStackLayout>
-
-                    <Button Grid.Column="2" 
-                            Text="{Binding NextButtonText}" 
-                            Command="{Binding NextPageCommand}" 
-                            Style="{StaticResource NavigationButton}" />
-                </Grid>
-
-                <BoxView Grid.Row="3" HeightRequest="1" Color="#E1E1E1" />
-            </Grid>
-        </Frame>
-
-        <!-- Bewerk/toevoeg formulier onder collectie -->
-        <VerticalStackLayout Grid.Row="3" Spacing="8">
-            <!-- actie overzicht tekst boven het formulier (iets lager geplaatst) -->
-            <Label Text="{Binding OverviewText}" HorizontalOptions="Fill" HorizontalTextAlignment="Center" TextColor="{StaticResource Primary}"
-                   FontAttributes="Bold" FontSize="14" Margin="0,18,0,6" />
-
-            <!-- breadcrumb / actie overzicht tekst, gecentreerd en uitgelijnd -->
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="12" Padding="0,0,0,6">
-                <Label Text="Overzicht" TextColor="#5A5A5A" FontAttributes="Bold" />
-                <Label Text="-" TextColor="#919191" />
-                <Label Text="Details" TextColor="#5A5A5A" />
-                <Label Text="-" TextColor="#919191" />
-                <Label Text="Bewerk" TextColor="{StaticResource Gray700}" />
-                <Label Text="-" TextColor="{StaticResource Gray400}" />
-                <Label Text="Verwijder" TextColor="{StaticResource Gray700}" />
-            </HorizontalStackLayout>
-
-            <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="10">
-                <VerticalStackLayout Spacing="8">
-                    <Entry x:Name="TitelEntry" Placeholder="{Binding HeaderTitle}" Text="{Binding Titel, Mode=TwoWay}" BackgroundColor="White" TextColor="{StaticResource Gray900}" PlaceholderColor="{StaticResource Gray500}" />
-                    <Entry x:Name="AuteurEntry" Placeholder="{Binding HeaderAuthor}" Text="{Binding Auteur, Mode=TwoWay}" BackgroundColor="White" TextColor="{StaticResource Gray900}" PlaceholderColor="{StaticResource Gray500}" />
-                    <Entry x:Name="IsbnEntry" Placeholder="{Binding IsbnPlaceholder}" Text="{Binding Isbn, Mode=TwoWay}" BackgroundColor="White" TextColor="{StaticResource Gray900}" PlaceholderColor="{StaticResource Gray500}" />
-
-                    <Picker x:Name="EditCategoriePicker" Title="{Binding CategoryTitle}" ItemsSource="{Binding Categorien}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" HorizontalTextAlignment="Start" BackgroundColor="White" TextColor="{StaticResource Gray900}" />
-
-                    <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
-                        <Button Text="{Binding NewButtonText}" 
-                                Command="{Binding NieuwCommand}" 
-                                Style="{StaticResource OutlineActionButton}" />
-                        <Button Text="{Binding DeleteButtonText}" 
-                                Command="{Binding VerwijderCommand}" 
-                                Style="{StaticResource DangerButton}" />
-                        <Button Text="{Binding SaveButtonText}" 
-                                Command="{Binding OpslaanCommand}" 
-                                Style="{StaticResource PrimaryButton}" />
-                    </HorizontalStackLayout>
-                </VerticalStackLayout>
-            </Border>
-        </VerticalStackLayout>
+                        <VerticalStackLayout Margin="0,8,0,0">
+                            <VerticalStackLayout.Spacing>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="6" />
+                                    <On Platform="iOS" Value="6" />
+                                    <On Platform="WinUI" Value="8" />
+                                </OnPlatform>
+                            </VerticalStackLayout.Spacing>
+                            
+                            <Button Text="{Binding NewButtonText}" 
+                                    Command="{Binding NieuwCommand}" 
+                                    Style="{StaticResource OutlineActionButton}"
+                                    HorizontalOptions="FillAndExpand">
+                                <Button.HeightRequest>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="38" />
+                                        <On Platform="iOS" Value="38" />
+                                        <On Platform="WinUI" Value="45" />
+                                    </OnPlatform>
+                                </Button.HeightRequest>
+                            </Button>
+                            
+                            <Button Text="{Binding DeleteButtonText}" 
+                                    Command="{Binding VerwijderCommand}" 
+                                    Style="{StaticResource DangerButton}"
+                                    HorizontalOptions="FillAndExpand">
+                                <Button.HeightRequest>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="38" />
+                                        <On Platform="iOS" Value="38" />
+                                        <On Platform="WinUI" Value="45" />
+                                    </OnPlatform>
+                                </Button.HeightRequest>
+                            </Button>
+                            
+                            <Button Text="{Binding SaveButtonText}" 
+                                    Command="{Binding OpslaanCommand}" 
+                                    Style="{StaticResource PrimaryButton}"
+                                    HorizontalOptions="FillAndExpand">
+                                <Button.HeightRequest>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="38" />
+                                        <On Platform="iOS" Value="38" />
+                                        <On Platform="WinUI" Value="45" />
+                                    </OnPlatform>
+                                </Button.HeightRequest>
+                            </Button>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
     </Grid>
-    </ScrollView>
 </ContentPage>

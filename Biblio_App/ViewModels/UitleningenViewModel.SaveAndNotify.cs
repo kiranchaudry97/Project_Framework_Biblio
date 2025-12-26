@@ -82,41 +82,50 @@ namespace Biblio_App.ViewModels
                     if (SelectedUitlening != null)
                     {
                         var id = SelectedUitlening.Id;
-                        for (int i = 0; i < Uitleningen.Count; i++)
+                        
+                        // MUST run on Main Thread for Android - UI collections update
+                        await MainThread.InvokeOnMainThreadAsync(() =>
                         {
                             try
                             {
-                                var it = Uitleningen[i];
-                                if (it != null && it.Id == id)
+                                for (int i = 0; i < Uitleningen.Count; i++)
                                 {
-                                    // create a new instance copy so CollectionView sees replacement
-                                    var copy = new Biblio_Models.Entiteiten.Lenen
+                                    try
                                     {
-                                        Id = SelectedUitlening.Id,
-                                        BoekId = SelectedUitlening.BoekId,
-                                        Boek = SelectedUitlening.Boek,
-                                        LidId = SelectedUitlening.LidId,
-                                        Lid = SelectedUitlening.Lid,
-                                        StartDate = SelectedUitlening.StartDate,
-                                        DueDate = SelectedUitlening.DueDate,
-                                        ReturnedAt = SelectedUitlening.ReturnedAt,
-                                        ForceLate = isLate && !SelectedUitlening.ReturnedAt.HasValue,
-                                        ForceNotLate = isReturn && !SelectedUitlening.ReturnedAt.HasValue,
-                                        IsClosed = SelectedUitlening.IsClosed
-                                    };
+                                        var it = Uitleningen[i];
+                                        if (it != null && it.Id == id)
+                                        {
+                                            // create a new instance copy so CollectionView sees replacement
+                                            var copy = new Biblio_Models.Entiteiten.Lenen
+                                            {
+                                                Id = SelectedUitlening.Id,
+                                                BoekId = SelectedUitlening.BoekId,
+                                                Boek = SelectedUitlening.Boek,
+                                                LidId = SelectedUitlening.LidId,
+                                                Lid = SelectedUitlening.Lid,
+                                                StartDate = SelectedUitlening.StartDate,
+                                                DueDate = SelectedUitlening.DueDate,
+                                                ReturnedAt = SelectedUitlening.ReturnedAt,
+                                                ForceLate = isLate && !SelectedUitlening.ReturnedAt.HasValue,
+                                                ForceNotLate = isReturn && !SelectedUitlening.ReturnedAt.HasValue,
+                                                IsClosed = SelectedUitlening.IsClosed
+                                            };
 
-                                    Uitleningen[i] = copy;
+                                            Uitleningen[i] = copy;
+                                        }
+                                    }
+                                    catch { }
+                                }
+
+                                // also ensure SelectedUitlening points to the collection's instance (if any)
+                                var firstIdx = Uitleningen.ToList().FindIndex(u => u.Id == SelectedUitlening.Id);
+                                if (firstIdx >= 0)
+                                {
+                                    SelectedUitlening = Uitleningen[firstIdx];
                                 }
                             }
                             catch { }
-                        }
-
-                        // also ensure SelectedUitlening points to the collection's instance (if any)
-                        var firstIdx = Uitleningen.ToList().FindIndex(u => u.Id == SelectedUitlening.Id);
-                        if (firstIdx >= 0)
-                        {
-                            SelectedUitlening = Uitleningen[firstIdx];
-                        }
+                        });
                     }
                 }
                 catch { }

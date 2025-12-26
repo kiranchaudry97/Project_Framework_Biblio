@@ -9,20 +9,51 @@
              Title="{Binding PageHeaderText, Source={x:Reference Page}}">
 
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="12">
-            <Label Text="{Binding PageHeaderText, Source={x:Reference Page}}" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" TextColor="{StaticResource White}" />
+        <VerticalStackLayout Padding="16" Spacing="16">
+            <Label Text="{Binding PageHeaderText, Source={x:Reference Page}}" 
+                   FontSize="20" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" 
+                   TextColor="{StaticResource White}"
+                   Margin="0,8,0,8" />
 
-            <Frame Style="{StaticResource WelcomeCardStyle}">
-                <VerticalStackLayout Spacing="8">
-                    <Entry Placeholder="{Binding TitelPlaceholder, Source={x:Reference Page}}" Text="{Binding Titel, Mode=TwoWay}" />
-                    <Entry Placeholder="{Binding AuteurPlaceholder, Source={x:Reference Page}}" Text="{Binding Auteur, Mode=TwoWay}" />
-                    <Entry Placeholder="{Binding IsbnPlaceholder, Source={x:Reference Page}}" Text="{Binding Isbn, Mode=TwoWay}" />
-                    <Picker Title="{Binding CategoryTitle, Source={x:Reference Page}}" ItemsSource="{Binding Categorien}" ItemDisplayBinding="{Binding Naam}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" />
+            <Frame Style="{StaticResource WelcomeCardStyle}" Padding="16">
+                <VerticalStackLayout Spacing="16">
+                    <Entry Placeholder="{Binding TitelPlaceholder, Source={x:Reference Page}}" 
+                           Text="{Binding Titel, Mode=TwoWay}"
+                           HeightRequest="50"
+                           FontSize="16"
+                           BackgroundColor="#F5F5F5" />
+                    <Entry Placeholder="{Binding AuteurPlaceholder, Source={x:Reference Page}}" 
+                           Text="{Binding Auteur, Mode=TwoWay}"
+                           HeightRequest="50"
+                           FontSize="16"
+                           BackgroundColor="#F5F5F5" />
+                    <Entry Placeholder="{Binding IsbnPlaceholder, Source={x:Reference Page}}" 
+                           Text="{Binding Isbn, Mode=TwoWay}"
+                           HeightRequest="50"
+                           FontSize="16"
+                           BackgroundColor="#F5F5F5" />
+                    <Picker Title="{Binding CategoryTitle, Source={x:Reference Page}}" 
+                            ItemsSource="{Binding Categorien}" 
+                            ItemDisplayBinding="{Binding Naam}" 
+                            SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
+                            HeightRequest="50"
+                            FontSize="16"
+                            BackgroundColor="#F5F5F5" />
 
-                    <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
-                        <Button Text="{Binding CancelButtonText, Source={x:Reference Page}}" Clicked="OnCancelClicked" Style="{StaticResource OutlineActionButton}" />
-                        <Button Text="{Binding SaveButtonText, Source={x:Reference Page}}" Command="{Binding OpslaanCommand}" Style="{StaticResource PrimaryButton}" />
-                    </HorizontalStackLayout>
+                    <VerticalStackLayout Spacing="10" Margin="0,8,0,0">
+                        <Button Text="{Binding CancelButtonText, Source={x:Reference Page}}" 
+                                Clicked="OnCancelClicked" 
+                                Style="{StaticResource OutlineActionButton}"
+                                HorizontalOptions="FillAndExpand"
+                                HeightRequest="48" />
+                        <Button Text="{Binding SaveButtonText, Source={x:Reference Page}}" 
+                                Command="{Binding OpslaanCommand}" 
+                                Style="{StaticResource PrimaryButton}"
+                                HorizontalOptions="FillAndExpand"
+                                HeightRequest="48" />
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
             </Frame>
         </VerticalStackLayout>

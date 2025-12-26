@@ -35,6 +35,14 @@ namespace Biblio_App.Pages
             InitializeComponent();
             BindingContext = vm;
 
+            try
+            {
+                try { Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false }); } catch { }
+                try { Shell.SetFlyoutBehavior(this, FlyoutBehavior.Flyout); } catch { }
+                try { NavigationPage.SetHasBackButton(this, false); } catch { }
+            }
+            catch { }
+
             try { _language_service = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>(); } catch { }
 
             InitializeSharedResourceManager();

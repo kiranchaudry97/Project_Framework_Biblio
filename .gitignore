@@ -367,3 +367,6 @@ FodyWeavers.xsd
 *.tmp.cshtml
 *.tmp.cs
 /scripts/resx-report.csv
+/ANDROID_DEPLOYMENT_OPTIMIZATIONS.md
+*.md
+/speed_boost_emulator.bat

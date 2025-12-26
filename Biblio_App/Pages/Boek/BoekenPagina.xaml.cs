@@ -1,16 +1,8 @@
-using Biblio_App.ViewModels;
-using Microsoft.Maui.Controls;
-using System.Linq;
-using System;
-using Microsoft.Maui.Storage;
-using Microsoft.Extensions.DependencyInjection;
 using Biblio_App.Services;
-using Microsoft.Maui.Graphics;
-using Microsoft.Maui.ApplicationModel;
-using System.Resources;
-using System.Globalization;
+using Biblio_App.ViewModels;
 using Biblio_Models.Resources;
-using System.Threading.Tasks;
+using System.Globalization;
+using System.Resources;
 
 namespace Biblio_App.Pages
 {
@@ -163,23 +155,16 @@ namespace Biblio_App.Pages
         {
             try
             {
-                // Run the VM load without blocking UI thread; library calls remain awaited but on thread pool
                 var vm = VM;
                 if (vm == null) return;
 
-                // Execute the async load on a thread-pool thread and await it
-                await Task.Run(async () => await vm.EnsureCategoriesLoadedAsync()).ConfigureAwait(false);
+                // Load categories (this runs async already)
+                await vm.EnsureCategoriesLoadedAsync();
 
-                // update UI-bound selection on main thread
-                if (VM != null)
+                // Update UI on main thread
+                if (VM != null && VM.SelectedFilterCategorie == null && VM.Categorien?.Count > 0)
                 {
-                    if (VM.SelectedFilterCategorie == null && VM.Categorien?.Count > 0)
-                    {
-                        Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
-                        {
-                            try { VM.SelectedFilterCategorie = VM.Categorien.FirstOrDefault(); } catch { }
-                        });
-                    }
+                    VM.SelectedFilterCategorie = VM.Categorien.FirstOrDefault();
                 }
             }
             catch (Exception ex)
@@ -249,22 +234,25 @@ namespace Biblio_App.Pages
             {
                 if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Boek boek)
                 {
-                    try
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
                     {
-                        if (VM != null)
+                        try
                         {
-                            VM.SelectedBoek = boek;
-                            return;
+                            if (VM != null)
+                            {
+                                VM.SelectedBoek = boek;
+                                return;
+                            }
                         }
-                    }
-                    catch { }
+                        catch { }
 
-                    // fallback: navigeer naar de detailpagina of toon een melding met basisinformatie
-                    var title = Localize("Details");
-                    var okText = Localize("OK");
-                    var isbnLabel = Localize("ISBN");
-                    var body = $"{boek.Titel}\n{boek.Auteur}\n{isbnLabel}: {boek.Isbn}";
-                    await DisplayAlert(title, body, okText);
+                        // fallback: navigeer naar de detailpagina of toon een melding met basisinformatie
+                        var title = Localize("Details");
+                        var okText = Localize("OK");
+                        var isbnLabel = Localize("ISBN");
+                        var body = $"{boek.Titel}\n{boek.Auteur}\n{isbnLabel}: {boek.Isbn}";
+                        await DisplayAlert(title, body, okText);
+                    });
                 }
             }
             catch { }
@@ -276,14 +264,17 @@ namespace Biblio_App.Pages
             {
                 if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Boek boek)
                 {
-                    try
+                    MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        if (VM != null)
+                        try
                         {
-                            VM.SelectedBoek = boek;
+                            if (VM != null)
+                            {
+                                VM.SelectedBoek = boek;
+                            }
                         }
-                    }
-                    catch { }
+                        catch { }
+                    });
                 }
             }
             catch { }
@@ -304,26 +295,29 @@ namespace Biblio_App.Pages
         {
             try
             {
-                if (sender is Label lbl)
+                await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    var text = lbl.Text;
-                    // Probeer meer context uit BindingContext te halen indien beschikbaar (boek)
-                    if (lbl.BindingContext is Biblio_Models.Entiteiten.Boek boek)
+                    if (sender is Label lbl)
                     {
-                        // bepaal welke eigenschap is aangeraakt op basis van de kolom (gebruik index van parent grid children)
-                        // fallback: toon titel + auteur + isbn
-                        var isbnLabel = Localize("ISBN");
-                        var categoryLabel = Localize("Category");
-                        text = $"{boek.Titel}\n{boek.Auteur}\n{isbnLabel}: {boek.Isbn}\n{categoryLabel}: {boek.CategorieID}";
-                    }
+                        var text = lbl.Text;
+                        // Probeer meer context uit BindingContext te halen indien beschikbaar (boek)
+                        if (lbl.BindingContext is Biblio_Models.Entiteiten.Boek boek)
+                        {
+                            // bepaal welke eigenschap is aangeraakt op basis van de kolom (gebruik index van parent grid children)
+                            // fallback: toon titel + auteur + isbn
+                            var isbnLabel = Localize("ISBN");
+                            var categoryLabel = Localize("Category");
+                            text = $"{boek.Titel}\n{boek.Auteur}\n{isbnLabel}: {boek.Isbn}\n{categoryLabel}: {boek.CategorieID}";
+                        }
 
-                    if (!string.IsNullOrWhiteSpace(text))
-                    {
-                        var title = Localize("Details");
-                        var okText = Localize("OK");
-                        await DisplayAlert(title, text, okText);
+                        if (!string.IsNullOrWhiteSpace(text))
+                        {
+                            var title = Localize("Details");
+                            var okText = Localize("OK");
+                            await DisplayAlert(title, text, okText);
+                        }
                     }
-                }
+                });
             }
             catch { }
         }
@@ -403,8 +397,6 @@ namespace Biblio_App.Pages
                 var title = VM.PageTitle ?? string.Empty;
 
                 try { this.Title = title; } catch { }
-
-                try { if (TitleLabel != null) TitleLabel.Text = title; } catch { }
             }
             catch { }
         }

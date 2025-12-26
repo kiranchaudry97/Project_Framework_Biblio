@@ -61,6 +61,14 @@ namespace Biblio_App.Pages
             InitializeComponent();
             BindingContext = vm;
 
+            try
+            {
+                try { Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false }); } catch { }
+                try { Shell.SetFlyoutBehavior(this, FlyoutBehavior.Flyout); } catch { }
+                try { NavigationPage.SetHasBackButton(this, false); } catch { }
+            }
+            catch { }
+
             try { Resources["PageVM"] = vm; } catch { }
 
             try { _language_service = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>(); } catch { }
@@ -90,8 +98,9 @@ namespace Biblio_App.Pages
                         {
                             try
                             {
+                                // ReturnStatusPicker is niet meer in de huidige XAML - skip deze functionaliteit
                                 var picker = this.FindByName<Picker>("ReturnStatusPicker");
-                                if (picker == null) return;
+                                if (picker == null) return; // Geen picker gevonden, skip
 
                                 if (vm.SelectedUitlening == null)
                                 {
@@ -345,6 +354,10 @@ namespace Biblio_App.Pages
         {
             try
             {
+                // DbPathLabel is uitgecommentarieerd in XAML - skip functionaliteit
+                return;
+                
+                /*
                 var lbl = this.FindByName<Label>("DbPathLabel");
                 var text = lbl?.Text ?? string.Empty;
                 if (!string.IsNullOrEmpty(text))
@@ -356,6 +369,7 @@ namespace Biblio_App.Pages
                 {
                     try { await DisplayAlert(Localize("NoPath"), Localize("NoPath"), Localize("OK")); } catch { }
                 }
+                */
             }
             catch { }
         }

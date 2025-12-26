@@ -33,32 +33,43 @@
     </Shell.TitleView>
 
     <ScrollView BackgroundColor="White">
-        <VerticalStackLayout Padding="20" Spacing="12" BackgroundColor="White">
-            <Label Text="{Binding PageTitle}" Style="{StaticResource PageHeaderLabel}" HorizontalOptions="Center" TextColor="#212121" />
+        <VerticalStackLayout Padding="12" Spacing="12" BackgroundColor="White">
+            <Label Text="{Binding PageTitle}" Style="{StaticResource PageHeaderLabel}" HorizontalOptions="Center" TextColor="#212121" FontSize="20" Margin="0,8,0,8" />
 
-            <Frame Style="{StaticResource WelcomeCardStyle}" BackgroundColor="White">
+            <Frame Style="{StaticResource WelcomeCardStyle}" BackgroundColor="White" Padding="12">
                 <VerticalStackLayout Spacing="12">
                     <VerticalStackLayout Spacing="8">
-                        <HorizontalStackLayout Spacing="8">
-                            <Entry Placeholder="{Binding SearchPlaceholder}" 
-                                   HorizontalOptions="FillAndExpand" 
-                                   Text="{Binding SearchText}" 
-                                   Style="{StaticResource SearchEntry}"
-                                   BackgroundColor="#F5F5F5" />
-                            <Button Text="{Binding SearchButtonText}" 
-                                    Command="{Binding ZoekCommand}" 
-                                    Style="{StaticResource FilterButton}" />
-                        </HorizontalStackLayout>
-                        <HorizontalStackLayout Spacing="8">
-                        </HorizontalStackLayout>
+                        <Entry Placeholder="{Binding SearchPlaceholder}" 
+                               HorizontalOptions="FillAndExpand" 
+                               Text="{Binding SearchText}" 
+                               Style="{StaticResource SearchEntry}"
+                               BackgroundColor="#F5F5F5"
+                               HeightRequest="50"
+                               FontSize="16" />
+                        <Button Text="{Binding SearchButtonText}" 
+                                Command="{Binding ZoekCommand}" 
+                                Style="{StaticResource FilterButton}"
+                                HorizontalOptions="FillAndExpand"
+                                HeightRequest="45" />
                     </VerticalStackLayout>
 
-                    <CollectionView ItemsSource="{Binding Leden}" SelectionMode="Single" SelectedItem="{Binding SelectedLid, Mode=TwoWay}" VerticalOptions="FillAndExpand" BackgroundColor="White">
+                    <CollectionView ItemsSource="{Binding Leden}" 
+                                    SelectionMode="Single" 
+                                    SelectedItem="{Binding SelectedLid, Mode=TwoWay}" 
+                                    BackgroundColor="White"
+                                    MinimumHeightRequest="200"
+                                    MaximumHeightRequest="400"
+                                    Margin="0,8,0,8">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:Lid">
-                                <Frame Padding="10" Margin="4" BackgroundColor="#F9F9F9">
-                                    <VerticalStackLayout Spacing="4">
-                                        <Label FontAttributes="Bold" TextColor="#212121">
+                                <Border Stroke="#E0E0E0" 
+                                        StrokeThickness="0.5" 
+                                        Padding="12" 
+                                        Margin="0,4" 
+                                        BackgroundColor="#F9F9F9"
+                                        StrokeShape="RoundRectangle 4">
+                                    <VerticalStackLayout Spacing="6">
+                                        <Label FontAttributes="Bold" TextColor="#212121" FontSize="16">
                                             <Label.FormattedText>
                                                 <FormattedString>
                                                     <Span Text="{Binding Voornaam}" />
@@ -67,45 +78,76 @@
                                                 </FormattedString>
                                             </Label.FormattedText>
                                         </Label>
-                                        <Label Text="{Binding Email}" FontSize="12" TextColor="#6E6E6E" />
+                                        <Label Text="{Binding Email}" FontSize="13" TextColor="#6E6E6E" LineBreakMode="TailTruncation" />
                                     </VerticalStackLayout>
-                                </Frame>
+                                </Border>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <!-- Overview / breadcrumb similar to books page -->
-                    <Label Text="{Binding PageHeaderText}" HorizontalOptions="Fill" HorizontalTextAlignment="Center" TextColor="{StaticResource Primary}"
-                           FontAttributes="Bold" FontSize="14" Margin="0,18,0,6" />
+                    <!-- Overview / breadcrumb - verkorte versie voor mobiel -->
+                    <Label Text="{Binding PageHeaderText}" 
+                           HorizontalOptions="Center" 
+                           HorizontalTextAlignment="Center" 
+                           TextColor="{StaticResource Primary}"
+                           FontAttributes="Bold" 
+                           FontSize="14" 
+                           Margin="0,12,0,8" />
 
-                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="12" Padding="0,0,0,6">
-                        <Label Text="{Binding OverviewText}" TextColor="#212121" FontAttributes="Bold" />
-                        <Label Text="-" TextColor="#919191" />
-                        <Label Text="{Binding DetailsButtonText}" TextColor="#212121" />
-                        <Label Text="-" TextColor="#919191" />
-                        <Label Text="{Binding EditButtonText}" TextColor="#212121" />
-                        <Label Text="-" TextColor="#919191" />
-                        <Label Text="{Binding DeleteButtonText}" TextColor="#212121" />
-                    </HorizontalStackLayout>
+                    <Border Stroke="#E1E1E1" StrokeThickness="1" Padding="12" BackgroundColor="White" StrokeShape="RoundRectangle 8">
+                        <VerticalStackLayout Spacing="12">
+                            <Entry x:Name="VoornaamEntry" 
+                                   Text="{Binding Voornaam, Mode=TwoWay}" 
+                                   Placeholder="{Binding FirstNamePlaceholder}" 
+                                   BackgroundColor="#F5F5F5" 
+                                   TextColor="#212121" 
+                                   PlaceholderColor="#6E6E6E"
+                                   HeightRequest="50"
+                                   FontSize="16" />
+                            <Entry x:Name="AchternaamEntry" 
+                                   Text="{Binding Achternaam, Mode=TwoWay}" 
+                                   Placeholder="{Binding LastNamePlaceholder}" 
+                                   BackgroundColor="#F5F5F5" 
+                                   TextColor="#212121" 
+                                   PlaceholderColor="#6E6E6E"
+                                   HeightRequest="50"
+                                   FontSize="16" />
+                            <Entry x:Name="EmailEntry" 
+                                   Text="{Binding Email, Mode=TwoWay}" 
+                                   Placeholder="{Binding EmailPlaceholder}" 
+                                   Keyboard="Email" 
+                                   BackgroundColor="#F5F5F5" 
+                                   TextColor="#212121" 
+                                   PlaceholderColor="#6E6E6E"
+                                   HeightRequest="50"
+                                   FontSize="16" />
+                            <Entry x:Name="TelefoonEntry" 
+                                   Text="{Binding Telefoon, Mode=TwoWay}" 
+                                   Placeholder="{Binding PhonePlaceholder}" 
+                                   Keyboard="Telephone" 
+                                   BackgroundColor="#F5F5F5" 
+                                   TextColor="#212121" 
+                                   PlaceholderColor="#6E6E6E"
+                                   HeightRequest="50"
+                                   FontSize="16" />
 
-                    <Border Stroke="#E1E1E1" StrokeThickness="1" Padding="10" BackgroundColor="White">
-                        <VerticalStackLayout Spacing="8">
-                            <Entry x:Name="VoornaamEntry" Text="{Binding Voornaam, Mode=TwoWay}" Placeholder="{Binding FirstNamePlaceholder}" BackgroundColor="#F5F5F5" TextColor="#212121" PlaceholderColor="#6E6E6E" />
-                            <Entry x:Name="AchternaamEntry" Text="{Binding Achternaam, Mode=TwoWay}" Placeholder="{Binding LastNamePlaceholder}" BackgroundColor="#F5F5F5" TextColor="#212121" PlaceholderColor="#6E6E6E" />
-                            <Entry x:Name="EmailEntry" Text="{Binding Email, Mode=TwoWay}" Placeholder="{Binding EmailPlaceholder}" Keyboard="Email" BackgroundColor="#F5F5F5" TextColor="#212121" PlaceholderColor="#6E6E6E" />
-                            <Entry x:Name="TelefoonEntry" Text="{Binding Telefoon, Mode=TwoWay}" Placeholder="{Binding PhonePlaceholder}" Keyboard="Telephone" BackgroundColor="#F5F5F5" TextColor="#212121" PlaceholderColor="#6E6E6E" />
-
-                            <HorizontalStackLayout Spacing="12" HorizontalOptions="End">
+                            <VerticalStackLayout Spacing="8" Margin="0,8,0,0">
                                 <Button Text="{Binding NewButtonText, FallbackValue='Nieuw'}"
                                         Command="{Binding NieuwCommand}"
-                                        Style="{StaticResource OutlineActionButtonSmall}" />
+                                        Style="{StaticResource OutlineActionButtonSmall}"
+                                        HorizontalOptions="FillAndExpand"
+                                        HeightRequest="45" />
                                 <Button Text="{Binding DeleteButtonText}"
                                         Command="{Binding VerwijderCommand}"
-                                        Style="{StaticResource DangerButtonSmall}" />
+                                        Style="{StaticResource DangerButtonSmall}"
+                                        HorizontalOptions="FillAndExpand"
+                                        HeightRequest="45" />
                                 <Button Text="{Binding SaveButtonText}"
                                         Command="{Binding OpslaanCommand}"
-                                        Style="{StaticResource PrimaryButtonSmall}" />
-                            </HorizontalStackLayout>
+                                        Style="{StaticResource PrimaryButtonSmall}"
+                                        HorizontalOptions="FillAndExpand"
+                                        HeightRequest="45" />
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
                     </Border>
                 </VerticalStackLayout>

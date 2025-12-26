@@ -117,16 +117,25 @@ namespace Biblio_App.ViewModels
 
         private async Task LoadAsync()
         {
-            Categorien.Clear();
-            Categorien.Add(new Categorie { Id = 0, Naam = "Alle" });
             try
             {
                 using var db = _dbFactory.CreateDbContext();
                 var cats = await db.Categorien.AsNoTracking().Where(c => !c.IsDeleted).OrderBy(c => c.Naam).ToListAsync();
-                foreach (var c in cats) Categorien.Add(c);
+                
+                // MUST update ObservableCollection on Main Thread for Android
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    try
+                    {
+                        Categorien.Clear();
+                        Categorien.Add(new Categorie { Id = 0, Naam = "Alle" });
+                        foreach (var c in cats) Categorien.Add(c);
+                        OnPropertyChanged(nameof(Categorien));
+                    }
+                    catch { }
+                });
             }
             catch { }
-            OnPropertyChanged(nameof(Categorien));
         }
 
         private async Task AddCategoryAsync()
@@ -141,11 +150,16 @@ namespace Biblio_App.ViewModels
                 db.Categorien.Add(cat);
                 await db.SaveChangesAsync();
 
-                // reload or add to collection
-                Categorien.Add(cat);
-
-                // clear input
-                NewCategoryName = string.Empty;
+                // MUST update ObservableCollection on Main Thread for Android
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    try
+                    {
+                        Categorien.Add(cat);
+                        NewCategoryName = string.Empty;
+                    }
+                    catch { }
+                });
             }
             catch { }
         }
@@ -155,9 +169,10 @@ namespace Biblio_App.ViewModels
             try
             {
                 if (SelectedCategorie == null) return;
+                var toDelete = SelectedCategorie;
 
                 using var db = _dbFactory.CreateDbContext();
-                var entity = await db.Categorien.FindAsync(SelectedCategorie.Id);
+                var entity = await db.Categorien.FindAsync(toDelete.Id);
                 if (entity != null)
                 {
                     // soft delete if property exists
@@ -166,9 +181,17 @@ namespace Biblio_App.ViewModels
                     await db.SaveChangesAsync();
                 }
 
-                Categorien.Remove(SelectedCategorie);
-                SelectedCategorie = null;
-                NewCategoryName = string.Empty;
+                // MUST update ObservableCollection on Main Thread for Android
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    try
+                    {
+                        Categorien.Remove(toDelete);
+                        SelectedCategorie = null;
+                        NewCategoryName = string.Empty;
+                    }
+                    catch { }
+                });
             }
             catch { }
         }

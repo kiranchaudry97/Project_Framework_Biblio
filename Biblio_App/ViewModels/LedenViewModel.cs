@@ -394,8 +394,13 @@ namespace Biblio_App.ViewModels
                     q = q.Where(l => (l.Voornaam ?? string.Empty).Contains(s) || (l.AchterNaam ?? string.Empty).Contains(s) || (l.Email ?? string.Empty).Contains(s));
                 }
                 var list = await q.OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToListAsync();
-                Leden.Clear();
-                foreach (var l in list) Leden.Add(l);
+                
+                // Update UI collection on main thread
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    Leden.Clear();
+                    foreach (var l in list) Leden.Add(l);
+                });
             }
             catch (Exception ex)
             {

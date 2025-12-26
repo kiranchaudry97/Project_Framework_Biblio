@@ -28,6 +28,14 @@ namespace Biblio_App.Pages.Account
             _security = security;
             BindingContext = new ProfilePageViewModel(security);
 
+            try
+            {
+                try { Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false }); } catch { }
+                try { Shell.SetFlyoutBehavior(this, FlyoutBehavior.Flyout); } catch { }
+                try { NavigationPage.SetHasBackButton(this, false); } catch { }
+            }
+            catch { }
+
             try { _languageService = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>(); } catch { }
         }
 

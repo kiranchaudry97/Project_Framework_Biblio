@@ -27,13 +27,26 @@
             // Global exception handlers
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
-                try { Infrastructure.ErrorLogger.Log(e.ExceptionObject as Exception); } catch { }
+                try 
+                { 
+                    var ex = e.ExceptionObject as Exception;
+                    System.Diagnostics.Debug.WriteLine($"[UNHANDLED EXCEPTION] {ex?.Message}");
+                    System.Diagnostics.Debug.WriteLine($"StackTrace: {ex?.StackTrace}");
+                    Infrastructure.ErrorLogger.Log(ex); 
+                } 
+                catch { }
             };
 
             // Log task scheduler unobserved exceptions
             TaskScheduler.UnobservedTaskException += (s, e) =>
             {
-                try { Infrastructure.ErrorLogger.Log(e.Exception); } catch { }
+                try 
+                { 
+                    System.Diagnostics.Debug.WriteLine($"[UNOBSERVED TASK EXCEPTION] {e.Exception?.Message}");
+                    System.Diagnostics.Debug.WriteLine($"StackTrace: {e.Exception?.StackTrace}");
+                    Infrastructure.ErrorLogger.Log(e.Exception); 
+                } 
+                catch { }
                 e.SetObserved();
             };
         }

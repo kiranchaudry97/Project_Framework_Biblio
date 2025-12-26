@@ -101,6 +101,9 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private Lid? selectedLid;
 
+    // Edit form visibility property
+    public bool IsEditFormVisible => SelectedUitlening != null || SelectedBoek != null || SelectedLid != null;
+
         [ObservableProperty]
         [Required(ErrorMessageResourceName = "Required", ErrorMessageResourceType = typeof(Biblio_Models.Resources.SharedModelResource))]
         private DateTime startDate = DateTime.Now;
@@ -295,10 +298,22 @@ namespace Biblio_App.ViewModels
             {
                 using var db = _dbFactory.CreateDbContext();
                 var leden = await db.Leden.AsNoTracking().OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToListAsync();
-                LedenList.Clear();
-                foreach (var l in leden) LedenList.Add(l);
-                OnPropertyChanged(nameof(LedenCount));
-                OnPropertyChanged(nameof(DebugInfo));
+                
+                // MUST update ObservableCollection on Main Thread for Android
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    try
+                    {
+                        LedenList.Clear();
+                        foreach (var l in leden) LedenList.Add(l);
+                        OnPropertyChanged(nameof(LedenCount));
+                        OnPropertyChanged(nameof(DebugInfo));
+                    }
+                    catch (Exception ex)
+                    {
+                        LastError = ex.Message;
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -736,43 +751,56 @@ namespace Biblio_App.ViewModels
             {
                 using var db = _dbFactory.CreateDbContext();
                 var uit = await db.Leningens.Include(l => l.Boek).Include(l => l.Lid).AsNoTracking().OrderByDescending(l => l.StartDate).ToListAsync();
-                Uitleningen.Clear();
-                foreach (var u in uit)
+                var boeken = await db.Boeken.AsNoTracking().Where(b => !b.IsDeleted).OrderBy(b => b.Titel).ToListAsync();
+                var leden = await db.Leden.AsNoTracking().OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToListAsync();
+                var cats = await db.Categorien.AsNoTracking().Where(c => !c.IsDeleted).OrderBy(c => c.Naam).ToListAsync();
+
+                // MUST update ObservableCollections on Main Thread for Android
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    Uitleningen.Add(u);
                     try
                     {
-                        System.Diagnostics.Debug.WriteLine($"[LoadDataAsync] Loan {u.Id}: BoekId={u.BoekId} LidId={u.LidId} ReturnedAt={u.ReturnedAt} LidFull={(u.Lid == null ? "NULL" : u.Lid.FullName)}");
+                        Uitleningen.Clear();
+                        foreach (var u in uit)
+                        {
+                            Uitleningen.Add(u);
+                            try
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[LoadDataAsync] Loan {u.Id}: BoekId={u.BoekId} LidId={u.LidId} ReturnedAt={u.ReturnedAt} LidFull={(u.Lid == null ? "NULL" : u.Lid.FullName)}");
+                            }
+                            catch { }
+                        }
+
+                        BoekenList.Clear();
+                        foreach (var b in boeken) BoekenList.Add(b);
+
+                        LedenList.Clear();
+                        foreach (var l in leden) LedenList.Add(l);
+
+                        Categorieen.Clear();
+                        Categorieen.Add(new Categorie { Id = 0, Naam = "Alle" });
+                        foreach (var c in cats) Categorieen.Add(c);
+
+                        SelectedCategory = Categorieen.FirstOrDefault();
+
+                        // reset laatste fout bij succesvol laden
+                        LastError = string.Empty;
+
+                        // update aantallen
+                        RaiseCountProperties();
                     }
-                    catch { }
-                }
-
-                var boeken = await db.Boeken.AsNoTracking().Where(b => !b.IsDeleted).OrderBy(b => b.Titel).ToListAsync();
-                BoekenList.Clear();
-                foreach (var b in boeken) BoekenList.Add(b);
-
-                var leden = await db.Leden.AsNoTracking().OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToListAsync();
-                LedenList.Clear();
-                foreach (var l in leden) LedenList.Add(l);
-
-                var cats = await db.Categorien.AsNoTracking().Where(c => !c.IsDeleted).OrderBy(c => c.Naam).ToListAsync();
-                Categorieen.Clear();
-                Categorieen.Add(new Categorie { Id = 0, Naam = "Alle" });
-                foreach (var c in cats) Categorieen.Add(c);
-
-                SelectedCategory = Categorieen.FirstOrDefault();
-
-                // reset laatste fout bij succesvol laden
-                LastError = string.Empty;
-
-                // update aantallen
-                RaiseCountProperties();
+                    catch (Exception ex)
+                    {
+                        LastError = ex.Message;
+                        Debug.WriteLine(ex);
+                    }
+                });
             }
             catch (Exception ex)
             {
                 LastError = ex.Message;
                 Debug.WriteLine(ex);
-                RaiseCountProperties();
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() => RaiseCountProperties());
             }
         }
 
@@ -859,8 +887,20 @@ namespace Biblio_App.ViewModels
                 }
 
                 var list = await query.ToListAsync();
-                Uitleningen.Clear();
-                foreach (var u in list) Uitleningen.Add(u);
+                
+                // MUST update ObservableCollection on Main Thread for Android
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    try
+                    {
+                        Uitleningen.Clear();
+                        foreach (var u in list) Uitleningen.Add(u);
+                    }
+                    catch (Exception innerEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"LoadDataWithFiltersAsync UI update error: {innerEx}");
+                    }
+                });
             }
             catch (Exception ex)
             {

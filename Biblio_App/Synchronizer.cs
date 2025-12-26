@@ -285,7 +285,10 @@ namespace Biblio_App
 
                 if (Application.Current?.MainPage is Page mainPage)
                 {
-                    await mainPage.Navigation.PushAsync(new Pages.Account.LoginPage());
+                    await MainThread.InvokeOnMainThreadAsync(async () =>
+                    {
+                        await mainPage.Navigation.PushAsync(new Pages.Account.LoginPage());
+                    });
                 }
             }
             catch { }

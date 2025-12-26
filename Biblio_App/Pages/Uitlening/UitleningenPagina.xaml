@@ -35,19 +35,120 @@
         </Grid>
     </Shell.TitleView>
 
-    <ScrollView x:Name="MainScroll" BackgroundColor="White">
-        <VerticalStackLayout Padding="20" Spacing="12" BackgroundColor="White">
-            <Label Text="{Binding PageHeaderText}" Style="{StaticResource PageHeaderLabel}" TextColor="#212121" />
+    <!-- Grid-layout voor consistente cross-platform weergave met scrollende lijst -->
+    <Grid x:Name="MainGrid" BackgroundColor="White">
+        <Grid.Padding>
+            <OnPlatform x:TypeArguments="Thickness">
+                <On Platform="Android" Value="8" />
+                <On Platform="iOS" Value="8" />
+                <On Platform="WinUI" Value="12" />
+            </OnPlatform>
+        </Grid.Padding>
+        <Grid.RowDefinitions>
+            <!-- header + stats -->
+            <RowDefinition Height="Auto" />
+            <!-- filterkaart + formulier + lijst in ScrollView -->
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-            <!-- Status / aantallen met navy blue achtergrond zoals design -->
-            <Frame Style="{StaticResource UitleningenHeader}" Padding="12,8">
-                <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
-                    <Label Text="{Binding MembersLabel}" Style="{StaticResource StatLabel}" />
-                    <Label Text="{Binding LedenCount}" FontAttributes="Bold" TextColor="White" FontSize="14" />
-                    <Label Text="{Binding LoansLabel}" Style="{StaticResource StatLabel}" />
-                    <Label Text="{Binding UitleningenCount}" FontAttributes="Bold" TextColor="White" FontSize="14" />
-                    <Label Text="{Binding BooksLabel}" Style="{StaticResource StatLabel}" />
-                    <Label Text="{Binding BoekenCount}" FontAttributes="Bold" TextColor="White" FontSize="14" />
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="White">
+            <VerticalStackLayout.Spacing>
+                <OnPlatform x:TypeArguments="x:Double">
+                    <On Platform="Android" Value="8" />
+                    <On Platform="iOS" Value="8" />
+                    <On Platform="WinUI" Value="12" />
+                </OnPlatform>
+            </VerticalStackLayout.Spacing>
+            
+            <Label Text="{Binding PageHeaderText}" Style="{StaticResource PageHeaderLabel}" TextColor="#212121">
+                <Label.FontSize>
+                    <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="Android" Value="18" />
+                        <On Platform="iOS" Value="18" />
+                        <On Platform="WinUI" Value="20" />
+                    </OnPlatform>
+                </Label.FontSize>
+                <Label.Margin>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <On Platform="Android" Value="0,6,0,6" />
+                        <On Platform="iOS" Value="0,6,0,6" />
+                        <On Platform="WinUI" Value="0,8,0,8" />
+                    </OnPlatform>
+                </Label.Margin>
+            </Label>
+
+            <!-- Status / aantallen met navy blue achtergrond zoals design - compacter op mobile -->
+            <Frame Style="{StaticResource UitleningenHeader}">
+                <Frame.Padding>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <On Platform="Android" Value="10,6" />
+                        <On Platform="iOS" Value="10,6" />
+                        <On Platform="WinUI" Value="12,8" />
+                    </OnPlatform>
+                </Frame.Padding>
+                <HorizontalStackLayout HorizontalOptions="Center">
+                    <HorizontalStackLayout.Spacing>
+                        <OnPlatform x:TypeArguments="x:Double">
+                            <On Platform="Android" Value="8" />
+                            <On Platform="iOS" Value="8" />
+                            <On Platform="WinUI" Value="12" />
+                        </OnPlatform>
+                    </HorizontalStackLayout.Spacing>
+                    
+                    <Label Text="{Binding MembersLabel}" Style="{StaticResource StatLabel}">
+                        <Label.FontSize>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="12" />
+                                <On Platform="iOS" Value="12" />
+                                <On Platform="WinUI" Value="13" />
+                            </OnPlatform>
+                        </Label.FontSize>
+                    </Label>
+                    <Label Text="{Binding LedenCount}" FontAttributes="Bold" TextColor="White">
+                        <Label.FontSize>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="13" />
+                                <On Platform="iOS" Value="13" />
+                                <On Platform="WinUI" Value="14" />
+                            </OnPlatform>
+                        </Label.FontSize>
+                    </Label>
+                    <Label Text="{Binding LoansLabel}" Style="{StaticResource StatLabel}">
+                        <Label.FontSize>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="12" />
+                                <On Platform="iOS" Value="12" />
+                                <On Platform="WinUI" Value="13" />
+                            </OnPlatform>
+                        </Label.FontSize>
+                    </Label>
+                    <Label Text="{Binding UitleningenCount}" FontAttributes="Bold" TextColor="White">
+                        <Label.FontSize>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="13" />
+                                <On Platform="iOS" Value="13" />
+                                <On Platform="WinUI" Value="14" />
+                            </OnPlatform>
+                        </Label.FontSize>
+                    </Label>
+                    <Label Text="{Binding BooksLabel}" Style="{StaticResource StatLabel}">
+                        <Label.FontSize>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="12" />
+                                <On Platform="iOS" Value="12" />
+                                <On Platform="WinUI" Value="13" />
+                            </OnPlatform>
+                        </Label.FontSize>
+                    </Label>
+                    <Label Text="{Binding BoekenCount}" FontAttributes="Bold" TextColor="White">
+                        <Label.FontSize>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="13" />
+                                <On Platform="iOS" Value="13" />
+                                <On Platform="WinUI" Value="14" />
+                            </OnPlatform>
+                        </Label.FontSize>
+                    </Label>
                 </HorizontalStackLayout>
             </Frame>
 
@@ -59,50 +160,213 @@
             </HorizontalStackLayout>-->
 
             <Label Text="{Binding LastError}" TextColor="Crimson" HorizontalOptions="Center" IsVisible="{Binding LastError, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
+        </VerticalStackLayout>
 
-            <Frame Style="{StaticResource WelcomeCardStyle}" BackgroundColor="White">
-                <VerticalStackLayout Spacing="12">
-                    <!-- Filters met styled components -->
-                    <Grid ColumnDefinitions="*, Auto">
-                        <Entry Grid.Column="0" 
-                               Placeholder="Zoek op titel, auteur of ISBN" 
+        <!-- Scrollend gedeelte met filters, lijst en formulier -->
+        <ScrollView x:Name="MainScroll" Grid.Row="1" BackgroundColor="White">
+            <VerticalStackLayout BackgroundColor="White">
+                <VerticalStackLayout.Spacing>
+                    <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="Android" Value="8" />
+                        <On Platform="iOS" Value="8" />
+                        <On Platform="WinUI" Value="12" />
+                    </OnPlatform>
+                </VerticalStackLayout.Spacing>
+
+                <Frame Style="{StaticResource WelcomeCardStyle}" BackgroundColor="White">
+                    <Frame.Padding>
+                        <OnPlatform x:TypeArguments="Thickness">
+                            <On Platform="Android" Value="10" />
+                            <On Platform="iOS" Value="10" />
+                            <On Platform="WinUI" Value="12" />
+                        </OnPlatform>
+                    </Frame.Padding>
+                    <VerticalStackLayout>
+                    <VerticalStackLayout.Spacing>
+                        <OnPlatform x:TypeArguments="x:Double">
+                            <On Platform="Android" Value="8" />
+                            <On Platform="iOS" Value="8" />
+                            <On Platform="WinUI" Value="12" />
+                        </OnPlatform>
+                    </VerticalStackLayout.Spacing>
+                    
+                    <!-- Filters met styled components - compacter op mobile -->
+                    <VerticalStackLayout>
+                        <VerticalStackLayout.Spacing>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="6" />
+                                <On Platform="iOS" Value="6" />
+                                <On Platform="WinUI" Value="8" />
+                            </OnPlatform>
+                        </VerticalStackLayout.Spacing>
+                        
+                        <Entry Placeholder="Zoek op titel, auteur of ISBN" 
                                Text="{Binding SearchText}" 
                                Style="{StaticResource SearchEntry}"
-                               BackgroundColor="#F5F5F5" />
-                        <Button Grid.Column="1" 
-                                Text="{Binding FilterButtonText}" 
+                               BackgroundColor="#F5F5F5">
+                            <Entry.HeightRequest>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="42" />
+                                    <On Platform="iOS" Value="42" />
+                                    <On Platform="WinUI" Value="50" />
+                                </OnPlatform>
+                            </Entry.HeightRequest>
+                            <Entry.FontSize>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="14" />
+                                    <On Platform="iOS" Value="14" />
+                                    <On Platform="WinUI" Value="16" />
+                                </OnPlatform>
+                            </Entry.FontSize>
+                        </Entry>
+                        <Button Text="{Binding FilterButtonText}" 
                                 Command="{Binding ZoekCommand}" 
                                 Style="{StaticResource FilterButton}"
-                                Margin="8,0,0,0" />
-                    </Grid>
-
-                    <VerticalStackLayout Spacing="8">
-                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="FillAndExpand">
-                            <Picker ItemsSource="{Binding LedenList}" ItemDisplayBinding="{Binding FullName}" SelectedItem="{Binding FilterLid, Mode=TwoWay}" Title="Filter op lid" HorizontalOptions="StartAndExpand" BackgroundColor="#F5F5F5" TextColor="#212121" TitleColor="#6E6E6E" />
-                            <Picker ItemsSource="{Binding BoekenList}" ItemDisplayBinding="{Binding Titel}" SelectedItem="{Binding FilterBoek, Mode=TwoWay}" Title="Filter op boek" HorizontalOptions="StartAndExpand" BackgroundColor="#F5F5F5" TextColor="#212121" TitleColor="#6E6E6E" />
-                        </HorizontalStackLayout>
-
-                        <HorizontalStackLayout Grid.Column="2" HorizontalOptions="EndAndExpand" Spacing="8" VerticalOptions="Center">
-                            <!-- spacer kolom; inhoud rechts uitgelijnd in kolom 2 -->
-                        </HorizontalStackLayout>
-
-                        <HorizontalStackLayout Grid.Column="3" Spacing="8" VerticalOptions="Center" HorizontalOptions="End">
-                           
-                        </HorizontalStackLayout>
+                                HorizontalOptions="FillAndExpand">
+                            <Button.HeightRequest>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="38" />
+                                    <On Platform="iOS" Value="38" />
+                                    <On Platform="WinUI" Value="45" />
+                                </OnPlatform>
+                            </Button.HeightRequest>
+                        </Button>
                     </VerticalStackLayout>
 
-                    <!-- Lijst van uitleningen met item kaart die overeenkomt met screenshot -->
-                    <CollectionView ItemsSource="{Binding Uitleningen}" SelectionMode="Single" SelectedItem="{Binding SelectedUitlening, Mode=TwoWay}">
+                    <VerticalStackLayout>
+                        <VerticalStackLayout.Spacing>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="6" />
+                                <On Platform="iOS" Value="6" />
+                                <On Platform="WinUI" Value="8" />
+                            </OnPlatform>
+                        </VerticalStackLayout.Spacing>
+                        
+                        <Grid ColumnDefinitions="Auto,*" Margin="0,8,0,0">
+                            <Label Grid.Column="0"
+                                   Text="Filter op lid"
+                                   FontSize="14"
+                                   TextColor="#757575"
+                                   VerticalOptions="Center"
+                                   MinimumWidthRequest="90"
+                                   Padding="0,0,8,0" />
+                            <Picker Grid.Column="1"
+                                    ItemsSource="{Binding LedenList}"
+                                    ItemDisplayBinding="{Binding FullName}"
+                                    SelectedItem="{Binding FilterLid, Mode=TwoWay}"
+                                    Title="Filter op lid"
+                                    BackgroundColor="#F5F5F5"
+                                    TextColor="#212121"
+                                    TitleColor="#6E6E6E"
+                                    HorizontalOptions="FillAndExpand">
+                                <Picker.HeightRequest>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="42" />
+                                        <On Platform="iOS" Value="42" />
+                                        <On Platform="WinUI" Value="50" />
+                                    </OnPlatform>
+                                </Picker.HeightRequest>
+                                <Picker.FontSize>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="14" />
+                                        <On Platform="iOS" Value="14" />
+                                        <On Platform="WinUI" Value="16" />
+                                    </OnPlatform>
+                                </Picker.FontSize>
+                            </Picker>
+                        </Grid>
+                        <Grid ColumnDefinitions="Auto,*" Margin="0,8,0,0">
+                            <Label Grid.Column="0"
+                                   Text="Filter op boek"
+                                   FontSize="14"
+                                   TextColor="#757575"
+                                   VerticalOptions="Center"
+                                   MinimumWidthRequest="90"
+                                   Padding="0,0,8,0" />
+                            <Picker Grid.Column="1"
+                                    ItemsSource="{Binding BoekenList}"
+                                    ItemDisplayBinding="{Binding Titel}"
+                                    SelectedItem="{Binding FilterBoek, Mode=TwoWay}"
+                                    Title="Filter op boek"
+                                    BackgroundColor="#F5F5F5"
+                                    TextColor="#212121"
+                                    TitleColor="#6E6E6E"
+                                    HorizontalOptions="FillAndExpand">
+                                <Picker.HeightRequest>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="42" />
+                                        <On Platform="iOS" Value="42" />
+                                        <On Platform="WinUI" Value="50" />
+                                    </OnPlatform>
+                                </Picker.HeightRequest>
+                                <Picker.FontSize>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="14" />
+                                        <On Platform="iOS" Value="14" />
+                                        <On Platform="WinUI" Value="16" />
+                                    </OnPlatform>
+                                </Picker.FontSize>
+                            </Picker>
+                        </Grid>
+                    </VerticalStackLayout>
+
+                    <!-- Lijst van uitleningen met item kaart die overeenkomt met screenshot - compacter op mobile -->
+                    <CollectionView ItemsSource="{Binding Uitleningen}" 
+                                    SelectionMode="Single" 
+                                    SelectedItem="{Binding SelectedUitlening, Mode=TwoWay}">
+                        <CollectionView.MinimumHeightRequest>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="180" />
+                                <On Platform="iOS" Value="180" />
+                                <On Platform="WinUI" Value="200" />
+                            </OnPlatform>
+                        </CollectionView.MinimumHeightRequest>
+                        <CollectionView.MaximumHeightRequest>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="400" />
+                                <On Platform="iOS" Value="400" />
+                                <On Platform="WinUI" Value="450" />
+                            </OnPlatform>
+                        </CollectionView.MaximumHeightRequest>
+                        <CollectionView.Margin>
+                            <OnPlatform x:TypeArguments="Thickness">
+                                <On Platform="Android" Value="0,6,0,6" />
+                                <On Platform="iOS" Value="0,6,0,6" />
+                                <On Platform="WinUI" Value="0,8,0,8" />
+                            </OnPlatform>
+                        </CollectionView.Margin>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:Lenen">
-                                <Border Stroke="{StaticResource Gray100}" StrokeThickness="1" Padding="0" BackgroundColor="White" Margin="0,6">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="8" />
-                                    </Border.StrokeShape>
+                                <Border Stroke="{StaticResource Gray100}" 
+                                        StrokeThickness="1" 
+                                        Padding="0" 
+                                        BackgroundColor="White" 
+                                        StrokeShape="RoundRectangle 8">
+                                    <Border.Margin>
+                                        <OnPlatform x:TypeArguments="Thickness">
+                                            <On Platform="Android" Value="0,4" />
+                                            <On Platform="iOS" Value="0,4" />
+                                            <On Platform="WinUI" Value="0,8" />
+                                        </OnPlatform>
+                                    </Border.Margin>
                                     <!-- Vereenvoudigde lay-out: alleen info -->
-                                    <Grid Padding="12" ColumnDefinitions="*">
+                                    <Grid ColumnDefinitions="*">
+                                        <Grid.Padding>
+                                            <OnPlatform x:TypeArguments="Thickness">
+                                                <On Platform="Android" Value="10" />
+                                                <On Platform="iOS" Value="10" />
+                                                <On Platform="WinUI" Value="12" />
+                                            </OnPlatform>
+                                        </Grid.Padding>
                                         <!-- Lid en boek info -->
-                                        <VerticalStackLayout Grid.Column="0" Spacing="6" HorizontalOptions="FillAndExpand">
+                                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="FillAndExpand">
+                                            <VerticalStackLayout.Spacing>
+                                                <OnPlatform x:TypeArguments="x:Double">
+                                                    <On Platform="Android" Value="6" />
+                                                    <On Platform="iOS" Value="6" />
+                                                    <On Platform="WinUI" Value="8" />
+                                                </OnPlatform>
+                                            </VerticalStackLayout.Spacing>
                                             <VerticalStackLayout.GestureRecognizers>
                                                 <TapGestureRecognizer Tapped="OnItemHeaderTapped" />
                                             </VerticalStackLayout.GestureRecognizers>
@@ -110,14 +374,43 @@
                                             <!-- Book Title - Most prominent -->
                                             <Label Text="{Binding Boek.Titel}" 
                                                    FontAttributes="Bold" 
-                                                   FontSize="16" 
                                                    TextColor="{StaticResource Primary}"
-                                                   LineBreakMode="WordWrap" />
+                                                   LineBreakMode="WordWrap">
+                                                <Label.FontSize>
+                                                    <OnPlatform x:TypeArguments="x:Double">
+                                                        <On Platform="Android" Value="16" />
+                                                        <On Platform="iOS" Value="16" />
+                                                        <On Platform="WinUI" Value="17" />
+                                                    </OnPlatform>
+                                                </Label.FontSize>
+                                            </Label>
                                             
                                             <!-- Lid Naam -->
-                                            <HorizontalStackLayout Spacing="4">
-                                                <Label Text="Lid:" FontSize="12" TextColor="#6E6E6E" FontAttributes="Bold" />
-                                                <Label FontSize="12" TextColor="#212121">
+                                            <HorizontalStackLayout>
+                                                <HorizontalStackLayout.Spacing>
+                                                    <OnPlatform x:TypeArguments="x:Double">
+                                                        <On Platform="Android" Value="4" />
+                                                        <On Platform="iOS" Value="4" />
+                                                        <On Platform="WinUI" Value="6" />
+                                                    </OnPlatform>
+                                                </HorizontalStackLayout.Spacing>
+                                                <Label Text="Lid:" TextColor="#6E6E6E" FontAttributes="Bold">
+                                                    <Label.FontSize>
+                                                        <OnPlatform x:TypeArguments="x:Double">
+                                                            <On Platform="Android" Value="12" />
+                                                            <On Platform="iOS" Value="12" />
+                                                            <On Platform="WinUI" Value="13" />
+                                                        </OnPlatform>
+                                                    </Label.FontSize>
+                                                </Label>
+                                                <Label TextColor="#212121">
+                                                    <Label.FontSize>
+                                                        <OnPlatform x:TypeArguments="x:Double">
+                                                            <On Platform="Android" Value="12" />
+                                                            <On Platform="iOS" Value="12" />
+                                                            <On Platform="WinUI" Value="13" />
+                                                        </OnPlatform>
+                                                    </Label.FontSize>
                                                     <Label.FormattedText>
                                                         <FormattedString>
                                                             <Span Text="{Binding Lid.Voornaam}" />
@@ -129,27 +422,76 @@
                                             </HorizontalStackLayout>
 
                                             <!-- toon Start en Einddatums in het item -->
-                                            <HorizontalStackLayout Spacing="12">
-                                                <HorizontalStackLayout Spacing="4">
+                                            <VerticalStackLayout>
+                                                <VerticalStackLayout.Spacing>
+                                                    <OnPlatform x:TypeArguments="x:Double">
+                                                        <On Platform="Android" Value="4" />
+                                                        <On Platform="iOS" Value="4" />
+                                                        <On Platform="WinUI" Value="6" />
+                                                    </OnPlatform>
+                                                </VerticalStackLayout.Spacing>
+                                                <HorizontalStackLayout>
+                                                    <HorizontalStackLayout.Spacing>
+                                                        <OnPlatform x:TypeArguments="x:Double">
+                                                            <On Platform="Android" Value="4" />
+                                                            <On Platform="iOS" Value="4" />
+                                                            <On Platform="WinUI" Value="6" />
+                                                        </OnPlatform>
+                                                    </HorizontalStackLayout.Spacing>
                                                     <Label Text="Start:" 
-                                                           FontSize="11" 
                                                            TextColor="#6E6E6E" 
-                                                           FontAttributes="Bold" />
+                                                           FontAttributes="Bold">
+                                                        <Label.FontSize>
+                                                            <OnPlatform x:TypeArguments="x:Double">
+                                                                <On Platform="Android" Value="11" />
+                                                                <On Platform="iOS" Value="11" />
+                                                                <On Platform="WinUI" Value="12" />
+                                                            </OnPlatform>
+                                                        </Label.FontSize>
+                                                    </Label>
                                                     <Label Text="{Binding StartDate, StringFormat='{0:dd-MM-yyyy}'}" 
-                                                           FontSize="11" 
-                                                           TextColor="#212121" />
+                                                           TextColor="#212121">
+                                                        <Label.FontSize>
+                                                            <OnPlatform x:TypeArguments="x:Double">
+                                                                <On Platform="Android" Value="11" />
+                                                                <On Platform="iOS" Value="11" />
+                                                                <On Platform="WinUI" Value="12" />
+                                                            </OnPlatform>
+                                                        </Label.FontSize>
+                                                    </Label>
                                                 </HorizontalStackLayout>
                                                 
-                                                <HorizontalStackLayout Spacing="4">
+                                                <HorizontalStackLayout>
+                                                    <HorizontalStackLayout.Spacing>
+                                                        <OnPlatform x:TypeArguments="x:Double">
+                                                            <On Platform="Android" Value="4" />
+                                                            <On Platform="iOS" Value="4" />
+                                                            <On Platform="WinUI" Value="6" />
+                                                        </OnPlatform>
+                                                    </HorizontalStackLayout.Spacing>
                                                     <Label Text="Tot:" 
-                                                           FontSize="11" 
                                                            TextColor="#6E6E6E" 
-                                                           FontAttributes="Bold" />
+                                                           FontAttributes="Bold">
+                                                        <Label.FontSize>
+                                                            <OnPlatform x:TypeArguments="x:Double">
+                                                                <On Platform="Android" Value="11" />
+                                                                <On Platform="iOS" Value="11" />
+                                                                <On Platform="WinUI" Value="12" />
+                                                            </OnPlatform>
+                                                        </Label.FontSize>
+                                                    </Label>
                                                     <Label Text="{Binding DueDate, StringFormat='{0:dd-MM-yyyy}'}" 
-                                                           FontSize="11" 
-                                                           TextColor="#212121" />
+                                                           TextColor="#212121">
+                                                        <Label.FontSize>
+                                                            <OnPlatform x:TypeArguments="x:Double">
+                                                                <On Platform="Android" Value="11" />
+                                                                <On Platform="iOS" Value="11" />
+                                                                <On Platform="WinUI" Value="12" />
+                                                            </OnPlatform>
+                                                        </Label.FontSize>
+                                                    </Label>
                                                 </HorizontalStackLayout>
-                                            </HorizontalStackLayout>
+                                            </VerticalStackLayout>
                                         </VerticalStackLayout>
                                     </Grid>
                                 </Border>
@@ -157,28 +499,96 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <!-- Bewerk / creëer formulier -->
-                    <Border x:Name="EditForm" Stroke="#E1E1E1" StrokeThickness="1" Padding="10" BackgroundColor="White">
-                        <VerticalStackLayout Spacing="12">
-                            <!-- Boek picker met expliciete styling -->
-                            <Label Text="{Binding BookTitle}" TextColor="#5A5A5A" FontSize="14" FontAttributes="Bold" />
-                            <Picker x:Name="BoekPicker" 
-                                    ItemsSource="{Binding BoekenList}" 
-                                    ItemDisplayBinding="{Binding Titel}" 
-                                    SelectedItem="{Binding SelectedBoek}" 
-                                    Title="Selecteer boek"
-                                    BackgroundColor="#F5F5F5"
-                                    TextColor="#212121"
-                                    TitleColor="#6E6E6E"
-                                    HeightRequest="45"
-                                    FontSize="14" />
+                    <!-- Bewerk / creëer formulier - compacter op mobile -->
+                    <Border x:Name="EditForm" Stroke="#E1E1E1" StrokeThickness="1" BackgroundColor="White" StrokeShape="RoundRectangle 8" IsVisible="{Binding IsEditFormVisible}">
+                        <Border.Padding>
+                            <OnPlatform x:TypeArguments="Thickness">
+                                <On Platform="Android" Value="10" />
+                                <On Platform="iOS" Value="10" />
+                                <On Platform="WinUI" Value="12" />
+                            </OnPlatform>
+                        </Border.Padding>
+                        <VerticalStackLayout>
+                            <VerticalStackLayout.Spacing>
+                                <OnPlatform x:TypeArguments="x:Double">
+                                    <On Platform="Android" Value="8" />
+                                    <On Platform="iOS" Value="8" />
+                                    <On Platform="WinUI" Value="12" />
+                                </OnPlatform>
+                            </VerticalStackLayout.Spacing>
+                            <!-- Boek picker met expliciete styling - responsive -->
+                            <Grid ColumnDefinitions="Auto,*" Margin="0,8,0,0">
+                                <Label Grid.Column="0"
+                                       Text="{Binding BookTitle}"
+                                       FontSize="14"
+                                       TextColor="#5A5A5A"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       MinimumWidthRequest="90"
+                                       Padding="0,0,8,0" />
+                                <Picker Grid.Column="1"
+                                        x:Name="BoekPicker"
+                                        ItemsSource="{Binding BoekenList}"
+                                        ItemDisplayBinding="{Binding Titel}"
+                                        SelectedItem="{Binding SelectedBoek}"
+                                        Title="Selecteer boek"
+                                        BackgroundColor="#F5F5F5"
+                                        TextColor="#212121"
+                                        TitleColor="#6E6E6E"
+                                        HorizontalOptions="FillAndExpand">
+                                    <Picker.HeightRequest>
+                                        <OnPlatform x:TypeArguments="x:Double">
+                                            <On Platform="Android" Value="42" />
+                                            <On Platform="iOS" Value="42" />
+                                            <On Platform="WinUI" Value="50" />
+                                        </OnPlatform>
+                                    </Picker.HeightRequest>
+                                    <Picker.FontSize>
+                                        <OnPlatform x:TypeArguments="x:Double">
+                                            <On Platform="Android" Value="14" />
+                                            <On Platform="iOS" Value="14" />
+                                            <On Platform="WinUI" Value="16" />
+                                        </OnPlatform>
+                                    </Picker.FontSize>
+                                </Picker>
+                            </Grid>
                             
-                            <!-- Weergave geselecteerde boek details -->
-                            <Frame Padding="8" BackgroundColor="#E8F5E9" IsVisible="{Binding SelectedBoek, Converter={StaticResource IsNotNullConverter}}">
+                            <!-- Weergave geselecteerde boek details - responsive -->
+                            <Frame BackgroundColor="#E8F5E9" IsVisible="{Binding SelectedBoek, Converter={StaticResource IsNotNullConverter}}">
+                                <Frame.Padding>
+                                    <OnPlatform x:TypeArguments="Thickness">
+                                        <On Platform="Android" Value="6" />
+                                        <On Platform="iOS" Value="6" />
+                                        <On Platform="WinUI" Value="8" />
+                                    </OnPlatform>
+                                </Frame.Padding>
                                 <VerticalStackLayout Spacing="2">
-                                    <Label Text="Geselecteerd boek:" FontSize="11" TextColor="#2E7D32" FontAttributes="Bold" />
-                                    <Label Text="{Binding SelectedBoek.Titel}" FontSize="13" TextColor="#212121" FontAttributes="Bold" />
-                                    <Label FontSize="11" TextColor="#5A5A5A">
+                                    <Label Text="Geselecteerd boek:" TextColor="#2E7D32" FontAttributes="Bold">
+                                        <Label.FontSize>
+                                            <OnPlatform x:TypeArguments="x:Double">
+                                                <On Platform="Android" Value="10" />
+                                                <On Platform="iOS" Value="10" />
+                                                <On Platform="WinUI" Value="11" />
+                                            </OnPlatform>
+                                        </Label.FontSize>
+                                    </Label>
+                                    <Label Text="{Binding SelectedBoek.Titel}" TextColor="#212121" FontAttributes="Bold">
+                                        <Label.FontSize>
+                                            <OnPlatform x:TypeArguments="x:Double">
+                                                <On Platform="Android" Value="12" />
+                                                <On Platform="iOS" Value="12" />
+                                                <On Platform="WinUI" Value="13" />
+                                            </OnPlatform>
+                                        </Label.FontSize>
+                                    </Label>
+                                    <Label TextColor="#5A5A5A">
+                                        <Label.FontSize>
+                                            <OnPlatform x:TypeArguments="x:Double">
+                                                <On Platform="Android" Value="10" />
+                                                <On Platform="iOS" Value="10" />
+                                                <On Platform="WinUI" Value="11" />
+                                            </OnPlatform>
+                                        </Label.FontSize>
                                         <Label.FormattedText>
                                             <FormattedString>
                                                 <Span Text="Auteur: " />
@@ -186,7 +596,14 @@
                                             </FormattedString>
                                         </Label.FormattedText>
                                     </Label>
-                                    <Label FontSize="11" TextColor="#5A5A5A">
+                                    <Label TextColor="#5A5A5A">
+                                        <Label.FontSize>
+                                            <OnPlatform x:TypeArguments="x:Double">
+                                                <On Platform="Android" Value="10" />
+                                                <On Platform="iOS" Value="10" />
+                                                <On Platform="WinUI" Value="11" />
+                                            </OnPlatform>
+                                        </Label.FontSize>
                                         <Label.FormattedText>
                                             <FormattedString>
                                                 <Span Text="ISBN: " />
@@ -197,24 +614,70 @@
                                 </VerticalStackLayout>
                             </Frame>
 
-                            <!-- Lid picker met expliciete styling -->
-                            <Label Text="{Binding MemberTitle}" TextColor="#5A5A5A" FontSize="14" FontAttributes="Bold" />
-                            <Picker x:Name="LidPicker" 
-                                    ItemsSource="{Binding LedenList}" 
-                                    ItemDisplayBinding="{Binding FullName}" 
-                                    SelectedItem="{Binding SelectedLid}" 
-                                    Title="Selecteer lid"
-                                    BackgroundColor="#F5F5F5"
-                                    TextColor="#212121"
-                                    TitleColor="#6E6E6E"
-                                    HeightRequest="45"
-                                    FontSize="14" />
+                            <!-- Lid picker met expliciete styling - responsive -->
+                            <Grid ColumnDefinitions="Auto,*" Margin="0,8,0,0">
+                                <Label Grid.Column="0"
+                                       Text="{Binding MemberTitle}"
+                                       FontSize="14"
+                                       TextColor="#5A5A5A"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       MinimumWidthRequest="90"
+                                       Padding="0,0,8,0" />
+                                <Picker Grid.Column="1"
+                                        x:Name="LidPicker"
+                                        ItemsSource="{Binding LedenList}"
+                                        ItemDisplayBinding="{Binding FullName}"
+                                        SelectedItem="{Binding SelectedLid}"
+                                        Title="Selecteer lid"
+                                        BackgroundColor="#F5F5F5"
+                                        TextColor="#212121"
+                                        TitleColor="#6E6E6E"
+                                        HorizontalOptions="FillAndExpand">
+                                    <Picker.HeightRequest>
+                                        <OnPlatform x:TypeArguments="x:Double">
+                                            <On Platform="Android" Value="42" />
+                                            <On Platform="iOS" Value="42" />
+                                            <On Platform="WinUI" Value="50" />
+                                        </OnPlatform>
+                                    </Picker.HeightRequest>
+                                    <Picker.FontSize>
+                                        <OnPlatform x:TypeArguments="x:Double">
+                                            <On Platform="Android" Value="14" />
+                                            <On Platform="iOS" Value="14" />
+                                            <On Platform="WinUI" Value="16" />
+                                        </OnPlatform>
+                                    </Picker.FontSize>
+                                </Picker>
+                            </Grid>
                             
-                            <!-- Weergave geselecteerde lid details -->
-                            <Frame Padding="8" BackgroundColor="#E3F2FD" IsVisible="{Binding SelectedLid, Converter={StaticResource IsNotNullConverter}}">
+                            <!-- Weergave geselecteerde lid details - responsive -->
+                            <Frame BackgroundColor="#E3F2FD" IsVisible="{Binding SelectedLid, Converter={StaticResource IsNotNullConverter}}">
+                                <Frame.Padding>
+                                    <OnPlatform x:TypeArguments="Thickness">
+                                        <On Platform="Android" Value="6" />
+                                        <On Platform="iOS" Value="6" />
+                                        <On Platform="WinUI" Value="8" />
+                                    </OnPlatform>
+                                </Frame.Padding>
                                 <VerticalStackLayout Spacing="2">
-                                    <Label Text="Geselecteerd lid:" FontSize="11" TextColor="#1565C0" FontAttributes="Bold" />
-                                    <Label FontSize="13" TextColor="#212121" FontAttributes="Bold">
+                                    <Label Text="Geselecteerd lid:" TextColor="#1565C0" FontAttributes="Bold">
+                                        <Label.FontSize>
+                                            <OnPlatform x:TypeArguments="x:Double">
+                                                <On Platform="Android" Value="10" />
+                                                <On Platform="iOS" Value="10" />
+                                                <On Platform="WinUI" Value="11" />
+                                            </OnPlatform>
+                                        </Label.FontSize>
+                                    </Label>
+                                    <Label TextColor="#212121" FontAttributes="Bold">
+                                        <Label.FontSize>
+                                            <OnPlatform x:TypeArguments="x:Double">
+                                                <On Platform="Android" Value="12" />
+                                                <On Platform="iOS" Value="12" />
+                                                <On Platform="WinUI" Value="13" />
+                                            </OnPlatform>
+                                        </Label.FontSize>
                                         <Label.FormattedText>
                                             <FormattedString>
                                                 <Span Text="{Binding SelectedLid.Voornaam}" />
@@ -223,49 +686,130 @@
                                             </FormattedString>
                                         </Label.FormattedText>
                                     </Label>
-                                    <Label Text="{Binding SelectedLid.Email}" FontSize="11" TextColor="#5A5A5A" />
-                                    <Label Text="{Binding SelectedLid.Telefoon}" FontSize="11" TextColor="#5A5A5A" IsVisible="{Binding SelectedLid.Telefoon, Converter={StaticResource StringNotEmptyToBoolConverter}}" />
+                                    <Label Text="{Binding SelectedLid.Email}" TextColor="#5A5A5A">
+                                        <Label.FontSize>
+                                            <OnPlatform x:TypeArguments="x:Double">
+                                                <On Platform="Android" Value="10" />
+                                                <On Platform="iOS" Value="10" />
+                                                <On Platform="WinUI" Value="11" />
+                                            </OnPlatform>
+                                        </Label.FontSize>
+                                    </Label>
+                                    <Label Text="{Binding SelectedLid.Telefoon}" TextColor="#5A5A5A" IsVisible="{Binding SelectedLid.Telefoon, Converter={StaticResource StringNotEmptyToBoolConverter}}">
+                                        <Label.FontSize>
+                                            <OnPlatform x:TypeArguments="x:Double">
+                                                <On Platform="Android" Value="10" />
+                                                <On Platform="iOS" Value="10" />
+                                                <On Platform="WinUI" Value="11" />
+                                            </OnPlatform>
+                                        </Label.FontSize>
+                                    </Label>
                                 </VerticalStackLayout>
                             </Frame>
 
-                            <!-- Start datum met expliciete styling -->
-                            <Label Text="{Binding StartLabel}" TextColor="#5A5A5A" FontSize="14" FontAttributes="Bold" />
+                            <!-- Start datum met expliciete styling - responsive -->
+                            <Label Text="{Binding StartLabel}" TextColor="#5A5A5A" FontAttributes="Bold">
+                                <Label.FontSize>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="14" />
+                                        <On Platform="iOS" Value="14" />
+                                        <On Platform="WinUI" Value="15" />
+                                    </OnPlatform>
+                                </Label.FontSize>
+                            </Label>
                             <DatePicker x:Name="StartDatePicker" 
                                         Date="{Binding StartDate}"
                                         BackgroundColor="#F5F5F5"
                                         TextColor="#212121"
-                                        HeightRequest="45"
-                                        FontSize="14"
-                                        Format="dd-MM-yyyy" />
+                                        Format="dd-MM-yyyy">
+                                <DatePicker.HeightRequest>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="42" />
+                                        <On Platform="iOS" Value="42" />
+                                        <On Platform="WinUI" Value="50" />
+                                    </OnPlatform>
+                                </DatePicker.HeightRequest>
+                                <DatePicker.FontSize>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="14" />
+                                        <On Platform="iOS" Value="14" />
+                                        <On Platform="WinUI" Value="16" />
+                                    </OnPlatform>
+                                </DatePicker.FontSize>
+                            </DatePicker>
 
-                            <!-- Einddatum met expliciete styling -->
-                            <Label Text="{Binding DueLabel}" TextColor="#5A5A5A" FontSize="14" FontAttributes="Bold" />
+                            <!-- Einddatum met expliciete styling - responsive -->
+                            <Label Text="{Binding DueLabel}" TextColor="#5A5A5A" FontAttributes="Bold">
+                                <Label.FontSize>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="14" />
+                                        <On Platform="iOS" Value="14" />
+                                        <On Platform="WinUI" Value="15" />
+                                    </OnPlatform>
+                                </Label.FontSize>
+                            </Label>
                             <DatePicker x:Name="DueDatePicker" 
                                         Date="{Binding DueDate}"
                                         BackgroundColor="#F5F5F5"
                                         TextColor="#212121"
-                                        HeightRequest="45"
-                                        FontSize="14"
-                                        Format="dd-MM-yyyy" />
+                                        Format="dd-MM-yyyy">
+                                <DatePicker.HeightRequest>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="42" />
+                                        <On Platform="iOS" Value="42" />
+                                        <On Platform="WinUI" Value="50" />
+                                    </OnPlatform>
+                                </DatePicker.HeightRequest>
+                                <DatePicker.FontSize>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="14" />
+                                        <On Platform="iOS" Value="14" />
+                                        <On Platform="WinUI" Value="16" />
+                                    </OnPlatform>
+                                </DatePicker.FontSize>
+                            </DatePicker>
 
-                            <!-- Knoppen met proper styles -->
-                            <HorizontalStackLayout Spacing="12" HorizontalOptions="End" Margin="0,8,0,0">
+                            <!-- Knoppen met proper styles - responsive -->
+                            <VerticalStackLayout Margin="0,12,0,0">
+                                <VerticalStackLayout.Spacing>
+                                    <OnPlatform x:TypeArguments="x:Double">
+                                        <On Platform="Android" Value="6" />
+                                        <On Platform="iOS" Value="6" />
+                                        <On Platform="WinUI" Value="8" />
+                                    </OnPlatform>
+                                </VerticalStackLayout.Spacing>
+                                
                                 <Button Text="{Binding DeleteButtonText}" 
                                         Command="{Binding VerwijderCommand}" 
                                         Style="{StaticResource DangerButton}"
-                                        WidthRequest="100"
-                                        HeightRequest="40" />
+                                        HorizontalOptions="FillAndExpand">
+                                    <Button.HeightRequest>
+                                        <OnPlatform x:TypeArguments="x:Double">
+                                            <On Platform="Android" Value="42" />
+                                            <On Platform="iOS" Value="42" />
+                                            <On Platform="WinUI" Value="48" />
+                                        </OnPlatform>
+                                    </Button.HeightRequest>
+                                </Button>
                                 <Button Text="{Binding SaveButtonText}" 
                                         Command="{Binding OpslaanCommand}" 
                                         Style="{StaticResource PrimaryButton}"
-                                        WidthRequest="100"
-                                        HeightRequest="40" />
-                             </HorizontalStackLayout>
-                         </VerticalStackLayout>
-                     </Border>
-                 </VerticalStackLayout>
-             </Frame>
+                                        HorizontalOptions="FillAndExpand">
+                                    <Button.HeightRequest>
+                                        <OnPlatform x:TypeArguments="x:Double">
+                                            <On Platform="Android" Value="42" />
+                                            <On Platform="iOS" Value="42" />
+                                            <On Platform="WinUI" Value="48" />
+                                        </OnPlatform>
+                                    </Button.HeightRequest>
+                                </Button>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </Frame>
 
-        </VerticalStackLayout>
-    </ScrollView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentPage>

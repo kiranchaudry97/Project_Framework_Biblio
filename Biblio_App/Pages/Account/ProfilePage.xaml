@@ -21,48 +21,51 @@
     </Shell.TitleView>
 
     <ScrollView BackgroundColor="White">
-        <VerticalStackLayout Padding="20" Spacing="16">
+        <VerticalStackLayout Padding="16" Spacing="16">
             <!-- Page Header -->
             <Label x:Name="HeaderLabel" 
                    Text="Profiel" 
                    FontAttributes="Bold" 
-                   FontSize="24" 
+                   FontSize="22" 
                    TextColor="#212121" 
-                   HorizontalOptions="Center" />
+                   HorizontalOptions="Center"
+                   Margin="0,8,0,8" />
 
             <!-- Profile Information Card -->
-            <Frame Style="{StaticResource WelcomeCardStyle}" BackgroundColor="White">
-                <VerticalStackLayout Spacing="12">
+            <Frame Style="{StaticResource WelcomeCardStyle}" BackgroundColor="White" Padding="16">
+                <VerticalStackLayout Spacing="16">
                     <Label Text="Profiel Informatie" 
                            FontAttributes="Bold" 
                            FontSize="18" 
                            TextColor="{StaticResource Primary}" />
                     
                     <!-- Email (read-only) -->
-                    <VerticalStackLayout Spacing="4">
+                    <VerticalStackLayout Spacing="6">
                         <Label x:Name="EmailLabel" 
                                Text="E-mail" 
                                FontAttributes="Bold" 
-                               FontSize="14"
+                               FontSize="15"
                                TextColor="#212121" />
                         <Label Text="{Binding Email}" 
-                               FontSize="14"
+                               FontSize="15"
                                TextColor="#212121" />
                     </VerticalStackLayout>
 
                     <!-- Full Name (editable) -->
-                    <VerticalStackLayout Spacing="4">
+                    <VerticalStackLayout Spacing="6">
                         <Label x:Name="FullNameLabel" 
                                Text="Volledige naam" 
                                FontAttributes="Bold" 
-                               FontSize="14"
+                               FontSize="15"
                                TextColor="#212121" />
                         <Entry x:Name="FullNameEntry" 
                                Text="{Binding FullName}" 
                                Placeholder="Voer volledige naam in"
                                BackgroundColor="#F5F5F5"
                                TextColor="#212121"
-                               PlaceholderColor="#6E6E6E" />
+                               PlaceholderColor="#6E6E6E"
+                               HeightRequest="50"
+                               FontSize="16" />
                         <Label x:Name="FullNameError" 
                                TextColor="Crimson" 
                                FontSize="12" 
@@ -70,14 +73,14 @@
                     </VerticalStackLayout>
 
                     <!-- Roles (read-only) -->
-                    <VerticalStackLayout Spacing="4">
+                    <VerticalStackLayout Spacing="6">
                         <Label x:Name="RolesLabel" 
                                Text="Rollen" 
                                FontAttributes="Bold" 
-                               FontSize="14"
+                               FontSize="15"
                                TextColor="#212121" />
                         <Label Text="{Binding Roles}" 
-                               FontSize="14"
+                               FontSize="15"
                                TextColor="#212121" />
                     </VerticalStackLayout>
 
@@ -86,7 +89,9 @@
                             Text="Profiel Opslaan" 
                             Clicked="OnSaveProfileClicked" 
                             Style="{StaticResource PrimaryButtonSmall}" 
-                            Margin="0,8,0,0" />
+                            Margin="0,8,0,0"
+                            HorizontalOptions="FillAndExpand"
+                            HeightRequest="48" />
                     
                     <Label x:Name="StatusLabel" 
                            TextColor="Green" 
@@ -97,65 +102,72 @@
             </Frame>
 
             <!-- Change Password Card -->
-            <Frame Style="{StaticResource WelcomeCardStyle}" BackgroundColor="White">
-                <VerticalStackLayout Spacing="12">
+            <Frame Style="{StaticResource WelcomeCardStyle}" BackgroundColor="White" Padding="16">
+                <VerticalStackLayout Spacing="16">
                     <Label Text="Wachtwoord Wijzigen" 
                            FontAttributes="Bold" 
                            FontSize="18" 
                            TextColor="{StaticResource Primary}" />
 
                     <!-- Current Password -->
-                    <VerticalStackLayout Spacing="4">
+                    <VerticalStackLayout Spacing="6">
                         <Label x:Name="CurrentPasswordLabel"
                                Text="Huidig Wachtwoord" 
                                FontAttributes="Bold" 
-                               FontSize="14"
+                               FontSize="15"
                                TextColor="#212121" />
                         <Entry x:Name="CurrentPasswordEntry" 
                                Placeholder="Voer huidig wachtwoord in"
                                IsPassword="True"
                                BackgroundColor="#F5F5F5"
                                TextColor="#212121"
-                               PlaceholderColor="#6E6E6E" />
+                               PlaceholderColor="#6E6E6E"
+                               HeightRequest="50"
+                               FontSize="16" />
                     </VerticalStackLayout>
 
                     <!-- New Password -->
-                    <VerticalStackLayout Spacing="4">
+                    <VerticalStackLayout Spacing="6">
                         <Label x:Name="NewPasswordLabel"
                                Text="Nieuw Wachtwoord" 
                                FontAttributes="Bold" 
-                               FontSize="14"
+                               FontSize="15"
                                TextColor="#212121" />
                         <Entry x:Name="NewPasswordEntry" 
                                Placeholder="Voer nieuw wachtwoord in"
                                IsPassword="True"
                                BackgroundColor="#F5F5F5"
                                TextColor="#212121"
-                               PlaceholderColor="#6E6E6E" />
+                               PlaceholderColor="#6E6E6E"
+                               HeightRequest="50"
+                               FontSize="16" />
                     </VerticalStackLayout>
 
                     <!-- Confirm New Password -->
-                    <VerticalStackLayout Spacing="4">
+                    <VerticalStackLayout Spacing="6">
                         <Label x:Name="ConfirmPasswordLabel"
                                Text="Bevestig Nieuw Wachtwoord" 
                                FontAttributes="Bold" 
-                               FontSize="14"
+                               FontSize="15"
                                TextColor="#212121" />
                         <Entry x:Name="ConfirmPasswordEntry" 
                                Placeholder="Bevestig nieuw wachtwoord"
                                IsPassword="True"
                                BackgroundColor="#F5F5F5"
                                TextColor="#212121"
-                               PlaceholderColor="#6E6E6E" />
+                               PlaceholderColor="#6E6E6E"
+                               HeightRequest="50"
+                               FontSize="16" />
                     </VerticalStackLayout>
 
                     <!-- Show Password Toggle -->
-                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
                         <Switch x:Name="ShowPasswordSwitch" Toggled="OnShowPasswordToggled" />
                         <Label x:Name="ShowPasswordLabel"
                                Text="Toon Wachtwoorden" 
                                VerticalOptions="Center"
-                               TextColor="#212121" />
+                               TextColor="#212121"
+                               FontSize="14" />
                     </HorizontalStackLayout>
 
                     <!-- Change Password Button -->
@@ -163,7 +175,9 @@
                             Text="Wachtwoord Wijzigen" 
                             Clicked="OnChangePasswordClicked" 
                             Style="{StaticResource OutlineActionButtonSmall}" 
-                            Margin="0,8,0,0" />
+                            Margin="0,8,0,0"
+                            HorizontalOptions="FillAndExpand"
+                            HeightRequest="48" />
                     
                     <Label x:Name="PasswordStatusLabel" 
                            TextColor="Crimson" 
@@ -177,7 +191,9 @@
             <Button Text="Logout" 
                     Clicked="OnLogoutClicked" 
                     Style="{StaticResource DangerButtonSmall}" 
-                    Margin="0,8,0,20" />
+                    Margin="0,8,0,20"
+                    HorizontalOptions="FillAndExpand"
+                    HeightRequest="48" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

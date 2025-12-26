@@ -10,6 +10,7 @@
             <conv:DateToBoolConverter x:Key="DateToBoolConverter" />
             <conv:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <conv:IsNotNullConverter x:Key="IsNotNullConverter" />
+            <conv:EqualToConverter x:Key="EqualToConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />

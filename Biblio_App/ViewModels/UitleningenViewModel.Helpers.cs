@@ -12,19 +12,27 @@ namespace Biblio_App.ViewModels
             {
                 if (SelectedUitlening == null) return;
 
-                // Map ReturnedAt to SelectedReturnStatus for UI pickers
-                if (SelectedUitlening.ReturnedAt.HasValue)
+                // MUST run on Main Thread for Android
+                Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    SelectedReturnStatus = Localize("ReturnedOption");
-                }
-                else
-                {
-                    SelectedReturnStatus = Localize("Return");
-                }
+                    try
+                    {
+                        // Map ReturnedAt to SelectedReturnStatus for UI pickers
+                        if (SelectedUitlening.ReturnedAt.HasValue)
+                        {
+                            SelectedReturnStatus = Localize("ReturnedOption");
+                        }
+                        else
+                        {
+                            SelectedReturnStatus = Localize("Return");
+                        }
 
-                // Force notify so bindings update
-                OnPropertyChanged(nameof(SelectedReturnStatus));
-                OnPropertyChanged(nameof(SelectedUitlening));
+                        // Force notify so bindings update
+                        OnPropertyChanged(nameof(SelectedReturnStatus));
+                        OnPropertyChanged(nameof(SelectedUitlening));
+                    }
+                    catch { }
+                });
             }
             catch { }
         }

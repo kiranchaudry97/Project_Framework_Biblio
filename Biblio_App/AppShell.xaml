@@ -8,7 +8,7 @@
     xmlns:local="clr-namespace:Biblio_App"
     Title="Biblio"
     FlyoutBehavior="Flyout"
-    FlyoutWidth="280"
+    FlyoutWidth="300"
     FlyoutBackgroundColor="{StaticResource Primary}"
     Shell.TabBarIsVisible="False">
 
@@ -28,17 +28,23 @@
             <Setter Property="Shell.TitleColor" Value="White" />
         </Style>
         
-        <!-- FlyoutItem styling -->
+        <!-- FlyoutItem styling met grotere touch targets -->
         <Style TargetType="FlyoutItem">
             <Setter Property="Shell.BackgroundColor" Value="{StaticResource Primary}" />
             <Setter Property="Shell.ForegroundColor" Value="White" />
             <Setter Property="Shell.TitleColor" Value="White" />
         </Style>
+        
+        <!-- ShellContent styling voor grotere items -->
+        <Style TargetType="ShellContent">
+            <Setter Property="Shell.BackgroundColor" Value="{StaticResource Primary}" />
+            <Setter Property="Shell.ForegroundColor" Value="White" />
+        </Style>
     </Shell.Resources>
 
     <!-- Flyout header met titel en thema toggle (taal picker verwijderd - gebruik Instellingen pagina) -->
     <Shell.FlyoutHeader>
-        <Grid Padding="12" BackgroundColor="{StaticResource Primary}">
+        <Grid Padding="16" BackgroundColor="{StaticResource Primary}" HeightRequest="80">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -46,7 +52,7 @@
 
             <Label Text="{Binding BiblioTitle, Source={x:Reference This}}" 
                    FontAttributes="Bold" 
-                   FontSize="18" 
+                   FontSize="20" 
                    VerticalOptions="Center" 
                    TextColor="White" />
 
@@ -56,20 +62,20 @@
                     Stroke="White"
                     BackgroundColor="#27416a"
                     Padding="0"
-                    WidthRequest="44"
-                    HeightRequest="44"
-                    Margin="8,0"
-                    StrokeShape="RoundRectangle 8">
+                    WidthRequest="50"
+                    HeightRequest="50"
+                    Margin="12,0"
+                    StrokeShape="RoundRectangle 10">
                 <Button x:Name="ThemeToggleButton" 
                         Text="☀"
-                        FontSize="24"
+                        FontSize="26"
                         FontAttributes="Bold"
                         Clicked="OnThemeToggleClicked" 
                         BackgroundColor="Transparent"
                         TextColor="White"
                         Padding="0"
-                        WidthRequest="44"
-                        HeightRequest="44"
+                        WidthRequest="50"
+                        HeightRequest="50"
                         BorderWidth="0" />
             </Border>
 
@@ -113,12 +119,40 @@
 
     <!-- Snelle acties in de flyout footer -->
     <Shell.FlyoutFooter>
-        <VerticalStackLayout Padding="12" Spacing="8" BackgroundColor="{StaticResource Primary}">
-            <Label x:Name="QuickLabel" Text="{Binding QuickLabelText, Source={x:Reference This}}" FontSize="14" TextColor="{StaticResource White}" />
-            <Button Text="{Binding QuickNewBookButtonText, Source={x:Reference This}}" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Clicked="QuickNewBook_Clicked" x:Name="QuickNewBookButton" />
-            <Button Text="{Binding QuickNewMemberButtonText, Source={x:Reference This}}" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Clicked="QuickNewMember_Clicked" x:Name="QuickNewMemberButton" />
+        <VerticalStackLayout Padding="16" Spacing="12" BackgroundColor="{StaticResource Primary}">
+            <Label x:Name="QuickLabel" 
+                   Text="{Binding QuickLabelText, Source={x:Reference This}}" 
+                   FontSize="15" 
+                   TextColor="{StaticResource White}"
+                   FontAttributes="Bold" />
+            <Button Text="{Binding QuickNewBookButtonText, Source={x:Reference This}}" 
+                    BackgroundColor="{StaticResource Primary}" 
+                    TextColor="{StaticResource White}" 
+                    Clicked="QuickNewBook_Clicked" 
+                    x:Name="QuickNewBookButton"
+                    HeightRequest="48"
+                    FontSize="15"
+                    BorderColor="White"
+                    BorderWidth="1" />
+            <Button Text="{Binding QuickNewMemberButtonText, Source={x:Reference This}}" 
+                    BackgroundColor="{StaticResource Primary}" 
+                    TextColor="{StaticResource White}" 
+                    Clicked="QuickNewMember_Clicked" 
+                    x:Name="QuickNewMemberButton"
+                    HeightRequest="48"
+                    FontSize="15"
+                    BorderColor="White"
+                    BorderWidth="1" />
             <!-- Snelle link naar instellingen behouden in footer als gemak (kan worden verwijderd indien ongewenst) -->
-            <Button x:Name="FooterSettingsButton" Text="{Binding FooterSettingsText, Source={x:Reference This}}" BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}" Command="{Binding Source={x:Static local:AppShell.Instance}, Path=OpenSettingsCommand}" />
+            <Button x:Name="FooterSettingsButton" 
+                    Text="{Binding FooterSettingsText, Source={x:Reference This}}" 
+                    BackgroundColor="{StaticResource Primary}" 
+                    TextColor="{StaticResource White}" 
+                    Command="{Binding Source={x:Static local:AppShell.Instance}, Path=OpenSettingsCommand}"
+                    HeightRequest="48"
+                    FontSize="15"
+                    BorderColor="White"
+                    BorderWidth="1" />
         </VerticalStackLayout>
     </Shell.FlyoutFooter>
 
