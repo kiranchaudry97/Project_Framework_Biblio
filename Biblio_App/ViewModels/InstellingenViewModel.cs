@@ -21,7 +21,7 @@ namespace Biblio_App.ViewModels
     public partial class InstellingenViewModel : ObservableObject
     {
         private readonly IDataSyncService? _sync;
-        private readonly IDbContextFactory<BiblioDbContext>? _dbFactory;
+        private readonly IDbContextFactory<LocalDbContext>? _dbFactory;
         private readonly ILanguageService? _languageService;
 
         // Include French (FR) so user can switch to fr as well
@@ -45,7 +45,7 @@ namespace Biblio_App.ViewModels
         public ICommand SyncNowCommand { get; }
         public ICommand CheckApiCommand { get; }
 
-        public InstellingenViewModel(IDataSyncService? sync = null, IDbContextFactory<BiblioDbContext>? dbFactory = null, ILanguageService? languageService = null)
+        public InstellingenViewModel(IDataSyncService? sync = null, IDbContextFactory<LocalDbContext>? dbFactory = null, ILanguageService? languageService = null)
         {
             _sync = sync;
             _dbFactory = dbFactory;
