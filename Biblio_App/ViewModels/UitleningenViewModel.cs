@@ -197,6 +197,14 @@ namespace Biblio_App.ViewModels
         public IAsyncRelayCommand OpslaanCommand { get; }
         public IAsyncRelayCommand VerwijderCommand { get; }
 
+        // Aliases for XAML bindings
+        public IRelayCommand NieuwUitleningCommand { get; }
+        public IAsyncRelayCommand OpslaanUitleningCommand { get; }
+        public IAsyncRelayCommand VerwijderGeselecteerdeCommand { get; }
+        public IRelayCommand<Lenen?> OpenDetailsCommand { get; }
+        public IRelayCommand<Lenen?> BewerkUitleningCommand { get; }
+        public IAsyncRelayCommand<Lenen?> VerwijderUitleningCommand { get; }
+
         public IRelayCommand ZoekCommand { get; }
         public IRelayCommand<string> SetFilterCommand { get; }
         public IAsyncRelayCommand<Lenen?> ReturnCommand { get; }
@@ -212,6 +220,14 @@ namespace Biblio_App.ViewModels
             NieuwCommand = new RelayCommand(Nieuw);
             OpslaanCommand = new AsyncRelayCommand(OpslaanAsync);
             VerwijderCommand = new AsyncRelayCommand(VerwijderAsync);
+
+            // Aliases used by XAML
+            NieuwUitleningCommand = new RelayCommand(Nieuw);
+            OpslaanUitleningCommand = new AsyncRelayCommand(OpslaanAsync);
+            VerwijderGeselecteerdeCommand = new AsyncRelayCommand(VerwijderAsync);
+            OpenDetailsCommand = new RelayCommand<Lenen?>(OnOpenDetails);
+            BewerkUitleningCommand = new RelayCommand<Lenen?>(OnEditLoan);
+            VerwijderUitleningCommand = new AsyncRelayCommand<Lenen?>(DeleteAsync);
 
             ZoekCommand = new RelayCommand(async () => await LoadDataWithFiltersAsync());
             ReturnCommand = new AsyncRelayCommand<Lenen?>(ReturnAsync);
@@ -258,6 +274,19 @@ namespace Biblio_App.ViewModels
             try
             {
                 await EnsureDataLoadedAsync();
+
+                // Toon direct het bewerkformulier bij eerste open zodat start/due labels en pickers zichtbaar zijn
+                try
+                {
+                    if (SelectedUitlening == null)
+                    {
+                        SelectedUitlening = new Lenen { StartDate = DateTime.Today, DueDate = DateTime.Today.AddDays(7) };
+                        // Prefill eerste boek/lid indien beschikbaar, zodat pickers niet leeg lijken
+                        if (SelectedBoek == null) SelectedBoek = BoekenList.FirstOrDefault();
+                        if (SelectedLid == null) SelectedLid = LedenList.FirstOrDefault();
+                    }
+                }
+                catch { }
 
                 // Nadat data is geladen, probeer het werkelijke DB bestandspad op te lossen
                 try
@@ -735,7 +764,35 @@ namespace Biblio_App.ViewModels
         }
 
         // behoud de rest van de bestaande methoden ongewijzigd
-        private void Nieuw() => SelectedUitlening = null;
+        private void Nieuw() => SelectedUitlening = new Lenen { StartDate = DateTime.Today, DueDate = DateTime.Today.AddDays(7) };
+
+        private void OnOpenDetails(Lenen? item)
+        {
+            if (item == null) return;
+            try
+            {
+                SelectedUitlening = item;
+                // optionally navigate to a details page if available
+                // Shell.Current?.GoToAsync($"{nameof(Pages.UitleningDetailsPage)}?id={item.Id}");
+            }
+            catch { }
+        }
+
+        private void OnEditLoan(Lenen? item)
+        {
+            if (item == null) return;
+            try
+            {
+                SelectedUitlening = item;
+                // prefill edit fields
+                StartDate = item.StartDate;
+                DueDate = item.DueDate;
+                ReturnedAt = item.ReturnedAt;
+                SelectedBoek = item.Boek;
+                SelectedLid = item.Lid;
+            }
+            catch { }
+        }
 
         private void RaiseCountProperties()
         {

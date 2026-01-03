@@ -67,11 +67,15 @@ namespace Biblio_App.Services
         public async Task SyncAllAsync()
         {
             var client = _httpFactory.CreateClient("ApiWithToken");
+            // Increase timeout for initial sync operations which may take longer
+            client.Timeout = TimeSpan.FromSeconds(30);
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
             // Probeer boeken op te halen
             try
             {
-                var remoteBoeken = await client.GetFromJsonAsync<PagedResult<Boek>>("api/boeken?page=1&pageSize=1000");
+                var remoteBoeken = await client.GetFromJsonAsync<PagedResult<Boek>>("api/boeken?page=1&pageSize=1000", cancellationToken: cts.Token);
                 if (remoteBoeken?.Items != null)
                 {
                     await _local.SaveBoekenAsync(remoteBoeken.Items);
@@ -82,7 +86,7 @@ namespace Biblio_App.Services
             // Leden
             try
             {
-                var remoteLeden = await client.GetFromJsonAsync<PagedResult<Lid>>("api/leden?page=1&pageSize=1000");
+                var remoteLeden = await client.GetFromJsonAsync<PagedResult<Lid>>("api/leden?page=1&pageSize=1000", cancellationToken: cts.Token);
                 if (remoteLeden?.Items != null)
                 {
                     foreach (var l in remoteLeden.Items) await _local.SaveLidAsync(l);
@@ -93,7 +97,7 @@ namespace Biblio_App.Services
             // Uitleningen
             try
             {
-                var remoteUit = await client.GetFromJsonAsync<PagedResult<Lenen>>("api/uitleningen?page=1&pageSize=1000");
+                var remoteUit = await client.GetFromJsonAsync<PagedResult<Lenen>>("api/uitleningen?page=1&pageSize=1000", cancellationToken: cts.Token);
                 if (remoteUit?.Items != null)
                 {
                     foreach (var u in remoteUit.Items) await _local.SaveUitleningAsync(u);
@@ -104,7 +108,7 @@ namespace Biblio_App.Services
             // Categorieen
             try
             {
-                var remoteCat = await client.GetFromJsonAsync<List<Categorie>>("api/categorieen");
+                var remoteCat = await client.GetFromJsonAsync<List<Categorie>>("api/categorieen", cancellationToken: cts.Token);
                 if (remoteCat != null)
                 {
                     await _local.SaveCategorieenAsync(remoteCat);
@@ -123,6 +127,7 @@ namespace Biblio_App.Services
                 try
                 {
                     var client = _httpFactory.CreateClient("ApiWithToken");
+                    client.Timeout = TimeSpan.FromSeconds(30);
                     var resp = await client.GetFromJsonAsync<PagedResult<Boek>>("api/boeken?page=1&pageSize=1000");
                     var items = resp?.Items ?? new List<Boek>();
                     await _local.SaveBoekenAsync(items);
@@ -141,6 +146,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.PostAsJsonAsync("api/boeken", model);
                 if (res.IsSuccessStatusCode)
                 {
@@ -161,6 +167,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.PutAsJsonAsync($"api/boeken/{model.Id}", model);
                 if (res.IsSuccessStatusCode)
                 {
@@ -180,6 +187,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.DeleteAsync($"api/boeken/{id}");
                 if (res.IsSuccessStatusCode)
                 {
@@ -201,6 +209,7 @@ namespace Biblio_App.Services
                 try
                 {
                     var client = _httpFactory.CreateClient("ApiWithToken");
+                    client.Timeout = TimeSpan.FromSeconds(30);
                     var resp = await client.GetFromJsonAsync<PagedResult<Lid>>("api/leden?page=1&pageSize=1000");
                     var items = resp?.Items ?? new List<Lid>();
                     foreach (var l in items) await _local.SaveLidAsync(l);
@@ -216,6 +225,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.PostAsJsonAsync("api/leden", model);
                 if (res.IsSuccessStatusCode)
                 {
@@ -235,6 +245,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.PutAsJsonAsync($"api/leden/{model.Id}", model);
                 if (res.IsSuccessStatusCode)
                 {
@@ -253,6 +264,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.DeleteAsync($"api/leden/{id}");
                 if (res.IsSuccessStatusCode)
                 {
@@ -274,6 +286,7 @@ namespace Biblio_App.Services
                 try
                 {
                     var client = _httpFactory.CreateClient("ApiWithToken");
+                    client.Timeout = TimeSpan.FromSeconds(30);
                     var resp = await client.GetFromJsonAsync<PagedResult<Lenen>>("api/uitleningen?page=1&pageSize=1000");
                     var items = resp?.Items ?? new List<Lenen>();
                     foreach (var u in items) await _local.SaveUitleningAsync(u);
@@ -289,6 +302,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.PostAsJsonAsync("api/uitleningen", model);
                 if (res.IsSuccessStatusCode)
                 {
@@ -308,6 +322,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.PutAsJsonAsync($"api/uitleningen/{model.Id}", model);
                 if (res.IsSuccessStatusCode)
                 {
@@ -326,6 +341,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.DeleteAsync($"api/uitleningen/{id}");
                 if (res.IsSuccessStatusCode)
                 {
@@ -347,6 +363,7 @@ namespace Biblio_App.Services
                 try
                 {
                     var client = _httpFactory.CreateClient("ApiWithToken");
+                    client.Timeout = TimeSpan.FromSeconds(30);
                     var resp = await client.GetFromJsonAsync<List<Categorie>>("api/categorieen");
                     var items = resp ?? new List<Categorie>();
                     if (items.Any()) await _local.SaveCategorieenAsync(items);
@@ -365,6 +382,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.PostAsJsonAsync("api/categorieen", model);
                 if (res.IsSuccessStatusCode)
                 {
@@ -384,6 +402,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.PutAsJsonAsync($"api/categorieen/{model.Id}", model);
                 if (res.IsSuccessStatusCode)
                 {
@@ -402,6 +421,7 @@ namespace Biblio_App.Services
             try
             {
                 var client = _httpFactory.CreateClient("ApiWithToken");
+                client.Timeout = TimeSpan.FromSeconds(30);
                 var res = await client.DeleteAsync($"api/categorieen/{id}");
                 if (res.IsSuccessStatusCode)
                 {

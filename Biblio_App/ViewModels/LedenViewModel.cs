@@ -11,6 +11,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Collections;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Networking;
 using Biblio_App.Models;
 using Biblio_App.Services;
 using System.Collections.Generic;
@@ -30,6 +31,7 @@ namespace Biblio_App.ViewModels
     {
         private readonly IGegevensProvider? _gegevensProvider;
         private readonly IDbContextFactory<LocalDbContext> _dbFactory;
+        private readonly ILedenService? _ledenService;
         private readonly ILanguageService? _languageService;
         private ResourceManager? _sharedResourceManager;
         private bool _resourceManagerInitialized = false;
@@ -114,11 +116,12 @@ namespace Biblio_App.ViewModels
         [ObservableProperty]
         private string phonePlaceholder = string.Empty;
 
-        public LedenViewModel(IDbContextFactory<LocalDbContext> dbFactory, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null)
+        public LedenViewModel(IDbContextFactory<LocalDbContext> dbFactory, IGegevensProvider? gegevensProvider = null, ILanguageService? languageService = null, ILedenService? ledenService = null)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _gegevensProvider = gegevensProvider;
             _languageService = languageService;
+            _ledenService = ledenService;
 
             NieuwCommand = new RelayCommand(Nieuw);
             OpslaanCommand = new AsyncRelayCommand(OpslaanAsync);
@@ -386,14 +389,75 @@ namespace Biblio_App.ViewModels
         {
             try
             {
-                using var db = _dbFactory.CreateDbContext();
-                var q = db.Leden.AsNoTracking().Where(l => !l.IsDeleted).AsQueryable();
-                if (!string.IsNullOrWhiteSpace(SearchText))
+                List<Lid> list;
+
+                // Probeer eerst API (indien internet en service beschikbaar). Val terug op lokale DB bij fout.
+                var online = Connectivity.Current?.NetworkAccess == NetworkAccess.Internet;
+                var loadedFromApi = false;
+                list = new List<Lid>();
+                if (online && _ledenService != null)
                 {
-                    var s = SearchText.Trim();
-                    q = q.Where(l => (l.Voornaam ?? string.Empty).Contains(s) || (l.AchterNaam ?? string.Empty).Contains(s) || (l.Email ?? string.Empty).Contains(s));
+                    try
+                    {
+                        var apiList = await _ledenService.GetLedenAsync();
+                        if (apiList != null && apiList.Count > 0)
+                        {
+                            list = apiList;
+                            loadedFromApi = true;
+                        }
+                        // Optioneel: filteren client-side op SearchText
+                        if (loadedFromApi && !string.IsNullOrWhiteSpace(SearchText))
+                        {
+                            var s = SearchText.Trim();
+                            list = list.Where(l => (l.Voornaam ?? string.Empty).Contains(s) || (l.AchterNaam ?? string.Empty).Contains(s) || (l.Email ?? string.Empty).Contains(s))
+                                       .OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToList();
+                        }
+                        // Optioneel: cache naar lokale DB (best-effort)
+                        if (loadedFromApi)
+                        {
+                            try
+                            {
+                                using var dbCache = _dbFactory.CreateDbContext();
+                                foreach (var m in list)
+                                {
+                                    var existing = await dbCache.Leden.FirstOrDefaultAsync(x => x.Id == m.Id);
+                                    if (existing != null)
+                                    {
+                                        existing.Voornaam = m.Voornaam;
+                                        existing.AchterNaam = m.AchterNaam;
+                                        existing.Email = m.Email;
+                                        existing.Telefoon = m.Telefoon;
+                                        existing.IsDeleted = false;
+                                    }
+                                    else
+                                    {
+                                        dbCache.Leden.Add(m);
+                                    }
+                                }
+                                await dbCache.SaveChangesAsync();
+                            }
+                            catch { }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // API faalde (bijv. 401 of backend down). Val terug op lokale database.
+                        System.Diagnostics.Debug.WriteLine($"LedenViewModel: API load failed, falling back to local DB. Error: {ex}");
+                        loadedFromApi = false;
+                    }
                 }
-                var list = await q.OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToListAsync();
+
+                if (!loadedFromApi)
+                {
+                    using var db = _dbFactory.CreateDbContext();
+                    var q = db.Leden.AsNoTracking().Where(l => !l.IsDeleted).AsQueryable();
+                    if (!string.IsNullOrWhiteSpace(SearchText))
+                    {
+                        var s = SearchText.Trim();
+                        q = q.Where(l => (l.Voornaam ?? string.Empty).Contains(s) || (l.AchterNaam ?? string.Empty).Contains(s) || (l.Email ?? string.Empty).Contains(s));
+                    }
+                    list = await q.OrderBy(l => l.Voornaam).ThenBy(l => l.AchterNaam).ToListAsync();
+                }
                 
                 // Update UI collection on main thread
                 await MainThread.InvokeOnMainThreadAsync(() =>

@@ -99,8 +99,8 @@ try
             builder.Services.AddTransient<ViewModels.UsersViewModel>();
 
             // Configureer DbContextFactory:
-            // Gebruik lokale SQLite bestand voor alle platforms (zorg ervoor dat MAUI app biblio.db gebruikt)
-            string dbPath = System.IO.Path.Combine(FileSystem.AppDataDirectory, "biblio.db");
+            // Gebruik lokale SQLite bestand voor alle platforms (zorg ervoor dat MAUI app dezelfde naam gebruikt als LocalDbContext fallback)
+            string dbPath = System.IO.Path.Combine(FileSystem.AppDataDirectory, "BiblioApp.db");
 
             // Log DB pad en AppDataDirectory zodat het gemakkelijk te vinden is op Windows
             try
@@ -127,70 +127,28 @@ try
             builder.Services.AddScoped<EfGegevensProvider>();
             builder.Services.AddScoped<IGegevensProvider>(sp => sp.GetRequiredService<EfGegevensProvider>());
 
-            // Lees UseAuth instelling (standaard true)
-            var useAuth = bool.TryParse(builder.Configuration["UseAuth"], out var ua) ? ua : true;
-
-            // Registreer TokenHandler en HttpClients conditioneel gebaseerd op UseAuth
-            if (useAuth)
+            // Eenvoudige HttpClient configuratie zonder TokenHandler. Services voegen zelf de Authorization-header toe per request.
+            builder.Services.AddHttpClient("ApiWithToken", c =>
             {
-                // TokenHandler heeft IAuthService nodig om refresh calls uit te voeren
-                builder.Services.AddTransient<TokenHandler>(sp => ActivatorUtilities.CreateInstance<TokenHandler>(sp));
-
-                // Auth service client (gebruikt door TokenHandler om tokens te vernieuwen)
-                builder.Services.AddHttpClient<IAuthService, AuthService>(c =>
+                c.BaseAddress = new Uri(apiBase);
+                c.Timeout = TimeSpan.FromSeconds(10);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() =>
+                new HttpClientHandler
                 {
-                    c.BaseAddress = new Uri(apiBase);
-                    c.Timeout = TimeSpan.FromSeconds(5);
-                })
-                .ConfigurePrimaryHttpMessageHandler(() =>
-                    new HttpClientHandler
+                    // Alleen ontwikkeling: accepteer zelf-ondertekende certificaten voor localhost. Verwijder in productie.
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
                     {
-                        // Alleen ontwikkeling: accepteer zelf-ondertekende certificaten voor localhost. Verwijder in productie.
-                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-                        {
-                            if (message.RequestUri?.Host == "localhost") return true;
-                            return errors == SslPolicyErrors.None;
-                        }
-                    });
-
-                // API client met TokenHandler bevestigd
-                builder.Services.AddHttpClient("ApiWithToken", c =>
-                {
-                    c.BaseAddress = new Uri(apiBase);
-                    c.Timeout = TimeSpan.FromSeconds(10);
-                })
-                .ConfigurePrimaryHttpMessageHandler(() =>
-                    new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-                        {
-                            if (message.RequestUri?.Host == "localhost") return true;
-                            return errors == SslPolicyErrors.None;
-                        }
-                    })
-                .AddHttpMessageHandler<TokenHandler>();
-            }
-            else
-            {
-                // Gewone API client zonder token (ontwikkeling of anonieme endpoints)
-                builder.Services.AddHttpClient("ApiWithToken", c =>
-                {
-                    c.BaseAddress = new Uri(apiBase);
-                    c.Timeout = TimeSpan.FromSeconds(10);
-                })
-                .ConfigurePrimaryHttpMessageHandler(() =>
-                    new HttpClientHandler
-                    {
-                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-                        {
-                            if (message.RequestUri?.Host == "localhost") return true;
-                            return errors == SslPolicyErrors.None;
-                        }
-                    });
-            }
+                        if (message.RequestUri?.Host == "localhost") return true;
+                        return errors == SslPolicyErrors.None;
+                    }
+                });
 
             builder.Services.AddScoped<IDataSyncService, DataSyncService>();
             builder.Services.AddScoped<ILocalRepository, LocalRepository>();
+            // Eenvoudige API services (HttpClientFactory + Bearer header uit SecureStorage)
+            builder.Services.AddScoped<ILedenService, LedenService>();
+            builder.Services.AddScoped<IBoekService, BoekService>();
 
             // MainViewModel transient (is afhankelijk van services via factory)
             builder.Services.AddTransient<MainViewModel>(sp =>
@@ -337,6 +295,43 @@ try
             return app;
         }
 
+        private static string ResolveApiBaseForDevice(string apiBase)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(apiBase)) return apiBase;
+                var uri = new Uri(apiBase);
+                var host = uri.Host;
+
+                // Android emulator: use 10.0.2.2 to reach host machine
+                if (Microsoft.Maui.Devices.DeviceInfo.Platform == Microsoft.Maui.Devices.DevicePlatform.Android)
+                {
+                    if (host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || host.Equals("127.0.0.1"))
+                    {
+                        var builder = new UriBuilder(uri)
+                        {
+                            Host = "10.0.2.2"
+                        };
+                        return builder.Uri.ToString();
+                    }
+                }
+
+                // iOS simulator/device: you may need machine IP; keep localhost for Mac Catalyst, adjust for iOS if needed
+                if (Microsoft.Maui.Devices.DeviceInfo.Platform == Microsoft.Maui.Devices.DevicePlatform.iOS)
+                {
+                    // If using localhost with iOS devices, consider replacing with local network IP
+                    // Leaving as-is unless explicitly configured
+                    return apiBase;
+                }
+
+                return apiBase;
+            }
+            catch
+            {
+                return apiBase;
+            }
+        }
+
         private static async Task InitializeDatabaseAsync(IServiceProvider services)
         {
             var marker = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
@@ -392,9 +387,9 @@ try
                                 
                                 if (needsSeeding)
                                 {
-                                    try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] Database is empty, seeding data...\n"); } catch { }
-                                    await SeedLocalDatabaseAsync(localCtx, marker);
-                                    try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] Seeded LocalDbContext with initial data\n"); } catch { }
+                                    try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] Database is empty, seeding data using LocalDbContext.SeedAsync...\n"); } catch { }
+                                    await Biblio_Models.Data.LocalDbContext.SeedAsync(localCtx);
+                                    try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] Seeded LocalDbContext with initial data via SeedAsync\n"); } catch { }
                                 }
                                 else
                                 {
@@ -424,63 +419,7 @@ try
             await EnsureForContextAsync<Biblio_Models.Data.LocalDbContext>();
         }
 
-        private static async Task SeedLocalDatabaseAsync(Biblio_Models.Data.LocalDbContext ctx, string marker)
-        {
-            // BELANGRIJK: Deze methode draait op een achtergrond thread.
-            // Raak GEEN UI elementen aan of roep MainThread.BeginInvokeOnMainThread aan hier tijdens seeding.
-            // Alleen database operaties zijn toegestaan.
-            
-            try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] SeedLocalDatabaseAsync started\n"); } catch { }
-
-            try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] Seeding Categorien...\n"); } catch { }
-            
-            // Seed Categorieën
-            var categorien = new[]
-            {
-                new Categorie { Naam = "Fictie", IsDeleted = false },
-                new Categorie { Naam = "Non-fictie", IsDeleted = false },
-                new Categorie { Naam = "Wetenschap", IsDeleted = false },
-                new Categorie { Naam = "Geschiedenis", IsDeleted = false },
-                new Categorie { Naam = "Technologie", IsDeleted = false }
-            };
-            ctx.Categorien.AddRange(categorien);
-            await ctx.SaveChangesAsync();
-
-            try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] Seeding Boeken...\n"); } catch { }
-            
-            // Seed Boeken
-            var boeken = new[]
-            {
-                new Boek { Titel = "De Hobbit", Auteur = "J.R.R. Tolkien", Isbn = "978-0-261-10295-8", CategorieID = categorien[0].Id, IsDeleted = false },
-                new Boek { Titel = "Sapiens", Auteur = "Yuval Noah Harari", Isbn = "978-0-062-31609-6", CategorieID = categorien[1].Id, IsDeleted = false },
-                new Boek { Titel = "Een korte geschiedenis van de tijd", Auteur = "Stephen Hawking", Isbn = "978-0-553-10953-5", CategorieID = categorien[2].Id, IsDeleted = false },
-                new Boek { Titel = "De Tweede Wereldoorlog", Auteur = "Antony Beevor", Isbn = "978-0-316-02374-0", CategorieID = categorien[3].Id, IsDeleted = false },
-                new Boek { Titel = "Clean Code", Auteur = "Robert C. Martin", Isbn = "978-0-132-35088-4", CategorieID = categorien[4].Id, IsDeleted = false },
-                new Boek { Titel = "Harry Potter en de Steen der Wijzen", Auteur = "J.K. Rowling", Isbn = "978-9-076-17401-5", CategorieID = categorien[0].Id, IsDeleted = false },
-                new Boek { Titel = "De Da Vinci Code", Auteur = "Dan Brown", Isbn = "978-0-307-47921-7", CategorieID = categorien[0].Id, IsDeleted = false },
-                new Boek { Titel = "Homo Deus", Auteur = "Yuval Noah Harari", Isbn = "978-1-784-70377-6", CategorieID = categorien[1].Id, IsDeleted = false },
-                new Boek { Titel = "De Oorsprong der Soorten", Auteur = "Charles Darwin", Isbn = "978-0-140-43205-6", CategorieID = categorien[2].Id, IsDeleted = false },
-                new Boek { Titel = "Steve Jobs", Auteur = "Walter Isaacson", Isbn = "978-1-451-64853-9", CategorieID = categorien[3].Id, IsDeleted = false }
-            };
-            ctx.Boeken.AddRange(boeken);
-            await ctx.SaveChangesAsync();
-
-            try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] Seeding Leden...\n"); } catch { }
-            
-            // Seed Leden
-            var leden = new[]
-            {
-                new Lid { Voornaam = "Jan", AchterNaam = "Janssens", Email = "jan.janssens@example.com", Telefoon = "0470123456", IsDeleted = false },
-                new Lid { Voornaam = "Marie", AchterNaam = "Peeters", Email = "marie.peeters@example.com", Telefoon = "0471234567", IsDeleted = false },
-                new Lid { Voornaam = "Luc", AchterNaam = "Vermeulen", Email = "luc.vermeulen@example.com", Telefoon = "0472345678", IsDeleted = false },
-                new Lid { Voornaam = "Sophie", AchterNaam = "Claes", Email = "sophie.claes@example.com", Telefoon = "0473456789", IsDeleted = false },
-                new Lid { Voornaam = "Tom", AchterNaam = "Maes", Email = "tom.maes@example.com", Telefoon = "0474567890", IsDeleted = false }
-            };
-            ctx.Leden.AddRange(leden);
-            await ctx.SaveChangesAsync();
-            
-            try { File.AppendAllText(marker, $"[{DateTime.UtcNow:o}] SeedLocalDatabaseAsync completed successfully\n"); } catch { }
-        }
+        // Custom seeding removed in favor of LocalDbContext.SeedAsync for consistency across projects.
 
         public static async Task InitializeAdminAsync(IServiceProvider serviceProvider)
         {
@@ -514,33 +453,6 @@ try
             }
         }
 
-        private static string ResolveApiBaseForDevice(string apiBase)
-        {
-            if (string.IsNullOrWhiteSpace(apiBase))
-                return apiBase;
-
-            try
-            {
-                // Als het draait op Android emulator, vervang localhost met emulator host loopback.
-                // Standaard Android emulator -> 10.0.2.2, Genymotion -> 10.0.3.2.
-                try
-                {
-                    if (DeviceInfo.Platform == DevicePlatform.Android && apiBase.Contains("localhost", StringComparison.OrdinalIgnoreCase))
-                    {
-                        apiBase = apiBase.Replace("localhost", "10.0.2.2", StringComparison.OrdinalIgnoreCase);
-                    }
-                }
-                catch { /* DeviceInfo is mogelijk niet beschikbaar in sommige contexten; negeer */ }
-
-                // Extra: als iemand 127.0.0.1 expliciet heeft geconfigureerd, behandel hetzelfde als localhost
-                if (apiBase.Contains("127.0.0.1"))
-                {
-                    apiBase = apiBase.Replace("127.0.0.1", "10.0.2.2", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            catch { /* best-effort */ }
-
-            return apiBase;
-        }
+        
     }
 }

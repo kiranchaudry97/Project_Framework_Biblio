@@ -53,8 +53,27 @@
                     BackgroundColor="#F5F5F5" 
                     TextColor="#212121" 
                     TitleColor="#6E6E6E"
-                    HeightRequest="48"
-                    FontSize="16" />
+                    MinimumHeightRequest="44"
+                    HeightRequest="44"
+                    FontSize="16"
+                    Margin="0,4"
+                    HorizontalTextAlignment="Start">
+                <Picker.MinimumWidthRequest>
+                    <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="Android" Value="0" />
+                        <On Platform="iOS" Value="0" />
+                        <On Platform="WinUI" Value="260" />
+                    </OnPlatform>
+                </Picker.MinimumWidthRequest>
+                
+                <Picker.FontSize>
+                    <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="Android" Value="16" />
+                        <On Platform="iOS" Value="16" />
+                        <On Platform="WinUI" Value="18" />
+                    </OnPlatform>
+                </Picker.FontSize>
+            </Picker>
         </VerticalStackLayout>
 
         <!-- CollectionView: simple mobile-first layout -->
@@ -295,13 +314,9 @@
                                 HorizontalTextAlignment="Start" 
                                 BackgroundColor="White" 
                                 TextColor="{StaticResource Gray900}">
-                            <Picker.HeightRequest>
-                                <OnPlatform x:TypeArguments="x:Double">
-                                    <On Platform="Android" Value="42" />
-                                    <On Platform="iOS" Value="42" />
-                                    <On Platform="WinUI" Value="50" />
-                                </OnPlatform>
-                            </Picker.HeightRequest>
+                            <Picker.MinimumHeightRequest>44</Picker.MinimumHeightRequest>
+                            <Picker.HeightRequest>44</Picker.HeightRequest>
+                            <Picker.Margin>0,4</Picker.Margin>
                             <Picker.FontSize>
                                 <OnPlatform x:TypeArguments="x:Double">
                                     <On Platform="Android" Value="14" />
