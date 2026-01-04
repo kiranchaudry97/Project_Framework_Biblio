@@ -13,51 +13,23 @@ using Biblio_Models.Entiteiten;
 
 namespace Biblio_App
 {
+
     internal class Synchronizer
     {
-        HttpClient client;
-        JsonSerializerOptions sOptions;
-        internal bool dbExists = false;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IDbContextFactory<LocalDbContext> _dbContextFactory;
+        private readonly string? _apiBase;
+        private readonly JsonSerializerOptions _jsonOptions;
 
-        readonly LocalDbContext _context;
-        readonly string? _apiBase;
-
-        // Optional current user state kept locally in the synchronizer
         internal AppUser? CurrentUser { get; private set; }
         internal string? CurrentUserId { get; private set; }
 
-        internal Synchronizer(LocalDbContext context, string? apiBase = null)
+        public Synchronizer(IHttpClientFactory httpClientFactory, IDbContextFactory<LocalDbContext> dbContextFactory, string? apiBase = null)
         {
-            _context = context;
+            _httpClientFactory = httpClientFactory;
+            _dbContextFactory = dbContextFactory;
             _apiBase = apiBase;
-
-            client = new HttpClient();
-            if (!string.IsNullOrWhiteSpace(_apiBase))
-            {
-                try { client.BaseAddress = new Uri(_apiBase); } catch { /* ignore */ }
-            }
-
-            sOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true,
-            };
-        }
-
-        // New ctor that accepts an HttpClient (e.g. created via IHttpClientFactory.CreateClient("ApiWithToken"))
-        internal Synchronizer(LocalDbContext context, HttpClient httpClient, string? apiBase = null)
-        {
-            _context = context;
-            _apiBase = apiBase;
-
-            client = httpClient ?? new HttpClient();
-            // Ensure BaseAddress when not already set on the provided client
-            if (client.BaseAddress == null && !string.IsNullOrWhiteSpace(_apiBase))
-            {
-                try { client.BaseAddress = new Uri(_apiBase); } catch { }
-            }
-
-            sOptions = new JsonSerializerOptions
+            _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 WriteIndented = true,
@@ -67,17 +39,17 @@ namespace Biblio_App
         // Synchronize books from remote to local (best-effort). Does not remove local-only changes.
         async Task AllBooks()
         {
-            // Synchronize local changes to API: not implemented here
+            using var db = _dbContextFactory.CreateDbContext();
+            var client = _httpClientFactory.CreateClient("ApiWithToken");
 
-            // Synchronize from API to local if authorized and API configured
-            if (await IsAuthorized() && client.BaseAddress != null)
+            if (await IsAuthorized(client) && client.BaseAddress != null)
             {
                 try
                 {
                     var response = await client.GetAsync("api/mobiledata");
                     response.EnsureSuccessStatusCode();
                     var responseBody = await response.Content.ReadAsStringAsync();
-                    var data = JsonSerializer.Deserialize<MobileDataDto>(responseBody, sOptions);
+                    var data = JsonSerializer.Deserialize<MobileDataDto>(responseBody, _jsonOptions);
                     if (data != null)
                     {
                         // Upsert categories
@@ -85,7 +57,7 @@ namespace Biblio_App
                         {
                             foreach (var c in data.Categories)
                             {
-                                var existingC = await _context.Categorien.FirstOrDefaultAsync(x => x.Id == c.Id);
+                                var existingC = await db.Categorien.FirstOrDefaultAsync(x => x.Id == c.Id);
                                 if (existingC != null)
                                 {
                                     existingC.Naam = c.Naam ?? existingC.Naam;
@@ -93,34 +65,50 @@ namespace Biblio_App
                                 }
                                 else
                                 {
-                                    _context.Categorien.Add(new Categorie { Id = c.Id, Naam = c.Naam ?? string.Empty });
+                                    db.Categorien.Add(new Categorie { Id = c.Id, Naam = c.Naam ?? string.Empty });
                                 }
                             }
                         }
 
-                        // Upsert books
+                        // --- Synchronisatie: lokale boeken exact gelijk aan server ---
                         if (data.Books != null)
                         {
+                            var serverBookIds = data.Books.Select(b => b.Id).ToHashSet();
+                            var localBooks = await db.Boeken.Where(b => !b.IsDeleted).ToListAsync();
+
+                            // Verwijder lokale boeken die niet meer op de server staan
+                            foreach (var local in localBooks)
+                            {
+                                if (!serverBookIds.Contains(local.Id))
+                                {
+                                    db.Boeken.Remove(local);
+                                }
+                            }
+
+                            // Upsert serverboeken
                             foreach (var b in data.Books)
                             {
-                                var existing = await _context.Boeken.FirstOrDefaultAsync(x => x.Id == b.Id);
+                                var existing = await db.Boeken.FirstOrDefaultAsync(x => x.Id == b.Id);
                                 if (existing != null)
                                 {
-                                    existing.Titel = b.Titel ?? existing.Titel;
-                                    existing.Auteur = b.Auteur ?? existing.Auteur;
-                                    existing.Isbn = b.Isbn ?? existing.Isbn;
+                                    existing.Titel = b.Titel ?? string.Empty;
+                                    existing.Auteur = b.Auteur ?? string.Empty;
+                                    existing.Isbn = b.Isbn ?? string.Empty;
                                     existing.CategorieID = b.CategorieId;
+                                    existing.CategorieNaam = b.CategorieNaam ?? string.Empty;
                                     existing.IsDeleted = false;
                                 }
                                 else
                                 {
-                                    _context.Boeken.Add(new Boek
+                                    db.Boeken.Add(new Boek
                                     {
                                         Id = b.Id,
                                         Titel = b.Titel ?? string.Empty,
                                         Auteur = b.Auteur ?? string.Empty,
                                         Isbn = b.Isbn ?? string.Empty,
-                                        CategorieID = b.CategorieId
+                                        CategorieID = b.CategorieId,
+                                        CategorieNaam = b.CategorieNaam ?? string.Empty,
+                                        IsDeleted = false
                                     });
                                 }
                             }
@@ -131,7 +119,7 @@ namespace Biblio_App
                         {
                             foreach (var m in data.Members)
                             {
-                                var existingM = await _context.Leden.FirstOrDefaultAsync(x => x.Id == m.Id);
+                                var existingM = await db.Leden.FirstOrDefaultAsync(x => x.Id == m.Id);
                                 if (existingM != null)
                                 {
                                     existingM.Voornaam = m.Voornaam ?? existingM.Voornaam;
@@ -141,7 +129,7 @@ namespace Biblio_App
                                 }
                                 else
                                 {
-                                    _context.Leden.Add(new Lid
+                                    db.Leden.Add(new Lid
                                     {
                                         Id = m.Id,
                                         Voornaam = m.Voornaam ?? string.Empty,
@@ -152,7 +140,7 @@ namespace Biblio_App
                             }
                         }
 
-                        await _context.SaveChangesAsync();
+                        await db.SaveChangesAsync();
                     }
                 }
                 catch (Exception)
@@ -162,11 +150,12 @@ namespace Biblio_App
             }
         }
 
-        internal async Task<bool> IsAuthorized()
+        internal async Task<bool> IsAuthorized(HttpClient? client = null)
         {
             if (!string.IsNullOrEmpty(CurrentUserId))
                 return true;
 
+            client ??= _httpClientFactory.CreateClient("ApiWithToken");
             if (client.BaseAddress == null)
                 return false;
 
@@ -175,7 +164,7 @@ namespace Biblio_App
                 var resp = await client.GetAsync("api/auth/isauthorized");
                 resp.EnsureSuccessStatusCode();
                 var body = await resp.Content.ReadAsStringAsync();
-                var user = JsonSerializer.Deserialize<AppUser>(body, sOptions);
+                var user = JsonSerializer.Deserialize<AppUser>(body, _jsonOptions);
                 if (user != null)
                 {
                     CurrentUser = user;
@@ -193,35 +182,38 @@ namespace Biblio_App
 
         internal async Task InitializeDb()
         {
+            using var db = _dbContextFactory.CreateDbContext();
             try
             {
-                await _context.Database.MigrateAsync();
+                await db.Database.MigrateAsync();
 
-                if (!await _context.Categorien.AnyAsync())
+                if (!await db.Categorien.AnyAsync())
                 {
-                    _context.Categorien.AddRange(
+                    db.Categorien.AddRange(
                         new Categorie { Naam = "Roman" },
                         new Categorie { Naam = "Jeugd" },
                         new Categorie { Naam = "Thriller" },
                         new Categorie { Naam = "Wetenschap" }
                     );
-                    await _context.SaveChangesAsync();
+                    await db.SaveChangesAsync();
                 }
 
-                if (!await _context.Boeken.AnyAsync())
+                if (!await db.Boeken.AnyAsync())
                 {
-                    var roman = await _context.Categorien.FirstAsync(c => c.Naam == "Roman");
-                    var jeugd = await _context.Categorien.FirstAsync(c => c.Naam == "Jeugd");
+                    var roman = await db.Categorien.FirstAsync(c => c.Naam == "Roman");
+                    var jeugd = await db.Categorien.FirstAsync(c => c.Naam == "Jeugd");
 
-                    _context.Boeken.AddRange(
+                    db.Boeken.AddRange(
                         new Boek { Titel = "1984", Auteur = "George Orwell", Isbn = "9780451524935", CategorieID = roman.Id },
                         new Boek { Titel = "De Hobbit", Auteur = "J.R.R. Tolkien", Isbn = "9780547928227", CategorieID = roman.Id },
-                        new Boek { Titel = "Matilda", Auteur = "Roald Dahl", Isbn = "9780142410370", CategorieID = jeugd.Id }
+                        new Boek { Titel = "Matilda", Auteur = "Roald Dahl", Isbn = "9780142410370", CategorieID = jeugd.Id },
+                        new Boek { Titel = "Het Achterhuis", Auteur = "Anne Frank", Isbn = "9789047518314", CategorieID = roman.Id },
+                        new Boek { Titel = "De Kleine Prins", Auteur = "Antoine de Saint-Exupéry", Isbn = "9789021677146", CategorieID = jeugd.Id },
+                        new Boek { Titel = "Harry Potter en de Steen der Wijzen", Auteur = "J.K. Rowling", Isbn = "9789076174082", CategorieID = jeugd.Id },
+                        new Boek { Titel = "De Da Vinci Code", Auteur = "Dan Brown", Isbn = "9789024546883", CategorieID = roman.Id }
                     );
-                    await _context.SaveChangesAsync();
+                    await db.SaveChangesAsync();
                 }
-
-                dbExists = true;
             }
             catch (Exception)
             {
@@ -230,19 +222,20 @@ namespace Biblio_App
 
         internal async Task<bool> Login(LoginModel loginModel)
         {
+            var client = _httpClientFactory.CreateClient("ApiWithToken");
             if (client.BaseAddress == null)
                 return false; // no API configured
 
             try
             {
-                var jsonString = JsonSerializer.Serialize(loginModel, sOptions);
+                var jsonString = JsonSerializer.Serialize(loginModel, _jsonOptions);
                 var content = new StringContent(jsonString, System.Text.Encoding.UTF8, "application/json");
                 var response = await client.PostAsync("api/auth/login", content);
                 if (!response.IsSuccessStatusCode)
                     return false;
 
                 var respBody = await response.Content.ReadAsStringAsync();
-                var user = JsonSerializer.Deserialize<AppUser>(respBody, sOptions);
+                var user = JsonSerializer.Deserialize<AppUser>(respBody, _jsonOptions);
                 if (user != null)
                 {
                     CurrentUser = user;
@@ -250,7 +243,7 @@ namespace Biblio_App
 
                     // persist minimal info in preferences
                     try { Preferences.Default.Set("CurrentUserId", CurrentUserId ?? string.Empty); } catch { }
-                    try { Preferences.Default.Set("CurrentUserJson", JsonSerializer.Serialize(user, sOptions)); } catch { }
+                    try { Preferences.Default.Set("CurrentUserJson", JsonSerializer.Serialize(user, _jsonOptions)); } catch { }
 
                     return true;
                 }
@@ -262,7 +255,8 @@ namespace Biblio_App
 
         private async Task LoginToAPI()
         {
-            if (await IsAuthorized())
+            var client = _httpClientFactory.CreateClient("ApiWithToken");
+            if (await IsAuthorized(client))
                 return;
 
             try
@@ -272,7 +266,7 @@ namespace Biblio_App
                 {
                     try
                     {
-                        var user = JsonSerializer.Deserialize<AppUser>(savedUserJson, sOptions);
+                        var user = JsonSerializer.Deserialize<AppUser>(savedUserJson, _jsonOptions);
                         if (user != null)
                         {
                             CurrentUser = user;
