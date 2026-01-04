@@ -29,6 +29,7 @@ namespace Biblio_Web.Controllers.Api
 
         // GET: api/Boeken?page=1&pageSize=10
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Get(int page = 1, int pageSize = 20)
         {
             if (page < 1) page = 1;
@@ -64,6 +65,7 @@ namespace Biblio_Web.Controllers.Api
 
         // GET: api/Boeken/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> Get(int id)
         {
             var boek = await _db.Boeken.Include(b => b.categorie).FirstOrDefaultAsync(b => b.Id == id && !b.IsDeleted);

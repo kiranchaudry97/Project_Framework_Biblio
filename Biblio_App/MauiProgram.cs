@@ -73,8 +73,8 @@ try
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            // Bepaal API-basisadres uit configuratie (ondersteunt 'ApiBaseAddress' of 'Api:BaseAddress')
-            var apiBase = builder.Configuration["ApiBaseAddress"] ?? builder.Configuration.GetSection("Api")["BaseAddress"] ?? "https://localhost:5001/";
+            // Bepaal API-basisadres uit configuratie (ondersteunt 'BiblioApi:BaseAddress')
+            var apiBase = builder.Configuration.GetSection("BiblioApi")["BaseAddress"] ?? builder.Configuration["ApiBaseAddress"] ?? "https://localhost:5001/";
 
             // Normaliseer ApiBase voor emulator/apparaat scenario's (vervang localhost voor Android emulators etc.)
             apiBase = ResolveApiBaseForDevice(apiBase);
@@ -149,6 +149,7 @@ try
             // Eenvoudige API services (HttpClientFactory + Bearer header uit SecureStorage)
             builder.Services.AddScoped<ILedenService, LedenService>();
             builder.Services.AddScoped<IBoekService, BoekService>();
+            builder.Services.AddScoped<IUitleningenService, UitleningenService>();
 
             // MainViewModel transient (is afhankelijk van services via factory)
             builder.Services.AddTransient<MainViewModel>(sp =>

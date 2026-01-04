@@ -31,8 +31,8 @@ namespace Biblio_App.Services
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
 
-            var result = await client.GetFromJsonAsync<List<Lid>>("api/leden");
-            return result ?? new List<Lid>();
+            var paged = await client.GetFromJsonAsync<Biblio_App.Models.ApiPagedResult<Lid>>("api/leden");
+            return paged?.items ?? new List<Lid>();
         }
     }
 }

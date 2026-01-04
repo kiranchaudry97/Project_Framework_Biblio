@@ -39,5 +39,13 @@ namespace Biblio_Models.Entiteiten
         public bool IsDefault { get; set; } = false;
 
         public bool IsDeleted { get; set; } = false;
+
+        public bool IsSystemTaal { get; set; } = true;
+
+        public bool IsActive { get; set; } = true;
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? DeletedAt { get; set; }
     }
 }

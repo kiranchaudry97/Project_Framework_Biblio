@@ -64,6 +64,15 @@ builder.Services.AddLocalization(options => options.ResourcesPath = "Resources/V
 // Register default cookie policy options provider
 builder.Services.AddSingleton<ICookiePolicyOptionsProvider, DefaultCookiePolicyOptionsProvider>();
 
+// CORS voor publieke tunnel- en externe clients
+builder.Services.AddCors(o =>
+{
+    o.AddDefaultPolicy(p =>
+        p.AllowAnyOrigin()
+         .AllowAnyHeader()
+         .AllowAnyMethod());
+});
+
 // DbContext configureren en tijdelijk waarschuwing over pending model changes onderdrukken (maak migrations aan)
 builder.Services.AddDbContext<BiblioDbContext>(options =>
     options.UseSqlServer(connectionString)
@@ -241,6 +250,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Enable CORS
+app.UseCors();
 
 // Apply cookie policy from provider (ensures consent handling and same-site/secure defaults)
 try

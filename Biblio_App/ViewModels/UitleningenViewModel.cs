@@ -30,6 +30,7 @@ namespace Biblio_App.ViewModels
     public partial class UitleningenViewModel : ObservableValidator, Biblio_App.Services.ILocalizable
     {
         private readonly IDbContextFactory<LocalDbContext> _dbFactory;
+        private readonly Biblio_App.Services.IUitleningenService? _uitleningenService;
         private readonly ILanguageService? _languageService;
         private ResourceManager? _sharedResourceManager;
         private Dictionary<string, string>? _resxFileStrings; // fallback geladen van web resx op schijf
@@ -212,10 +213,11 @@ namespace Biblio_App.ViewModels
 
         public IAsyncRelayCommand SyncCommand => new AsyncRelayCommand(async () => await ExecuteSyncAsync());
 
-        public UitleningenViewModel(IDbContextFactory<LocalDbContext> dbFactory, ILanguageService? languageService = null)
+        public UitleningenViewModel(IDbContextFactory<LocalDbContext> dbFactory, ILanguageService? languageService = null, Biblio_App.Services.IUitleningenService? uitleningenService = null)
         {
             _dbFactory = dbFactory ?? throw new ArgumentNullException(nameof(dbFactory));
             _languageService = languageService;
+            _uitleningenService = uitleningenService;
 
             NieuwCommand = new RelayCommand(Nieuw);
             OpslaanCommand = new AsyncRelayCommand(OpslaanAsync);
@@ -275,6 +277,9 @@ namespace Biblio_App.ViewModels
             {
                 await EnsureDataLoadedAsync();
 
+                // Laad uitleningen vanuit API indien beschikbaar om overzicht te vullen
+                await LoadUitleningenFromApiAsync();
+
                 // Toon direct het bewerkformulier bij eerste open zodat start/due labels en pickers zichtbaar zijn
                 try
                 {
@@ -318,6 +323,29 @@ namespace Biblio_App.ViewModels
             catch (Exception ex)
             {
                 Debug.WriteLine(ex);
+            }
+        }
+
+        private async Task LoadUitleningenFromApiAsync()
+        {
+            try
+            {
+                if (_uitleningenService == null) return;
+                var list = await _uitleningenService.GetUitleningenAsync();
+                if (list != null && list.Count > 0)
+                {
+                    Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        Uitleningen.Clear();
+                        foreach (var l in list) Uitleningen.Add(l);
+                        OnPropertyChanged(nameof(UitleningenCount));
+                        OnPropertyChanged(nameof(DebugInfo));
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                LastError = ex.Message;
             }
         }
 
