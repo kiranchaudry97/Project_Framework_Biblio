@@ -32,15 +32,7 @@ namespace Biblio_Web.Controllers.Api
                 .Where(b => !b.IsDeleted)
                 .Include(b => b.categorie)
                 .OrderBy(b => b.Titel)
-                .Select(b => new
-                {
-                    b.Id,
-                    b.Titel,
-                    b.Auteur,
-                    b.Isbn,
-                    CategorieId = b.CategorieID,
-                    CategorieNaam = b.categorie != null ? b.categorie.Naam : null
-                })
+                .Select(b => new { ... })
                 .ToListAsync();
 
             // Members
