@@ -54,9 +54,21 @@
             if (!ctx.Boeken.Any())
             {
                 var roman = ctx.Categorien.FirstOrDefault(c => c.Naam == "Roman") ?? ctx.Categorien.First();
+                var jeugd = ctx.Categorien.FirstOrDefault(c => c.Naam == "Jeugd") ?? ctx.Categorien.First();
+                var thriller = ctx.Categorien.FirstOrDefault(c => c.Naam == "Thriller") ?? ctx.Categorien.First();
+                var wetenschap = ctx.Categorien.FirstOrDefault(c => c.Naam == "Wetenschap") ?? ctx.Categorien.First();
                 ctx.Boeken.AddRange(
                     new Boek { Titel = "1984", Auteur = "George Orwell", Isbn = "9780451524935", CategorieID = roman.Id },
-                    new Boek { Titel = "De Hobbit", Auteur = "J.R.R. Tolkien", Isbn = "9780547928227", CategorieID = roman.Id }
+                    new Boek { Titel = "De Hobbit", Auteur = "J.R.R. Tolkien", Isbn = "9780547928227", CategorieID = roman.Id },
+                    new Boek { Titel = "Pride and Prejudice", Auteur = "Jane Austen", Isbn = "9781503290563", CategorieID = roman.Id },
+                    new Boek { Titel = "To Kill a Mockingbird", Auteur = "Harper Lee", Isbn = "9780061120084", CategorieID = roman.Id },
+                    new Boek { Titel = "Brave New World", Auteur = "Aldous Huxley", Isbn = "9780060850524", CategorieID = roman.Id },
+                    new Boek { Titel = "Matilda", Auteur = "Roald Dahl", Isbn = "9780142410370", CategorieID = jeugd.Id },
+                    new Boek { Titel = "Harry Potter en de Steen der Wijzen", Auteur = "J.K. Rowling", Isbn = "9781408855652", CategorieID = jeugd.Id },
+                    new Boek { Titel = "The Girl with the Dragon Tattoo", Auteur = "Stieg Larsson", Isbn = "9780307454546", CategorieID = thriller.Id },
+                    new Boek { Titel = "The Da Vinci Code", Auteur = "Dan Brown", Isbn = "9780307474278", CategorieID = thriller.Id },
+                    new Boek { Titel = "A Brief History of Time", Auteur = "Stephen Hawking", Isbn = "9780553380163", CategorieID = wetenschap.Id },
+                    new Boek { Titel = "The Selfish Gene", Auteur = "Richard Dawkins", Isbn = "9780192860927", CategorieID = wetenschap.Id }
                 );
                 await ctx.SaveChangesAsync();
             }
