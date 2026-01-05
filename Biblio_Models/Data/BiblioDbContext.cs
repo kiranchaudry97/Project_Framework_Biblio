@@ -7,7 +7,6 @@ using Biblio_Models.Entiteiten;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-// zie commict bericht voor meer informatie over AppUser
 
 namespace Biblio_Models.Data
 {
@@ -15,7 +14,7 @@ namespace Biblio_Models.Data
     {
         public BiblioDbContext(DbContextOptions<BiblioDbContext> options) : base(options) { }
 
-        public DbSet<Boek> Boeken { get; set; } = null!; 
+        public DbSet<Boek> Boeken { get; set; } = null!;
         public DbSet<Lid> Leden { get; set; } = null!;
         public DbSet<Lenen> Leningens { get; set; } = null!;
         public DbSet<Categorie> Categorien { get; set; } = null!;
@@ -25,17 +24,14 @@ namespace Biblio_Models.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // Try several environment/config keys so both user-secrets, env vars and CI pipelines are supported
                 string? connectionString = null;
 
-                // 1. Explicit environment variable used by some deployments/scripts
                 connectionString = Environment.GetEnvironmentVariable("BIBLIO_CONNECTION");
                 if (!string.IsNullOrWhiteSpace(connectionString))
                 {
                     try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Using connection from BIBLIO_CONNECTION"); } catch { }
                 }
 
-                // 2. Typical ASP.NET Core environment variable format for ConnectionStrings:DefaultConnection
                 if (string.IsNullOrWhiteSpace(connectionString))
                 {
                     connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
@@ -45,7 +41,6 @@ namespace Biblio_Models.Data
                     }
                 }
 
-                // 3. Legacy/public keys used by this solution
                 if (string.IsNullOrWhiteSpace(connectionString))
                 {
                     connectionString = Environment.GetEnvironmentVariable("PublicConnection");
@@ -64,7 +59,6 @@ namespace Biblio_Models.Data
                     }
                 }
 
-                // 4. Azure style named connection (used for managed identity scenarios)
                 if (string.IsNullOrWhiteSpace(connectionString))
                 {
                     connectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTIONSTRING");
@@ -74,7 +68,6 @@ namespace Biblio_Models.Data
                     }
                 }
 
-                // 5. Fallback to LocalDB (development)
                 if (string.IsNullOrWhiteSpace(connectionString))
                 {
                     connectionString = "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
@@ -86,6 +79,7 @@ namespace Biblio_Models.Data
 
             base.OnConfiguring(optionsBuilder);
         }
+
 
         protected override void OnModelCreating(ModelBuilder b)
         {
@@ -119,40 +113,33 @@ namespace Biblio_Models.Data
                 e.Property(x => x.DueDate).HasColumnName("EindDatum");
                 e.Property(x => x.ReturnedAt).HasColumnName("IngeleverdOp");
 
-                // Max. één actieve uitlening per boek (IngeleverdOp is NULL)
                 e.HasIndex(x => x.BoekId)
                 .HasFilter("([IngeleverdOp] IS NULL)")
                 .HasDatabaseName("IX_Uitleningen_BoekId_Actief")
                 .IsUnique();
             });
 
-            // Relaties
             b.Entity<Boek>()
             .HasOne(x => x.categorie)
             .WithMany(c => c.Boeken)
             .HasForeignKey(x => x.CategorieID)
             .OnDelete(DeleteBehavior.Restrict);
 
-
             b.Entity<Lenen>()
             .HasOne(l => l.Boek)
             .WithMany(bk => bk.leent)
             .HasForeignKey(l => l.BoekId);
-
 
             b.Entity<Lenen>()
             .HasOne(l => l.Lid)
             .WithMany(m => m.Leningens)
             .HasForeignKey(l => l.LidId);
 
-
-            // Soft‑delete global filters
             b.Entity<Boek>().HasQueryFilter(e => !e.IsDeleted);
             b.Entity<Lid>().HasQueryFilter(e => !e.IsDeleted);
             b.Entity<Categorie>().HasQueryFilter(e => !e.IsDeleted);
             b.Entity<Lenen>().HasQueryFilter(e => !e.IsDeleted);
 
-            // Taal entity mapping
             b.Entity<Taal>(e =>
             {
                 e.ToTable("Talen");
@@ -165,7 +152,6 @@ namespace Biblio_Models.Data
 
             b.Entity<Taal>().HasQueryFilter(t => !t.IsDeleted);
 
-            // register RefreshToken entity
             b.Entity<RefreshToken>(e =>
             {
                 e.ToTable("RefreshTokens");
@@ -178,7 +164,6 @@ namespace Biblio_Models.Data
                 e.Property(r => r.ReplacedByToken).HasColumnName("ReplacedByToken");
             });
 
-            // Unieke indexes voor data-integriteit
             b.Entity<Lid>()
             .HasIndex(m => m.Email)
             .IsUnique()
@@ -189,21 +174,91 @@ namespace Biblio_Models.Data
             .IsUnique()
             .HasFilter("([Isbn] IS NOT NULL AND [Isbn] <> '')");
         }
-    
-        /*
-        internal class BiblioDbContextDesignTimeFactory : IDesignTimeDbContextFactory<BiblioDbContext>
+
+        // Zet de SeedAsync-methode HIER, buiten de andere methodes maar binnen de class!
+        public static async Task SeedAsync(BiblioDbContext ctx)
         {
-            public BiblioDbContext CreateDbContext(string[] args)
+            try
             {
-                var optionsBuilder = new DbContextOptionsBuilder<BiblioDbContext>();
-                var connectionString = Environment.GetEnvironmentVariable("BIBLIO_CONNECTION")
-                    ?? "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+                if (!ctx.Categorien.Any())
+                {
+                    ctx.Categorien.AddRange(
+                        new Categorie { Naam = "Roman" },
+                        new Categorie { Naam = "Jeugd" },
+                        new Categorie { Naam = "Thriller" },
+                        new Categorie { Naam = "Wetenschap" }
+                    );
+                    await ctx.SaveChangesAsync();
+                }
 
-                optionsBuilder.UseSqlServer(connectionString);
+                if (!ctx.Boeken.Any())
+                {
+                    var roman = ctx.Categorien.FirstOrDefault(c => c.Naam == "Roman") ?? ctx.Categorien.First();
+                    var jeugd = ctx.Categorien.FirstOrDefault(c => c.Naam == "Jeugd") ?? ctx.Categorien.First();
+                    var thriller = ctx.Categorien.FirstOrDefault(c => c.Naam == "Thriller") ?? ctx.Categorien.First();
+                    var wetenschap = ctx.Categorien.FirstOrDefault(c => c.Naam == "Wetenschap") ?? ctx.Categorien.First();
+                    ctx.Boeken.AddRange(
+                        new Boek { Titel = "1984", Auteur = "George Orwell", Isbn = "9780451524935", CategorieID = roman.Id },
+                        new Boek { Titel = "De Hobbit", Auteur = "J.R.R. Tolkien", Isbn = "9780547928227", CategorieID = roman.Id },
+                        new Boek { Titel = "Pride and Prejudice", Auteur = "Jane Austen", Isbn = "9781503290563", CategorieID = roman.Id },
+                        new Boek { Titel = "To Kill a Mockingbird", Auteur = "Harper Lee", Isbn = "9780061120084", CategorieID = roman.Id },
+                        new Boek { Titel = "Brave New World", Auteur = "Aldous Huxley", Isbn = "9780060850524", CategorieID = roman.Id },
+                        new Boek { Titel = "Matilda", Auteur = "Roald Dahl", Isbn = "9780142410370", CategorieID = jeugd.Id },
+                        new Boek { Titel = "Harry Potter en de Steen der Wijzen", Auteur = "J.K. Rowling", Isbn = "9781408855652", CategorieID = jeugd.Id },
+                        new Boek { Titel = "The Girl with the Dragon Tattoo", Auteur = "Stieg Larsson", Isbn = "9780307454546", CategorieID = thriller.Id },
+                        new Boek { Titel = "The Da Vinci Code", Auteur = "Dan Brown", Isbn = "9780307474278", CategorieID = thriller.Id },
+                        new Boek { Titel = "A Brief History of Time", Auteur = "Stephen Hawking", Isbn = "9780553380163", CategorieID = wetenschap.Id },
+                        new Boek { Titel = "The Selfish Gene", Auteur = "Richard Dawkins", Isbn = "9780192860927", CategorieID = wetenschap.Id }
+                    );
+                    await ctx.SaveChangesAsync();
+                }
 
-                return new BiblioDbContext(optionsBuilder.Options);
+                if (!ctx.Leden.Any())
+                {
+                    ctx.Leden.AddRange(
+                        new Lid { Voornaam = "Jan", AchterNaam = "Peeters", Email = "jan.peeters@example.com", Telefoon = "+32 470 11 22 33" },
+                        new Lid { Voornaam = "Sara", AchterNaam = "De Smet", Email = "sara.desmet@example.com", Telefoon = "+32 480 44 55 66" }
+                    );
+                    await ctx.SaveChangesAsync();
+                }
+
+                if (!ctx.Leningens.Any())
+                {
+                    var firstBook = ctx.Boeken.FirstOrDefault();
+                    var secondBook = ctx.Boeken.Skip(1).FirstOrDefault();
+                    var firstMember = ctx.Leden.FirstOrDefault();
+                    var secondMember = ctx.Leden.Skip(1).FirstOrDefault();
+
+                    if (firstBook != null && firstMember != null)
+                    {
+                        ctx.Leningens.Add(new Lenen
+                        {
+                            BoekId = firstBook.Id,
+                            LidId = firstMember.Id,
+                            StartDate = DateTime.Today.AddDays(-20),
+                            DueDate = DateTime.Today.AddDays(-6),
+                            ReturnedAt = null
+                        });
+                    }
+
+                    if (secondBook != null && secondMember != null)
+                    {
+                        ctx.Leningens.Add(new Lenen
+                        {
+                            BoekId = secondBook.Id,
+                            LidId = secondMember.Id,
+                            StartDate = DateTime.Today.AddDays(-10),
+                            DueDate = DateTime.Today.AddDays(5),
+                            ReturnedAt = null
+                        });
+                    }
+
+                    await ctx.SaveChangesAsync();
+                }
+            }
+            catch
+            {
             }
         }
-        */
     }
 }
