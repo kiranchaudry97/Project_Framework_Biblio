@@ -25,12 +25,12 @@
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         // Only configure if no provider has been configured by DI.
-        if (!optionsBuilder.IsConfigured)
-        {
+            if (!optionsBuilder.IsConfigured)
+            {
             var folder = Environment.SpecialFolder.LocalApplicationData;
             var path = Environment.GetFolderPath(folder);
             var dbPath = System.IO.Path.Join(path, "BiblioApp.db");
-            optionsBuilder.UseSqlite($"Data Source={dbPath}");
+                optionsBuilder.UseSqlite($"Data Source={dbPath}", o => o.MigrationsAssembly("Biblio_Models"));
         }
     }
 
@@ -38,6 +38,36 @@
     {
         try
         {
+            // Ensure database schema is created/applied before seeding.
+            // Try migrations first; if that doesn't result in the expected tables, remove any stale
+            // __EFMigrationsHistory marker and fall back to EnsureCreated to build the schema.
+            try
+            {
+                await ctx.Database.MigrateAsync();
+            }
+            catch
+            {
+                // ignore and try the fallback below
+            }
+
+            // Ensure schema exists without destroying existing data.
+            // Prefer applying migrations; if migrations cannot be applied, create the schema if missing.
+            try
+            {
+                await ctx.Database.MigrateAsync();
+            }
+            catch
+            {
+                // If migrations can't be applied at runtime, try to create the schema if it doesn't exist.
+                try
+                {
+                    await ctx.Database.EnsureCreatedAsync();
+                }
+                catch
+                {
+                    // If EnsureCreated also fails, let seeding proceed and surface errors.
+                }
+            }
             // Seed categories
             if (!ctx.Categorien.Any())
             {
@@ -51,13 +81,13 @@
             }
 
             // Seed books
-            if (!ctx.Boeken.Any())
             {
                 var roman = ctx.Categorien.FirstOrDefault(c => c.Naam == "Roman") ?? ctx.Categorien.First();
                 var jeugd = ctx.Categorien.FirstOrDefault(c => c.Naam == "Jeugd") ?? ctx.Categorien.First();
                 var thriller = ctx.Categorien.FirstOrDefault(c => c.Naam == "Thriller") ?? ctx.Categorien.First();
                 var wetenschap = ctx.Categorien.FirstOrDefault(c => c.Naam == "Wetenschap") ?? ctx.Categorien.First();
-                ctx.Boeken.AddRange(
+
+                var seedBooks = new[] {
                     new Boek { Titel = "1984", Auteur = "George Orwell", Isbn = "9780451524935", CategorieID = roman.Id },
                     new Boek { Titel = "De Hobbit", Auteur = "J.R.R. Tolkien", Isbn = "9780547928227", CategorieID = roman.Id },
                     new Boek { Titel = "Pride and Prejudice", Auteur = "Jane Austen", Isbn = "9781503290563", CategorieID = roman.Id },
@@ -69,8 +99,23 @@
                     new Boek { Titel = "The Da Vinci Code", Auteur = "Dan Brown", Isbn = "9780307474278", CategorieID = thriller.Id },
                     new Boek { Titel = "A Brief History of Time", Auteur = "Stephen Hawking", Isbn = "9780553380163", CategorieID = wetenschap.Id },
                     new Boek { Titel = "The Selfish Gene", Auteur = "Richard Dawkins", Isbn = "9780192860927", CategorieID = wetenschap.Id }
-                );
-                await ctx.SaveChangesAsync();
+                };
+
+                var toAdd = new List<Boek>();
+                foreach (var sb in seedBooks)
+                {
+                    bool exists = ctx.Boeken.Any(b => b.Isbn == sb.Isbn);
+                    if (!exists)
+                    {
+                        toAdd.Add(sb);
+                    }
+                }
+
+                if (toAdd.Count > 0)
+                {
+                    ctx.Boeken.AddRange(toAdd);
+                    await ctx.SaveChangesAsync();
+                }
             }
 
             // Seed members

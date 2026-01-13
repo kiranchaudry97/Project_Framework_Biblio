@@ -9,6 +9,9 @@ using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using System.Globalization;
 using System.Net.Security;
+using System.IO;
+using Microsoft.Maui.Storage;
+using Microsoft.Maui.Devices;
 
 namespace Biblio_App;
 
@@ -16,6 +19,9 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
+        // Disable Application Insights telemetry to prevent TaskCanceledException during shutdown
+        Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", "");
+        
         var builder = MauiApp.CreateBuilder();
 
         ConfigureCulture();
@@ -54,12 +60,22 @@ public static class MauiProgram
 
     private static void ConfigureConfiguration(MauiAppBuilder builder)
     {
+        // Load base settings, then optional development overrides (emulator-friendly).
         builder.Configuration.AddJsonFile(
             "appsettings.json",
             optional: true,
             reloadOnChange: true
         );
+
+        // Optional development file — place emulator-specific overrides here,
+        // for example using http://10.0.2.2:5000/ when running the Android emulator.
+        builder.Configuration.AddJsonFile(
+            "appsettings.Development.json",
+            optional: true,
+            reloadOnChange: true
+        );
     }
+
 
     // ================= MAUI =================     
 
@@ -96,6 +112,7 @@ public static class MauiProgram
             options.UseSqlite($"Data Source={dbPath}")
         );
 
+       
         services.AddDbContext<LocalDbContext>(options =>
             options.UseSqlite($"Data Source={dbPath}")
         );
@@ -111,6 +128,9 @@ public static class MauiProgram
         services.AddScoped<ILedenService, LedenService>();
         services.AddScoped<IBoekService, BoekService>();
         services.AddScoped<IUitleningenService, UitleningenService>();
+
+        // Token handler used to attach bearer tokens to API requests. Register as transient.
+        services.AddTransient<TokenHandler>();
 
         services.AddSingleton<Synchronizer>();
 
@@ -150,18 +170,41 @@ public static class MauiProgram
 
         apiBase = ResolveApiBaseForDevice(apiBase);
 
+        // Register a small-timeout auth client used by AuthService (no token handler attached)
+        builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
+        {
+            client.BaseAddress = new Uri(apiBase);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+
+        // API client that includes TokenHandler to attach bearer tokens. TokenHandler is registered
+        // as a transient service and will call AuthService to refresh tokens if necessary. AuthService
+        // uses the dedicated auth client above to avoid recursion.
         builder.Services.AddHttpClient("ApiWithToken", client =>
         {
             client.BaseAddress = new Uri(apiBase);
-            client.Timeout = TimeSpan.FromSeconds(10);
+            client.Timeout = TimeSpan.FromMinutes(2);
         })
+        .AddHttpMessageHandler<TokenHandler>()
         .ConfigurePrimaryHttpMessageHandler(() =>
             new HttpClientHandler
             {
-                ServerCertificateCustomValidationCallback =
-                    (message, cert, chain, errors) =>
-                        message.RequestUri?.Host == "localhost"
-                        || errors == SslPolicyErrors.None
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                {
+                    var host = message?.RequestUri?.Host;
+                    // Accept self-signed/dev certs for local development hosts (emulator/device)
+                    if (string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(host, "10.0.2.2", StringComparison.OrdinalIgnoreCase))
+                    {
+#if DEBUG
+                        return true;
+#else
+                        return errors == SslPolicyErrors.None;
+#endif
+                    }
+
+                    return errors == SslPolicyErrors.None;
+                }
             });
     }
 
@@ -172,29 +215,65 @@ public static class MauiProgram
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
+        
+        // Explicitly disable Application Insights telemetry in MAUI client app
+        builder.Logging.AddFilter("Microsoft.ApplicationInsights", LogLevel.None);
     }
 
     // ================= BACKGROUND INIT =================
 
     private static void StartBackgroundInitialization(MauiApp app)
     {
-        Task.Run(async () =>
+        // Fire and forget - don't block app startup
+        _ = Task.Run(async () =>
         {
-            using var scope = app.Services.CreateScope();
+            try
+            {
+                using var scope = app.Services.CreateScope();
 
-            var dbFactory = scope.ServiceProvider
-                .GetRequiredService<IDbContextFactory<LocalDbContext>>();
+                var dbFactory = scope.ServiceProvider
+                    .GetRequiredService<IDbContextFactory<LocalDbContext>>();
 
-            using var db = dbFactory.CreateDbContext();
+                using var db = dbFactory.CreateDbContext();
 
-            await db.Database.MigrateAsync();
-            await LocalDbContext.SeedAsync(db);
+                // Only migrate if necessary - check if database exists first
+                var dbExists = await db.Database.CanConnectAsync();
+                if (!dbExists || (await db.Database.GetPendingMigrationsAsync()).Any())
+                {
+                    System.Diagnostics.Debug.WriteLine("[INIT] Running database migrations...");
+                    await db.Database.MigrateAsync();
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("[INIT] Database already up to date, skipping migrations");
+                }
 
-            var sync = scope.ServiceProvider
-                .GetService<IDataSyncService>();
+                // Only seed if database is empty
+                var hasData = await db.Boeken.AnyAsync();
+                if (!hasData)
+                {
+                    System.Diagnostics.Debug.WriteLine("[INIT] Seeding database...");
+                    await LocalDbContext.SeedAsync(db);
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("[INIT] Database already seeded, skipping seed");
+                }
 
-            if (sync != null)
-                await sync.SyncAllAsync();
+                // Sync in background without blocking
+                var sync = scope.ServiceProvider.GetService<IDataSyncService>();
+                if (sync != null)
+                {
+                    System.Diagnostics.Debug.WriteLine("[INIT] Starting background sync...");
+                    await sync.SyncAllAsync();
+                    System.Diagnostics.Debug.WriteLine("[INIT] Background sync completed");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[INIT ERROR] {ex.Message}");
+                // Don't crash the app if background init fails
+            }
         });
     }
 

@@ -23,6 +23,28 @@
     <WindowsPackageType>None</WindowsPackageType>
   </PropertyGroup>
 
+  <!-- General Debug optimizations for faster builds -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <!-- Skip XML documentation generation in debug -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    
+    <!-- Use faster debug info generation -->
+    <DebugType>portable</DebugType>
+    
+    <!-- Skip optimization for faster compilation -->
+    <Optimize>false</Optimize>
+    
+    <!-- Enable incremental builds -->
+    <UseSharedCompilation>true</UseSharedCompilation>
+    
+    <!-- Disable deterministic builds for faster compilation -->
+    <Deterministic>false</Deterministic>
+    
+    <!-- Skip analyzers in debug for faster builds -->
+    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
+  </PropertyGroup>
+
   <!-- Android-specific optimizations for faster deployment during development -->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(TargetFramework)' == 'net9.0-android'">
     <!-- Fast Deployment: Uses shared runtime instead of bundling everything -->
@@ -47,6 +69,20 @@
     
     <!-- Disable bundling of native libraries when not needed -->
     <AndroidUseAssemblyStore>false</AndroidUseAssemblyStore>
+  </PropertyGroup>
+
+  <!-- Windows-specific optimizations for faster deployment during development -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(TargetFramework)' == 'net9.0-windows10.0.19041.0'">
+    <!-- Skip packaging for faster deployment -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <AppxPackage>false</AppxPackage>
+    
+    <!-- Disable unnecessary Windows features for debug -->
+    <EnableMsixTooling>false</EnableMsixTooling>
+    <GenerateAppInstallerFile>false</GenerateAppInstallerFile>
+    
+    <!-- Speed up build by skipping resource indexing -->
+    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -175,7 +175,6 @@ namespace Biblio_Models.Data
             .HasFilter("([Isbn] IS NOT NULL AND [Isbn] <> '')");
         }
 
-        // Zet de SeedAsync-methode HIER, buiten de andere methodes maar binnen de class!
         public static async Task SeedAsync(BiblioDbContext ctx)
         {
             try
