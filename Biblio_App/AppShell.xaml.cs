@@ -78,8 +78,7 @@ namespace Biblio_App
             Routing.RegisterRoute(nameof(Pages.Account.ProfilePage), typeof(Pages.Account.ProfilePage));
             Routing.RegisterRoute(nameof(Pages.MainPage), typeof(Pages.MainPage));
             Routing.RegisterRoute(nameof(Pages.InstellingenPagina), typeof(Pages.InstellingenPagina));
-            Routing.RegisterRoute(nameof(Pages.BoekDetailsPage), typeof(Pages.BoekDetailsPage));
-            Routing.RegisterRoute(nameof(Pages.LidDetailsPage), typeof(Pages.LidDetailsPage));
+            // Details pages removed - using inline editing instead
 
             // Gebruik instance-navigatiemethoden om niet te vertrouwen op Shell.Current tijdens constructie
             LoginCommand = new Command(async () => await this.GoToAsync(nameof(Pages.Account.LoginPage)));
@@ -989,9 +988,8 @@ namespace Biblio_App
                 (nameof(Pages.Account.ProfilePage), typeof(Pages.Account.ProfilePage)),
                 (nameof(Pages.MainPage), typeof(Pages.MainPage)),
                 (nameof(Pages.Account.LoginPage), typeof(Pages.Account.LoginPage)),
-                (nameof(Pages.InstellingenPagina), typeof(Pages.InstellingenPagina)),
-                (nameof(Pages.BoekDetailsPage), typeof(Pages.BoekDetailsPage)),
-                (nameof(Pages.LidDetailsPage), typeof(Pages.LidDetailsPage))
+                (nameof(Pages.InstellingenPagina), typeof(Pages.InstellingenPagina))
+                // Details pages removed
             };
 
             foreach (var r in registered)

@@ -112,27 +112,14 @@ public static class MauiProgram
             options.UseSqlite($"Data Source={dbPath}")
         );
 
-       
-        services.AddDbContext<LocalDbContext>(options =>
-            options.UseSqlite($"Data Source={dbPath}")
-        );
-
-        services.AddScoped<EfGegevensProvider>();
-        services.AddScoped<IGegevensProvider>(sp =>
-            sp.GetRequiredService<EfGegevensProvider>());
-
         services.AddScoped<ILocalRepository, LocalRepository>();
+        services.AddScoped<IGegevensProvider, EfGegevensProvider>();
 
-        // ---- API & Synchronisatie
+        // ---- API & Synchronisatie (RESTful API calls naar Biblio_Web)
         services.AddScoped<IDataSyncService, DataSyncService>();
         services.AddScoped<ILedenService, LedenService>();
         services.AddScoped<IBoekService, BoekService>();
         services.AddScoped<IUitleningenService, UitleningenService>();
-
-        // Token handler used to attach bearer tokens to API requests. Register as transient.
-        services.AddTransient<TokenHandler>();
-
-        services.AddSingleton<Synchronizer>();
 
         // ---- ViewModels
         services.AddTransient<MainViewModel>();
@@ -177,15 +164,12 @@ public static class MauiProgram
             client.Timeout = TimeSpan.FromSeconds(30);
         });
 
-        // API client that includes TokenHandler to attach bearer tokens. TokenHandler is registered
-        // as a transient service and will call AuthService to refresh tokens if necessary. AuthService
-        // uses the dedicated auth client above to avoid recursion.
+        // API client for RESTful calls to Biblio_Web (manual token handling in each service)
         builder.Services.AddHttpClient("ApiWithToken", client =>
         {
             client.BaseAddress = new Uri(apiBase);
             client.Timeout = TimeSpan.FromMinutes(2);
         })
-        .AddHttpMessageHandler<TokenHandler>()
         .ConfigurePrimaryHttpMessageHandler(() =>
             new HttpClientHandler
             {

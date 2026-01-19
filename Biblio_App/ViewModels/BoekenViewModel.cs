@@ -1031,32 +1031,19 @@ namespace Biblio_App.ViewModels
             }
         }
 
+        // Details navigation removed - using inline editing instead
         private async Task NavigateToDetailsAsync(Boek? b)
         {
+            // Details page removed - edit inline instead
             if (b == null) return;
-            try
-            {
-                await Shell.Current.GoToAsync($"{nameof(Pages.BoekDetailsPage)}?boekId={b.Id}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                await ShowAlertAsync("Fout", "Kan detailspagina niet openen.");
-            }
+            await ShowAlertAsync("Info", "Selecteer een boek om te bewerken.");
         }
 
         private async Task NavigateToEditAsync(Boek? b)
         {
+            // Details page removed - edit inline instead
             if (b == null) return;
-            try
-            {
-                await Shell.Current.GoToAsync($"{nameof(Pages.BoekDetailsPage)}?boekId={b.Id}&edit=true");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-                await ShowAlertAsync("Fout", "Kan bewerkpagina niet openen.");
-            }
+            await ShowAlertAsync("Info", "Gebruik de bewerkknop in het overzicht.");
         }
 
         private async Task ShowAlertAsync(string title, string message)

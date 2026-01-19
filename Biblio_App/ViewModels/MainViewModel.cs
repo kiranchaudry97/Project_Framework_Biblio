@@ -18,21 +18,11 @@ namespace Biblio_App.ViewModels
     public partial class MainViewModel : ObservableObject
     {
         private readonly IGegevensProvider? _gegevensProvider;
-        private readonly Action? _openBoekenAction;
-        private readonly Action? _openLedenAction;
-        private readonly Action? _openUitleningenAction;
-        private readonly Action? _openCategorieenAction;
         private readonly IDataSyncService? _dataSync;
         private readonly ILanguageService? _languageService;
 
         private ResourceManager? _sharedResourceManager;
         private bool _resourceManagerInitialized = false;
-
-        [ObservableProperty]
-        private ObservableCollection<Boek> boeken = new ObservableCollection<Boek>();
-
-        [ObservableProperty]
-        private Boek? selectedBoek;
 
         [ObservableProperty]
         private int totaalBoeken;
@@ -53,49 +43,29 @@ namespace Biblio_App.ViewModels
         private bool isBusy;
 
         // Parameterless ctor for tooling
-        public MainViewModel() : this(null, null, null, null, null, null, null) { }
+        public MainViewModel() : this(null, null, null) { }
 
-        // DI ctor used in MauiProgram
-        public MainViewModel(IGegevensProvider? gegevensProvider = null,
-                             Action? openBoeken = null,
-                             Action? openLeden = null,
-                             Action? openUitleningen = null,
-                             Action? openCategorieen = null,
-                             IDataSyncService? dataSync = null,
-                             ILanguageService? languageService = null)
+        // DI ctor - simplified
+        public MainViewModel(
+            IGegevensProvider? gegevensProvider = null,
+            IDataSyncService? dataSync = null,
+            ILanguageService? languageService = null)
         {
             _gegevensProvider = gegevensProvider;
-            _openBoekenAction = openBoeken;
-            _openLedenAction = openLeden;
-            _openUitleningenAction = openUitleningen;
-            _openCategorieenAction = openCategorieen;
             _dataSync = dataSync;
             _languageService = languageService;
 
-            // initialize status
+            // Initialize status
             IsVerbonden = NetworkInterface.GetIsNetworkAvailable();
-            SynchronisatieStatus = IsVerbonden ? Localize("Online") : Localize("Offline");
+            SynchronisatieStatus = IsVerbonden ? "Online" : "Offline";
 
-            // subscribe to language changes to update localized strings
-            try
+            // Subscribe to language changes
+            if (_languageService != null)
             {
-                if (_languageService != null)
+                _languageService.LanguageChanged += (s, c) =>
                 {
-                    _languageService.LanguageChanged += (s, c) =>
-                    {
-                        // update status message when language changes
-                        SynchronisatieStatus = IsVerbonden ? Localize("Online") : Localize("Offline");
-                    };
-                }
-            }
-            catch { }
-
-            // sample data for design/runtime when DB/provider not available
-            if (Boeken.Count == 0)
-            {
-                Boeken.Add(new Boek { Titel = "Voorbeeldboek 1", Auteur = "A. Auteur" });
-                Boeken.Add(new Boek { Titel = "Voorbeeldboek 2", Auteur = "B. Schrijver" });
-                TotaalBoeken = Boeken.Count;
+                    SynchronisatieStatus = IsVerbonden ? Localize("Online") : Localize("Offline");
+                };
             }
         }
 
@@ -109,7 +79,7 @@ namespace Biblio_App.ViewModels
                 IsVerbonden = NetworkInterface.GetIsNetworkAvailable();
                 SynchronisatieStatus = IsVerbonden ? Localize("Online") : Localize("Offline");
 
-                if (_gegevensProvider != null && IsVerbonden)
+                if (_gegevensProvider != null)
                 {
                     try
                     {
@@ -117,11 +87,10 @@ namespace Biblio_App.ViewModels
                         TotaalBoeken = result.boeken;
                         TotaalLeden = result.leden;
                         OpenUitleningen = result.openUitleningen;
-                        SynchronisatieStatus = Localize("Online");
                     }
                     catch (Exception ex)
                     {
-                        SynchronisatieStatus = Localize("OnlineWithError", ex.Message);
+                        SynchronisatieStatus = $"Error: {ex.Message}";
                     }
                 }
             }
@@ -132,46 +101,18 @@ namespace Biblio_App.ViewModels
         }
 
         [RelayCommand]
-        public void VoegToe()
-        {
-            var nieuw = new Boek { Titel = "Nieuw boek", Auteur = "Onbekend" };
-            Boeken.Add(nieuw);
-            SelectedBoek = nieuw;
-            TotaalBoeken = Boeken.Count;
-        }
-
-        // Rename navigation commands to avoid name conflicts with properties
-        [RelayCommand]
-        public void NavigateToBoeken() => _openBoekenAction?.Invoke();
-
-        [RelayCommand]
-        public void NavigateToLeden() => _openLedenAction?.Invoke();
-
-        [RelayCommand]
-        public void NavigateToUitleningen() => _openUitleningenAction?.Invoke();
-
-        [RelayCommand]
-        public void NavigateToCategorieen() => _openCategorieenAction?.Invoke();
-
-        // Sync command to pull remote data and store locally
-        [RelayCommand]
         public async Task SyncAsync()
         {
-            if (IsBusy) return;
+            if (IsBusy || _dataSync == null) return;
+            
             IsBusy = true;
             try
             {
-                SynchronisatieStatus = Localize("Syncing");
-                if (_dataSync == null)
-                {
-                    SynchronisatieStatus = Localize("NoSyncService");
-                    return;
-                }
-
+                SynchronisatieStatus = "Syncing...";
                 await _dataSync.SyncAllAsync();
-                SynchronisatieStatus = Localize("SyncComplete");
+                SynchronisatieStatus = "Sync complete";
 
-                // Optionally refresh counts after sync
+                // Refresh counts
                 if (_gegevensProvider != null)
                 {
                     var result = await _gegevensProvider.GetTellersAsync();
@@ -182,7 +123,7 @@ namespace Biblio_App.ViewModels
             }
             catch (Exception ex)
             {
-                SynchronisatieStatus = Localize("SyncError", ex.Message);
+                SynchronisatieStatus = $"Sync error: {ex.Message}";
             }
             finally
             {

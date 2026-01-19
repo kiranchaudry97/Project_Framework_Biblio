@@ -330,34 +330,19 @@ namespace Biblio_App.ViewModels
             OnPropertyChanged(nameof(PageTitle));
         }
 
+        // Details navigation removed - using inline editing instead
         private async Task NavigateToDetailsAsync(Lid? l)
         {
+            // Details page removed - edit inline instead
             if (l == null) return;
-            try
-            {
-                Debug.WriteLine($"NavigateToDetailsAsync called for Lid Id={l.Id}");
-                await Shell.Current.GoToAsync($"{nameof(Pages.LidDetailsPage)}?lidId={l.Id}");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex);
-                await ShowAlertAsync("Fout", "Kan detailspagina niet openen.");
-            }
+            await ShowAlertAsync("Info", "Selecteer een lid om te bewerken.");
         }
 
         private async Task NavigateToEditAsync(Lid? l)
         {
+            // Details page removed - edit inline instead
             if (l == null) return;
-            try
-            {
-                Debug.WriteLine($"NavigateToEditAsync called for Lid Id={l.Id}");
-                await Shell.Current.GoToAsync($"{nameof(Pages.LidDetailsPage)}?lidId={l.Id}&edit=true");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex);
-                await ShowAlertAsync("Fout", "Kan bewerkpagina niet openen.");
-            }
+            await ShowAlertAsync("Info", "Gebruik de bewerkknop in het overzicht.");
         }
 
         partial void OnSelectedLidChanged(Lid? value)
