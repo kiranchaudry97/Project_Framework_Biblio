@@ -11,6 +11,8 @@ namespace Biblio_App.Pages.Account
 {
     public partial class LoginPage : ContentPage
     {
+        // SecurityViewModel bewaart login status (email/rollen) in de app.
+        // Dit gebruiken we om te bepalen welke pagina's zichtbaar mogen zijn.
         private readonly SecurityViewModel? _securityViewModel;
 
         public LoginPage()
@@ -25,7 +27,8 @@ namespace Biblio_App.Pages.Account
 
             try
             {
-                // Ensure login page does not show flyout or back button
+                // Login pagina moet geen menu (flyout) tonen zolang de gebruiker niet is aangemeld.
+                // Daarom zetten we FlyoutBehavior = Disabled en verbergen we de back button.
                 try
                 {
                     Shell.SetFlyoutBehavior(this, FlyoutBehavior.Disabled);
@@ -37,7 +40,8 @@ namespace Biblio_App.Pages.Account
                 }
                 catch { }
 
-                // Resolve SecurityViewModel once to avoid service resolution overhead on every login
+                // SecurityViewModel één keer resolven via DI.
+                // Zo moeten we niet elke keer bij het klikken op "Login" opnieuw services opzoeken.
                 try
                 {
                     var services = App.Current?.Handler?.MauiContext?.Services;
@@ -74,7 +78,15 @@ namespace Biblio_App.Pages.Account
 
         private async void OnLoginClicked(object sender, System.EventArgs e)
         {
-            // Show busy indicator and disable the login button so user sees immediate feedback
+            // Login flow:
+            // 1) Toon busy indicator (visuele feedback)
+            // 2) Valideer input (email/wachtwoord)
+            // 3) In deze build: lokale demo-auth (2 accounts)
+            // 4) Zet SecurityViewModel + Preferences
+            // 5) Navigeer naar het hoofdgedeelte (Boeken)
+            // try/catch zodat de app niet crasht bij onvoorziene UI/navigatie fouten.
+
+            // Busy indicator tonen zodat gebruiker directe feedback krijgt
             try
             {
                 BusyIndicator.IsVisible = true;
@@ -110,6 +122,9 @@ namespace Biblio_App.Pages.Account
                     }
 
                     // Local-only authentication: only allow two development accounts
+                    // Demo accounts:
+                    // - admin@biblio.local / Admin1234?
+                    // - medewerker@biblio.local / test1234?
                     bool success = false;
                     bool isAdmin = false;
                     bool isStaff = false;
@@ -134,7 +149,7 @@ namespace Biblio_App.Pages.Account
                     {
                         System.Diagnostics.Debug.WriteLine($"OnLoginClicked: authentication succeeded for '{email}'. isAdmin={isAdmin}, isStaff={isStaff}");
 
-                        // Ensure flyout is enabled now that the user is authenticated
+                        // Vanaf nu mag het menu (flyout) weer zichtbaar zijn
                         try { AppShell.Instance?.EnsureLoginFlyoutHidden(false); } catch { }
 
                         try
@@ -148,7 +163,7 @@ namespace Biblio_App.Pages.Account
                         try { Preferences.Default.Set("IsAdmin", isAdmin ? "1" : "0"); } catch { }
                         try { Preferences.Default.Set("IsStaff", isStaff ? "1" : "0"); } catch { }
 
-                        // Remember me
+                        // Remember me: email onthouden in Preferences
                         try
                         {
                             var remember = false;
@@ -166,7 +181,7 @@ namespace Biblio_App.Pages.Account
                         }
                         catch { }
 
-                        // Force UI update of flyout/profile texts so user immediately sees logged-in state
+                        // Forceer UI update van flyout/profile teksten
                         try
                         {
                             MainThread.BeginInvokeOnMainThread(() =>
@@ -191,7 +206,8 @@ namespace Biblio_App.Pages.Account
                         }
                         catch { }
 
-                        // Navigate to BoekenPagina (books) after successful login on UI thread
+                        // Navigeer naar BoekenShell na succesvolle login
+                        // Dit doen we op de UI thread om Shell navigatie issues te vermijden.
                         try
                         {
                             await MainThread.InvokeOnMainThreadAsync(async () =>

@@ -12,7 +12,11 @@ namespace Biblio_App.Pages.Boek
 {
     public partial class BoekCreatePage : ContentPage, ILocalizable
     {
+        // Deze pagina gebruikt hetzelfde `BoekenViewModel` als de boekenlijst,
+        // maar toont enkel het "nieuw boek" formulier.
         private BoekenViewModel VM => BindingContext as BoekenViewModel;
+
+        // Taalservice + resources voor vertaling
         private ILanguageService? _languageService;
         private ResourceManager? _sharedResourceManager;
 
@@ -35,10 +39,14 @@ namespace Biblio_App.Pages.Boek
         public BoekCreatePage(BoekenViewModel vm)
         {
             InitializeComponent();
+
+            // MVVM: ViewModel koppelen aan de pagina
             BindingContext = vm;
 
             try { _languageService = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>(); } catch { }
             InitializeSharedResourceManager();
+
+            // UI teksten initialiseren volgens huidige taal
             UpdateLocalizedStrings();
         }
 
@@ -46,6 +54,9 @@ namespace Biblio_App.Pages.Boek
         {
             try
             {
+                // Zelfde resource strategie als andere pagina's:
+                // 1) web resources (als beschikbaar)
+                // 2) model resources (fallback)
                 var webAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
                 if (webAsm != null)
                 {
@@ -78,6 +89,9 @@ namespace Biblio_App.Pages.Boek
         {
             try
             {
+                // Localize helper:
+                // - probeer ResourceManager (resx)
+                // - anders hard-coded fallback
                 var culture = _languageService?.CurrentCulture ?? CultureInfo.CurrentUICulture;
                 if (_sharedResourceManager != null)
                 {
@@ -118,6 +132,7 @@ namespace Biblio_App.Pages.Boek
 
         public void UpdateLocalizedStrings()
         {
+            // Zet alle bindable properties voor labels/placeholders/knoppen
             PageHeaderText = Localize("Boeken");
             TitelPlaceholder = Localize("Titel");
             AuteurPlaceholder = Localize("Auteur");
@@ -129,6 +144,9 @@ namespace Biblio_App.Pages.Boek
 
         public void ApplyQueryAttributes(System.Collections.Generic.IDictionary<string, object> query)
         {
+            // Shell query parameters:
+            // als we een `boekId` meekrijgen, selecteren we dat boek in de ViewModel.
+            // Handig als we dezelfde pagina ook zouden gebruiken voor "edit".
             if (query == null) return;
             if (query.TryGetValue("boekId", out var val) && val != null)
             {
@@ -152,6 +170,7 @@ namespace Biblio_App.Pages.Boek
 
         private async void OnCancelClicked(object sender, System.EventArgs e)
         {
+            // Cancel: ga één pagina terug in de Shell navigatie stack
             await Shell.Current.GoToAsync("..", true);
         }
     }

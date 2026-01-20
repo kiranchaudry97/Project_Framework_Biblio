@@ -15,6 +15,8 @@ namespace Biblio_App.Pages.Account
 {
     public partial class ProfilePage : ContentPage, ILocalizable
     {
+        // SecurityViewModel bewaart wie is ingelogd + rollen.
+        // Dit wordt gebruikt om profielgegevens te tonen en om logout te doen.
         private readonly SecurityViewModel _security;
         private ILanguageService? _languageService;
 
@@ -26,10 +28,13 @@ namespace Biblio_App.Pages.Account
         {
             InitializeComponent();
             _security = security;
+
+            // MVVM: ProfilePage gebruikt een eigen ViewModel voor UI bindings
             BindingContext = new ProfilePageViewModel(security);
 
             try
             {
+                // Toon deze pagina als normale Shell pagina (met hamburger/flyout)
                 try { Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false }); } catch { }
                 try { Shell.SetFlyoutBehavior(this, FlyoutBehavior.Flyout); } catch { }
                 try { NavigationPage.SetHasBackButton(this, false); } catch { }
@@ -41,6 +46,11 @@ namespace Biblio_App.Pages.Account
 
         private async void OnLogoutClicked(object sender, System.EventArgs e)
         {
+            // Logout flow:
+            // 1) Reset SecurityViewModel
+            // 2) Clear preferences/tokens
+            // 3) Toon melding
+            // 4) Navigeer naar LoginPage als nieuwe root
             _security.Reset();
             Preferences.Default.Remove("CurrentEmail");
             Preferences.Default.Remove("IsAdmin");
@@ -66,6 +76,7 @@ namespace Biblio_App.Pages.Account
         {
             try
             {
+                // Voorlopig vaste NL titel. Kan later via resx/ResourceManager.
                 var header = "Profiel"; // could be localized via resources if present
                 try { if (TitleLabel != null) TitleLabel.Text = header; } catch { }
                 try { if (HeaderLabel != null) HeaderLabel.Text = header; } catch { }
@@ -82,6 +93,7 @@ namespace Biblio_App.Pages.Account
 
                 if (_languageService != null)
                 {
+                    // Subscribe voor live vertaling
                     _languageService.LanguageChanged += LanguageService_LanguageChanged;
                 }
             }
@@ -97,6 +109,7 @@ namespace Biblio_App.Pages.Account
 
                 if (_languageService != null)
                 {
+                    // Unsubscribe om memory leaks te vermijden
                     _languageService.LanguageChanged -= LanguageService_LanguageChanged;
                 }
             }
@@ -136,7 +149,8 @@ namespace Biblio_App.Pages.Account
                 return;
             }
 
-            // Try to update remote via API if token-guarded client is available, otherwise attempt local DbContext update via registered factory
+            // Probeer te saven via server-side UserManager (als die bestaat in services);
+            // anders fallback naar lokale DB (SQLite)
             try
             {
                 var services = App.Current?.Handler?.MauiContext?.Services;
@@ -166,7 +180,7 @@ namespace Biblio_App.Pages.Account
                         }
                     }
 
-                    // Fallback: try updating profile in local BiblioDbContext if available (e.g., local SQLite)
+                    // Fallback: probeer lokale update in SQLite (BiblioDbContext) als die factory geregistreerd is
                     var dbFactory = services.GetService<Microsoft.EntityFrameworkCore.IDbContextFactory<Biblio_Models.Data.BiblioDbContext>>();
                     if (dbFactory != null && !string.IsNullOrWhiteSpace(_security.CurrentEmail))
                     {

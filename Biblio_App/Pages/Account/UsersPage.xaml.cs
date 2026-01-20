@@ -9,7 +9,10 @@ namespace Biblio_App.Pages.Account
 {
     public partial class UsersPage : ContentPage, ILocalizable
     {
+        // ViewModel met gebruikerslijst/rollen (admin/staff)
         private UsersViewModel VM => BindingContext as UsersViewModel;
+
+        // Language service om te kunnen hertekenen bij taalwijziging
         private ILanguageService? _languageService;
 
         public static readonly BindableProperty AdminLabelTextProperty = BindableProperty.Create(nameof(AdminLabelText), typeof(string), typeof(UsersPage), default(string));
@@ -21,8 +24,12 @@ namespace Biblio_App.Pages.Account
         public UsersPage(UsersViewModel vm)
         {
             InitializeComponent();
+
+            // MVVM: ViewModel koppelen
             BindingContext = vm;
             try { _languageService = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>(); } catch { }
+
+            // Init teksten voor deze pagina (simpel gehouden)
             UpdateLocalizedStrings();
         }
 
@@ -30,6 +37,8 @@ namespace Biblio_App.Pages.Account
         {
             try
             {
+                // Deze pagina heeft momenteel vooral vaste NL teksten.
+                // We zetten ze hier zodat we later makkelijk kunnen uitbreiden naar echte resx-vertalingen.
                 var title = "Gebruikers";
                 try { if (TitleLabel != null) TitleLabel.Text = title; } catch { }
                 try { if (HeaderLabel != null) HeaderLabel.Text = "Gebruikers beheer"; } catch { }
@@ -50,6 +59,7 @@ namespace Biblio_App.Pages.Account
             {
                 if (_languageService != null)
                 {
+                    // Subscribe: als taal verandert, teksten opnieuw zetten
                     _languageService.LanguageChanged += LanguageService_LanguageChanged;
                 }
             }
@@ -63,6 +73,7 @@ namespace Biblio_App.Pages.Account
             {
                 if (_languageService != null)
                 {
+                    // Unsubscribe om memory leaks te vermijden
                     _languageService.LanguageChanged -= LanguageService_LanguageChanged;
                 }
             }

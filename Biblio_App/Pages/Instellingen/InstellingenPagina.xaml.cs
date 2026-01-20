@@ -12,17 +12,23 @@ namespace Biblio_App.Pages
 {
     public partial class InstellingenPagina : ContentPage, ILocalizable
     {
+        // ViewModel bevat o.a. sync acties en DB-info
         private InstellingenViewModel VM => BindingContext as InstellingenViewModel;
+
+        // Service + ResourceManager voor taal/vertaling
         private ILanguageService? _language_service;
         private ResourceManager? _sharedResourceManager;
 
         public InstellingenPagina(InstellingenViewModel vm)
         {
             InitializeComponent();
+
+            // MVVM: koppel ViewModel
             BindingContext = vm;
 
             try
             {
+                // Shell navigatie/Back knop gedrag instellen (zelfde aanpak als andere pagina's)
                 try { Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false }); } catch { }
                 try { Shell.SetFlyoutBehavior(this, FlyoutBehavior.Flyout); } catch { }
                 try { NavigationPage.SetHasBackButton(this, false); } catch { }
@@ -31,7 +37,7 @@ namespace Biblio_App.Pages
 
             try { _language_service = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>(); } catch { }
 
-            // initialize resource manager so Localize() can use app/web/model resources
+            // ResourceManager initialiseren zodat Localize() kan werken
             InitializeSharedResourceManager();
             UpdateLocalizedStrings();
         }
@@ -40,7 +46,14 @@ namespace Biblio_App.Pages
         {
             try
             {
-                // Prefer MAUI app resources first
+                // Doel:
+                // vertalingen ophalen via ResourceManager.
+                // We proberen (in volgorde):
+                // 1) Biblio_App resources
+                // 2) Biblio_Web resources (handig tijdens dev)
+                // 3) Biblio_Models resources (fallback)
+
+                // 1) Prefer MAUI app resources first
                 var appAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_App", StringComparison.OrdinalIgnoreCase));
                 if (appAsm != null)
                 {
@@ -60,7 +73,7 @@ namespace Biblio_App.Pages
                     }
                 }
 
-                // Then try web project resources
+                // 2) Then try web project resources
                 var webAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
                 if (webAsm != null)
                 {
@@ -83,6 +96,7 @@ namespace Biblio_App.Pages
                 var modelType = typeof(SharedModelResource);
                 if (modelType != null)
                 {
+                    // 3) Fallback naar model resource
                     _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", modelType.Assembly);
                 }
             }
@@ -196,6 +210,10 @@ namespace Biblio_App.Pages
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+
+            // Bij het openen van de instellingen:
+            // - haal DB info op zodat je kan tonen waar de SQLite DB staat
+            // - subscribe op taalwijzigingen zodat labels live kunnen updaten
             if (VM != null)
             {
                 await VM.LoadDatabaseInfoAsync();
@@ -235,7 +253,10 @@ namespace Biblio_App.Pages
 
         private async void OnResetDbClicked(object sender, EventArgs e)
         {
-            // confirm reset using Yes/No buttons
+            // Reset lokale DB:
+            // 1) vraag bevestiging (zodat gebruiker niet per ongeluk alles wist)
+            // 2) laat ViewModel DB verwijderen + opnieuw seeden
+            // 3) toon resultaat
             var ok = await DisplayAlert(Localize("Settings"), Localize("ResetLocalDb") + "?", Localize("Yes"), Localize("No"));
             if (!ok) return;
 
