@@ -15,5 +15,9 @@ namespace Biblio_Models.Seed
         public string? StaffPassword { get; set; }
         public string? BlockedEmail { get; set; }
         public string? BlockedPassword { get; set; }
+
+        // MAUI seed options (voor LocalDbContext)
+        public int NumberOfBooks { get; set; } = 20;
+        public int NumberOfMembers { get; set; } = 10;
     }
 }

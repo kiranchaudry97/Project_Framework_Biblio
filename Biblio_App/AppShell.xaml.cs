@@ -921,7 +921,10 @@ namespace Biblio_App
                          {
                              // Recreate AppShell as a fresh MainPage instance
                              var newShell = new AppShell();
-                             Application.Current.MainPage = newShell;
+                             if (Application.Current?.Windows.Count > 0)
+                             {
+                                 Application.Current.Windows[0].Page = newShell;
+                             }
 
                              // ensure flyout is hidden on the new shell too
                              try { newShell.EnsureLoginFlyoutHidden(true); } catch { }

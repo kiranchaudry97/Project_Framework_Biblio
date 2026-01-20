@@ -52,6 +52,22 @@ namespace Biblio_App.ViewModels
             SaveCommand = new Command(async () => await SaveSelectedAsync(), () => SelectedCategorie != null && !string.IsNullOrWhiteSpace(NewCategoryName));
         }
 
+        private bool _initialized = false;
+
+        public async Task InitializeAsync()
+        {
+            if (_initialized) return;
+            _initialized = true;
+            try
+            {
+                await LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CategorieenViewModel.InitializeAsync error: {ex}");
+            }
+        }
+
         // Gelokaliseerde UI eigenschappen
         private string _pageHeaderText = string.Empty;
         public string PageHeaderText { get => _pageHeaderText; set { _pageHeaderText = value; OnPropertyChanged(nameof(PageHeaderText)); } }

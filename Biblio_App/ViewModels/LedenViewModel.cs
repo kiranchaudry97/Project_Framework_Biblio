@@ -23,7 +23,6 @@ using System.Resources;
 using System.Globalization;
 using System.Reflection;
 using Biblio_Models.Resources;
-using Biblio_App.Services;
 
 namespace Biblio_App.ViewModels
 {
@@ -633,9 +632,10 @@ namespace Biblio_App.ViewModels
             {
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    if (Application.Current?.MainPage != null)
+                    var page = Application.Current?.Windows[0]?.Page;
+                    if (page != null)
                     {
-                        await Application.Current.MainPage.DisplayAlert(title, message, "OK");
+                        await page.DisplayAlert(title, message, "OK");
                     }
                 });
             }

@@ -6,7 +6,6 @@
              xmlns:models="clr-namespace:Biblio_Models.Entiteiten;assembly=Biblio_Models"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
              x:Class="Biblio_App.Pages.LedenPagina"
              x:DataType="viewmodel:LedenViewModel"
              mc:Ignorable="d"

@@ -14,7 +14,10 @@ namespace Biblio_App.Pages
 {
     public partial class UitleningenPagina : ContentPage, ILocalizable
     {
+        // Short-hand naar de gekoppelde ViewModel
         private UitleningenViewModel VM => BindingContext as UitleningenViewModel;
+
+        // Service + resources voor taal/vertaling
         private ILanguageService? _language_service;
         private ResourceManager? _sharedResourceManager;
 
@@ -59,10 +62,13 @@ namespace Biblio_App.Pages
         public UitleningenPagina(UitleningenViewModel vm)
         {
             InitializeComponent();
+
+            // MVVM: ViewModel koppelen
             BindingContext = vm;
 
             try
             {
+                // Shell navigatie/Back-knop gedrag instellen
                 try { Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false }); } catch { }
                 try { Shell.SetFlyoutBehavior(this, FlyoutBehavior.Flyout); } catch { }
                 try { NavigationPage.SetHasBackButton(this, false); } catch { }
@@ -71,15 +77,18 @@ namespace Biblio_App.Pages
 
             try { Resources["PageVM"] = vm; } catch { }
 
+            // LanguageService uit DI halen (kan null zijn in design-time)
             try { _language_service = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>(); } catch { }
 
             InitializeSharedResourceManager();
+            // Pagina labels/knoppen initialiseren volgens huidige taal
             UpdateLocalizedStrings();
 
             try
             {
                 if (vm != null)
                 {
+                    // Luister naar property changes zodat we specifieke UI elementen kunnen bijsturen
                     vm.PropertyChanged += Vm_PropertyChanged;
                 }
             }
@@ -98,6 +107,8 @@ namespace Biblio_App.Pages
                         {
                             try
                             {
+                                // Dit stuk code probeert een (optionele) picker te synchroniseren met de ViewModel.
+                                // Als de picker niet bestaat in XAML, skippen we dit gewoon.
                                 // ReturnStatusPicker is niet meer in de huidige XAML - skip deze functionaliteit
                                 var picker = this.FindByName<Picker>("ReturnStatusPicker");
                                 if (picker == null) return; // Geen picker gevonden, skip
@@ -144,6 +155,11 @@ namespace Biblio_App.Pages
         {
             try
             {
+                // Doel van deze methode:
+                // we willen vertalingen kunnen ophalen via ResourceManager.
+                // We proberen (in volgorde):
+                // 1) Biblio_Web resources (handig tijdens development als die assembly mee geladen is)
+                // 2) Biblio_Models resources (altijd aanwezig in de app)
                 var webAsm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => string.Equals(a.GetName().Name, "Biblio_Web", StringComparison.OrdinalIgnoreCase));
                 if (webAsm != null)
                 {
@@ -151,6 +167,7 @@ namespace Biblio_App.Pages
                     {
                         try
                         {
+                            // Test key om te checken of deze resx effectief bestaat
                             var rm = new ResourceManager(name, webAsm);
                             var test = rm.GetString("Members", CultureInfo.CurrentUICulture);
                             if (!string.IsNullOrEmpty(test))
@@ -166,6 +183,7 @@ namespace Biblio_App.Pages
                 var modelType = typeof(SharedModelResource);
                 if (modelType != null)
                 {
+                    // Fallback: vertalingen vanuit het model-project
                     _sharedResourceManager = new ResourceManager("Biblio_Models.Resources.SharedModelResource", modelType.Assembly);
                 }
             }
@@ -176,6 +194,9 @@ namespace Biblio_App.Pages
         {
             try
             {
+                // Deze helper geeft een tekst terug op basis van de huidige cultuur/taal.
+                // Eerst proberen we via AppShell.Translate (centrale plek),
+                // daarna via ResourceManager, en als laatste via hard-coded fallback.
                 var culture = _language_service?.CurrentCulture ?? CultureInfo.CurrentUICulture;
 
                 try
@@ -183,6 +204,8 @@ namespace Biblio_App.Pages
                     var shell = AppShell.Instance;
                     if (shell != null)
                     {
+                        // AppShell.Translate bevat ook menu/flyout vertalingen.
+                        // Als deze key daar bestaat, gebruiken we die zodat alles consistent is.
                         var val = shell.Translate(key);
                         if (!string.IsNullOrEmpty(val)) return val;
                     }
@@ -193,6 +216,7 @@ namespace Biblio_App.Pages
                 {
                     try
                     {
+                        // ResourceManager lookup (resx)
                         var val = _sharedResourceManager.GetString(key, culture);
                         if (!string.IsNullOrEmpty(val)) return val;
                     }
@@ -264,6 +288,10 @@ namespace Biblio_App.Pages
 
         public void UpdateLocalizedStrings()
         {
+            // Alle UI labels/knoppen (bindable properties) updaten volgens huidige taal.
+            // Dit wordt opgeroepen:
+            // - in de constructor
+            // - wanneer LanguageService.LanguageChanged triggert
             PageHeaderText = Localize("Loans");
             MembersLabel = Localize("Members");
             LoansLabel = Localize("Loans");
@@ -297,10 +325,16 @@ namespace Biblio_App.Pages
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+
+            // Deze methode wordt uitgevoerd telkens wanneer de pagina zichtbaar wordt.
+            // We doen hier bewust enkel "init" en event subscriptions:
+            // - data laden gebeurt via de ViewModel (`InitializeAsync`) zodat alle logica op 1 plek zit.
+            // - try/catch zodat de app niet crasht als er geen internet is of de lokale DB faalt.
             try
             {
                 if (_language_service != null)
                 {
+                    // Abonneer op LanguageChanged zodat de labels/knoppen live kunnen updaten
                     _language_service.LanguageChanged += LanguageService_LanguageChanged;
                 }
             }
@@ -310,6 +344,12 @@ namespace Biblio_App.Pages
             {
                 if (BindingContext is UitleningenViewModel vm)
                 {
+                    // We starten de init "fire-and-forget" zodat de UI niet blokkeert.
+                    // De ViewModel laadt:
+                    // - ledenlijst
+                    // - boekenlijst
+                    // - uitleningen
+                    // - en zet default waarden voor het bewerkformulier
                     _ = vm.InitializeAsync();
                 }
             }
@@ -322,6 +362,10 @@ namespace Biblio_App.Pages
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
+
+            // Wanneer de gebruiker de pagina verlaat:
+            // - events unsubscriben (voorkomt memory leaks)
+            // - viewmodel property changed handler loskoppelen
             try
             {
                 if (_language_service != null)
@@ -344,6 +388,7 @@ namespace Biblio_App.Pages
             {
                 Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(() =>
                 {
+                    // Herlaad alle gelokaliseerde teksten als de gekozen taal verandert
                     UpdateLocalizedStrings();
                 });
             }
@@ -354,7 +399,9 @@ namespace Biblio_App.Pages
         {
             try
             {
-                // DbPathLabel is uitgecommentarieerd in XAML - skip functionaliteit
+                // Debug/handige feature:
+                // kopieer het pad van de lokale SQLite database naar het clipboard.
+                // In deze build is DbPathLabel uitgecommentarieerd in XAML, daarom returnen we.
                 return;
                 
                 /*
@@ -376,6 +423,11 @@ namespace Biblio_App.Pages
 
         private async void OnItemHeaderTapped(object sender, EventArgs e)
         {
+            // Dit event wordt getriggerd wanneer de gebruiker op de header van een item tapt.
+            // Doel:
+            // 1) Zet de aangeklikte uitlening als SelectedUitlening in de ViewModel
+            // 2) Scroll naar het edit-formulier
+            // 3) Toggle (open/dicht) extra details in de UI
             try
             {
                 if (sender is View header)
@@ -384,6 +436,7 @@ namespace Biblio_App.Pages
                     {
                         if (header.BindingContext is Biblio_Models.Entiteiten.Lenen lenen && VM != null)
                         {
+                            // Selecteer het item zodat de ViewModel het edit-formulier invult
                             VM.SelectedUitlening = lenen;
                         }
                     }
@@ -391,6 +444,8 @@ namespace Biblio_App.Pages
 
                     try
                     {
+                        // Kleine delay zodat layout eerst kan hertekenen,
+                        // daarna scrollen we naar het edit-formulier.
                         await System.Threading.Tasks.Task.Delay(80);
                         var sv = this.FindByName<ScrollView>("MainScroll");
                         var form = this.FindByName<VisualElement>("EditForm");
@@ -412,6 +467,7 @@ namespace Biblio_App.Pages
                         var details = frame.FindByName<StackLayout>("Details");
                         if (details != null)
                         {
+                            // Toon/verberg de detailsectie onder het item
                             details.IsVisible = !details.IsVisible;
                         }
                     }
@@ -422,6 +478,8 @@ namespace Biblio_App.Pages
 
         private async void OnViewLoanClicked(object sender, EventArgs e)
         {
+            // "Inzien" knop: toon een popup met de belangrijkste info van de uitlening.
+            // Dit is vooral handig voor demo/presentatie zonder dat we naar aparte detailpagina navigeren.
             try
             {
                 // Visual tree: Border ? Grid ? VerticalStackLayout ? HorizontalStackLayout ? Button
@@ -431,6 +489,7 @@ namespace Biblio_App.Pages
                 
                 if (lenen != null)
                 {
+                    // Nette strings opbouwen (met fallbacks als er geen relatie geladen is)
                     var boek = lenen.Boek?.Titel ?? "-";
                     var lid = (lenen.Lid?.Voornaam ?? "") + " " + (lenen.Lid?.AchterNaam ?? "");
                     var start = lenen.StartDate.ToString("dd-MM-yyyy");
@@ -453,6 +512,8 @@ namespace Biblio_App.Pages
 
         private async void OnItemTapped(object sender, TappedEventArgs e)
         {
+            // Tap op item zelf: dezelfde info tonen als bij de "Inzien" knop.
+            // Zo werkt de UI intuïtief op mobiel (niet enkel kleine knoppen).
             try
             {
                 if (sender is VisualElement el && el.BindingContext is Biblio_Models.Entiteiten.Lenen lenen)
@@ -479,6 +540,9 @@ namespace Biblio_App.Pages
 
         private async void OnMarkReturnedClicked(object sender, EventArgs e)
         {
+            // "Inleveren" knop: markeer een boek als teruggebracht.
+            // We proberen dit via de ViewModel command, omdat daar de echte logic zit
+            // (DB update + UI refresh). Als dat niet lukt, gebruiken we reflection als fallback.
             try
             {
                 if (sender is Button btn && btn.BindingContext is Biblio_Models.Entiteiten.Lenen item)
@@ -488,7 +552,7 @@ namespace Biblio_App.Pages
 
                     try
                     {
-                        // Prefer using the ViewModel's async command when available
+                        // Prefer: ViewModel command (netjes MVVM)
                         if (vm.ReturnCommand != null && vm.ReturnCommand.CanExecute(item))
                         {
                             await vm.ReturnCommand.ExecuteAsync(item);
@@ -500,6 +564,9 @@ namespace Biblio_App.Pages
                     // Fallback: invoke ReturnAsync via reflection
                     try
                     {
+                        // Deze fallback is vooral bedoeld als "safety net".
+                        // Normaal wil je dit via commands doen (MVVM), maar zo blijft de pagina werken
+                        // ook als de command-binding ooit verandert.
                         var ret = vm.GetType().GetMethod("ReturnAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
                         if (ret != null)
                         {
@@ -515,6 +582,11 @@ namespace Biblio_App.Pages
 
         private async void OnDeleteLoanClicked(object sender, EventArgs e)
         {
+            // "Verwijder" knop: verwijder een uitlening.
+            // Flow:
+            // 1) haal item uit BindingContext
+            // 2) vraag bevestiging aan gebruiker
+            // 3) roep ViewModel delete command aan (lokaal DB) en refresh UI
             try
             {
                 // Visual tree: Border ? Grid ? VerticalStackLayout ? HorizontalStackLayout ? Button
@@ -526,6 +598,7 @@ namespace Biblio_App.Pages
                     var confirm = false;
                     try
                     {
+                        // Confirm dialog zodat we niet per ongeluk data verwijderen
                         confirm = await DisplayAlert(Localize("Delete"), Localize("DeleteConfirmation"), Localize("OK"), Localize("Cancel"));
                     }
                     catch { }
@@ -542,6 +615,7 @@ namespace Biblio_App.Pages
                             {
                                 if (vm.DeleteCommand != null && vm.DeleteCommand.CanExecute(item))
                                 {
+                                    // Delete via ViewModel (beste optie)
                                     await vm.DeleteCommand.ExecuteAsync(item);
                                     // reload data to ensure UI (icons/labels) consistent
                                     try { await vm.EnsureDataLoadedAsync(); } catch { }
@@ -556,6 +630,7 @@ namespace Biblio_App.Pages
                                 var del = vm.GetType().GetMethod("DeleteAsync", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public);
                                 if (del != null)
                                 {
+                                    // Fallback: DeleteAsync via reflection
                                     var task = del.Invoke(vm, new object[] { item }) as System.Threading.Tasks.Task;
                                     if (task != null) await task;
                                     try { await vm.EnsureDataLoadedAsync(); } catch { }
@@ -567,6 +642,8 @@ namespace Biblio_App.Pages
                             // ultimate fallback: remove via DB and reload
                             try
                             {
+                                // Laatste redmiddel: zelf via EF DbContext verwijderen.
+                                // Normaal gezien gebeurt dit in de ViewModel.
                                 var dbFactoryField = vm.GetType().GetField("_dbFactory", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
                                 var dbFactory = dbFactoryField?.GetValue(vm) as Microsoft.EntityFrameworkCore.IDbContextFactory<Biblio_Models.Data.BiblioDbContext>;
                                 if (dbFactory != null)

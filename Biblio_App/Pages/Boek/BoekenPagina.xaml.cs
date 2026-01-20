@@ -8,19 +8,25 @@ namespace Biblio_App.Pages
 {
     public partial class BoekenPagina : ContentPage, ILocalizable
     {
+        // Short-hand naar de ViewModel die aan de pagina hangt
         private BoekenViewModel VM => BindingContext as BoekenViewModel;
+
+        // Taalservice + resource manager om de teksten in de UI te vertalen
         private ILanguageService? _languageService;
         private ResourceManager? _sharedResourceManager;
 
         public BoekenPagina(BoekenViewModel vm)
         {
             InitializeComponent();
+
+            // MVVM: ViewModel koppelen aan de pagina
             BindingContext = vm;
             if (vm != null)
                 vm.PropertyChanged += Vm_PropertyChanged;
 
             try
             {
+                // Navigatie/Back-knop gedrag aanpassen zodat Shell menu correct werkt
                 try { Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false }); } catch { }
                 try { Shell.SetFlyoutBehavior(this, FlyoutBehavior.Flyout); } catch { }
                 try { NavigationPage.SetHasBackButton(this, false); } catch { }
@@ -29,6 +35,7 @@ namespace Biblio_App.Pages
 
             try
             {
+                // Services uit DI halen (MauiContext) - kan null zijn in design-time
                 _languageService = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>();
                 InitializeSharedResourceManager();
             }
@@ -132,12 +139,28 @@ namespace Biblio_App.Pages
             catch { return key; }
         }
 
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
+            
+            // Wanneer de pagina zichtbaar wordt:
+            // - roepen we InitializeAsync op (laadt boeken/categorieën/tellers)
+            // - we abonneren op taalwijzigingen zodat labels live kunnen updaten
+            try
+            {
+                if (BindingContext is BoekenViewModel vm)
+                {
+                    await vm.InitializeAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"BoekenPagina.OnAppearing InitializeAsync error: {ex}");
+            }
 
             if (VM != null)
             {
+                // Best-effort categorieën ophalen (async), zodat filter/picker niet leeg is
                 _ = LoadCategoriesAsync();
             }
 
@@ -145,6 +168,7 @@ namespace Biblio_App.Pages
             {
                 if (_languageService != null)
                 {
+                    // Als de gebruiker van taal wisselt -> UI strings opnieuw zetten
                     _languageService.LanguageChanged += LanguageService_LanguageChanged;
                 }
             }
@@ -164,6 +188,7 @@ namespace Biblio_App.Pages
                 // Update UI on main thread
                 if (VM != null && VM.SelectedFilterCategorie == null && VM.Categorien?.Count > 0)
                 {
+                    // Default filter = eerste item (meestal "Alle")
                     VM.SelectedFilterCategorie = VM.Categorien.FirstOrDefault();
                 }
             }
@@ -180,6 +205,7 @@ namespace Biblio_App.Pages
             {
                 if (_languageService != null)
                 {
+                    // Unsubscribe om memory leaks te vermijden
                     _languageService.LanguageChanged -= LanguageService_LanguageChanged;
                 }
             }
@@ -190,6 +216,7 @@ namespace Biblio_App.Pages
         {
             if (e.PropertyName == nameof(BoekenViewModel.HasValidationErrors) || e.PropertyName == nameof(BoekenViewModel.ValidationMessage))
             {
+                // Als validatie faalt, zetten we focus op het eerste fout veld
                 FocusFirstError();
             }
 
@@ -230,6 +257,8 @@ namespace Biblio_App.Pages
         // Nieuwe click-handlers voor de afbeeldingsknoppen
         private async void OnDetailsClicked(object sender, EventArgs e)
         {
+            // "Details" knop in de lijst: selecteer boek in de viewmodel
+            // zodat het edit/detail paneel ingevuld wordt.
             try
             {
                 if (sender is ImageButton btn && btn.BindingContext is Biblio_Models.Entiteiten.Boek boek)

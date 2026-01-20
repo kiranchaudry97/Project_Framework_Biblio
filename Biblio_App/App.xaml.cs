@@ -4,14 +4,16 @@
     {
         private readonly ViewModels.SecurityViewModel _security;
 
-        // Use DI to receive the singleton SecurityViewModel and start the app on Shell
+        // Dit is de MAUI Application class.
+        // Hier maken we de startpagina (Shell) en zetten we globale exception logging.
+        // We gebruiken DI om de singleton `SecurityViewModel` te krijgen (login status).
         public App(ViewModels.SecurityViewModel security)
         {
             InitializeComponent();
             
             _security = security;
             
-            // Start with the Shell as the main page
+            // Start met Shell als hoofd-navigatiecontainer (menu + routes)
             MainPage = new AppShell();
 
             var current = SynchronizationContext.Current;
@@ -21,10 +23,13 @@
             // the proxy when there is no inner context.
             if (current != null)
             {
+                // SafeSynchronizationContext beschermt tegen bepaalde crashes/deadlocks
+                // door dispatching veiliger af te handelen.
                 SynchronizationContext.SetSynchronizationContext(new Infrastructure.SafeSynchronizationContext(current));
             }
 
-            // Global exception handlers
+            // Globale exception handlers:
+            // - zorgen dat onverwachte fouten gelogd worden i.p.v. "stil" te crashen.
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
                 try 
@@ -37,7 +42,7 @@
                 catch { }
             };
 
-            // Log task scheduler unobserved exceptions
+            // Ongeobserveerde Task exceptions (async fouten die niemand awaited)
             TaskScheduler.UnobservedTaskException += (s, e) =>
             {
                 try 
@@ -53,6 +58,7 @@
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
+            // In MAUI kan je per platform/venster instellingen doen (titel, grootte, ...)
             var window = base.CreateWindow(activationState);
             
             window.Title = "Biblio App";
@@ -83,20 +89,20 @@
             // Use Dispatcher instead of window.Created to avoid timing issues
             Dispatcher.Dispatch(async () =>
             {
-                // Wait for Shell to be fully loaded
+                // We wachten kort zodat Shell volledig geïnitialiseerd is voor navigatie
                 await Task.Delay(250);
                 
                 try
                 {
                     if (_security.IsAuthenticated)
                     {
-                        // User is logged in -> Navigate to Books page
+                        // Gebruiker is ingelogd -> ga rechtstreeks naar het boeken-overzicht
                         System.Diagnostics.Debug.WriteLine("User is authenticated, navigating to BoekenShell");
                         await Shell.Current.GoToAsync("//BoekenShell");
                     }
                     else
                     {
-                        // User is NOT logged in -> Navigate to Login page
+                        // Gebruiker is niet ingelogd -> ga naar login pagina
                         System.Diagnostics.Debug.WriteLine("User is not authenticated, navigating to LoginPage");
                         await Shell.Current.GoToAsync("//LoginPage");
                     }
@@ -104,7 +110,7 @@
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Navigation error: {ex.Message}");
-                    // If navigation fails, at least show the default page (BoekenShell)
+                    // Als navigatie faalt, proberen we minstens een veilige fallback route
                     try
                     {
                         await Shell.Current.GoToAsync("//BoekenShell");

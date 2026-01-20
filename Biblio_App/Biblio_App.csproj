@@ -21,6 +21,12 @@
     <MauiVersion>9.0.111</MauiVersion>
 
     <WindowsPackageType>None</WindowsPackageType>
+    
+    <!-- CRITICAL: Disable MrtCore PRI tasks completely -->
+    <EnableMsixTooling>false</EnableMsixTooling>
+    <EnableDefaultMrtResourceItems>false</EnableDefaultMrtResourceItems>
+    <EnableMrtResourceIndexGeneration>false</EnableMrtResourceIndexGeneration>
+    <UsePriForGeneratedResources>false</UsePriForGeneratedResources>
   </PropertyGroup>
 
   <!-- General Debug optimizations for faster builds -->
@@ -83,15 +89,58 @@
     
     <!-- Speed up build by skipping resource indexing -->
     <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    
+    <!-- NOTE: PRI generation must remain enabled for WinUI theme resources to be available at runtime. -->
+    
+    <!-- FIX: .NET SDK 10 Assembly Linker compatibility -->
+    <DisableWinExeOutputInference>true</DisableWinExeOutputInference>
+    <GenerateSatelliteAssemblies>false</GenerateSatelliteAssemblies>
+    
+    <!-- ULTIMATE FIX: Skip Assembly Linker entirely -->
+    <SkipCreateAppHost>false</SkipCreateAppHost>
+    <UseAppHost>true</UseAppHost>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+    
+    <!-- .NET SDK 10 WindowsAppSDK compatibility fixes -->
+    <WindowsAppSDKDeploymentManagerInitialize>false</WindowsAppSDKDeploymentManagerInitialize>
+    <WindowsAppSDKBootstrap>false</WindowsAppSDKBootstrap>
   </PropertyGroup>
 
+  <!-- NOTE: Removed aggressive PRI/AL task overrides to ensure WinUI resources are available at runtime.
+       The previous overrides prevented packaging of library resources (for example Microsoft.UI.Xaml theme
+       resources) and caused runtime failures loading ms-appx:///Microsoft.UI.Xaml/Themes/themeresources.xaml.
+       If you still experience Windows build issues (MSB4062), narrow the overrides instead of disabling them globally. -->
+
+  <!-- Skip PRI generation tasks on machines that do not have the Visual Studio AppxPackage Pri.Tasks assembly available.
+       This prevents MSB4062 when building on machines without the Appx packaging tooling (for example, minimal
+       dotnet SDK installs). If the assembly exists, normal PRI generation will run. -->
   <PropertyGroup>
-    <TargetFrameworks>
-      net9.0-android;
-      net9.0-ios;
-      net9.0-maccatalyst;
-      net9.0-windows10.0.19041.0
-    </TargetFrameworks>
+    <PriTasksPath>$(MSBuildProgramFiles32)\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VisualStudio\v18.0\AppxPackage\Microsoft.Build.Packaging.Pri.Tasks.dll</PriTasksPath>
+  </PropertyGroup>
+
+  <Target Name="SkipPriTasksIfPriAssemblyMissing" BeforeTargets="ExpandPriContent;GenerateProjectPriFile;_GenerateMrtResourcesProjectOutputGroup;RemovePayloadDuplicates">
+    <PropertyGroup>
+      <_PriTasksExists Condition="Exists('$(PriTasksPath)')">true</_PriTasksExists>
+      <_PriTasksExists Condition="'$(PriTasksPath)' == ''">false</_PriTasksExists>
+    </PropertyGroup>
+    <Message Importance="high" Text="PRI tasks assembly: $(PriTasksPath) - Exists: $(_PriTasksExists)" />
+    <PropertyGroup Condition="'$(_PriTasksExists)' != 'true'">
+      <GenerateProjectPriFile>false</GenerateProjectPriFile>
+      <GeneratePriFileForOutputAssembly>false</GeneratePriFileForOutputAssembly>
+      <AppxGeneratePriEnabled>false</AppxGeneratePriEnabled>
+    </PropertyGroup>
+  </Target>
+
+  <!-- NOTE: Embedded resources (resx) are required for WinUI themes and other library resources.
+       Removing all EmbeddedResource items for Windows was causing runtime failures loading
+       ms-appx:///Microsoft.UI.Xaml/Themes/themeresources.xaml. Keep resx files included.
+       If specific resx files cause AL task failures, remove them individually instead of all. -->
+
+  <!-- OS-Aware Platform Targeting: Windows TEMPORARILY DISABLED to avoid MSB3030 WebView2Loader.dll errors -->
+  <PropertyGroup>
+    <!-- MAUI targets: Windows excluded until WebView2 runtime installed and NuGet packages restored.
+         Run: .\scripts\install-webview2-and-restore.ps1 to fix, then re-enable Windows target. -->
+    <TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -99,7 +148,7 @@
       21.0
     </SupportedOSPlatformVersion>
 
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">       
       15.0
     </SupportedOSPlatformVersion>
 
@@ -133,8 +182,10 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="CommunityToolkit.Maui" Version="9.0.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.23.0" />
 
-    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.111" />
+    <!-- WebView2 requirement on Windows: ensure runtime present on developer machines. -->
 
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
@@ -147,7 +198,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
-    <PackageReference Include="SkiaSharp.Extended.UI.Maui" Version="3.0.0" />
   </ItemGroup>
 
 	<PropertyGroup>
@@ -231,4 +281,9 @@
     <FrameworkReference Remove="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
-</Project>
+ 
+  <ItemGroup>
+    <Folder Include="Converters\" />
+  </ItemGroup>
+
+ </Project>

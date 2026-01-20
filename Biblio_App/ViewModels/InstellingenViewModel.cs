@@ -108,8 +108,15 @@ namespace Biblio_App.ViewModels
                     System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
                     System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
 
-                    // Refresh UI by recreating main page (best-effort)
-                    try { Application.Current.MainPage = new AppShell(); } catch { }
+                // Refresh UI by recreating main page (best-effort)
+                try
+                {
+                    if (Application.Current?.Windows.Count > 0)
+                    {
+                        Application.Current.Windows[0].Page = new AppShell();
+                    }
+                }
+                catch { }
                 }
             }
             catch { }
@@ -136,9 +143,10 @@ namespace Biblio_App.ViewModels
                 {
                     await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(async () =>
                     {
-                        if (Application.Current?.MainPage != null)
+                        var page = Application.Current?.Windows[0]?.Page;
+                        if (page != null)
                         {
-                            await Application.Current.MainPage.DisplayAlert("Synchronisatie", "Synchronisatie voltooid.", "OK");
+                            await page.DisplayAlert("Synchronisatie", "Synchronisatie voltooid.", "OK");
                         }
                     });
                 }
@@ -154,9 +162,10 @@ namespace Biblio_App.ViewModels
                 {
                     await Microsoft.Maui.ApplicationModel.MainThread.InvokeOnMainThreadAsync(async () =>
                     {
-                        if (Application.Current?.MainPage != null)
+                        var page = Application.Current?.Windows[0]?.Page;
+                        if (page != null)
                         {
-                            await Application.Current.MainPage.DisplayAlert("Synchronisatie", "Fout bij synchronisatie: " + ex.Message, "OK");
+                            await page.DisplayAlert("Synchronisatie", "Fout bij synchronisatie: " + ex.Message, "OK");
                         }
                     });
                 }
@@ -214,7 +223,7 @@ namespace Biblio_App.ViewModels
             try
             {
                 // If using SQLite local file, delete it
-                var dbPath = Path.Combine(FileSystem.AppDataDirectory, "biblio.db");
+                var dbPath = Path.Combine(FileSystem.AppDataDirectory, "BiblioApp.db");
                 if (File.Exists(dbPath))
                 {
                     File.Delete(dbPath);

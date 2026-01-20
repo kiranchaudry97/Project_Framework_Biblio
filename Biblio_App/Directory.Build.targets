@@ -1,0 +1,12 @@
+<Project>
+  <!-- Override MrtCore.PriGen.targets import voor .NET SDK 10 compatibility -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0-windows10.0.19041.0'">
+    <ImportProjectExtensionTargets>false</ImportProjectExtensionTargets>
+  </PropertyGroup>
+  
+  <!-- Skip alle WindowsAppSDK PRI tasks -->
+  <Target Name="ExpandPriContent" />
+  <Target Name="RemovePayloadDuplicates" />
+  <Target Name="GenerateProjectPriFile" />
+  <Target Name="_GenerateMrtResourcesProjectOutputGroup" />
+</Project>

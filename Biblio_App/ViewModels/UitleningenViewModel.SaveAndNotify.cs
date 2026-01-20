@@ -44,9 +44,10 @@ namespace Biblio_App.ViewModels
             {
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    if (Application.Current?.MainPage != null)
+                    var page = Application.Current?.Windows[0]?.Page;
+                    if (page != null)
                     {
-                        await Application.Current.MainPage.DisplayAlert(Localize("Ready"), message, Localize("OK"));
+                        await page.DisplayAlert(Localize("Ready"), message, Localize("OK"));
                     }
                 });
             }

@@ -248,7 +248,15 @@ namespace Biblio_App.ViewModels
             ItemDeleteCommand = new AsyncRelayCommand<Boek>(async b => await DeleteItemAsync(b));
 
             // initialize localized strings
-            UpdateLocalizedStrings();
+            UpdateLocalizedStrings();  
+        }
+
+        private bool _initialized = false;
+
+        public async Task InitializeAsync()
+        {
+            if (_initialized) return;
+            _initialized = true;
 
             // Diagnostic: log resource names and lookup results to help debug missing translations
             try
@@ -1052,9 +1060,10 @@ namespace Biblio_App.ViewModels
             {
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    if (Application.Current?.MainPage != null)
+                    var page = Application.Current?.Windows[0]?.Page;
+                    if (page != null)
                     {
-                        await Application.Current.MainPage.DisplayAlert(title, message, "OK");
+                        await page.DisplayAlert(title, message, "OK");
                     }
                 });
             }

@@ -16,7 +16,10 @@ namespace Biblio_App.Pages
 {
     public partial class LedenPagina : ContentPage, ILocalizable
     {
+        // Short-hand naar de gekoppelde ViewModel
         private LedenViewModel VM => BindingContext as LedenViewModel;
+
+        // Service + resources voor taal/vertaling
         private ILanguageService? _language_service;
         private ResourceManager? _sharedResourceManager;
 
@@ -47,10 +50,13 @@ namespace Biblio_App.Pages
         public LedenPagina(LedenViewModel vm)
         {
             InitializeComponent();
+
+            // MVVM: ViewModel koppelen aan de pagina
             BindingContext = vm;
 
             try
             {
+                // Shell navigatie/Back-knop gedrag instellen
                 try { Shell.SetBackButtonBehavior(this, new BackButtonBehavior { IsVisible = false }); } catch { }
                 try { Shell.SetFlyoutBehavior(this, FlyoutBehavior.Flyout); } catch { }
                 try { NavigationPage.SetHasBackButton(this, false); } catch { }
@@ -59,11 +65,13 @@ namespace Biblio_App.Pages
 
             try
             {
+                // LanguageService uit DI halen (kan null zijn in design-time)
                 _language_service = App.Current?.Handler?.MauiContext?.Services?.GetService<ILanguageService>();
             }
             catch { }
 
             InitializeSharedResourceManager();
+            // Pagina-teksten initialiseren (header, placeholders, knoppen)
             UpdateLocalizedStrings();
 
             // Initialize ViewModel's localized strings
@@ -71,6 +79,7 @@ namespace Biblio_App.Pages
             {
                 if (vm is Biblio_App.Services.ILocalizable locVm)
                 {
+                    // ViewModel heeft ook gelokaliseerde strings (labels), dus die updaten we ook
                     locVm.UpdateLocalizedStrings();
                 }
             }
@@ -208,6 +217,7 @@ namespace Biblio_App.Pages
 
                 if (_language_service != null)
                 {
+                    // Luister naar taalwijzigingen zodat de UI live update
                     _language_service.LanguageChanged += LanguageService_LanguageChanged;
                 }
             }
@@ -221,6 +231,7 @@ namespace Biblio_App.Pages
             {
                 if (_language_service != null)
                 {
+                    // Unsubscribe om memory leaks te vermijden
                     _language_service.LanguageChanged -= LanguageService_LanguageChanged;
                 }
             }
@@ -254,6 +265,7 @@ namespace Biblio_App.Pages
         // Click handler for details Button
         private async void OnDetailsClicked(object? sender, EventArgs e)
         {
+            // Details/bewerk/delete zitten in de lijst. Via BindingContext weten we welk item is aangeklikt.
             try
             {
                 System.Diagnostics.Debug.WriteLine("=== OnDetailsClicked TRIGGERED ===");

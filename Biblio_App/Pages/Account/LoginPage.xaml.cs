@@ -186,7 +186,8 @@ namespace Biblio_App.Pages.Account
                         // Log main page / shell state before navigation
                         try
                         {
-                            System.Diagnostics.Debug.WriteLine($"OnLoginClicked: MainPage={Application.Current?.MainPage?.GetType()?.FullName}, ShellCurrent={(Shell.Current == null ? "null" : Shell.Current.GetType().FullName)}");
+                            var mainPage = Application.Current?.Windows[0]?.Page;
+                            System.Diagnostics.Debug.WriteLine($"OnLoginClicked: MainPage={mainPage?.GetType()?.FullName}, ShellCurrent={(Shell.Current == null ? "null" : Shell.Current.GetType().FullName)}");
                         }
                         catch { }
 
@@ -225,7 +226,7 @@ namespace Biblio_App.Pages.Account
                                             }
                                         }
                                     }
-                                    else if (Application.Current?.MainPage is AppShell appShell)
+                                    else if (Application.Current?.Windows[0]?.Page is AppShell appShell)
                                     {
                                         try { await appShell.GoToAsync("//BoekenShell"); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"OnLoginClicked: appshell.GoToAsync failed: {ex}"); }
                                     }

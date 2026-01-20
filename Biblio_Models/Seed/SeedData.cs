@@ -191,5 +191,137 @@ namespace Biblio_Models.Seed
                 }
             }
         }
+
+        /// <summary>
+        /// Seed methode voor MAUI (LocalDbContext - SQLite offline database).
+        /// Deze methode wordt aangeroepen vanuit MauiProgram.cs tijdens app initialisatie.
+        /// Seeded alleen basisdata (geen Identity users/roles - MAUI heeft geen Identity).
+        /// </summary>
+        public static async Task SeedAsync(LocalDbContext db, SeedOptions? options = null)
+        {
+            options ??= new SeedOptions { NumberOfBooks = 20, NumberOfMembers = 10 };
+
+            // 1️⃣ Seed categorieën
+            if (!await db.Categorien.AnyAsync())
+            {
+                db.Categorien.AddRange(
+                    new Categorie { Naam = "Roman" },
+                    new Categorie { Naam = "Jeugd" },
+                    new Categorie { Naam = "Thriller" },
+                    new Categorie { Naam = "Wetenschap" },
+                    new Categorie { Naam = "Biografie" }
+                );
+                await db.SaveChangesAsync();
+            }
+
+            // 2️⃣ Seed boeken (20 items voor development/testing)
+            if (!await db.Boeken.AnyAsync())
+            {
+                var categories = await db.Categorien.ToListAsync();
+                var roman = categories.First(c => c.Naam == "Roman");
+                var jeugd = categories.First(c => c.Naam == "Jeugd");
+                var thriller = categories.First(c => c.Naam == "Thriller");
+                var wetenschap = categories.First(c => c.Naam == "Wetenschap");
+                var biografie = categories.First(c => c.Naam == "Biografie");
+
+                db.Boeken.AddRange(
+                    // Romans (8 items)
+                    new Boek { Titel = "1984", Auteur = "George Orwell", Isbn = "9780451524935", CategorieID = roman.Id },
+                    new Boek { Titel = "De Hobbit", Auteur = "J.R.R. Tolkien", Isbn = "9780547928227", CategorieID = roman.Id },
+                    new Boek { Titel = "Pride and Prejudice", Auteur = "Jane Austen", Isbn = "9781503290563", CategorieID = roman.Id },
+                    new Boek { Titel = "To Kill a Mockingbird", Auteur = "Harper Lee", Isbn = "9780061120084", CategorieID = roman.Id },
+                    new Boek { Titel = "Brave New World", Auteur = "Aldous Huxley", Isbn = "9780060850524", CategorieID = roman.Id },
+                    new Boek { Titel = "The Great Gatsby", Auteur = "F. Scott Fitzgerald", Isbn = "9780743273565", CategorieID = roman.Id },
+                    new Boek { Titel = "The Catcher in the Rye", Auteur = "J.D. Salinger", Isbn = "9780316769488", CategorieID = roman.Id },
+                    new Boek { Titel = "Animal Farm", Auteur = "George Orwell", Isbn = "9780451526342", CategorieID = roman.Id },
+
+                    // Jeugd (4 items)
+                    new Boek { Titel = "Matilda", Auteur = "Roald Dahl", Isbn = "9780142410370", CategorieID = jeugd.Id },
+                    new Boek { Titel = "Harry Potter en de Steen der Wijzen", Auteur = "J.K. Rowling", Isbn = "9781408855652", CategorieID = jeugd.Id },
+                    new Boek { Titel = "Charlie and the Chocolate Factory", Auteur = "Roald Dahl", Isbn = "9780142410318", CategorieID = jeugd.Id },
+                    new Boek { Titel = "The Lion, the Witch and the Wardrobe", Auteur = "C.S. Lewis", Isbn = "9780064471046", CategorieID = jeugd.Id },
+
+                    // Thrillers (4 items)
+                    new Boek { Titel = "The Girl with the Dragon Tattoo", Auteur = "Stieg Larsson", Isbn = "9780307454546", CategorieID = thriller.Id },
+                    new Boek { Titel = "The Da Vinci Code", Auteur = "Dan Brown", Isbn = "9780307474278", CategorieID = thriller.Id },
+                    new Boek { Titel = "Gone Girl", Auteur = "Gillian Flynn", Isbn = "9780307588371", CategorieID = thriller.Id },
+                    new Boek { Titel = "The Silence of the Lambs", Auteur = "Thomas Harris", Isbn = "9780312924584", CategorieID = thriller.Id },
+
+                    // Wetenschap (2 items)
+                    new Boek { Titel = "A Brief History of Time", Auteur = "Stephen Hawking", Isbn = "9780553380163", CategorieID = wetenschap.Id },
+                    new Boek { Titel = "The Selfish Gene", Auteur = "Richard Dawkins", Isbn = "9780192860927", CategorieID = wetenschap.Id },
+
+                    // Biografie (2 items)
+                    new Boek { Titel = "Steve Jobs", Auteur = "Walter Isaacson", Isbn = "9781451648539", CategorieID = biografie.Id },
+                    new Boek { Titel = "The Diary of a Young Girl", Auteur = "Anne Frank", Isbn = "9780553296983", CategorieID = biografie.Id }
+                );
+                await db.SaveChangesAsync();
+            }
+
+            // 3️⃣ Seed leden (10 items voor development/testing)
+            if (!await db.Leden.AnyAsync())
+            {
+                db.Leden.AddRange(
+                    new Lid { Voornaam = "Jan", AchterNaam = "Peeters", Email = "jan.peeters@example.com", Telefoon = "0471234567" },
+                    new Lid { Voornaam = "Sara", AchterNaam = "De Smet", Email = "sara.desmet@example.com", Telefoon = "0472345678" },
+                    new Lid { Voornaam = "Peter", AchterNaam = "Janssen", Email = "peter.janssen@example.com", Telefoon = "0473456789" },
+                    new Lid { Voornaam = "Marie", AchterNaam = "Dubois", Email = "marie.dubois@example.com", Telefoon = "0474567890" },
+                    new Lid { Voornaam = "Luc", AchterNaam = "Vermeulen", Email = "luc.vermeulen@example.com", Telefoon = "0475678901" },
+                    new Lid { Voornaam = "Sophie", AchterNaam = "Maes", Email = "sophie.maes@example.com", Telefoon = "0476789012" },
+                    new Lid { Voornaam = "Tom", AchterNaam = "Willems", Email = "tom.willems@example.com", Telefoon = "0477890123" },
+                    new Lid { Voornaam = "Emma", AchterNaam = "Claes", Email = "emma.claes@example.com", Telefoon = "0478901234" },
+                    new Lid { Voornaam = "Lucas", AchterNaam = "Goossens", Email = "lucas.goossens@example.com", Telefoon = "0479012345" },
+                    new Lid { Voornaam = "Nina", AchterNaam = "Wouters", Email = "nina.wouters@example.com", Telefoon = "0470123456" }
+                );
+                await db.SaveChangesAsync();
+            }
+
+            // 4️⃣ Seed talen (voor meertalige UI)
+            if (!await db.Set<Taal>().AnyAsync())
+            {
+                db.Set<Taal>().AddRange(
+                    new Taal { Code = "nl", Naam = "Nederlands", IsDefault = true },
+                    new Taal { Code = "en", Naam = "English", IsDefault = false },
+                    new Taal { Code = "fr", Naam = "Français", IsDefault = false }
+                );
+                await db.SaveChangesAsync();
+            }
+
+            // 5️⃣ Seed uitleningen (15 sample items voor testing)
+            if (!await db.Leningens.AnyAsync())
+            {
+                var boeken = await db.Boeken.Take(15).ToListAsync();
+                var leden = await db.Leden.Take(10).ToListAsync();
+
+                if (boeken.Any() && leden.Any())
+                {
+                    var uitleningen = new List<Lenen>();
+                    var random = new Random(42); // Fixed seed voor consistente test data
+
+                    for (int i = 0; i < Math.Min(15, boeken.Count); i++)
+                    {
+                        var lid = leden[i % leden.Count];
+                        var boek = boeken[i];
+                        var startDate = DateTime.Now.AddDays(-random.Next(1, 30));
+                        var dueDate = startDate.AddDays(14);
+
+                        // 70% van uitleningen zijn nog open (niet ingeleverd)
+                        DateTime? returnedAt = (i % 10 < 7) ? null : startDate.AddDays(random.Next(7, 14));
+
+                        uitleningen.Add(new Lenen
+                        {
+                            BoekId = boek.Id,
+                            LidId = lid.Id,
+                            StartDate = startDate,
+                            DueDate = dueDate,
+                            ReturnedAt = returnedAt
+                        });
+                    }
+
+                    db.Leningens.AddRange(uitleningen);
+                    await db.SaveChangesAsync();
+                }
+            }
+        }
     }
 }

@@ -6,7 +6,6 @@ using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using SkiaSharp.Views.Maui.Controls.Hosting;
 using System.Globalization;
 using System.Net.Security;
 using System.IO;
@@ -19,20 +18,37 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
-        // Disable Application Insights telemetry to prevent TaskCanceledException during shutdown
+        // App startpunt (vergelijkbaar met Program.cs in een console app).
+        // Hier configureren we:
+        // - cultuur/language
+        // - appsettings.json
+        // - MAUI (fonts/toolkit)
+        // - dependency injection (services, viewmodels, pages)
+        // - HttpClient(s) voor de API
+        // - logging
+
+        // Application Insights in de MAUI client uitzetten:
+        // dit voorkomt soms TaskCanceledException/errors tijdens afsluiten op bepaalde platformen.
         Environment.SetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING", "");
         
         var builder = MauiApp.CreateBuilder();
 
+        // 1) Cultuur instellen (voor vertalingen, datumnotatie, ...)
         ConfigureCulture();
+        // 2) Config inladen uit appsettings.json (en optioneel Development overrides)
         ConfigureConfiguration(builder);
+        // 3) MAUI zelf configureren (fonts/toolkit)
         ConfigureMaui(builder);
+        // 4) Dependency Injection: services/viewmodels/pages registreren
         ConfigureServices(builder);
+        // 5) HttpClient(s) instellen (API base address, timeouts, certificaten)
         ConfigureHttpClient(builder);
+        // 6) Logging instellen
         ConfigureLogging(builder);
 
         var app = builder.Build();
 
+        // Start database migraties/seed in de achtergrond zodat de app UI snel opent
         StartBackgroundInitialization(app);
 
         return app;
@@ -60,7 +76,9 @@ public static class MauiProgram
 
     private static void ConfigureConfiguration(MauiAppBuilder builder)
     {
-        // Load base settings, then optional development overrides (emulator-friendly).
+        // We laden hier de configuratie die o.a. de API base-url bevat.
+        // Eerst de algemene `appsettings.json`, daarna (optioneel) `appsettings.Development.json`.
+        // Dit is handig voor emulator/dev situaties (bv. Android emulator gebruikt meestal 10.0.2.2).
         builder.Configuration.AddJsonFile(
             "appsettings.json",
             optional: true,
@@ -81,10 +99,10 @@ public static class MauiProgram
 
     private static void ConfigureMaui(MauiAppBuilder builder)
     {
+        // Registreren van de app + community toolkit + fonts
         builder
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit()
-            .UseSkiaSharp()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -99,10 +117,12 @@ public static class MauiProgram
         var services = builder.Services;
 
         // ---- Core / App State
+        // Taal/vertalingen + beveiligingsstatus (ingelogd of niet)
         services.AddSingleton<ILanguageService, LanguageService>();
         services.AddSingleton<SecurityViewModel>();
 
         // ---- Database
+        // SQLite bestand in AppDataDirectory (platform-onafhankelijk pad)
         var dbPath = Path.Combine(
             FileSystem.AppDataDirectory,
             "BiblioApp.db"
@@ -116,13 +136,27 @@ public static class MauiProgram
         services.AddScoped<IGegevensProvider, EfGegevensProvider>();
 
         // ---- API & Synchronisatie (RESTful API calls naar Biblio_Web)
+        // DataSyncService doet "sync alles" + offline-first opslag
         services.AddScoped<IDataSyncService, DataSyncService>();
         services.AddScoped<ILedenService, LedenService>();
         services.AddScoped<IBoekService, BoekService>();
         services.AddScoped<IUitleningenService, UitleningenService>();
 
         // ---- ViewModels
-        services.AddTransient<MainViewModel>();
+        // ViewModels worden meestal Transient gemaakt (nieuwe instantie per pagina)
+        
+        // MainViewModel met lambda factory:
+        // we injecteren navigatie-acties (GoToAsync) zodat de ViewModel geen directe UI-referenties nodig heeft.
+        services.AddTransient<MainViewModel>(sp =>
+            new MainViewModel(
+                gegevensProvider: sp.GetService<IGegevensProvider>(),
+                openBoeken: () => Shell.Current?.GoToAsync(nameof(BoekenPagina)),
+                openLeden: () => Shell.Current?.GoToAsync(nameof(LedenPagina)),
+                openUitleningen: () => Shell.Current?.GoToAsync(nameof(UitleningenPagina)),
+                openCategorieen: () => Shell.Current?.GoToAsync(nameof(CategorieenPagina)),
+                dataSync: sp.GetService<IDataSyncService>()
+            ));
+        
         services.AddTransient<BoekenViewModel>();
         services.AddTransient<LedenViewModel>();
         services.AddTransient<UitleningenViewModel>();
@@ -132,6 +166,7 @@ public static class MauiProgram
         services.AddTransient<InstellingenViewModel>();
 
         // ---- Pages
+        // Pagina's ook via DI zodat constructor-injectie (ViewModel) werkt
         services.AddTransient<MainPage>();
         services.AddTransient<BoekenPagina>();
         services.AddTransient<LedenPagina>();
@@ -151,20 +186,24 @@ public static class MauiProgram
 
     private static void ConfigureHttpClient(MauiAppBuilder builder)
     {
+        // API base address uit appsettings.json (met fallback)
         var apiBase =
             builder.Configuration["BiblioApi:BaseAddress"]
             ?? "https://localhost:5001/";
 
+        // Voor emulator/device kan localhost niet werken.
+        // Deze helper past de base-url aan (bv. localhost -> 10.0.2.2 voor Android emulator)
         apiBase = ResolveApiBaseForDevice(apiBase);
 
-        // Register a small-timeout auth client used by AuthService (no token handler attached)
+        // Kleine-timeout auth client voor login (geen token handler attached)
         builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
         {
             client.BaseAddress = new Uri(apiBase);
             client.Timeout = TimeSpan.FromSeconds(30);
         });
 
-        // API client for RESTful calls to Biblio_Web (manual token handling in each service)
+        // API client voor de echte REST-calls (Boeken/Leden/Uitleningen/...)
+        // Token wordt per request toegevoegd in de services.
         builder.Services.AddHttpClient("ApiWithToken", client =>
         {
             client.BaseAddress = new Uri(apiBase);
@@ -176,7 +215,8 @@ public static class MauiProgram
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
                 {
                     var host = message?.RequestUri?.Host;
-                    // Accept self-signed/dev certs for local development hosts (emulator/device)
+                    // Dev-only: accepteer self-signed certificaten op localhost/10.0.2.2.
+                    // In productie laten we enkel geldige certificaten toe.
                     if (string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(host, "10.0.2.2", StringComparison.OrdinalIgnoreCase))
                     {
@@ -208,7 +248,10 @@ public static class MauiProgram
 
     private static void StartBackgroundInitialization(MauiApp app)
     {
-        // Fire and forget - don't block app startup
+        // Fire-and-forget: we blokkeren de app-start niet.
+        // Dit doet in de achtergrond:
+        // - database migraties (schema up-to-date brengen)
+        // - seed data (demo data) als de DB leeg is
         _ = Task.Run(async () =>
         {
             try
@@ -237,14 +280,21 @@ public static class MauiProgram
                 if (!hasData)
                 {
                     System.Diagnostics.Debug.WriteLine("[INIT] Seeding database...");
-                    await LocalDbContext.SeedAsync(db);
+                    await Biblio_Models.Seed.SeedData.SeedAsync(db, new Biblio_Models.Seed.SeedOptions
+                    {
+                        NumberOfBooks = 20,
+                        NumberOfMembers = 10
+                    });
+                    System.Diagnostics.Debug.WriteLine("[INIT] Database seeded successfully.");
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("[INIT] Database already seeded, skipping seed");
                 }
 
-                // Sync in background without blocking
+                // Sync disabled - app works fully offline with local SQLite data
+                // To enable: uncomment below and ensure Biblio_Web API is running
+                /*
                 var sync = scope.ServiceProvider.GetService<IDataSyncService>();
                 if (sync != null)
                 {
@@ -252,6 +302,8 @@ public static class MauiProgram
                     await sync.SyncAllAsync();
                     System.Diagnostics.Debug.WriteLine("[INIT] Background sync completed");
                 }
+                */
+                System.Diagnostics.Debug.WriteLine("[INIT] Sync disabled - app running in offline mode");
             }
             catch (Exception ex)
             {
