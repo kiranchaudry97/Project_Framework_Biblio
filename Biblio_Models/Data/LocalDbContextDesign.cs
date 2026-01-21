@@ -8,10 +8,11 @@ namespace Biblio_Models.Data
         public LocalDbContext CreateDbContext(string[] args)
         {
             var builder = new DbContextOptionsBuilder<LocalDbContext>();
-            // Design-time only: use the same local SQLite file as the runtime (LocalApplicationData/BiblioApp.db)
-            var folder = Environment.SpecialFolder.LocalApplicationData;
-            var path = Environment.GetFolderPath(folder);
-            var dbPath = System.IO.Path.Join(path, "BiblioApp.db");
+            // Design-time only: use a predictable path inside the repository so migrations
+            // can be created consistently on the developer machine. This file is not used
+            // at runtime on devices; runtime path is configured in the MAUI app.
+            var repoRoot = System.IO.Directory.GetCurrentDirectory();
+            var dbPath = System.IO.Path.Join(repoRoot, "bibliodatabase.db");
             builder.UseSqlite($"Data Source={dbPath}");
             return new LocalDbContext(builder.Options);
         }

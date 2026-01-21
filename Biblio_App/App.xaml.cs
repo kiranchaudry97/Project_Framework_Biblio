@@ -42,6 +42,16 @@
                 catch { }
             };
 
+            // DEVELOPMENT HELPER: forceer éénmalig recreatie van de lokale MAUI database.
+            // Zet de voorkeur alleen tijdelijk (verwijdert device DB op volgende app start
+            // als de flag aanwezig is) zodat de app zelf migraties en seeding uitvoert.
+            try
+            {
+                // Comment out or remove this line after first successful run.
+                Microsoft.Maui.Storage.Preferences.Default.Set("biblio-recreate-db", true);
+            }
+            catch { }
+
             // Ongeobserveerde Task exceptions (async fouten die niemand awaited)
             TaskScheduler.UnobservedTaskException += (s, e) =>
             {

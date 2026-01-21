@@ -144,7 +144,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFrammulaework)')) == 'android'">
       21.0
     </SupportedOSPlatformVersion>
 

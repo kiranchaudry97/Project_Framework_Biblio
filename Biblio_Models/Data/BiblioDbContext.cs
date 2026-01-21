@@ -7,6 +7,7 @@ using Biblio_Models.Entiteiten;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace Biblio_Models.Data
 {
@@ -22,63 +23,38 @@ namespace Biblio_Models.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            // default connection string voor lokaal gebruik
+			var connectionString = "Server=(localdb)\\MSSQLLocalDB;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+
             if (!optionsBuilder.IsConfigured)
             {
-                string? connectionString = null;
-
-                connectionString = Environment.GetEnvironmentVariable("BIBLIO_CONNECTION");
-                if (!string.IsNullOrWhiteSpace(connectionString))
+                try
                 {
-                    try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Using connection from BIBLIO_CONNECTION"); } catch { }
-                }
+                    var config = new ConfigurationBuilder()
+                        .SetBasePath(AppContext.BaseDirectory)
+                        .AddJsonFile("appsettings.json", optional: true)
+                        .AddUserSecrets<BiblioDbContext>(optional: true)
+                        .AddEnvironmentVariables()
+                        .Build();
 
-                if (string.IsNullOrWhiteSpace(connectionString))
+                    // dit haalt de connection string op van de user secrets
+					var con = config.GetConnectionString("DefaultConnection");
+                    if (!string.IsNullOrWhiteSpace(con))
+                        connectionString = con;
+
+                    optionsBuilder.UseSqlServer(connectionString);
+                }
+                catch
                 {
-                    connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
-                    if (!string.IsNullOrWhiteSpace(connectionString))
-                    {
-                        try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Using connection from ConnectionStrings__DefaultConnection (env)"); } catch { }
-                    }
+                    optionsBuilder.UseSqlServer(connectionString);
                 }
-
-                if (string.IsNullOrWhiteSpace(connectionString))
-                {
-                    connectionString = Environment.GetEnvironmentVariable("PublicConnection");
-                    if (!string.IsNullOrWhiteSpace(connectionString))
-                    {
-                        try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Using connection from PublicConnection (env)"); } catch { }
-                    }
-                }
-
-                if (string.IsNullOrWhiteSpace(connectionString))
-                {
-                    connectionString = Environment.GetEnvironmentVariable("PublicConnection_Azure");
-                    if (!string.IsNullOrWhiteSpace(connectionString))
-                    {
-                        try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Using connection from PublicConnection_Azure (env)"); } catch { }
-                    }
-                }
-
-                if (string.IsNullOrWhiteSpace(connectionString))
-                {
-                    connectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTIONSTRING");
-                    if (!string.IsNullOrWhiteSpace(connectionString))
-                    {
-                        try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Using connection from AZURE_SQL_CONNECTIONSTRING (env)"); } catch { }
-                    }
-                }
-
-                if (string.IsNullOrWhiteSpace(connectionString))
-                {
-                    connectionString = "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
-                    try { System.Diagnostics.Debug.WriteLine($"[BiblioDbContext] Falling back to LocalDB connection"); } catch { }
-                }
-
-                optionsBuilder.UseSqlServer(connectionString);
             }
 
             base.OnConfiguring(optionsBuilder);
         }
+
+        // dit is voor de seeding van de database met dummy data
+        public static Task Seeder(BiblioDbContext context) => SeedAsync(context);
 
 
         protected override void OnModelCreating(ModelBuilder b)

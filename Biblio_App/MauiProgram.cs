@@ -4,6 +4,7 @@ using Biblio_App.ViewModels;
 using Biblio_Models.Data;
 using CommunityToolkit.Maui;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
@@ -11,6 +12,7 @@ using System.Net.Security;
 using System.IO;
 using Microsoft.Maui.Storage;
 using Microsoft.Maui.Devices;
+using System.Text;
 
 namespace Biblio_App;
 
@@ -115,6 +117,11 @@ public static class MauiProgram
     private static void ConfigureServices(MauiAppBuilder builder)
     {
         var services = builder.Services;
+        // make MauiDbContext available to MAUI-only code (optional, used by client helpers)
+        // The LocalDbContext factory is still registered below for shared model usage.
+        services.AddDbContextFactory<Biblio_App.Data.MauiDbContext>(options =>
+            options.UseSqlite($"Data Source={Path.Combine(FileSystem.AppDataDirectory, "bibliodatabase.db")}"
+        ));
 
         // ---- Core / App State
         // Taal/vertalingen + beveiligingsstatus (ingelogd of niet)
@@ -125,11 +132,11 @@ public static class MauiProgram
         // SQLite bestand in AppDataDirectory (platform-onafhankelijk pad)
         var dbPath = Path.Combine(
             FileSystem.AppDataDirectory,
-            "BiblioApp.db"
+            "bibliodatabase.db"
         );
 
         services.AddDbContextFactory<LocalDbContext>(options =>
-            options.UseSqlite($"Data Source={dbPath}")
+			options.UseSqlite($"Data Source={dbPath}", o => o.MigrationsAssembly("Biblio_Models"))
         );
 
         services.AddScoped<ILocalRepository, LocalRepository>();
@@ -256,6 +263,36 @@ public static class MauiProgram
         {
             try
             {
+
+                // Determine DB path up-front so we can optionally delete it before creating a DbContext.
+                var dbPath = Path.Combine(FileSystem.AppDataDirectory, "bibliodatabase.db");
+
+                // Allow forcing a full recreate of the local SQLite database from the app.
+                try
+                {
+                    var forceRecreate = Preferences.Default.Get("biblio-recreate-db", false);
+                    if (forceRecreate)
+                    {
+                        try
+                        {
+                            if (File.Exists(dbPath)) File.Delete(dbPath);
+                            var wal = dbPath + "-wal";
+                            var shm = dbPath + "-shm";
+                            if (File.Exists(wal)) File.Delete(wal);
+                            if (File.Exists(shm)) File.Delete(shm);
+                            System.Diagnostics.Debug.WriteLine("[INIT] Force-recreate: deleted local DB files");
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[INIT] Force-recreate delete failed: {ex.Message}");
+                        }
+
+                        // Clear the flag so recreate runs only once unless explicitly set again
+                        Preferences.Default.Remove("biblio-recreate-db");
+                    }
+                }
+                catch { }
+
                 using var scope = app.Services.CreateScope();
 
                 var dbFactory = scope.ServiceProvider
@@ -263,33 +300,164 @@ public static class MauiProgram
 
                 using var db = dbFactory.CreateDbContext();
 
+                // Allow forcing a full recreate of the local SQLite database from the app.
+                // Usage: set the MAUI preference key "biblio-recreate-db" to true (e.g. via a debug menu
+                // or from an external script calling into the app). The app will delete the file and
+                // associated -wal/-shm files and then recreate/migrate + seed the database.
+                try
+                {
+                    var forceRecreate = Preferences.Default.Get("biblio-recreate-db", false);
+                    if (forceRecreate)
+                    {
+                        try
+                        {
+                            if (File.Exists(dbPath)) File.Delete(dbPath);
+                            var wal = dbPath + "-wal";
+                            var shm = dbPath + "-shm";
+                            if (File.Exists(wal)) File.Delete(wal);
+                            if (File.Exists(shm)) File.Delete(shm);
+                            System.Diagnostics.Debug.WriteLine("[INIT] Force-recreate: deleted local DB files");
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[INIT] Force-recreate delete failed: {ex.Message}");
+                        }
+
+                        // Clear the flag so recreate runs only once unless explicitly set again
+                        Preferences.Default.Remove("biblio-recreate-db");
+                    }
+                }
+                catch { }
+
+                // Diagnostics (writes to same log file used elsewhere in the app)
+                try
+                {
+                    var logPath = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
+                    var conn = "(unknown)";
+                    try { conn = db.Database.GetDbConnection()?.ConnectionString ?? conn; } catch { }
+                    var size = 0L;
+                    try { if (File.Exists(dbPath)) size = new FileInfo(dbPath).Length; } catch { }
+                    File.AppendAllText(logPath,
+                        $"[{DateTime.UtcNow:O}] [INIT] AppDataDirectory={FileSystem.AppDataDirectory} dbPath={dbPath} size={size} conn={conn}\n",
+                        Encoding.UTF8);
+                }
+                catch { }
+
                 // Only migrate if necessary - check if database exists first
                 var dbExists = await db.Database.CanConnectAsync();
                 if (!dbExists || (await db.Database.GetPendingMigrationsAsync()).Any())
                 {
                     System.Diagnostics.Debug.WriteLine("[INIT] Running database migrations...");
-                    await db.Database.MigrateAsync();
+                    try
+                    {
+                        await db.Database.MigrateAsync();
+                        try
+                        {
+                            var logPath = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
+                            var size = 0L;
+                            try { if (File.Exists(dbPath)) size = new FileInfo(dbPath).Length; } catch { }
+                            File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] [INIT] MigrateAsync OK size={size}\n", Encoding.UTF8);
+                        }
+                        catch { }
+                    }
+                    catch (Exception ex)
+                    {
+                        try
+                        {
+                            var logPath = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
+                            File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] [INIT] MigrateAsync FAILED: {ex.GetType().Name}: {ex.Message}\n", Encoding.UTF8);
+                        }
+                        catch { }
+                        throw;
+                    }
                 }
                 else
                 {
                     System.Diagnostics.Debug.WriteLine("[INIT] Database already up to date, skipping migrations");
                 }
 
-                // Only seed if database is empty
-                var hasData = await db.Boeken.AnyAsync();
-                if (!hasData)
+                // Always try to seed - SeedData.SeedAsync checks internally whether data already exists
+                System.Diagnostics.Debug.WriteLine("[INIT] Seeding database...");
+                try
                 {
-                    System.Diagnostics.Debug.WriteLine("[INIT] Seeding database...");
                     await Biblio_Models.Seed.SeedData.SeedAsync(db, new Biblio_Models.Seed.SeedOptions
                     {
                         NumberOfBooks = 20,
                         NumberOfMembers = 10
                     });
+
+                    try
+                    {
+                        var logPath = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
+                        var count = 0;
+                        try { count = await db.Boeken.CountAsync(); } catch { }
+                        File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] [INIT] SeedAsync OK boeken={count}\n", Encoding.UTF8);
+                    }
+                    catch { }
+
                     System.Diagnostics.Debug.WriteLine("[INIT] Database seeded successfully.");
                 }
-                else
+                catch (SqliteException sx)
                 {
-                    System.Diagnostics.Debug.WriteLine("[INIT] Database already seeded, skipping seed");
+                    // Common cause: pushed/corrupt DB or missing tables in the SQLite file.
+                    // Attempt to repair by deleting the local DB file and recreating + seeding.
+                    try
+                    {
+                        var logPath = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
+                        File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] [INIT] SeedAsync SqliteException: {sx.Message}\n", Encoding.UTF8);
+                    }
+                    catch { }
+
+                    try
+                    {
+                        // Delete local DB files and recreate schema
+                        if (File.Exists(dbPath)) File.Delete(dbPath);
+                        var wal = dbPath + "-wal";
+                        var shm = dbPath + "-shm";
+                        if (File.Exists(wal)) File.Delete(wal);
+                        if (File.Exists(shm)) File.Delete(shm);
+
+                        System.Diagnostics.Debug.WriteLine("[INIT] Sqlite error detected - deleted local DB, recreating and seeding...");
+
+                        using var recreatedDb = dbFactory.CreateDbContext();
+                        await recreatedDb.Database.EnsureCreatedAsync();
+                        await Biblio_Models.Seed.SeedData.SeedAsync(recreatedDb, new Biblio_Models.Seed.SeedOptions
+                        {
+                            NumberOfBooks = 20,
+                            NumberOfMembers = 10
+                        });
+
+                        try
+                        {
+                            var logPath = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
+                            var count = 0;
+                            try { count = await recreatedDb.Boeken.CountAsync(); } catch { }
+                            File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] [INIT] Repair SeedAsync OK boeken={count}\n", Encoding.UTF8);
+                        }
+                        catch { }
+
+                        System.Diagnostics.Debug.WriteLine("[INIT] Recreated and seeded local DB successfully.");
+                    }
+                    catch (Exception rex)
+                    {
+                        try
+                        {
+                            var logPath = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
+                            File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] [INIT] Repair failed: {rex.GetType().Name}: {rex.Message}\n", Encoding.UTF8);
+                        }
+                        catch { }
+                        System.Diagnostics.Debug.WriteLine($"[INIT] Repair failed: {rex.Message}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        var logPath = Path.Combine(FileSystem.AppDataDirectory, "biblio_seed.log");
+                        File.AppendAllText(logPath, $"[{DateTime.UtcNow:O}] [INIT] SeedAsync FAILED: {ex.GetType().Name}: {ex.Message}\n", Encoding.UTF8);
+                    }
+                    catch { }
+                    System.Diagnostics.Debug.WriteLine($"[INIT] Seed failed: {ex.Message}");
                 }
 
                 // Sync disabled - app works fully offline with local SQLite data

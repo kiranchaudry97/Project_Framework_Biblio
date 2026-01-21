@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Biblio_Models.Migrations.Local
 {
-    public partial class InitialLocal : Migration
+    public partial class InitialMauiLocal : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -25,7 +25,7 @@ namespace Biblio_Models.Migrations.Local
                     table.PrimaryKey("PK_Categorien", x => x.Id);
                 });
 
-            // Leden (central-style)
+            // Leden
             migrationBuilder.CreateTable(
                 name: "Leden",
                 columns: table => new
@@ -86,7 +86,7 @@ namespace Biblio_Models.Migrations.Local
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            // Leningens (central)
+            // Leningens
             migrationBuilder.CreateTable(
                 name: "Leningens",
                 columns: table => new
@@ -119,7 +119,7 @@ namespace Biblio_Models.Migrations.Local
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            // LocalLeden (device)
+            // LocalLeden
             migrationBuilder.CreateTable(
                 name: "LocalLeden",
                 columns: table => new
@@ -137,7 +137,7 @@ namespace Biblio_Models.Migrations.Local
                     table.PrimaryKey("PK_LocalLeden", x => x.Id);
                 });
 
-            // LocalLeningens (device)
+            // LocalLeningens
             migrationBuilder.CreateTable(
                 name: "LocalLeningens",
                 columns: table => new
