@@ -24,7 +24,7 @@ namespace Biblio_App.ViewModels
         private readonly IDbContextFactory<LocalDbContext>? _dbFactory;
         private readonly ILanguageService? _languageService;
 
-        // Include French (FR) so user can switch to fr as well
+        
         public ObservableCollection<string> Languages { get; } = new ObservableCollection<string> { "NL", "EN", "FR" };
 
         [ObservableProperty]

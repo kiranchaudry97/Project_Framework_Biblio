@@ -2,13 +2,15 @@
 // Doel: bootstrap en configuratie van de webapplicatie (services, middleware en routing).
 // Program.cs
 // The method bodies, field initializers, and property accessor bodies have been eliminated for brevity.
+
+// using voor nodige namepspaces te importeren en improt van EF Core, Identity, JWT, Swagger, Localization…
 using System.Text;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; // voor database en ORM
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Identity; // voor gebruikers , rollen , login
+using Microsoft.AspNetCore.Authentication.JwtBearer; // Api - auth
+using Microsoft.IdentityModel.Tokens; 
+using Microsoft.AspNetCore.Localization; // Meertalig 
 using System.Globalization;
 using Microsoft.OpenApi.Models;
 using Biblio_Models.Data;
@@ -18,10 +20,18 @@ using Biblio_Web.Middleware; // added for cookie provider
 using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Text.Json.Serialization;
 
+
+
+
+// dependcy injection van services 
 var builder = WebApplication.CreateBuilder(args);
 
+
+// connection string van database 
 const string ConnKey = "BibliobContextConnection";
 
+
+// AI + voor deployment
 // Prefer explicit Azure connection settings when provided. Support two patterns:
 // - AZURE_SQL_CONNECTIONSTRING: connection string key used for AAD / managed identity scenarios
 // - PublicConnection_Azure / PublicConnection: legacy key used for SQL auth
@@ -39,7 +49,7 @@ var connectionString = builder.Configuration.GetConnectionString(ConnKey)
             (!string.IsNullOrWhiteSpace(publicConnection) ? publicConnection : null)))
     ?? "Server=(localdb)\\mssqllocaldb;Database=BiblioDb;Trusted_Connection=True;MultipleActiveResultSets=true";
 
-// Log resolved connection source for diagnostics
+// Voor debbuging hier gebruik ik try/catch statement + connectie 
 try
 {
     var logger = LoggerFactory.Create(l => l.AddConsole()).CreateLogger("Program.Connection");
@@ -50,6 +60,8 @@ try
 }
 catch { }
 
+// AI
+
 // NOTE: If you intend to use Azure AD / Managed Identity authentication, set AZURE_SQL_CONNECTIONSTRING to a value
 // like: "Server=tcp:your-server.database.windows.net,1433;Initial Catalog=your-db;Authentication=Active Directory Default;Encrypt=True;"
 // Then configure your App Service with a system-assigned managed identity and create a database user from the external provider:
@@ -58,10 +70,10 @@ catch { }
 //   ALTER ROLE db_datawriter ADD MEMBER [<principal-name>];
 // See Biblio_Web/Azure_Managed_Identity.md for CLI steps.
 
-// Localisatie - gebruik de map Vertalingen (bevat de volledige SharedResource.*.resx bestanden)
+// Localisatie - gebruik de map Vertalingen (bevat de volledige SharedResource.*.resx bestanden) - meertalig
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources/Vertalingen");
 
-// Register default cookie policy options provider
+// Register default cookie policy options provider vanuit de services 
 builder.Services.AddSingleton<ICookiePolicyOptionsProvider, DefaultCookiePolicyOptionsProvider>();
 
 // CORS voor publieke tunnel- en externe clients

@@ -13,21 +13,25 @@
 // Doel: ASP.NET Identity gebruiker met extra veld FullName.
 // Beschrijving: Uitgebreide IdentityUser voor desktop; FullName wordt o.a. in profiel en beheer UI gebruikt.
 
+// using system om te laten importeren zoals in andere bestanden om consistent te zijn en gebruik van dezelfde namespaces mogelijk te maken
+// om klasse te gebruiken en fundamentele functionaliteit te vo
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using Microsoft.AspNetCore.Identity;
 
-namespace Biblio_Models.Entiteiten
+using System; // using directives voor benodigde namespaces
+using System.Collections.Generic; // generieke collecties voor lijsten
+using System.Linq; // LINQ functionaliteit voor queries
+using System.Text; // tekstmanipulatie
+using System.Threading.Tasks; // asynchrone taken
+
+using Microsoft.AspNetCore.Identity; // IdentityUser voor ASP.NET Identity functionaliteit
+
+namespace Biblio_Models.Entiteiten // namespace voor entiteiten in Biblio_Models
 {
-    public class AppUser : IdentityUser
+    public class AppUser : IdentityUser // AppUser klasse die IdentityUser uitbreidt
     {
         public string? FullName { get; set; } // verplichte extra property
         // Nieuw: markeer accounts als geblokkeerd (blokkeer login wanneer true)
-        public bool IsBlocked { get; set; } = false;
+        public bool IsBlocked { get; set; } = false; // standaard niet geblokkeerd
     }
 }

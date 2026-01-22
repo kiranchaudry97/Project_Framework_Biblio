@@ -1,12 +1,15 @@
-﻿@using Microsoft.Extensions.Localization
+﻿@using Microsoft.Extensions.Localization @* Beschikbaar voor meertalig , en injectie en komen vanuit resx bestanden   *@
 @inject IStringLocalizer<Biblio_Web.SharedResource> Localizer
-@model IEnumerable<Biblio_Models.Entiteiten.Lenen>
+@model IEnumerable<Biblio_Models.Entiteiten.Lenen> 
+@* Lijst van uiteleningen, return viewmodel*@
 @{
-    ViewData["Title"] = Localizer["Loans"];
+    ViewData["Title"] = Localizer["Loans"]; @*  de paginatitel (gelokaliseerd). + ViewData + querystring uitlezen  *@
     var selLidStr = Context.Request.Query["lidId"].FirstOrDefault();
     int? selLid = int.TryParse(selLidStr, out var tmpLid) ? tmpLid : (int?)null;
     var selBoekStr = Context.Request.Query["boekId"].FirstOrDefault();
     int? selBoek = int.TryParse(selBoekStr, out var tmpBoek) ? tmpBoek : (int?)null;
+
+    @* ViewBag-waarden combineren van controller en query string van URL  van filteren   *@
 
     var currentSearch = ViewBag.Search as string ?? string.Empty;
     var selectedCategory = ViewBag.SelectedCategory as int?;
@@ -14,18 +17,25 @@
     var selectedBoek = ViewBag.SelectedBoek as int? ?? selBoek;
 }
 
+@* Titel tonen ( “Loans / Uitleningen / Prêts)  *@
+
 <h1>@ViewData["Title"]</h1>
+
+@* Formulier(input) voor filteren en zoeken(zoekveld) die komen in url + layout + livesearch*@
 
 <form method="get" class="row g-2 mb-2 align-items-end">
     <div class="col-12 col-md-5">
         <label class="form-label visually-hidden">@Localizer["Search"]</label>
-        <input id="searchInput" type="search" name="search" value="@currentSearch" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" />
+        <input id="searchInput" type="search" name="search" value="@currentSearch" class="form-control" placeholder="@Localizer["SearchPlaceholder"]" /> @* meertalig van resx bestanden *@
     </div>
 
+
+    @* Categorie filter, de controller vult in, toont dropdown met categorieen , selected als dit de actieve filter is *@
     <div class="col-12 col-md-3">
-        <label class="form-label visually-hidden">@Localizer["ChooseCategory"]</label>
+        <label class="form-label visually-hidden">@Localizer["ChooseCategory"]</label>   @* meertalig van resx bestanden *@
         <select name="categoryId" class="form-select">
             <option value="">-- @Localizer["ChooseCategory"] --</option>
+            @*Dynamische opties *@
             @if (ViewBag.Categories is IEnumerable<Biblio_Models.Entiteiten.Categorie> cats)
             {
                 foreach (var c in cats)
@@ -49,7 +59,9 @@
                 <label class="form-label">@Localizer["Member"]</label>
                 @if (ViewBag.Leden is IEnumerable<Biblio_Models.Entiteiten.Lid> leden)
                 {
+                    @*Lid dropdown*@
                     <select name="lidId" class="form-select">
+                       
                         <option value="">@Localizer["AllMembers"]</option>
                         @foreach(var l in leden)
                         {
@@ -67,6 +79,7 @@
                 }
                 else
                 {
+                    @*fallback van option geen filter  *@
                     <select class="form-select"><option disabled>@Localizer["NoMembersLoaded"]</option></select>
                 }
             </div>
@@ -74,6 +87,7 @@
                 <label class="form-label">@Localizer["Book"]</label>
                 @if (ViewBag.Boeken is IEnumerable<Biblio_Models.Entiteiten.Boek> boeken)
                 {
+                    @*Dropdown van boeken, dezelfde voor author en titel dezelfde selectie logica*@
                     <select name="boekId" class="form-select">
                         <option value="">@Localizer["AllBooks"]</option>
                         @foreach(var b in boeken)
@@ -97,7 +111,7 @@
             </div>
         </div>
     </div>
-
+    @*Enkel open leningen , filtert op leningen die nog niet zijn ingeleverd*@ 
     <div class="col-auto">
         <div class="form-check me-2">
             <input type="checkbox" name="onlyOpen" class="form-check-input" id="onlyOpen" />
@@ -105,9 +119,10 @@
         </div>
     </div>
     <div class="col-auto">
-        <button class="btn btn-primary">@Localizer["Filter"]</button>
+        <button class="btn btn-primary">@Localizer["Filter"]</button> @* form submit knop *@
     </div>
     <div class="col-auto">
+        @*Nieuw rol , alleen personeel  kan nieuwe leningen aanmaken*@
         @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
         {
             <a class="btn btn-success" asp-action="Create">@Localizer["New"]</a>
@@ -118,6 +133,7 @@
 <table class="table table-striped">
     <thead>
         <tr>
+            @*Kolomen + meertalig vanuit resx*@
             <th>@Localizer["Member"]</th>
             <th>@Localizer["Book"]</th>
             <th>@Localizer["StartDate"]</th>
@@ -130,20 +146,24 @@
 @foreach(var u in Model)
 {
     <tr>
+        @*Data tonen gegevens van de lid + boek en datum en pas zicht in de cultuur aan *@
         <td>@u.Lid?.Voornaam @u.Lid?.AchterNaam</td>
-        <td>@u.Boek?.Titel</td>
-        <td>@(u.StartDate.ToString("d"))</td>
-        <td>@(u.DueDate.ToString("d"))</td>
-        <td>@(u.ReturnedAt.HasValue ? u.ReturnedAt.Value.ToString("d") : "-")</td>
+        <td>@u.Boek?.Titel</td> @*zoals weergave van title en boek*@
+                <td>@(u.StartDate.ToString("d"))</td> @*Datum weergave begin datum  *@
+        <td>@(u.DueDate.ToString("d"))</td> @*datum weergave van wanneer *@
+        @*Returned valut voor wat er word geselecteerd *@
+        <td>@(u.ReturnedAt.HasValue ? u.ReturnedAt.Value.ToString("d") : "-")</td> @* Return Datum weergave *@
         <td>
+            @*Op details  knoppen op klikken + overzicht kunnen zien met actie knop + delete  *@
             <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@u.Id">@Localizer["Details"]</a>
             @if (User.IsInRole("Admin") || User.IsInRole("Medewerker"))
             {
-                @if (u.ReturnedAt == null)
+                @if (u.ReturnedAt == null) @*gekozen actie en word teruggestuurd  enkel open leningen *@
                 {
-                    <a class="btn btn-sm btn-success" asp-action="Return" asp-route-id="@u.Id">@Localizer["Return"]</a>
+                    <a class="btn btn-sm btn-success" asp-action="Return" asp-route-id="@u.Id">@Localizer["Return"]</a> @*Actie knop voor succes + meertalig en gaat terug met correct url   *@
                 }
-                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@u.Id">@Localizer["Delete"]</a>
+                        <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@u.Id">@Localizer["Delete"]</a> @*Actie knop voor verwijderen + meertalig en gaat terug met correcte url  *@
+                    }
             }
         </td>
     </tr>
@@ -154,11 +174,12 @@
 @section Scripts {
     <script>
         (function () {
+            @* JavaScript voor live search functionaliteit + api calls*@
             var debounce = function (fn, delay) {
                 var t;
                 return function () { var args = arguments; clearTimeout(t); t = setTimeout(function () { fn.apply(null, args); }, delay); };
             };
-
+            @*Tabel bijwerken met resultaten van API en updaten en toont resultaten *@
             var updateTable = function (data) {
                 var $tb = $('#loansTbody');
                 if (!$tb.length) return;

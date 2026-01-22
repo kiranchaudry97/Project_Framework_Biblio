@@ -1,4 +1,4 @@
-using Biblio_App.ViewModels;
+ï»¿using Biblio_App.ViewModels;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.ApplicationModel;
 using System;
@@ -176,7 +176,7 @@ namespace Biblio_App.Pages
                 {
                     return key switch
                     {
-                        "Categories" => "Catégories",
+                        "Categories" => "CatÃ©gories",
                         "Name" => "Nom",
                         "New" => "Nouveau",
                         "Save" => "Enregistrer",
@@ -230,7 +230,7 @@ namespace Biblio_App.Pages
             
             // Deze methode draait telkens wanneer de pagina zichtbaar wordt.
             // We doen hier:
-            // 1) ViewModel initialiseren (laadt categorieën uit lokale DB)
+            // 1) ViewModel initialiseren (laadt categorieÃ«n uit lokale DB)
             // 2) subscriben op taalwijzigingen
             // try/catch zodat de app niet crasht bij DB/IO problemen.
             try

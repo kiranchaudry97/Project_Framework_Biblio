@@ -33,62 +33,107 @@ namespace Biblio_Web.Controllers.Api
     public class CategorieenApiController : ControllerBase
     {
         private readonly BiblioDbContext _db;
-        public CategorieenApiController(BiblioDbContext db) => _db = db;
+
+        // Injecteer DbContext
+        public CategorieenApiController(BiblioDbContext db)
+        {
+            _db = db;
+        }
 
         // GET: api/categorieen
+        // Haalt alle niet-verwijderde categorieën op
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var list = await _db.Categorien.Where(c => !c.IsDeleted).ToListAsync();
+            var list = await _db.Categorien
+                .Where(c => !c.IsDeleted)
+                .ToListAsync();
+
             return Ok(list);
         }
 
         // GET: api/categorieen/{id}
+        // Haalt één categorie op
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var c = await _db.Categorien.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
-            if (c == null) return NotFound(new ProblemDetails { Title = "Not Found", Detail = "Category not found" });
+            var c = await _db.Categorien
+                .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+
+            if (c == null)
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Not Found",
+                    Detail = "Category not found"
+                });
+
             return Ok(c);
         }
 
         // POST: api/categorieen
+        // Maakt een nieuwe categorie aan
         [HttpPost]
         public async Task<IActionResult> Post(Categorie model)
         {
-            if (!ModelState.IsValid) return BadRequest(new ValidationProblemDetails(ModelState));
+            if (!ModelState.IsValid)
+                return BadRequest(new ValidationProblemDetails(ModelState));
+
             var entity = new Categorie
             {
                 Naam = model.Naam
             };
+
             _db.Categorien.Add(entity);
             await _db.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = entity.Id }, entity);
+
+            return CreatedAtAction(nameof(Get),
+                new { id = entity.Id }, entity);
         }
 
         // PUT: api/categorieen/{id}
+        // Past een categorie aan
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Categorie model)
         {
-            if (id != model.Id) return BadRequest(new ProblemDetails { Title = "Bad Request", Detail = "Id mismatch" });
+            if (id != model.Id)
+                return BadRequest(new ProblemDetails
+                {
+                    Title = "Bad Request",
+                    Detail = "Id mismatch"
+                });
+
             var existing = await _db.Categorien.FindAsync(id);
-            if (existing == null || existing.IsDeleted) return NotFound(new ProblemDetails { Title = "Not Found", Detail = "Category not found" });
+            if (existing == null || existing.IsDeleted)
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Not Found",
+                    Detail = "Category not found"
+                });
 
             existing.Naam = model.Naam;
             _db.Categorien.Update(existing);
             await _db.SaveChangesAsync();
+
             return NoContent();
         }
 
         // DELETE: api/categorieen/{id}
+        // Soft delete van categorie
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var existing = await _db.Categorien.FindAsync(id);
-            if (existing == null || existing.IsDeleted) return NotFound(new ProblemDetails { Title = "Not Found", Detail = "Category not found" });
+            if (existing == null || existing.IsDeleted)
+                return NotFound(new ProblemDetails
+                {
+                    Title = "Not Found",
+                    Detail = "Category not found"
+                });
+
             existing.IsDeleted = true;
             _db.Categorien.Update(existing);
             await _db.SaveChangesAsync();
+
             return NoContent();
         }
     }

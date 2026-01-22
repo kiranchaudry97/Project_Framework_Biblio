@@ -18,13 +18,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Biblio_Models.Entiteiten
+namespace Biblio_Models.Entiteiten // Categorie-entiteit met naam en relatie naar boeken.
 {
-    public class Categorie : BaseEntiteit
+    public class Categorie : BaseEntiteit // Categorie-entiteit die BaseEntiteit uitbreidt voor soft-delete
     {
         [Required, StringLength(120)]
-        public string Naam { get; set; } = string.Empty;
-        public ICollection<Boek> Boeken { get; set; } = new List<Boek>();
+        public string Naam { get; set; } = string.Empty; // lezen en instellen van categorienaam met validatie
+        public ICollection<Boek> Boeken { get; set; } = new List<Boek>(); // lezen en instellen van gekoppelde boeken
 
     }
 }

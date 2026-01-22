@@ -3,12 +3,17 @@ using Biblio_Models.Entiteiten;
 
 namespace Biblio_Web.Mapping
 {
-    // AutoMapper profile kept minimal since API uses entities directly.
+    // AutoMapper profiel
+    // Bevat mappingconfiguratie voor de applicatie
+    // Momenteel minimaal omdat de API rechtstreeks entities gebruikt
     public class MappingProfile : Profile
     {
         public MappingProfile()
         {
-            // Keep simple mappings if needed elsewhere. No DTOs used for API.
+            // Self-to-self mappings
+            // Worden gebruikt om entiteiten te kopiëren (clonen)
+            // of om later eenvoudig DTO-mappings toe te voegen
+
             CreateMap<Boek, Boek>();
             CreateMap<Lid, Lid>();
             CreateMap<Categorie, Categorie>();

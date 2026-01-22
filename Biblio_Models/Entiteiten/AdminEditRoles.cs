@@ -10,18 +10,19 @@
 // - Entiteit voor categorieën met validatie
 // - Gebruikt in LINQ queries en soft-delete filtering// Doel: Categorie-entiteit met naam en relatie naar boeken.// Beschrijving: Bevat naam met lengtevalidatie en navigatiecollectie naar gekoppelde boeken.
 
-namespace Biblio_Models.Entiteiten
+
+namespace Biblio_Models.Entiteiten // namespace voor rolbeheer modellen
 {
-    public class RoleCheckbox
+    public class RoleCheckbox // model voor rolselectie met checkbox
     {
-        public string RoleName { get; set; } = string.Empty;
-        public bool IsSelected { get; set; }
+        public string RoleName { get; set; } = string.Empty; // naam van de rol
+        public bool IsSelected { get; set; } // status of de rol geselecteerd is met true/false
     }
 
-    public class AdminEditRoles
+    public class AdminEditRoles // model voor bewerken van gebruikersrollen in admin UI
     {
-        public string UserId { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public List<RoleCheckbox> Roles { get; set; } = new List<RoleCheckbox>();
+        public string UserId { get; set; } = string.Empty; // ID van de gebruiker
+        public string Email { get; set; } = string.Empty; // e-mailadres van de gebruiker
+        public List<RoleCheckbox> Roles { get; set; } = new List<RoleCheckbox>(); // lijst van rolselecties
     }
 }

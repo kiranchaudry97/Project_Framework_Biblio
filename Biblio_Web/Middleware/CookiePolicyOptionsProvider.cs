@@ -2,28 +2,44 @@
 using Microsoft.AspNetCore.Http;
 using System;
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+
 namespace Biblio_Web.Middleware
 {
-    // Simple provider interface to return configured CookiePolicyOptions
+    // Interface die cookie policy configuratie levert
+    // Maakt het systeem uitbreidbaar en testbaar
     public interface ICookiePolicyOptionsProvider
     {
         CookiePolicyOptions GetOptions();
     }
 
-    // Default implementation used when no custom provider is supplied.
+    // Standaard implementatie van het cookie-beleid
+    // Wordt gebruikt wanneer geen andere provider is geregistreerd
     public class DefaultCookiePolicyOptionsProvider : ICookiePolicyOptionsProvider
     {
         public CookiePolicyOptions GetOptions()
         {
             return new CookiePolicyOptions
             {
-                // require explicit consent for non-essential cookies unless a consent cookie is already present
-                CheckConsentNeeded = ctx => !ctx.Request.Cookies.ContainsKey("biblio_cookie_consent"),
+                // Vereist expliciete toestemming voor niet-essentiële cookies
+                // tenzij de consent-cookie al bestaat
+                CheckConsentNeeded = ctx =>
+                    !ctx.Request.Cookies.ContainsKey("biblio_cookie_consent"),
+
+                // Minimum SameSite-beleid (bescherming tegen CSRF)
                 MinimumSameSitePolicy = SameSiteMode.Lax,
+
+                // Cookies zijn secure als de request via HTTPS verloopt
                 Secure = CookieSecurePolicy.SameAsRequest,
-                OnAppendCookie = ctx => { /* no-op, hook for audits if needed */ },
-                OnDeleteCookie = ctx => { /* no-op */ }
+
+                // Hook voor logging of auditing bij het plaatsen van cookies
+                OnAppendCookie = ctx => { },
+
+                // Hook voor logging of auditing bij het verwijderen van cookies
+                OnDeleteCookie = ctx => { }
             };
         }
     }
 }
+
