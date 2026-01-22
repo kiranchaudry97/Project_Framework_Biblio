@@ -26,4 +26,10 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
   </ItemGroup>
 
+  <!-- Exclude MAUI / UI ViewModel files from this library so platform-specific code lives in Biblio_App -->
+  <ItemGroup>
+    <Compile Remove="ViewModels\**\*.cs" />
+    <EmbeddedResource Remove="ViewModels\**\*.resx" />
+  </ItemGroup>
+
 </Project>
